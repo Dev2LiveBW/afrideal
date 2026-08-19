@@ -45,7 +45,9 @@ Eight seeded accounts. The login page has a one-click card for each of them, so 
 | thabo@gmail.com | `Customer@2026` | Customer | `/` |
 | kefilwe@gmail.com | `Customer@2026` | Customer | `/` |
 
-Passwords sit in plain text in `data/users.json`. That is deliberate for a demo whose main feature is switching roles in one click, and it is the first thing to change before this touches a real user. Hash on write, compare with a constant-time check in `lib/auth.ts`.
+Buyers can also open their own account at `/signup`. Registration is deliberately narrow: it creates a `CUSTOMER` on the `RETAIL` tier and nothing else. Supplier and runner accounts carry consequences a form should not be able to grant — a supplier can be routed real orders, a runner can mark a delivery complete — so those stay behind admin creation and verification. The duplicate-email check and the insert share one `mutate` pass, so two simultaneous signups cannot both find an address free.
+
+Passwords sit in plain text in `data/users.json`. That is deliberate for a demo whose main feature is switching roles in one click, and it is the first thing to change before this touches a real user. Hash on write, compare with a constant-time check in `lib/auth.ts` — and in `app/api/auth/register/route.ts`, which writes them. The two changes are the same edit and belong together.
 
 ## What each role can reach
 
@@ -118,7 +120,9 @@ margin 30% on a BWP 250 cost  →  BWP 357.14
 
 ## Pricing is tiered, not universal
 
-A product does not have one price. It has a ladder of bands in `data/customer-prices.json`, resolved by who is buying and how many, and the same resolution runs on the product page and at checkout so the two cannot disagree.
+A product does not have one price. It has a ladder of bands in `data/customer-prices.json`, resolved by who is buying and how many, and one resolution path runs on every surface — landing, browse, product, cart and checkout — so no two can disagree about the same quantity.
+
+This is also the storefront's argument, not just an implementation detail. The landing page opens on one real product at three real prices, and `/browse?tier=BULK` reprices the whole catalogue at that rung.
 
 Shea Butter Deep Treatment, as a verified business account:
 
@@ -231,9 +235,11 @@ Route groups in parentheses do not appear in URLs. They exist to give each porta
 
 ## Design
 
-`../DESIGN.md` governs typography, money formatting, and the split between the two modes.
+`DESIGN.md` at the repo root governs typography, money formatting, and the split between the two modes, and `PRODUCT.md` records the product truth beneath it — who buys here, what may be claimed, and what the pricing model actually guarantees. Both sit at the root; earlier drafts referenced them one directory up.
 
-The storefront's page structure comes from the Stitch mockups in `../stitch_africart_customer_portal_mvp/`: category tiles, a live-deals rail, supplier discovery, new-arrivals carousel, and on the product page a breadcrumb, thumbnail rail, delivery-estimate card, seller card, Description/Specifications/Reviews tabs and frequently-bought-together. Order tracking takes its account sidebar, icon stepper and runner contact card from the same set.
+The storefront was rebuilt around the price ladder. The client's direction was that buyers should understand their comparison advantage; the mockups expressed that as comparing suppliers on price, which this platform cannot honestly show — supplier quotes are confidential under §5/§23, enforced by the `PublicOffer` type and by three checks in `npm run verify`. The ladder was the comparison that was real and unused, so the landing page now opens on one product at three published prices and the rungs are the way into the catalogue.
+
+What survives from the Stitch mockups in `../stitch_africart_customer_portal_mvp/` is the catalogue furniture: category tiles, a live-deals rail, a new-arrivals carousel, and on the product page a breadcrumb, thumbnail rail, delivery-estimate card, seller card, Description/Specifications/Reviews tabs and frequently-bought-together. Order tracking takes its account sidebar, icon stepper and runner contact card from the same set. The supplier-discovery rail and the standalone tier explainer were dropped: the ladder says what the explainer said, with real figures.
 
 The structure was adopted; the AfriCart visual identity was not. Those mockups run terracotta and teal on warm off-white in DM Sans and Inter, which would reverse the palette decision above and reinstate a font `DESIGN.md` bans. The layouts carry over onto AfriDeal's own tokens instead.
 
@@ -242,6 +248,8 @@ The discounts on the deals rail are real `PROMOTIONAL` price bands with real exp
 ## Photography
 
 55 photographs live in `public/products`, fetched from Pexels and vendored locally so nothing is requested from a third party at runtime. `npm run images` refetches them; it needs `PEXELS_API_KEY` in `.env.local`.
+
+`npm run seed` and `npm run images` are safe to run in either order, any number of times. They were not always: the seed rewrote `product-images.json` with gradient swatches unconditionally, so every reseed silently reverted the catalogue to placeholders while the downloaded files sat on disk unreferenced. The seed now reads `public/products` and points each row at the real file when one exists.
 
 Every one was looked at before it shipped, which is the part that matters. The failure mode is not a broken image, it is a plausible wrong one, and the first pass produced several:
 
@@ -263,7 +271,9 @@ Marketplace pages get a 340ms fade and rise on navigation, scroll reveals, a slo
 
 Console pages get opacity only, at 160ms, and no entrances at all. An operator moving between escrow and disputes twenty times an hour wants confirmation that the page changed, not travel.
 
-Everything animates on `transform` and `opacity` so it stays on the compositor. `prefers-reduced-motion` collapses the durations in `globals.css`, and the continuous drift checks it directly and stops rather than shortening.
+Everything animates on `transform` and `opacity` so it stays on the compositor. `prefers-reduced-motion` collapses the durations in `globals.css`, and the continuous drift checks it directly and stops.
+
+What it must not do is change the markup. `Float` used to return a bare `<div>` under reduced motion where the animated branch rendered two nested ones, and because the server cannot know the preference it always sent the pair — so every visitor with reduced motion turned on hydrated against the wrong shape and React threw the page away and re-rendered it on the client. The element tree is now identical in both branches and only the durations differ.
 
 The palette follows the build brief: black metallic ground, Amber Gold as the primary action colour, Forest Green demoted to verified and released states. Amber means one thing, money in motion but not yet settled, and it is never used for decoration.
 
@@ -288,5 +298,3 @@ Product matching on barcode or GTIN is modelled but not implemented, because not
 The JSON store is single writer and fine for a demo or a pilot. A real deployment moves `lib/db.ts` behind Firestore or Postgres, which is why every read and write already goes through it rather than touching `fs` directly.
 
 One conflict in the brief is worth flagging rather than burying. Electronics carries a 12% markup and the default retail margin floor is 20%. Those cannot both hold: 12% over cost cannot yield a 20% margin on the selling price once logistics and gateway costs come out. Margin floors are therefore per category, and Electronics runs at 10/8/6/4. Left unresolved, every Electronics band would sit permanently under its floor and the §19 alert queue would be noise an operator learns to ignore.
-#   a f r i d e a l  
- 
