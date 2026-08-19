@@ -1,0 +1,357 @@
+{
+  "schemaVersion": 2,
+  "generatedAt": "2026-08-19T00:00:00.000Z",
+  "title": "Design System: AfriDeal",
+  "extensions": {
+    "colorMeta": {
+      "ink": {
+        "role": "secondary",
+        "displayName": "Metallic Ink",
+        "canonical": "#111111",
+        "tonalRamp": ["#0a0a0a", "#111111", "#1a1a1a", "#2a2a2a", "#3a3a3a", "#4d4d4d", "#8f918f", "#d9dad9"]
+      },
+      "gold": {
+        "role": "primary",
+        "displayName": "Amber Gold",
+        "canonical": "#D4920A",
+        "tonalRamp": ["#3D2A03", "#5C3F06", "#7A5709", "#8B5E0A", "#D4920A", "#f0c040", "#F6E2B4", "#FBF0D8"]
+      },
+      "forest": {
+        "role": "tertiary",
+        "displayName": "Forest Green",
+        "canonical": "#1A5C2A",
+        "tonalRamp": ["#08210F", "#0F3A1B", "#12331C", "#1A5C2A", "#2E7D3F", "#57A468", "#8FD69F", "#E8F1E9"]
+      },
+      "danger": {
+        "role": "tertiary",
+        "displayName": "Dispute Red",
+        "canonical": "#C0392B",
+        "tonalRamp": ["#3D0A06", "#5C0F0B", "#7A140F", "#9E2418", "#C0392B", "#D9695C", "#F2A9A2", "#FBE6E4"]
+      },
+      "slateish-wash": {
+        "role": "neutral",
+        "displayName": "Clean-Outcome Slate",
+        "canonical": "#EDF0F1",
+        "tonalRamp": ["#151B1E", "#232D31", "#334046", "#4A5A61", "#6F8189", "#A2B0B6", "#D2DADD", "#EDF0F1"]
+      },
+      "surface": {
+        "role": "neutral",
+        "displayName": "Warm Page Ground",
+        "canonical": "#f5f5f5",
+        "tonalRamp": ["#171a18", "#2c2f2c", "#4a4e4a", "#6B726C", "#9aa09b", "#C8CCC6", "#E5E4DD", "#f5f5f5"]
+      },
+      "surface-raised": {
+        "role": "neutral",
+        "displayName": "Raised White",
+        "canonical": "#FFFFFF",
+        "tonalRamp": ["#171a18", "#3a3d3a", "#5A615C", "#6B726C", "#C8CCC6", "#E5E4DD", "#ECEBE7", "#FFFFFF"]
+      },
+      "muted": {
+        "role": "neutral",
+        "displayName": "Warm Muted Grey",
+        "canonical": "#6B726C",
+        "tonalRamp": ["#171a18", "#2f332f", "#454a45", "#5A615C", "#6B726C", "#9aa09b", "#C8CCC6", "#ECEBE7"]
+      },
+      "hairline": {
+        "role": "neutral",
+        "displayName": "Warm Hairline",
+        "canonical": "rgba(23, 26, 24, 0.08)",
+        "tonalRamp": ["rgba(23,26,24,0.40)", "rgba(23,26,24,0.30)", "rgba(23,26,24,0.22)", "rgba(23,26,24,0.14)", "rgba(23,26,24,0.10)", "rgba(23,26,24,0.08)", "rgba(23,26,24,0.04)", "rgba(23,26,24,0.015)"]
+      }
+    },
+    "typographyMeta": {
+      "display": {
+        "displayName": "Display",
+        "purpose": "One per page, the hero statement only. Satoshi 700 at 32/52/58px in discrete responsive steps, tracking -0.035em, text-wrap balance."
+      },
+      "headline": {
+        "displayName": "Headline",
+        "purpose": "Storefront section headings — the sticky left-hand argument of a two-column band."
+      },
+      "title": {
+        "displayName": "Title",
+        "purpose": "Console page titles and dialog headings. The display face stops just below this, at 15-16px panel and card headings."
+      },
+      "body": {
+        "displayName": "Body",
+        "purpose": "Default running text in Geist Sans at 15px/1.6, capped at a 65ch measure for long-form prose."
+      },
+      "label": {
+        "displayName": "Label",
+        "purpose": "Mono uppercase micro-label at 0.2em tracking — table column headers and small structural labels."
+      },
+      "money": {
+        "displayName": "Money",
+        "purpose": "Every price, total, payout and escrow figure. Mono, tabular, two decimals always, BWP prefixed unless a column header carries it."
+      }
+    },
+    "shadows": [
+      {
+        "name": "card",
+        "value": "0 1px 2px rgba(23,26,24,0.04), 0 8px 24px -12px rgba(23,26,24,0.12)",
+        "purpose": "Resting state of a panel, product card, or the floating nav once it detaches from the top."
+      },
+      {
+        "name": "lift",
+        "value": "0 2px 4px rgba(23,26,24,0.05), 0 18px 40px -16px rgba(23,26,24,0.22)",
+        "purpose": "The hover answer to card, and the resting state of the two ink trays that sit visibly above the page."
+      },
+      {
+        "name": "gold",
+        "value": "0 8px 28px -10px rgba(212,146,10,0.55)",
+        "purpose": "The primary button only. The one coloured shadow in the system; appears once per view."
+      },
+      {
+        "name": "core-inner-light",
+        "value": "inset 0 1px 1px rgba(255,255,255,0.6)",
+        "purpose": "Top edge of an enclosure core catching light. A hairline, never a bevel."
+      },
+      {
+        "name": "rung-inner-light",
+        "value": "inset 0 1px 0 rgba(255,255,255,0.10)",
+        "purpose": "Top edge of a reachable rung on the dark ladder; drops to 0.06 on a locked rung."
+      }
+    ],
+    "motion": [
+      {
+        "name": "ease-out-expo",
+        "value": "cubic-bezier(0.16, 1, 0.3, 1)",
+        "purpose": "The default. Mass that settles, never a linear slide. Entrances, hovers, shadow and transform."
+      },
+      {
+        "name": "ease-out-quint",
+        "value": "cubic-bezier(0.22, 1, 0.36, 1)",
+        "purpose": "Fast state colour changes — table row hover, count-in."
+      },
+      {
+        "name": "ease-spring",
+        "value": "cubic-bezier(0.34, 1.56, 0.64, 1)",
+        "purpose": "The cart-count pop. The only overshoot in the system."
+      },
+      {
+        "name": "duration-state",
+        "value": "160-300ms",
+        "purpose": "Colour, background, ring and border transitions."
+      },
+      {
+        "name": "duration-entrance",
+        "value": "500-700ms",
+        "purpose": "The single authored page entrance, and card shadow on hover."
+      },
+      {
+        "name": "duration-image",
+        "value": "900ms",
+        "purpose": "Photographic push-in on card hover — slow and small so it suggests the image is live without reading as a slideshow."
+      },
+      {
+        "name": "drift",
+        "value": "9s easeInOut, 6px amplitude",
+        "purpose": "The single hero drift. Dropped outright under prefers-reduced-motion; a continuous loop is what that preference exists to silence."
+      }
+    ],
+    "breakpoints": [
+      { "name": "sm", "value": "640px" },
+      { "name": "md", "value": "768px" },
+      { "name": "lg", "value": "1024px" },
+      { "name": "xl", "value": "1280px" },
+      { "name": "market", "value": "1400px" },
+      { "name": "console", "value": "1600px" }
+    ]
+  },
+  "components": [
+    {
+      "name": "Primary Button",
+      "kind": "button",
+      "refersTo": "button-gold",
+      "description": "The one gold-filled action per view, with the nested arrow chip that moves while the button body stays put.",
+      "html": "<button class=\"ds-btn-gold\"><span class=\"ds-btn-label\">Apply as a supplier</span><span class=\"ds-btn-chip\"><svg width=\"15\" height=\"15\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.75\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><path d=\"M7 17 17 7\"/><path d=\"M7 7h10v10\"/></svg></span></button>",
+      "css": ".ds-btn-gold { display: inline-flex; align-items: center; justify-content: center; gap: 8px; height: 44px; padding: 0 24px; border: none; border-radius: 9999px; font-family: 'Geist Sans', ui-sans-serif, sans-serif; font-size: 14px; font-weight: 500; color: #111111; background-image: linear-gradient(to bottom, #f0c040, #D4920A); box-shadow: 0 8px 28px -10px rgba(212,146,10,0.55); cursor: pointer; transition: all 300ms cubic-bezier(0.16,1,0.3,1); } .ds-btn-gold:hover { background-image: linear-gradient(to bottom, #f5cc5c, #e0a11c); } .ds-btn-gold:active { transform: scale(0.98); background-image: linear-gradient(to bottom, #D4920A, #8B5E0A); } .ds-btn-gold:focus-visible { outline: 2px solid #D4920A; outline-offset: 2px; } .ds-btn-chip { display: inline-flex; align-items: center; justify-content: center; width: 28px; height: 28px; margin-right: -12px; border-radius: 9999px; background: rgba(17,17,17,0.14); transition: transform 300ms cubic-bezier(0.16,1,0.3,1); } .ds-btn-gold:hover .ds-btn-chip { transform: translate(1px, -1px) scale(1.05); }"
+    },
+    {
+      "name": "Ghost Button",
+      "kind": "button",
+      "refersTo": "button-ghost",
+      "description": "The default secondary. Inset hairline ring, no fill until hover.",
+      "html": "<button class=\"ds-btn-ghost\">See all 12</button>",
+      "css": ".ds-btn-ghost { display: inline-flex; align-items: center; justify-content: center; height: 44px; padding: 0 24px; border: none; border-radius: 9999px; font-family: 'Geist Sans', ui-sans-serif, sans-serif; font-size: 14px; font-weight: 500; color: #111111; background: transparent; box-shadow: inset 0 0 0 1px rgba(23,26,24,0.14); cursor: pointer; transition: background-color 300ms cubic-bezier(0.16,1,0.3,1); } .ds-btn-ghost:hover { background: rgba(17,17,17,0.04); } .ds-btn-ghost:active { background: rgba(17,17,17,0.07); } .ds-btn-ghost:focus-visible { outline: 2px solid #D4920A; outline-offset: 2px; }"
+    },
+    {
+      "name": "Status Badge",
+      "kind": "chip",
+      "refersTo": "badge-held",
+      "description": "One badge component owns every status in the system. Amber is money in motion; green is settled; inert grey carries no weight.",
+      "html": "<span class=\"ds-badge ds-badge-amber\">Held</span> <span class=\"ds-badge ds-badge-green\">Released</span> <span class=\"ds-badge ds-badge-slate\">Refunded</span> <span class=\"ds-badge ds-badge-inert\">Cancelled</span>",
+      "css": ".ds-badge { display: inline-flex; align-items: center; white-space: nowrap; padding: 4px 10px; border-radius: 9999px; font-family: 'Geist Sans', ui-sans-serif, sans-serif; font-size: 12px; font-weight: 500; } .ds-badge-amber { background: #FBF0D8; color: #7A5709; box-shadow: inset 0 0 0 1px rgba(212,146,10,0.25); animation: ds-pulse-soft 2.4s ease-in-out infinite; } .ds-badge-green { background: #E8F1E9; color: #12331C; box-shadow: inset 0 0 0 1px rgba(26,92,42,0.20); } .ds-badge-slate { background: #EDF0F1; color: #4A5A61; box-shadow: inset 0 0 0 1px rgba(74,90,97,0.15); } .ds-badge-inert { background: #EFEEEA; color: #5A615C; box-shadow: inset 0 0 0 1px rgba(23,26,24,0.14); } @keyframes ds-pulse-soft { 0%, 100% { opacity: 1; } 50% { opacity: 0.55; } } @media (prefers-reduced-motion: reduce) { .ds-badge-amber { animation: none; } }"
+    },
+    {
+      "name": "Money Text",
+      "kind": "custom",
+      "refersTo": "typography.money",
+      "description": "Every price, total, payout and escrow figure. Mono, tabular, two decimals always.",
+      "html": "<div class=\"ds-money-row\"><span class=\"ds-money ds-money-xl\">BWP 182.00</span><span class=\"ds-money ds-money-md\">BWP 161.00</span><span class=\"ds-money ds-money-forest\">BWP 139.00</span></div>",
+      "css": ".ds-money-row { display: flex; align-items: baseline; gap: 20px; } .ds-money { font-family: 'Geist Mono', ui-monospace, monospace; font-weight: 500; font-variant-numeric: tabular-nums; font-feature-settings: 'tnum' 1; color: #111111; } .ds-money-md { font-size: 15px; } .ds-money-xl { font-size: 26px; line-height: 32px; letter-spacing: -0.02em; font-weight: 600; } .ds-money-forest { font-size: 15px; color: #1A5C2A; }"
+    },
+    {
+      "name": "Price Ladder Rung (dark)",
+      "kind": "custom",
+      "refersTo": "rung-dark",
+      "description": "The signature object. Rungs step right and widen as the unit price falls; a locked rung keeps its figure and changes only temperature.",
+      "html": "<div class=\"ds-ladder\"><a class=\"ds-rung ds-rung-1\" href=\"#\"><span class=\"ds-rung-main\"><span class=\"ds-rung-head\"><span class=\"ds-rung-label\">Retail</span><span class=\"ds-rung-range\">1–4 units</span></span><span class=\"ds-rung-blurb\">A few units, for the house or the shop counter.</span></span><span class=\"ds-rung-price\"><span class=\"ds-money ds-money-md ds-on-dark\">182.00</span><span class=\"ds-rung-note\">list price</span></span><span class=\"ds-rung-chip ds-rung-chip-open\"><svg width=\"14\" height=\"14\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.75\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><path d=\"M5 12h14\"/><path d=\"m12 5 7 7-7 7\"/></svg></span></a><a class=\"ds-rung ds-rung-2\" href=\"#\"><span class=\"ds-rung-main\"><span class=\"ds-rung-head\"><span class=\"ds-rung-label\">Bulk</span><span class=\"ds-rung-range\">5–19 units</span></span><span class=\"ds-rung-blurb\">Restocking a salon, a spaza or a small site.</span></span><span class=\"ds-rung-price\"><span class=\"ds-money ds-money-lg ds-on-dark\">161.00</span><span class=\"ds-rung-note ds-rung-note-save\">−12% a unit</span></span><span class=\"ds-rung-chip ds-rung-chip-open\"><svg width=\"14\" height=\"14\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.75\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><path d=\"M5 12h14\"/><path d=\"m12 5 7 7-7 7\"/></svg></span></a><a class=\"ds-rung ds-rung-3 ds-rung-locked\" href=\"#\"><span class=\"ds-rung-main\"><span class=\"ds-rung-head\"><span class=\"ds-rung-label\">Wholesale</span><span class=\"ds-rung-range\">20–99 units</span></span><span class=\"ds-rung-blurb\">Buying to resell, or to supply an institution.</span></span><span class=\"ds-rung-price\"><span class=\"ds-money ds-money-xl2 ds-on-dark-muted\">139.00</span><span class=\"ds-rung-note ds-rung-note-lock\">Business account</span></span><span class=\"ds-rung-chip\"><svg width=\"14\" height=\"14\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.75\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><path d=\"M5 12h14\"/><path d=\"m12 5 7 7-7 7\"/></svg></span></a></div>",
+      "css": ".ds-ladder { display: flex; flex-direction: column; gap: 10px; padding: 28px; border-radius: 32px; background: #111111; background-image: radial-gradient(100% 70% at 85% 0%, rgba(212,146,10,0.18), transparent 62%); box-shadow: 0 2px 4px rgba(23,26,24,0.05), 0 18px 40px -16px rgba(23,26,24,0.22); } .ds-rung { display: flex; align-items: center; gap: 20px; border-radius: 20px; text-decoration: none; background: rgba(255,255,255,0.07); box-shadow: inset 0 1px 0 rgba(255,255,255,0.10); transition: transform 500ms cubic-bezier(0.16,1,0.3,1), background-color 500ms cubic-bezier(0.16,1,0.3,1); } .ds-rung:hover { background: rgba(255,255,255,0.11); transform: translateY(-2px); } .ds-rung:focus-visible { outline: 2px solid #D4920A; outline-offset: 2px; } .ds-rung-1 { margin-right: 12%; padding: 16px 20px; } .ds-rung-2 { margin-right: 6%; padding: 20px; } .ds-rung-3 { margin-right: 0; padding: 24px 20px; } .ds-rung-locked { background: rgba(255,255,255,0.045); box-shadow: inset 0 1px 0 rgba(255,255,255,0.06); } .ds-rung-locked:hover { background: rgba(255,255,255,0.075); } .ds-rung-main { flex: 1; min-width: 0; } .ds-rung-head { display: flex; align-items: baseline; gap: 10px; } .ds-rung-label { font-family: 'Satoshi', ui-sans-serif, sans-serif; font-weight: 600; letter-spacing: -0.01em; color: #FFFFFF; } .ds-rung-1 .ds-rung-label { font-size: 16px; } .ds-rung-2 .ds-rung-label { font-size: 18px; } .ds-rung-3 .ds-rung-label { font-size: 21px; } .ds-rung-range { font-family: 'Geist Mono', ui-monospace, monospace; font-size: 11.5px; font-variant-numeric: tabular-nums; color: rgba(255,255,255,0.75); } .ds-rung-blurb { display: block; margin-top: 4px; font-family: 'Geist Sans', ui-sans-serif, sans-serif; font-size: 12.5px; line-height: 20px; color: rgba(255,255,255,0.55); } .ds-rung-price { flex-shrink: 0; text-align: right; } .ds-on-dark { color: #FFFFFF; } .ds-on-dark-muted { color: rgba(255,255,255,0.70); } .ds-money-lg { font-size: 19px; letter-spacing: -0.01em; } .ds-money-xl2 { font-size: 26px; line-height: 32px; letter-spacing: -0.02em; font-weight: 600; } .ds-rung-note { display: block; margin-top: 2px; font-family: 'Geist Mono', ui-monospace, monospace; font-size: 11px; font-variant-numeric: tabular-nums; color: rgba(255,255,255,0.50); } .ds-rung-note-save { color: #8FD69F; } .ds-rung-note-lock { font-family: 'Geist Sans', ui-sans-serif, sans-serif; font-weight: 500; color: #f0c040; } .ds-rung-chip { display: flex; align-items: center; justify-content: center; flex-shrink: 0; width: 32px; height: 32px; border-radius: 9999px; background: rgba(255,255,255,0.10); color: rgba(255,255,255,0.55); transition: transform 500ms cubic-bezier(0.16,1,0.3,1), background-color 500ms cubic-bezier(0.16,1,0.3,1); } .ds-rung-chip-open { background: #D4920A; color: #111111; } .ds-rung:hover .ds-rung-chip { transform: translateX(2px); } .ds-rung:hover .ds-rung-chip-open { background: #f0c040; }"
+    },
+    {
+      "name": "Product Card",
+      "kind": "card",
+      "refersTo": "card-product",
+      "description": "Raised white on the page ground. Flat at rest; the shadow lifts on hover while the card itself stays put.",
+      "html": "<a class=\"ds-card\" href=\"#\"><span class=\"ds-card-media\"><span class=\"ds-card-flag\">Featured</span></span><span class=\"ds-card-body\"><span class=\"ds-card-title\">Shea Butter Deep Treatment</span><span class=\"ds-card-meta\">Hair &amp; Beauty · 3 suppliers</span><span class=\"ds-card-price\"><span class=\"ds-money ds-money-lg\">BWP 182.00</span><span class=\"ds-card-note\">from 161.00 at 5+</span></span></span></a>",
+      "css": ".ds-card { display: flex; flex-direction: column; overflow: hidden; width: 280px; border-radius: 14px; border: 1px solid rgba(23,26,24,0.08); background: #FFFFFF; text-decoration: none; box-shadow: 0 1px 2px rgba(23,26,24,0.04), 0 8px 24px -12px rgba(23,26,24,0.12); transition: box-shadow 500ms cubic-bezier(0.16,1,0.3,1); } .ds-card:hover { box-shadow: 0 2px 4px rgba(23,26,24,0.05), 0 18px 40px -16px rgba(23,26,24,0.22); } .ds-card:focus-visible { outline: 2px solid #D4920A; outline-offset: 2px; } .ds-card-media { position: relative; display: block; aspect-ratio: 4 / 3; background-image: linear-gradient(140deg, #D4920A 0%, #8B5E0A 100%); } .ds-card-flag { position: absolute; left: 12px; top: 12px; padding: 4px 10px; border-radius: 9999px; background: rgba(17,17,17,0.70); font-family: 'Geist Mono', ui-monospace, monospace; font-size: 10px; text-transform: uppercase; letter-spacing: 0.16em; color: #FFFFFF; } .ds-card-body { display: flex; flex-direction: column; gap: 4px; padding: 16px; } .ds-card-title { font-family: 'Satoshi', ui-sans-serif, sans-serif; font-size: 15px; font-weight: 600; color: #111111; } .ds-card-meta { font-family: 'Geist Sans', ui-sans-serif, sans-serif; font-size: 12.5px; color: #6B726C; } .ds-card-price { display: flex; align-items: baseline; gap: 10px; margin-top: 10px; } .ds-card-note { font-family: 'Geist Mono', ui-monospace, monospace; font-size: 11.5px; font-variant-numeric: tabular-nums; color: #1A5C2A; }"
+    },
+    {
+      "name": "Console Panel",
+      "kind": "card",
+      "refersTo": "panel",
+      "description": "The repeating chrome of every console screen — header strip on a hairline, 20px body, tables running edge to edge.",
+      "html": "<section class=\"ds-panel\"><header class=\"ds-panel-header\"><div><h2 class=\"ds-panel-title\">Escrow queue</h2><p class=\"ds-panel-desc\">Funds held against undelivered orders</p></div><button class=\"ds-btn-ghost\" style=\"height:36px;padding:0 16px;font-size:13px\">Export</button></header><table class=\"ds-table\"><thead><tr><th>Order</th><th>Supplier</th><th>Amount</th></tr></thead><tbody><tr><td>ORD-1042</td><td>Kalahari Trading</td><td class=\"ds-num\">3,640.00</td></tr><tr><td>ORD-1043</td><td>Gaborone Supply Co</td><td class=\"ds-num\">812.50</td></tr><tr><td>ORD-1044</td><td>Limpopo Wholesale</td><td class=\"ds-num\">15,220.00</td></tr></tbody></table></section>",
+      "css": ".ds-panel { overflow: hidden; width: 520px; border-radius: 14px; border: 1px solid rgba(23,26,24,0.08); background: #FFFFFF; box-shadow: 0 1px 2px rgba(23,26,24,0.04), 0 8px 24px -12px rgba(23,26,24,0.12); } .ds-panel-header { display: flex; align-items: center; justify-content: space-between; gap: 16px; padding: 16px 20px; border-bottom: 1px solid rgba(23,26,24,0.08); } .ds-panel-title { margin: 0; font-family: 'Satoshi', ui-sans-serif, sans-serif; font-size: 15px; font-weight: 600; color: #111111; } .ds-panel-desc { margin: 2px 0 0; font-family: 'Geist Sans', ui-sans-serif, sans-serif; font-size: 13px; color: #5A615C; } .ds-table { width: 100%; border-collapse: collapse; text-align: left; font-family: 'Geist Sans', ui-sans-serif, sans-serif; font-size: 13px; color: #171a18; } .ds-table thead th { padding: 12px 16px; border-bottom: 1px solid rgba(23,26,24,0.14); background: rgba(212,146,10,0.07); font-family: 'Geist Mono', ui-monospace, monospace; font-size: 10px; font-weight: 500; line-height: 12px; letter-spacing: 0.2em; text-transform: uppercase; color: #8B5E0A; } .ds-table tbody td { padding: 14px 16px; border-bottom: 1px solid rgba(23,26,24,0.08); vertical-align: middle; } .ds-table tbody tr { transition: background-color 160ms cubic-bezier(0.22,1,0.36,1); } .ds-table tbody tr:nth-child(even) { background: rgba(23,26,24,0.015); } .ds-table tbody tr:hover { background: rgba(212,146,10,0.05); } .ds-num { text-align: right; font-family: 'Geist Mono', ui-monospace, monospace; font-variant-numeric: tabular-nums; }"
+    },
+    {
+      "name": "Search Input",
+      "kind": "input",
+      "refersTo": "input-search",
+      "description": "Pill field with a leading muted glyph. Focus shifts the border to gold; there is no glow.",
+      "html": "<label class=\"ds-field\"><span class=\"ds-field-icon\"><svg width=\"15\" height=\"15\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.5\" stroke-linecap=\"round\"><circle cx=\"11\" cy=\"11\" r=\"7\"/><path d=\"m20 20-3.5-3.5\"/></svg></span><input class=\"ds-input-search\" type=\"search\" placeholder=\"Search products\" aria-label=\"Search products\" /></label>",
+      "css": ".ds-field { position: relative; display: inline-block; width: 280px; } .ds-field-icon { position: absolute; left: 14px; top: 50%; transform: translateY(-50%); pointer-events: none; color: #6B726C; display: flex; } .ds-input-search { width: 100%; padding: 10px 36px 10px 40px; border: 1px solid rgba(23,26,24,0.14); border-radius: 9999px; background: #FFFFFF; font-family: 'Geist Sans', ui-sans-serif, sans-serif; font-size: 13.5px; color: #111111; outline: none; transition: border-color 200ms cubic-bezier(0.22,1,0.36,1); } .ds-input-search::placeholder { color: #6B726C; } .ds-input-search:focus { border-color: rgba(212,146,10,0.50); } .ds-input-search:focus-visible { outline: 2px solid #D4920A; outline-offset: 2px; }"
+    },
+    {
+      "name": "Tier Switch",
+      "kind": "nav",
+      "refersTo": "rung-active",
+      "description": "The rung the catalogue is currently priced at, rendered as links so the choice lives in the URL and works before hydration.",
+      "html": "<div class=\"ds-switch\" role=\"group\" aria-label=\"Price the catalogue by quantity\"><a class=\"ds-switch-item ds-switch-on\" href=\"#\" aria-current=\"true\"><span class=\"ds-switch-label\">Retail</span><span class=\"ds-switch-range\">1–4</span></a><a class=\"ds-switch-item\" href=\"#\"><span class=\"ds-switch-label\">Bulk</span><span class=\"ds-switch-range\">5–19</span></a><a class=\"ds-switch-item\" href=\"#\"><span class=\"ds-switch-label\">Wholesale</span><span class=\"ds-switch-range\">20–99</span><span class=\"ds-switch-lock\"><svg width=\"10\" height=\"10\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\"><rect x=\"4\" y=\"11\" width=\"16\" height=\"10\" rx=\"2\"/><path d=\"M8 11V7a4 4 0 0 1 8 0v4\"/></svg></span></a></div>",
+      "css": ".ds-switch { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; } .ds-switch-item { display: inline-flex; align-items: baseline; gap: 8px; padding: 8px 16px; border-radius: 9999px; text-decoration: none; background: rgba(17,17,17,0.045); color: #5A615C; transition: background-color 300ms cubic-bezier(0.16,1,0.3,1), color 300ms cubic-bezier(0.16,1,0.3,1); } .ds-switch-item:hover { background: rgba(17,17,17,0.08); color: #111111; } .ds-switch-item:focus-visible { outline: 2px solid #D4920A; outline-offset: 2px; } .ds-switch-on { background: #111111; color: #FFFFFF; } .ds-switch-on:hover { background: #1a1a1a; color: #FFFFFF; } .ds-switch-label { font-family: 'Geist Sans', ui-sans-serif, sans-serif; font-size: 13px; font-weight: 500; } .ds-switch-range { font-family: 'Geist Mono', ui-monospace, monospace; font-size: 11px; font-variant-numeric: tabular-nums; color: #6B726C; } .ds-switch-on .ds-switch-range { color: rgba(255,255,255,0.50); } .ds-switch-lock { display: inline-flex; align-self: center; color: #8B5E0A; } .ds-switch-on .ds-switch-lock { color: #f0c040; }"
+    },
+    {
+      "name": "Next Rung Nudge",
+      "kind": "custom",
+      "refersTo": "rung-light",
+      "description": "A sentence with a button, not a badge or a countdown — the ladder's argument reduced to one actionable line at the last moment quantity is still editable.",
+      "html": "<p class=\"ds-nudge\"><span class=\"ds-nudge-icon\"><svg width=\"13\" height=\"13\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.75\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><path d=\"m22 17-8.5-8.5-5 5L2 7\"/><path d=\"M16 17h6v-6\"/></svg></span><span><span class=\"ds-nudge-num\">2</span> more and every unit drops to <span class=\"ds-nudge-num ds-nudge-strong\">161.00</span></span><button class=\"ds-nudge-action\" type=\"button\">Add 2</button></p>",
+      "css": ".ds-nudge { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 8px; margin: 0; padding: 8px 12px; border-radius: 10px; background: #E8F1E9; font-family: 'Geist Sans', ui-sans-serif, sans-serif; font-size: 12.5px; line-height: 20px; color: #12331C; } .ds-nudge-icon { display: inline-flex; color: #1A5C2A; } .ds-nudge-num { font-family: 'Geist Mono', ui-monospace, monospace; font-variant-numeric: tabular-nums; } .ds-nudge-strong { font-weight: 600; } .ds-nudge-action { padding: 0; border: none; background: none; font-family: inherit; font-size: inherit; font-weight: 500; color: #1A5C2A; text-decoration: underline; text-underline-offset: 4px; cursor: pointer; transition: color 200ms cubic-bezier(0.22,1,0.36,1); } .ds-nudge-action:hover { color: #12331C; } .ds-nudge-action:focus-visible { outline: 2px solid #D4920A; outline-offset: 2px; border-radius: 4px; }"
+    }
+  ],
+  "narrative": {
+    "northStar": "The Posted Rate Board",
+    "overview": "AfriDeal looks like a board on which rates are published rather than a shop window in which one price is displayed. The surface is a warm off-white ground with hairline rules, and the objects that carry money are drawn as instruments: mono figures on tabular rails, ink trays with a gold light in them, green when a number has settled and amber while it is still in motion. Nothing here glows, gradients stay on button bodies where they read as material rather than as decoration, and the loudest thing on any page is a real figure.\n\nThe system runs in two modes over one token set, and the difference between them is temperament, not palette. Marketplace mode — the storefront — is allowed to be image-led and to stage one arrival per page. Console mode — /admin, /supplier, /runner — is tighter and quieter, denser panels, no staged entrances, every control in the same place every time, because an operator releasing money should never have to wait for a page to finish composing itself. A flourish that belongs in the first is a defect in the second.\n\nThe signature structure is a descending ladder. Where a marketplace would normally show three matched cards side by side, this system steps its rungs down and to the right, widening each one as the unit price falls, so the geometry argues the same thing the numbers do. That stagger is unconditional — it exists at 375px as well as at 1440px — because a signature that only appears on desktop is not a signature.",
+    "keyCharacteristics": [
+      "Warm neutral ground (#f5f5f5), never cool grey; every divider is a warm translucent hairline rather than a solid line.",
+      "Ink near-black and amber gold as the working pair; forest green kept for settled and verified states only.",
+      "Two type voices with no overlap: Satoshi for headings, Geist Sans for text, Geist Mono for every number that means something.",
+      "Pill-first geometry for anything you press; concentric radii for anything that nests.",
+      "Flat at rest. Depth comes from hairline rings and tonal wash; shadow is a response to hover or to a tray being lifted off the page.",
+      "One authored entrance per page, on the object the page is about."
+    ],
+    "rules": [
+      {
+        "name": "The Money-In-Motion Rule",
+        "body": "Amber means money that exists but has not settled. Green means settled or verified. A status may not borrow amber for emphasis, and green may not be used to make something look important — colour here is a claim about state, not a volume knob.",
+        "section": "colors"
+      },
+      {
+        "name": "The Warm Neutral Rule",
+        "body": "There is no cool grey in this system. Neutrals are warm off-whites and warm greys, and every rule, divider and border is a warm translucent black rather than a flat grey line. A blue-cast grey is a defect.",
+        "section": "colors"
+      },
+      {
+        "name": "The No-Failure-Red Rule",
+        "body": "A refund is a clean outcome, so it is slate. A cancellation carries no colour at all. Red is spent only on dispute, failure and invalid input, which is what keeps it legible when it appears.",
+        "section": "colors"
+      },
+      {
+        "name": "The Contrast Floor Rule",
+        "body": "Any text that carries a number, a claim, or a condition clears 4.5:1 against its own ground, dark trays included. The ladder panel is measured, not assumed: all eighteen of its text nodes clear the floor, the lowest at 5.5:1.",
+        "section": "colors"
+      },
+      {
+        "name": "The Tabular Money Rule",
+        "body": "Every price, total, payout and escrow figure renders through one component, in mono with tabular figures, at two decimals always — including on round numbers, because BWP 1,200 beside BWP 1,199.50 reads as a typo. BWP is prefixed unless a column header already carries it. No surface formats currency by hand.",
+        "section": "typography"
+      },
+      {
+        "name": "The Two Voices Rule",
+        "body": "Satoshi sets headings; Geist Sans sets text. The body face may never stand in for the display face — that substitution erases the type contrast the whole system rests on, which is why Satoshi is self-hosted as one 41kb variable file with a grotesque fallback rather than pulled from a CDN with the text face behind it.",
+        "section": "typography"
+      },
+      {
+        "name": "The Counting Rule",
+        "body": "If a number can change, shift a column, or be compared to the number above it, it is mono and tabular. Prose numerals inside a sentence still take mono when they are real data — the hero's product and supplier counts are set in mono inside running text for exactly this reason.",
+        "section": "typography"
+      },
+      {
+        "name": "The min-w-0 Rule",
+        "body": "Every grid or flex child that holds a headline, a form, a table, or a wide row carries min-w-0. A grid item defaults to min-width: auto, so one missing declaration lets a headline's min-content width set the page width — which is exactly how this build once shipped a 420px page on a 375px screen. Where a long string cannot shrink, it is allowed to wrap below sm instead of being held on one line.",
+        "section": "layout"
+      },
+      {
+        "name": "The Real-Width Signature Rule",
+        "body": "A structural signature is written in percentages and applied unconditionally, not behind a lg: prefix. The ladder's descent is mr-[7%] / mr-[3.5%] / mr-0 at all widths, doubling above sm, so it scales with whatever column it lands in and exists on the phone the design was drawn for.",
+        "section": "layout"
+      },
+      {
+        "name": "The Hairline-First Rule",
+        "body": "Reach for a ring before a shadow. A surface earns a shadow by being liftable (hover) or by being a tray the page is meant to read as lying on top of it; everything else separates with a hairline ring and a change of ground.",
+        "section": "elevation"
+      },
+      {
+        "name": "The Depth-Not-Pallor Rule",
+        "body": "When one item in a set is less available than the others, separate it by depth and temperature, not by fading it out. A locked price rung keeps its geometry, its size and its figure, and changes only its wash and the colour of its condition line.",
+        "section": "elevation"
+      },
+      {
+        "name": "The Concentric Rule",
+        "body": "When a surface nests inside another, the inner radius is the outer radius minus the padding: a 2rem tray with 0.375rem of padding holds a calc(2rem - 0.375rem) core. Curves stay parallel; a nested box with the same radius as its parent is wrong.",
+        "section": "shapes"
+      },
+      {
+        "name": "The Reserved Enclosure Rule",
+        "body": "The nested tray is for surfaces that carry weight — a stat cluster, an escrow control, the checkout summary, the hero ladder. It never appears on anything that repeats more than eight times on a page; a list of trays is just a list.",
+        "section": "shapes"
+      },
+      {
+        "name": "The One Entrance Rule",
+        "body": "A page gets exactly one authored entrance, on the object the page is about. The landing page's ladder reveals; nothing else on it does. Fifteen sections sharing one fade-up is not choreography, it is the same effect fifteen times, and it makes the thesis object arrive with no more ceremony than a footer. Console mode gets none at all.",
+        "section": "components"
+      },
+      {
+        "name": "The Same-Shape Rule",
+        "body": "prefers-reduced-motion changes durations and drops continuous loops; it never changes what is rendered. A reduced-motion branch that returns different markup — or a different initial style — hydrates against the wrong shape and makes React throw the server HTML away. Same elements, same start, same end, no perceptible movement.",
+        "section": "components"
+      }
+    ],
+    "dos": [
+      "Do put every currency figure through the money component: mono, tabular, two decimals, BWP prefixed unless a column header carries it.",
+      "Do resolve every price through the one tier-resolution path shared by landing, browse, product, cart and checkout. Two surfaces quoting different figures for the same product is the failure this system is built to prevent.",
+      "Do show a price the visitor cannot yet buy at, at its real published figure, with the condition for reaching it named beside it.",
+      "Do put min-w-0 on any grid or flex child holding a headline, a form, a table, or a wide row.",
+      "Do separate surfaces with a warm hairline and a change of ground before reaching for a shadow.",
+      "Do keep the descending-ladder geometry at every width, including 375px.",
+      "Do let a comparison graphic lose — shared scales across rows, not self-normalised bars.",
+      "Do give every icon-only control a real accessible name describing the object and the action, and let the name follow the behaviour when a component switches between link and button.",
+      "Do keep console mode still: same controls, same positions, no staged arrivals."
+    ],
+    "donts": [
+      "Don't use cool grey anywhere — neutrals are warm, and dividers are warm translucent black.",
+      "Don't spend amber on emphasis or green on importance. Both are claims about state.",
+      "Don't blank, hide, or grey out a published price to indicate it is unavailable; change temperature, never geometry or figure.",
+      "Don't fade an element to express unavailability when the world's own rule says weight belongs to the cheaper rung — running the weight rule backwards makes the most important rungs the faintest things on the page.",
+      "Don't put more than one staged entrance on a page, and don't animate anything in the console.",
+      "Don't branch markup on prefers-reduced-motion; branch only duration.",
+      "Don't stack a second gold-filled button beside the primary one, or place a filled primary next to the ladder — the rungs are the primary action there.",
+      "Don't use gradient text, and don't let gradients do anything other than sit inside a button body or a fallback image slot.",
+      "Don't build a page section as a row of identical icon-plus-heading-plus-paragraph cards. Where a sequence exists, draw it as a sequence with a spine.",
+      "Don't put a mono tracked kicker above a heading on a storefront surface; fold the word into the heading as its subject instead.",
+      "Don't nest a tray with the same radius as its parent, and don't use the nested enclosure on anything that repeats more than eight times.",
+      "Don't put figures on a page that cannot be computed from the store."
+    ]
+  }
+}

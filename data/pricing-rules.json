@@ -1,0 +1,62 @@
+[
+  {
+    "id": "pr001",
+    "category_id": "c1",
+    "category_name": "Hair & Beauty",
+    "markup_type": "PERCENTAGE",
+    "markup_value": 80,
+    "logistics_cost": 15,
+    "gateway_rate": 0.025,
+    "active": true
+  },
+  {
+    "id": "pr002",
+    "category_id": "c2",
+    "category_name": "Electronics",
+    "markup_type": "PERCENTAGE",
+    "markup_value": 12,
+    "logistics_cost": 15,
+    "gateway_rate": 0.025,
+    "active": true
+  },
+  {
+    "id": "pr003",
+    "category_id": "c3",
+    "category_name": "Building Materials",
+    "markup_type": "PERCENTAGE",
+    "markup_value": 35,
+    "logistics_cost": 15,
+    "gateway_rate": 0.025,
+    "active": true
+  },
+  {
+    "id": "pr004",
+    "category_id": "c4",
+    "category_name": "Food & Agriculture",
+    "markup_type": "PERCENTAGE",
+    "markup_value": 42,
+    "logistics_cost": 15,
+    "gateway_rate": 0.025,
+    "active": true
+  },
+  {
+    "id": "pr005",
+    "category_id": "c5",
+    "category_name": "Office Supplies",
+    "markup_type": "PERCENTAGE",
+    "markup_value": 40,
+    "logistics_cost": 15,
+    "gateway_rate": 0.025,
+    "active": true
+  },
+  {
+    "id": "pr006",
+    "category_id": "c6",
+    "category_name": "Clothing",
+    "markup_type": "PERCENTAGE",
+    "markup_value": 58,
+    "logistics_cost": 15,
+    "gateway_rate": 0.025,
+    "active": true
+  }
+]

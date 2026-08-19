@@ -1,0 +1,32 @@
+[
+  {
+    "id": "b001",
+    "name": "Naledi Care",
+    "slug": "naledi-care"
+  },
+  {
+    "id": "b002",
+    "name": "Kalahari Tech",
+    "slug": "kalahari-tech"
+  },
+  {
+    "id": "b003",
+    "name": "Motswedi Build",
+    "slug": "motswedi-build"
+  },
+  {
+    "id": "b004",
+    "name": "Tsholofelo Agri",
+    "slug": "tsholofelo-agri"
+  },
+  {
+    "id": "b005",
+    "name": "Setlhoa Office",
+    "slug": "setlhoa-office"
+  },
+  {
+    "id": "b006",
+    "name": "Bokamoso Apparel",
+    "slug": "bokamoso-apparel"
+  }
+]

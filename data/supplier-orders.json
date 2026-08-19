@@ -1,0 +1,317 @@
+[
+  {
+    "id": "sup001",
+    "order_id": "o001",
+    "supplier_id": "s001",
+    "status": "DELIVERED",
+    "item_ids": [
+      "oi001",
+      "oi002"
+    ],
+    "supplier_subtotal": 377,
+    "platform_margin": 442,
+    "selection_reason": "Selected on 92/100 reliability, 2-day fulfilment, 4.7★ rating. In stock (340 units), ships in 2 days.",
+    "auto_selected": true,
+    "created_at": "2026-07-23T07:39:00.000Z"
+  },
+  {
+    "id": "sup002",
+    "order_id": "o002",
+    "supplier_id": "s004",
+    "status": "DELIVERED",
+    "item_ids": [
+      "oi003"
+    ],
+    "supplier_subtotal": 78,
+    "platform_margin": 56,
+    "selection_reason": "Selected on 95/100 reliability, 1-day fulfilment, 4.8★ rating. In stock (4800 units), ships in 1 day.",
+    "auto_selected": true,
+    "created_at": "2026-07-26T08:48:00.000Z"
+  },
+  {
+    "id": "sup003",
+    "order_id": "o003",
+    "supplier_id": "s003",
+    "status": "DELIVERED",
+    "item_ids": [
+      "oi004",
+      "oi005"
+    ],
+    "supplier_subtotal": 898,
+    "platform_margin": 222,
+    "selection_reason": "Selected on 89/100 reliability, 4.6★ rating. In stock (145 units), ships in 3 days.",
+    "auto_selected": true,
+    "created_at": "2026-07-31T09:23:00.000Z"
+  },
+  {
+    "id": "sup004",
+    "order_id": "o004",
+    "supplier_id": "s005",
+    "status": "DELIVERED",
+    "item_ids": [
+      "oi006",
+      "oi007"
+    ],
+    "supplier_subtotal": 748,
+    "platform_margin": 418,
+    "selection_reason": "Selected on a balanced cost and reliability profile. In stock (1400 units), ships in 4 days.",
+    "auto_selected": true,
+    "created_at": "2026-08-04T10:15:00.000Z"
+  },
+  {
+    "id": "sup005",
+    "order_id": "o005",
+    "supplier_id": "s001",
+    "status": "COLLECTED",
+    "item_ids": [
+      "oi008"
+    ],
+    "supplier_subtotal": 290,
+    "platform_margin": 315,
+    "selection_reason": "Selected on 92/100 reliability, 1-day fulfilment, 4.7★ rating. In stock (620 units), ships in 1 day.",
+    "auto_selected": true,
+    "created_at": "2026-08-13T11:42:00.000Z"
+  },
+  {
+    "id": "sup006",
+    "order_id": "o006",
+    "supplier_id": "s004",
+    "status": "COLLECTED",
+    "item_ids": [
+      "oi009",
+      "oi010"
+    ],
+    "supplier_subtotal": 2648,
+    "platform_margin": 1624,
+    "selection_reason": "Selected on 95/100 reliability, 2-day fulfilment, 4.8★ rating. In stock (960 units), ships in 2 days.",
+    "auto_selected": true,
+    "created_at": "2026-08-14T12:25:00.000Z"
+  },
+  {
+    "id": "sup007",
+    "order_id": "o007",
+    "supplier_id": "s002",
+    "status": "COLLECTED",
+    "item_ids": [
+      "oi011",
+      "oi012"
+    ],
+    "supplier_subtotal": 798,
+    "platform_margin": 727,
+    "selection_reason": "Selected on 86/100 reliability. In stock (380 units), ships in 3 days.",
+    "auto_selected": true,
+    "created_at": "2026-08-15T13:08:00.000Z"
+  },
+  {
+    "id": "sup008",
+    "order_id": "o008",
+    "supplier_id": "s001",
+    "status": "PREPARING",
+    "item_ids": [
+      "oi013",
+      "oi014",
+      "oi015"
+    ],
+    "supplier_subtotal": 269,
+    "platform_margin": 347,
+    "selection_reason": "Selected on 92/100 reliability, 2-day fulfilment, 4.7★ rating. In stock (340 units), ships in 2 days.",
+    "auto_selected": true,
+    "created_at": "2026-08-16T14:51:00.000Z"
+  },
+  {
+    "id": "sup009",
+    "order_id": "o009",
+    "supplier_id": "s005",
+    "status": "PREPARING",
+    "item_ids": [
+      "oi016"
+    ],
+    "supplier_subtotal": 922,
+    "platform_margin": 442,
+    "selection_reason": "Selected on a balanced cost and reliability profile. In stock (90 units), ships in 6 days.",
+    "auto_selected": true,
+    "created_at": "2026-08-17T07:34:00.000Z"
+  },
+  {
+    "id": "sup010",
+    "order_id": "o010",
+    "supplier_id": "s005",
+    "status": "PREPARING",
+    "item_ids": [
+      "oi017"
+    ],
+    "supplier_subtotal": 576,
+    "platform_margin": 348,
+    "selection_reason": "Selected on a balanced cost and reliability profile. In stock (1400 units), ships in 4 days.",
+    "auto_selected": true,
+    "created_at": "2026-08-17T08:34:00.000Z"
+  },
+  {
+    "id": "sup011",
+    "order_id": "o011",
+    "supplier_id": "s003",
+    "status": "AWAITING_CONFIRMATION",
+    "item_ids": [
+      "oi018"
+    ],
+    "supplier_subtotal": 512,
+    "platform_margin": 132,
+    "selection_reason": "Selected on 89/100 reliability, 2-day fulfilment, 4.6★ rating. In stock (88 units), ships in 2 days.",
+    "auto_selected": true,
+    "created_at": "2026-08-18T09:17:00.000Z"
+  },
+  {
+    "id": "sup012",
+    "order_id": "o012",
+    "supplier_id": "s005",
+    "status": "AWAITING_CONFIRMATION",
+    "item_ids": [
+      "oi019"
+    ],
+    "supplier_subtotal": 182,
+    "platform_margin": 93,
+    "selection_reason": "Selected on a balanced cost and reliability profile. In stock (260 units), ships in 5 days.",
+    "auto_selected": true,
+    "created_at": "2026-08-19T10:00:00.000Z"
+  },
+  {
+    "id": "sup013",
+    "order_id": "o012",
+    "supplier_id": "s001",
+    "status": "AWAITING_CONFIRMATION",
+    "item_ids": [
+      "oi020"
+    ],
+    "supplier_subtotal": 164,
+    "platform_margin": 200,
+    "selection_reason": "Selected on 92/100 reliability, 2-day fulfilment, 4.7★ rating. In stock (340 units), ships in 2 days.",
+    "auto_selected": true,
+    "created_at": "2026-08-19T10:00:00.000Z"
+  },
+  {
+    "id": "sup014",
+    "order_id": "o013",
+    "supplier_id": "s003",
+    "status": "DELIVERED",
+    "item_ids": [
+      "oi021"
+    ],
+    "supplier_subtotal": 1024,
+    "platform_margin": 264,
+    "selection_reason": "Selected on 89/100 reliability, 2-day fulfilment, 4.6★ rating. In stock (88 units), ships in 2 days.",
+    "auto_selected": true,
+    "created_at": "2026-08-07T11:24:00.000Z"
+  },
+  {
+    "id": "sup015",
+    "order_id": "o014",
+    "supplier_id": "s004",
+    "status": "DELIVERED",
+    "item_ids": [
+      "oi022"
+    ],
+    "supplier_subtotal": 1284,
+    "platform_margin": 954,
+    "selection_reason": "Selected on 95/100 reliability, 2-day fulfilment, 4.8★ rating. In stock (960 units), ships in 2 days.",
+    "auto_selected": true,
+    "created_at": "2026-08-10T12:33:00.000Z"
+  },
+  {
+    "id": "sup016",
+    "order_id": "o015",
+    "supplier_id": "s003",
+    "status": "CANCELLED",
+    "item_ids": [
+      "oi023"
+    ],
+    "supplier_subtotal": 386,
+    "platform_margin": 90,
+    "selection_reason": "Selected on 89/100 reliability, 4.6★ rating. In stock (145 units), ships in 3 days.",
+    "auto_selected": true,
+    "created_at": "2026-07-29T13:57:00.000Z"
+  },
+  {
+    "id": "sup017",
+    "order_id": "o016",
+    "supplier_id": "s001",
+    "status": "AWAITING_CONFIRMATION",
+    "item_ids": [
+      "oi024"
+    ],
+    "supplier_subtotal": 164,
+    "platform_margin": 200,
+    "selection_reason": "Selected on 92/100 reliability, 2-day fulfilment, 4.7★ rating, competitive unit cost. In stock (340 units), ships in 2 days.",
+    "auto_selected": true,
+    "created_at": "2026-08-19T16:41:44.063Z"
+  },
+  {
+    "id": "sup018",
+    "order_id": "o016",
+    "supplier_id": "s004",
+    "status": "AWAITING_CONFIRMATION",
+    "item_ids": [
+      "oi025"
+    ],
+    "supplier_subtotal": 234,
+    "platform_margin": 168,
+    "selection_reason": "Selected on 95/100 reliability, 1-day fulfilment, 4.8★ rating, competitive unit cost. In stock (4800 units), ships in 1 day.",
+    "auto_selected": true,
+    "created_at": "2026-08-19T16:41:44.063Z"
+  },
+  {
+    "id": "sup019",
+    "order_id": "o017",
+    "supplier_id": "s001",
+    "status": "AWAITING_CONFIRMATION",
+    "item_ids": [
+      "oi026"
+    ],
+    "supplier_subtotal": 82,
+    "platform_margin": 100,
+    "selection_reason": "Selected on 92/100 reliability, 2-day fulfilment, 4.7★ rating, competitive unit cost. In stock (340 units), ships in 2 days.",
+    "auto_selected": true,
+    "created_at": "2026-08-19T16:41:45.896Z"
+  },
+  {
+    "id": "sup020",
+    "order_id": "o018",
+    "supplier_id": "s001",
+    "status": "AWAITING_CONFIRMATION",
+    "item_ids": [
+      "oi027"
+    ],
+    "supplier_subtotal": 410,
+    "platform_margin": 395,
+    "selection_reason": "Selected on 92/100 reliability, 2-day fulfilment, 4.7★ rating, competitive unit cost. In stock (340 units), ships in 2 days.",
+    "auto_selected": true,
+    "created_at": "2026-08-19T16:41:46.019Z"
+  },
+  {
+    "id": "sup021",
+    "order_id": "o019",
+    "supplier_id": "s001",
+    "status": "AWAITING_CONFIRMATION",
+    "item_ids": [
+      "oi028"
+    ],
+    "supplier_subtotal": 1640,
+    "platform_margin": 1340,
+    "selection_reason": "Selected on 92/100 reliability, 2-day fulfilment, 4.7★ rating, competitive unit cost. In stock (340 units), ships in 2 days.",
+    "auto_selected": true,
+    "created_at": "2026-08-19T16:41:46.169Z"
+  },
+  {
+    "id": "sup022",
+    "order_id": "o020",
+    "supplier_id": "s001",
+    "status": "AWAITING_CONFIRMATION",
+    "item_ids": [
+      "oi029"
+    ],
+    "supplier_subtotal": 1640,
+    "platform_margin": 1500,
+    "selection_reason": "Selected on 92/100 reliability, 2-day fulfilment, 4.7★ rating, competitive unit cost. In stock (340 units), ships in 2 days.",
+    "auto_selected": true,
+    "created_at": "2026-08-19T16:41:46.306Z"
+  }
+]

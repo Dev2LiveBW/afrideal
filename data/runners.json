@@ -1,0 +1,47 @@
+[
+  {
+    "id": "r001",
+    "user_id": "u005",
+    "name": "Kagiso Sithole",
+    "initials": "KS",
+    "phone": "+267 72 118 449",
+    "vehicle": "Toyota Hilux single cab",
+    "plate": "B 481 AQR",
+    "city": "Gaborone",
+    "online": true,
+    "rating": 4.9,
+    "deliveries_completed": 312,
+    "earnings_mtd": 4180,
+    "earnings_total": 61420
+  },
+  {
+    "id": "r002",
+    "user_id": null,
+    "name": "Onalenna Phiri",
+    "initials": "OP",
+    "phone": "+267 71 903 226",
+    "vehicle": "Nissan NP200",
+    "plate": "B 772 BKM",
+    "city": "Gaborone",
+    "online": false,
+    "rating": 4.7,
+    "deliveries_completed": 198,
+    "earnings_mtd": 2640,
+    "earnings_total": 38900
+  },
+  {
+    "id": "r003",
+    "user_id": null,
+    "name": "Lesedi Kgosi",
+    "initials": "LK",
+    "phone": "+267 74 552 018",
+    "vehicle": "Motorcycle — Honda CG125",
+    "plate": "B 219 CDN",
+    "city": "Francistown",
+    "online": true,
+    "rating": 4.6,
+    "deliveries_completed": 141,
+    "earnings_mtd": 1980,
+    "earnings_total": 22150
+  }
+]

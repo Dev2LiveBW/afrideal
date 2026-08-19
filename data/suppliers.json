@@ -1,0 +1,414 @@
+[
+  {
+    "id": "s001",
+    "name": "Naledi Beauty Supplies",
+    "legal_name": "Naledi Beauty Supplies (Pty) Ltd",
+    "initials": "NB",
+    "country": "BW",
+    "city": "Gaborone",
+    "status": "VERIFIED",
+    "contact_email": "supplier@naledi.co.bw",
+    "contact_phone": "+267 391 4820",
+    "registration_no": "BW00001923845",
+    "joined_at": "2025-07-03T08:44:00.000Z",
+    "rating": 4.7,
+    "fulfilment_rate": 96,
+    "reliability_score": 92,
+    "avg_fulfilment_days": 2,
+    "total_gmv": 486320,
+    "products_count": 3,
+    "orders_count": 214,
+    "verification_docs": [
+      {
+        "id": "d1",
+        "label": "Certificate of Incorporation",
+        "status": "APPROVED",
+        "uploaded_at": "2025-07-15T08:20:00.000Z"
+      },
+      {
+        "id": "d2",
+        "label": "Tax Clearance Certificate",
+        "status": "APPROVED",
+        "uploaded_at": "2025-07-15T08:20:00.000Z"
+      },
+      {
+        "id": "d3",
+        "label": "Proof of Bank Account",
+        "status": "APPROVED",
+        "uploaded_at": "2025-07-15T08:20:00.000Z"
+      },
+      {
+        "id": "d4",
+        "label": "Directors ID Documents",
+        "status": "APPROVED",
+        "uploaded_at": "2025-07-15T08:20:00.000Z"
+      }
+    ],
+    "categories": [
+      "c1"
+    ],
+    "supplier_type": "DISTRIBUTOR",
+    "commercial_model": "AFRIDEAL_MANAGED"
+  },
+  {
+    "id": "s002",
+    "name": "GlowUp Distributors",
+    "legal_name": "GlowUp Distributors SA (Pty) Ltd",
+    "initials": "GU",
+    "country": "ZA",
+    "city": "Johannesburg",
+    "status": "VERIFIED",
+    "contact_email": "supplier@glowup.co.za",
+    "contact_phone": "+27 11 726 3391",
+    "registration_no": "ZA2019/447128/07",
+    "joined_at": "2025-08-24T08:00:00.000Z",
+    "rating": 4.4,
+    "fulfilment_rate": 91,
+    "reliability_score": 86,
+    "avg_fulfilment_days": 4,
+    "total_gmv": 372940,
+    "products_count": 4,
+    "orders_count": 168,
+    "verification_docs": [
+      {
+        "id": "d1",
+        "label": "Certificate of Incorporation",
+        "status": "APPROVED",
+        "uploaded_at": "2025-09-01T08:44:00.000Z"
+      },
+      {
+        "id": "d2",
+        "label": "Tax Clearance Certificate",
+        "status": "APPROVED",
+        "uploaded_at": "2025-09-01T08:44:00.000Z"
+      },
+      {
+        "id": "d3",
+        "label": "Proof of Bank Account",
+        "status": "APPROVED",
+        "uploaded_at": "2025-09-01T08:44:00.000Z"
+      },
+      {
+        "id": "d4",
+        "label": "Directors ID Documents",
+        "status": "APPROVED",
+        "uploaded_at": "2025-09-01T08:44:00.000Z"
+      }
+    ],
+    "categories": [
+      "c1",
+      "c6"
+    ],
+    "supplier_type": "WHOLESALER",
+    "commercial_model": "AFRIDEAL_MANAGED"
+  },
+  {
+    "id": "s003",
+    "name": "Kalahari Electronics",
+    "legal_name": "Kalahari Electronics Trading CC",
+    "initials": "KE",
+    "country": "BW",
+    "city": "Gaborone",
+    "status": "VERIFIED",
+    "contact_email": "trade@kalaharielectronics.co.bw",
+    "contact_phone": "+267 397 2210",
+    "registration_no": "BW00002774119",
+    "joined_at": "2025-11-05T08:19:00.000Z",
+    "rating": 4.6,
+    "fulfilment_rate": 94,
+    "reliability_score": 89,
+    "avg_fulfilment_days": 3,
+    "total_gmv": 611450,
+    "products_count": 2,
+    "orders_count": 143,
+    "verification_docs": [
+      {
+        "id": "d1",
+        "label": "Certificate of Incorporation",
+        "status": "APPROVED",
+        "uploaded_at": "2025-11-12T08:20:00.000Z"
+      },
+      {
+        "id": "d2",
+        "label": "Tax Clearance Certificate",
+        "status": "APPROVED",
+        "uploaded_at": "2025-11-12T08:20:00.000Z"
+      },
+      {
+        "id": "d3",
+        "label": "Proof of Bank Account",
+        "status": "APPROVED",
+        "uploaded_at": "2025-11-12T08:20:00.000Z"
+      },
+      {
+        "id": "d4",
+        "label": "Directors ID Documents",
+        "status": "APPROVED",
+        "uploaded_at": "2025-11-12T08:20:00.000Z"
+      }
+    ],
+    "categories": [
+      "c2"
+    ],
+    "supplier_type": "IMPORTER",
+    "commercial_model": "AFRIDEAL_MANAGED"
+  },
+  {
+    "id": "s004",
+    "name": "Motswedi Building Supplies",
+    "legal_name": "Motswedi Building Supplies (Pty) Ltd",
+    "initials": "MB",
+    "country": "BW",
+    "city": "Francistown",
+    "status": "VERIFIED",
+    "contact_email": "sales@motswedi.co.bw",
+    "contact_phone": "+267 241 8876",
+    "registration_no": "BW00003318204",
+    "joined_at": "2025-12-29T08:01:00.000Z",
+    "rating": 4.8,
+    "fulfilment_rate": 98,
+    "reliability_score": 95,
+    "avg_fulfilment_days": 1,
+    "total_gmv": 894180,
+    "products_count": 2,
+    "orders_count": 97,
+    "verification_docs": [
+      {
+        "id": "d1",
+        "label": "Certificate of Incorporation",
+        "status": "APPROVED",
+        "uploaded_at": "2026-01-03T08:36:00.000Z"
+      },
+      {
+        "id": "d2",
+        "label": "Tax Clearance Certificate",
+        "status": "APPROVED",
+        "uploaded_at": "2026-01-03T08:36:00.000Z"
+      },
+      {
+        "id": "d3",
+        "label": "Proof of Bank Account",
+        "status": "APPROVED",
+        "uploaded_at": "2026-01-03T08:36:00.000Z"
+      },
+      {
+        "id": "d4",
+        "label": "Directors ID Documents",
+        "status": "APPROVED",
+        "uploaded_at": "2026-01-03T08:36:00.000Z"
+      }
+    ],
+    "categories": [
+      "c3"
+    ],
+    "supplier_type": "MANUFACTURER",
+    "commercial_model": "AFRIDEAL_MANAGED"
+  },
+  {
+    "id": "s005",
+    "name": "Highveld Trade Co",
+    "legal_name": "Highveld Trade Company (Pty) Ltd",
+    "initials": "HT",
+    "country": "ZA",
+    "city": "Pretoria",
+    "status": "VERIFIED",
+    "contact_email": "orders@highveldtrade.co.za",
+    "contact_phone": "+27 12 348 5502",
+    "registration_no": "ZA2017/229041/07",
+    "joined_at": "2026-02-02T08:06:00.000Z",
+    "rating": 4.2,
+    "fulfilment_rate": 88,
+    "reliability_score": 81,
+    "avg_fulfilment_days": 5,
+    "total_gmv": 258600,
+    "products_count": 5,
+    "orders_count": 76,
+    "verification_docs": [
+      {
+        "id": "d1",
+        "label": "Certificate of Incorporation",
+        "status": "APPROVED",
+        "uploaded_at": "2026-02-10T08:50:00.000Z"
+      },
+      {
+        "id": "d2",
+        "label": "Tax Clearance Certificate",
+        "status": "APPROVED",
+        "uploaded_at": "2026-02-10T08:50:00.000Z"
+      },
+      {
+        "id": "d3",
+        "label": "Proof of Bank Account",
+        "status": "APPROVED",
+        "uploaded_at": "2026-02-10T08:50:00.000Z"
+      },
+      {
+        "id": "d4",
+        "label": "Directors ID Documents",
+        "status": "APPROVED",
+        "uploaded_at": "2026-02-10T08:50:00.000Z"
+      }
+    ],
+    "categories": [
+      "c2",
+      "c4",
+      "c5"
+    ],
+    "supplier_type": "WHOLESALER",
+    "commercial_model": "AFRIDEAL_MANAGED"
+  },
+  {
+    "id": "s006",
+    "name": "Tsholofelo Fresh Produce",
+    "legal_name": "Tsholofelo Fresh Produce (Pty) Ltd",
+    "initials": "TF",
+    "country": "BW",
+    "city": "Maun",
+    "status": "PENDING",
+    "contact_email": "hello@tsholofelofresh.co.bw",
+    "contact_phone": "+267 686 1140",
+    "registration_no": "BW00004402771",
+    "joined_at": "2026-08-10T08:33:00.000Z",
+    "rating": 0,
+    "fulfilment_rate": 0,
+    "reliability_score": 0,
+    "avg_fulfilment_days": 0,
+    "total_gmv": 0,
+    "products_count": 1,
+    "orders_count": 0,
+    "verification_docs": [
+      {
+        "id": "d1",
+        "label": "Certificate of Incorporation",
+        "status": "APPROVED",
+        "uploaded_at": "2026-08-10T08:33:00.000Z"
+      },
+      {
+        "id": "d2",
+        "label": "Tax Clearance Certificate",
+        "status": "PENDING",
+        "uploaded_at": "2026-08-10T08:33:00.000Z"
+      },
+      {
+        "id": "d3",
+        "label": "Proof of Bank Account",
+        "status": "PENDING",
+        "uploaded_at": "2026-08-11T08:16:00.000Z"
+      },
+      {
+        "id": "d4",
+        "label": "Directors ID Documents",
+        "status": "REJECTED",
+        "uploaded_at": "2026-08-11T08:16:00.000Z",
+        "note": "Scan is illegible below the fold. Re-upload at 300dpi."
+      }
+    ],
+    "categories": [
+      "c4"
+    ],
+    "supplier_type": "AGENT",
+    "commercial_model": "AFRIDEAL_MANAGED"
+  },
+  {
+    "id": "s007",
+    "name": "Setlhoa Office Group",
+    "legal_name": "Setlhoa Office Group (Pty) Ltd",
+    "initials": "SO",
+    "country": "BW",
+    "city": "Gaborone",
+    "status": "PENDING",
+    "contact_email": "accounts@setlhoaoffice.co.bw",
+    "contact_phone": "+267 395 7731",
+    "registration_no": "BW00004518830",
+    "joined_at": "2026-08-15T08:08:00.000Z",
+    "rating": 4,
+    "fulfilment_rate": 85,
+    "reliability_score": 70,
+    "avg_fulfilment_days": 3,
+    "total_gmv": 0,
+    "products_count": 1,
+    "orders_count": 0,
+    "verification_docs": [
+      {
+        "id": "d1",
+        "label": "Certificate of Incorporation",
+        "status": "APPROVED",
+        "uploaded_at": "2026-08-15T08:08:00.000Z"
+      },
+      {
+        "id": "d2",
+        "label": "Tax Clearance Certificate",
+        "status": "APPROVED",
+        "uploaded_at": "2026-08-15T08:08:00.000Z"
+      },
+      {
+        "id": "d3",
+        "label": "Proof of Bank Account",
+        "status": "PENDING",
+        "uploaded_at": null
+      },
+      {
+        "id": "d4",
+        "label": "Directors ID Documents",
+        "status": "APPROVED",
+        "uploaded_at": "2026-08-16T08:51:00.000Z"
+      }
+    ],
+    "categories": [
+      "c5"
+    ],
+    "supplier_type": "RETAILER",
+    "commercial_model": "AFRIDEAL_MANAGED"
+  },
+  {
+    "id": "s008",
+    "name": "Bokamoso Textiles",
+    "legal_name": "Bokamoso Textiles (Pty) Ltd",
+    "initials": "BT",
+    "country": "BW",
+    "city": "Lobatse",
+    "status": "SUSPENDED",
+    "contact_email": "info@bokamosotextiles.co.bw",
+    "contact_phone": "+267 533 2094",
+    "registration_no": "BW00002091447",
+    "joined_at": "2025-03-17T08:20:00.000Z",
+    "rating": 3.1,
+    "fulfilment_rate": 62,
+    "reliability_score": 44,
+    "avg_fulfilment_days": 9,
+    "total_gmv": 88400,
+    "products_count": 2,
+    "orders_count": 41,
+    "verification_docs": [
+      {
+        "id": "d1",
+        "label": "Certificate of Incorporation",
+        "status": "APPROVED",
+        "uploaded_at": "2025-03-22T08:55:00.000Z"
+      },
+      {
+        "id": "d2",
+        "label": "Tax Clearance Certificate",
+        "status": "APPROVED",
+        "uploaded_at": "2025-03-22T08:55:00.000Z"
+      },
+      {
+        "id": "d3",
+        "label": "Proof of Bank Account",
+        "status": "APPROVED",
+        "uploaded_at": "2025-03-22T08:55:00.000Z"
+      },
+      {
+        "id": "d4",
+        "label": "Directors ID Documents",
+        "status": "APPROVED",
+        "uploaded_at": "2025-03-22T08:55:00.000Z"
+      }
+    ],
+    "categories": [
+      "c6"
+    ],
+    "supplier_type": "MANUFACTURER",
+    "commercial_model": "AFRIDEAL_MANAGED"
+  }
+]

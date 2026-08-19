@@ -1,0 +1,112 @@
+[
+  {
+    "id": "st001",
+    "supplier_id": "s001",
+    "supplier_name": "Naledi Beauty Supplies",
+    "period": "2026-06",
+    "gross": 81053,
+    "commission": 9726,
+    "net": 71327,
+    "status": "PAID",
+    "paid_at": "2026-07-10T08:20:00.000Z"
+  },
+  {
+    "id": "st002",
+    "supplier_id": "s001",
+    "supplier_name": "Naledi Beauty Supplies",
+    "period": "2026-07",
+    "gross": 69474,
+    "commission": 8337,
+    "net": 61137,
+    "status": "PENDING",
+    "paid_at": null
+  },
+  {
+    "id": "st003",
+    "supplier_id": "s002",
+    "supplier_name": "GlowUp Distributors",
+    "period": "2026-06",
+    "gross": 62157,
+    "commission": 7459,
+    "net": 54698,
+    "status": "PAID",
+    "paid_at": "2026-07-11T08:03:00.000Z"
+  },
+  {
+    "id": "st004",
+    "supplier_id": "s002",
+    "supplier_name": "GlowUp Distributors",
+    "period": "2026-07",
+    "gross": 53277,
+    "commission": 6393,
+    "net": 46884,
+    "status": "PENDING",
+    "paid_at": null
+  },
+  {
+    "id": "st005",
+    "supplier_id": "s003",
+    "supplier_name": "Kalahari Electronics",
+    "period": "2026-06",
+    "gross": 101908,
+    "commission": 12229,
+    "net": 89679,
+    "status": "PAID",
+    "paid_at": "2026-07-12T08:46:00.000Z"
+  },
+  {
+    "id": "st006",
+    "supplier_id": "s003",
+    "supplier_name": "Kalahari Electronics",
+    "period": "2026-07",
+    "gross": 87350,
+    "commission": 10482,
+    "net": 76868,
+    "status": "PENDING",
+    "paid_at": null
+  },
+  {
+    "id": "st007",
+    "supplier_id": "s004",
+    "supplier_name": "Motswedi Building Supplies",
+    "period": "2026-06",
+    "gross": 149030,
+    "commission": 17884,
+    "net": 131146,
+    "status": "PAID",
+    "paid_at": "2026-07-13T08:29:00.000Z"
+  },
+  {
+    "id": "st008",
+    "supplier_id": "s004",
+    "supplier_name": "Motswedi Building Supplies",
+    "period": "2026-07",
+    "gross": 127740,
+    "commission": 15329,
+    "net": 112411,
+    "status": "PENDING",
+    "paid_at": null
+  },
+  {
+    "id": "st009",
+    "supplier_id": "s005",
+    "supplier_name": "Highveld Trade Co",
+    "period": "2026-06",
+    "gross": 43100,
+    "commission": 5172,
+    "net": 37928,
+    "status": "PAID",
+    "paid_at": "2026-07-14T08:12:00.000Z"
+  },
+  {
+    "id": "st010",
+    "supplier_id": "s005",
+    "supplier_name": "Highveld Trade Co",
+    "period": "2026-07",
+    "gross": 36943,
+    "commission": 4433,
+    "net": 32510,
+    "status": "PENDING",
+    "paid_at": null
+  }
+]

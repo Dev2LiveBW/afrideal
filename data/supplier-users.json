@@ -1,0 +1,16 @@
+[
+  {
+    "id": "su001",
+    "supplier_id": "s001",
+    "user_id": "u003",
+    "role": "SUPPLIER_OWNER",
+    "status": "ACTIVE"
+  },
+  {
+    "id": "su002",
+    "supplier_id": "s002",
+    "user_id": "u004",
+    "role": "SUPPLIER_OWNER",
+    "status": "ACTIVE"
+  }
+]

@@ -1,0 +1,202 @@
+[
+  {
+    "id": "a001",
+    "at": "2026-02-10T11:50:00.000Z",
+    "actor_id": "u002",
+    "actor_name": "Keabetswe Molapo",
+    "action": "SUPPLIER_APPROVED",
+    "entity": "supplier",
+    "entity_id": "s005",
+    "detail": "Approved Highveld Trade Co after document review."
+  },
+  {
+    "id": "a002",
+    "at": "2026-07-27T11:31:00.000Z",
+    "actor_id": "u002",
+    "actor_name": "Keabetswe Molapo",
+    "action": "ESCROW_RELEASED",
+    "entity": "escrow",
+    "entity_id": "e001",
+    "detail": "Released escrow on AFD-24810 following delivery confirmation."
+  },
+  {
+    "id": "a003",
+    "at": "2026-08-01T11:06:00.000Z",
+    "actor_id": "u001",
+    "actor_name": "AfriDeal Admin",
+    "action": "PRICING_RULE_UPDATED",
+    "entity": "pricing-rule",
+    "entity_id": "pr001",
+    "detail": "Hair & Beauty markup changed from 75% to 80%."
+  },
+  {
+    "id": "a004",
+    "at": "2026-08-05T11:58:00.000Z",
+    "actor_id": "u002",
+    "actor_name": "Keabetswe Molapo",
+    "action": "SUPPLIER_SUSPENDED",
+    "entity": "supplier",
+    "entity_id": "s008",
+    "detail": "Suspended Bokamoso Textiles — fulfilment rate below 65% for two consecutive months."
+  },
+  {
+    "id": "a005",
+    "at": "2026-08-07T11:24:00.000Z",
+    "actor_id": "u008",
+    "actor_name": "Finance Admin",
+    "action": "SETTLEMENT_PAID",
+    "entity": "settlement",
+    "entity_id": "st001",
+    "detail": "June settlement paid to Naledi Beauty Supplies."
+  },
+  {
+    "id": "a006",
+    "at": "2026-08-10T11:33:00.000Z",
+    "actor_id": "u002",
+    "actor_name": "Keabetswe Molapo",
+    "action": "DISPUTE_OPENED",
+    "entity": "dispute",
+    "entity_id": "dp001",
+    "detail": "Dispute opened on AFD-24822 — short delivery."
+  },
+  {
+    "id": "a007",
+    "at": "2026-08-13T11:42:00.000Z",
+    "actor_id": "u001",
+    "actor_name": "AfriDeal Admin",
+    "action": "USER_ROLE_CHANGED",
+    "entity": "user",
+    "entity_id": "u008",
+    "detail": "Granted FINANCE_ADMIN to finance@afrideal.co.bw."
+  },
+  {
+    "id": "a008",
+    "at": "2026-08-15T11:08:00.000Z",
+    "actor_id": "u002",
+    "actor_name": "Keabetswe Molapo",
+    "action": "SUPPLIER_OVERRIDDEN",
+    "entity": "supplier-order",
+    "entity_id": "sup004",
+    "detail": "Manually routed to Motswedi Building Supplies — customer requested Francistown collection."
+  },
+  {
+    "id": "a009",
+    "at": "2026-08-19T16:41:44.122Z",
+    "actor_id": "u006",
+    "actor_name": "Thabo Modise",
+    "action": "ORDER_CREATED",
+    "entity": "order",
+    "entity_id": "o016",
+    "detail": "AFD-24825 placed — 2 line(s) split across 2 supplier(s)."
+  },
+  {
+    "id": "a010",
+    "at": "2026-08-19T16:41:45.499Z",
+    "actor_id": "u005",
+    "actor_name": "Kagiso Sithole",
+    "action": "RUNNER_STATUS_CHANGED",
+    "entity": "runner",
+    "entity_id": "r001",
+    "detail": "Kagiso Sithole went offline."
+  },
+  {
+    "id": "a011",
+    "at": "2026-08-19T16:41:45.587Z",
+    "actor_id": "u005",
+    "actor_name": "Kagiso Sithole",
+    "action": "RUNNER_STATUS_CHANGED",
+    "entity": "runner",
+    "entity_id": "r001",
+    "detail": "Kagiso Sithole went online."
+  },
+  {
+    "id": "a012",
+    "at": "2026-08-19T16:41:45.707Z",
+    "actor_id": "u002",
+    "actor_name": "Keabetswe Molapo",
+    "action": "SUPPLIER_APPROVED",
+    "entity": "supplier",
+    "entity_id": "s007",
+    "detail": "Setlhoa Office Group moved from PENDING to VERIFIED."
+  },
+  {
+    "id": "a013",
+    "at": "2026-08-19T16:41:45.770Z",
+    "actor_id": "u002",
+    "actor_name": "Keabetswe Molapo",
+    "action": "SUPPLIER_REJECTED",
+    "entity": "supplier",
+    "entity_id": "s007",
+    "detail": "Setlhoa Office Group moved from VERIFIED to PENDING."
+  },
+  {
+    "id": "a014",
+    "at": "2026-08-19T16:41:45.976Z",
+    "actor_id": "u007",
+    "actor_name": "Kefilwe Dithebe",
+    "action": "ORDER_CREATED",
+    "entity": "order",
+    "entity_id": "o017",
+    "detail": "AFD-24826 placed — 1 line(s) split across 1 supplier(s)."
+  },
+  {
+    "id": "a015",
+    "at": "2026-08-19T16:41:46.102Z",
+    "actor_id": "u007",
+    "actor_name": "Kefilwe Dithebe",
+    "action": "ORDER_CREATED",
+    "entity": "order",
+    "entity_id": "o018",
+    "detail": "AFD-24827 placed — 1 line(s) split across 1 supplier(s)."
+  },
+  {
+    "id": "a016",
+    "at": "2026-08-19T16:41:46.261Z",
+    "actor_id": "u007",
+    "actor_name": "Kefilwe Dithebe",
+    "action": "ORDER_CREATED",
+    "entity": "order",
+    "entity_id": "o019",
+    "detail": "AFD-24828 placed — 1 line(s) split across 1 supplier(s)."
+  },
+  {
+    "id": "a017",
+    "at": "2026-08-19T16:41:46.386Z",
+    "actor_id": "u006",
+    "actor_name": "Thabo Modise",
+    "action": "ORDER_CREATED",
+    "entity": "order",
+    "entity_id": "o020",
+    "detail": "AFD-24829 placed — 1 line(s) split across 1 supplier(s)."
+  },
+  {
+    "id": "a018",
+    "at": "2026-08-19T16:41:52.224Z",
+    "actor_id": "u007",
+    "actor_name": "Kefilwe Dithebe",
+    "action": "RFQ_SUBMITTED",
+    "entity": "rfq",
+    "entity_id": "rfq004",
+    "detail": "RFQ-2603 — 400 × Shea Butter Deep Treatment 500ml, 3 supplier(s) invited."
+  },
+  {
+    "id": "a019",
+    "at": "2026-08-19T16:41:53.825Z",
+    "actor_id": "u003",
+    "actor_name": "Naledi Beauty Supplies",
+    "action": "RFQ_QUOTED",
+    "entity": "rfq",
+    "entity_id": "rfq004",
+    "detail": "Naledi Beauty Supplies quoted 400 units at BWP 68.00."
+  },
+  {
+    "id": "a020",
+    "at": "2026-08-19T16:41:53.951Z",
+    "actor_id": "u002",
+    "actor_name": "Keabetswe Molapo",
+    "action": "RFQ_RESPONSE_SELECTED",
+    "entity": "rfq",
+    "entity_id": "rfq004",
+    "detail": "Selected response rr007 at BWP 68.00 per unit."
+  }
+]
