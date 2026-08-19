@@ -1,0 +1,92 @@
+[
+  {
+    "id": "n001",
+    "user_id": "u001",
+    "title": "Two suppliers awaiting verification",
+    "body": "Tsholofelo Fresh Produce and Setlhoa Office Group have submitted documents.",
+    "kind": "SUPPLIER",
+    "read": false,
+    "at": "2026-08-17T06:34:00.000Z"
+  },
+  {
+    "id": "n002",
+    "user_id": "u001",
+    "title": "Dispute SLA expiring",
+    "body": "AFD-24822 has under 24 hours remaining on its resolution clock.",
+    "kind": "DISPUTE",
+    "read": false,
+    "at": "2026-08-19T07:00:00.000Z"
+  },
+  {
+    "id": "n003",
+    "user_id": "u002",
+    "title": "Escrow overdue",
+    "body": "Three escrow records have passed their seven-day hold window.",
+    "kind": "ESCROW",
+    "read": false,
+    "at": "2026-08-18T08:17:00.000Z"
+  },
+  {
+    "id": "n004",
+    "user_id": "u003",
+    "title": "New order to confirm",
+    "body": "AFD-24817 needs confirmation within 24 hours.",
+    "kind": "ORDER",
+    "read": false,
+    "at": "2026-08-16T09:51:00.000Z"
+  },
+  {
+    "id": "n005",
+    "user_id": "u003",
+    "title": "Escrow released",
+    "body": "BWP 1,842.00 released against AFD-24810.",
+    "kind": "ESCROW",
+    "read": true,
+    "at": "2026-07-27T10:31:00.000Z"
+  },
+  {
+    "id": "n006",
+    "user_id": "u004",
+    "title": "Quote request received",
+    "body": "A buyer has requested pricing on 200 units of School Uniform Set.",
+    "kind": "ORDER",
+    "read": false,
+    "at": "2026-08-18T11:17:00.000Z"
+  },
+  {
+    "id": "n007",
+    "user_id": "u005",
+    "title": "New job available",
+    "body": "Pickup at Motswedi Francistown depot, 18.4km.",
+    "kind": "ORDER",
+    "read": false,
+    "at": "2026-08-19T12:00:00.000Z"
+  },
+  {
+    "id": "n008",
+    "user_id": "u006",
+    "title": "Your order is on the way",
+    "body": "AFD-24814 left the depot and is out for delivery.",
+    "kind": "ORDER",
+    "read": false,
+    "at": "2026-08-18T13:17:00.000Z"
+  },
+  {
+    "id": "n009",
+    "user_id": "u007",
+    "title": "Delivery confirmed",
+    "body": "AFD-24813 was delivered. Escrow released to the supplier.",
+    "kind": "ORDER",
+    "read": true,
+    "at": "2026-08-08T14:07:00.000Z"
+  },
+  {
+    "id": "n010",
+    "user_id": "u008",
+    "title": "July settlements ready",
+    "body": "Five supplier settlements are pending approval.",
+    "kind": "SYSTEM",
+    "read": false,
+    "at": "2026-08-17T15:34:00.000Z"
+  }
+]

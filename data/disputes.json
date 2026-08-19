@@ -1,0 +1,32 @@
+[
+  {
+    "id": "dp001",
+    "order_id": "o013",
+    "escrow_id": "e014",
+    "customer_id": "u006",
+    "customer_name": "Thabo Modise",
+    "supplier_id": "s003",
+    "reason": "Item not as described",
+    "detail": "Customer reports the noise cancellation does not engage on one bud. Requesting replacement rather than refund.",
+    "status": "UNDER_REVIEW",
+    "opened_at": "2026-08-10T09:33:00.000Z",
+    "sla_due_at": "2026-08-20T15:00:00.000Z",
+    "resolved_at": null,
+    "resolution_note": null
+  },
+  {
+    "id": "dp002",
+    "order_id": "o014",
+    "escrow_id": "e015",
+    "customer_id": "u007",
+    "customer_name": "Kefilwe Dithebe",
+    "supplier_id": "s004",
+    "reason": "Short delivery",
+    "detail": "Six sheets ordered, four delivered. Runner proof-of-delivery photo shows four on the vehicle.",
+    "status": "OPEN",
+    "opened_at": "2026-08-13T09:42:00.000Z",
+    "sla_due_at": "2026-08-23T15:00:00.000Z",
+    "resolved_at": null,
+    "resolution_note": null
+  }
+]

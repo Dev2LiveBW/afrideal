@@ -1,0 +1,183 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/*
+ * AfriDeal global layer.
+ *
+ * Two modes share one token set. Marketplace mode (the storefront) is allowed
+ * to be expressive and image-led. Console mode (/admin, /supplier, /runner) is
+ * deliberately tighter and quieter — an operator releasing money should find
+ * every control in the same place every time, so staged entrances are a defect
+ * there, not a flourish.
+ */
+
+@layer base {
+  :root {
+    --font-satoshi: 'Satoshi', var(--font-geist-sans), ui-sans-serif, sans-serif;
+
+    /* Motion. Exponential ease-out — mass that settles, never a linear slide. */
+    --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
+    --ease-out-quint: cubic-bezier(0.22, 1, 0.36, 1);
+    --ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+  }
+
+  * {
+    border-color: theme('colors.hairline');
+  }
+
+  html {
+    -webkit-text-size-adjust: 100%;
+    scroll-behavior: smooth;
+  }
+
+  body {
+    background-color: theme('colors.surface.DEFAULT');
+    color: #171a18;
+    font-family: var(--font-geist-sans), ui-sans-serif, sans-serif;
+    font-size: 15px;
+    line-height: 1.6;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  h1,
+  h2,
+  h3,
+  h4 {
+    font-family: var(--font-satoshi);
+    font-weight: 600;
+    letter-spacing: -0.02em;
+    text-wrap: balance;
+  }
+
+  /* Every number that means something is tabular, so columns never shift. */
+  .tnum,
+  .font-mono {
+    font-variant-numeric: tabular-nums;
+    font-feature-settings: 'tnum' 1;
+  }
+
+  ::selection {
+    background-color: #f0c040;
+    color: #111111;
+  }
+
+  :focus-visible {
+    outline: 2px solid theme('colors.gold.DEFAULT');
+    outline-offset: 2px;
+    border-radius: 4px;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+      scroll-behavior: auto !important;
+    }
+  }
+}
+
+@layer components {
+  /*
+   * The nested enclosure. An outer tray with a hairline ring holding an inner
+   * core with a mathematically smaller radius, so the curves stay concentric.
+   * Reserved for surfaces that matter — stat clusters, escrow controls, the
+   * checkout summary. Never on anything that repeats more than eight times.
+   */
+  .enclosure {
+    @apply rounded-xl bg-[rgba(23,26,24,0.04)] p-1.5 ring-1 ring-hairline;
+  }
+
+  .enclosure-core {
+    @apply rounded-[calc(2rem-0.375rem)] bg-surface-raised;
+    box-shadow: inset 0 1px 1px rgba(255, 255, 255, 0.6);
+  }
+
+  /* Console equivalent — same idea, tighter radius for dense screens. */
+  .panel {
+    @apply rounded-md border border-hairline bg-surface-raised shadow-card;
+  }
+
+  .panel-header {
+    @apply flex items-center justify-between gap-4 border-b border-hairline px-5 py-4;
+  }
+
+  .eyebrow {
+    @apply font-mono text-eyebrow font-medium uppercase text-muted;
+  }
+
+  /* Table conventions: gold header rule, alternating body, hairline dividers. */
+  .data-table {
+    @apply w-full border-collapse text-left text-[13px];
+  }
+
+  .data-table thead th {
+    @apply whitespace-nowrap border-b border-hairline-strong bg-gold/[0.07] px-4 py-3 font-mono text-eyebrow font-medium uppercase text-gold-dark;
+  }
+
+  .data-table tbody td {
+    @apply border-b border-hairline px-4 py-3.5 align-middle;
+  }
+
+  .data-table tbody tr:nth-child(even) {
+    @apply bg-[rgba(23,26,24,0.015)];
+  }
+
+  .data-table tbody tr {
+    transition: background-color 160ms var(--ease-out-quint);
+  }
+
+  .data-table tbody tr:hover {
+    @apply bg-gold/[0.05];
+  }
+
+  /* Skeletons — a moving sheen, never a static grey block. */
+  .skeleton {
+    @apply relative overflow-hidden rounded bg-surface-sunk;
+  }
+
+  .skeleton::after {
+    content: '';
+    @apply absolute inset-0 -translate-x-full animate-shimmer;
+    background-image: linear-gradient(
+      90deg,
+      transparent,
+      rgba(255, 255, 255, 0.65),
+      transparent
+    );
+  }
+
+  /* Fine grain over the dark hero so the black reads as a surface, not a void. */
+  .grain::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    opacity: 0.035;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  }
+}
+
+@layer utilities {
+  .text-balance {
+    text-wrap: balance;
+  }
+
+  .measure {
+    max-width: 65ch;
+  }
+
+  /* Hides scrollbars on horizontal rails without killing the scroll itself. */
+  .no-scrollbar {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+
+  .no-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
+}

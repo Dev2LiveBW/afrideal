@@ -1,0 +1,34 @@
+[
+  {
+    "file": "p010-0.jpg",
+    "product_id": "p010",
+    "credit": "https://kaboompics.com/ (Pexels)",
+    "source": "https://www.pexels.com/photo/photo-of-stacked-clear-papers-4038653/",
+    "width": 6720,
+    "height": 4480
+  },
+  {
+    "file": "p010-1.jpg",
+    "product_id": "p010",
+    "credit": "Pixabay (Pexels)",
+    "source": "https://www.pexels.com/photo/pile-of-folders-357514/",
+    "width": 2592,
+    "height": 1728
+  },
+  {
+    "file": "p010-2.jpg",
+    "product_id": "p010",
+    "credit": "Michaela St (Pexels)",
+    "source": "https://www.pexels.com/photo/corner-of-paper-stack-20062955/",
+    "width": 5305,
+    "height": 3536
+  },
+  {
+    "file": "p010-3.jpg",
+    "product_id": "p010",
+    "credit": "Sergey  Meshkov (Pexels)",
+    "source": "https://www.pexels.com/photo/assorted-colored-papers-8478387/",
+    "width": 6720,
+    "height": 4128
+  }
+]

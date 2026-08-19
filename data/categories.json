@@ -1,0 +1,44 @@
+[
+  {
+    "id": "c1",
+    "name": "Hair & Beauty",
+    "slug": "hair-beauty",
+    "emoji": "💄",
+    "blurb": "Salon stock, retail lines and treatment ranges from verified regional distributors."
+  },
+  {
+    "id": "c2",
+    "name": "Electronics",
+    "slug": "electronics",
+    "emoji": "🔌",
+    "blurb": "Consumer and off-grid electronics, landed and warranty-backed."
+  },
+  {
+    "id": "c3",
+    "name": "Building Materials",
+    "slug": "building-materials",
+    "emoji": "🧱",
+    "blurb": "Cement, roofing and structural supply at contractor volumes."
+  },
+  {
+    "id": "c4",
+    "name": "Food & Agriculture",
+    "slug": "food-agriculture",
+    "emoji": "🌾",
+    "blurb": "Staples, seed and inputs sourced through the SADC corridor."
+  },
+  {
+    "id": "c5",
+    "name": "Office Supplies",
+    "slug": "office-supplies",
+    "emoji": "📎",
+    "blurb": "Consumables and stationery for offices that reorder monthly."
+  },
+  {
+    "id": "c6",
+    "name": "Clothing",
+    "slug": "clothing",
+    "emoji": "👕",
+    "blurb": "Workwear, uniforms and retail apparel in bulk."
+  }
+]

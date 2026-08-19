@@ -1,0 +1,743 @@
+[
+  {
+    "id": "p001",
+    "name": "Shea Butter Deep Treatment 500ml",
+    "slug": "shea-butter-deep-treatment-500ml",
+    "category_id": "c1",
+    "emoji": "🧴",
+    "swatch": [
+      "#D4920A",
+      "#8B5E0A"
+    ],
+    "short_description": "Unrefined West African shea, cold-pressed, salon strength.",
+    "description": "A deep conditioning treatment built on unrefined shea butter sourced through the Ghana–Botswana trade corridor. Sold into salons across Gaborone and Francistown at volume, and stocked as a retail line by three of the four largest beauty chains in the country. Fragrance-free base, no added parabens.",
+    "specs": [
+      {
+        "label": "Volume",
+        "value": "500ml"
+      },
+      {
+        "label": "Base",
+        "value": "Unrefined shea butter"
+      },
+      {
+        "label": "Shelf life",
+        "value": "24 months"
+      },
+      {
+        "label": "Origin",
+        "value": "Ghana / repacked BW"
+      }
+    ],
+    "variants": [
+      {
+        "id": "p001v1",
+        "label": "Single tub",
+        "sku": "SHB-500-1",
+        "price": 182
+      },
+      {
+        "id": "p001v2",
+        "label": "Case of 6",
+        "sku": "SHB-500-6",
+        "price": 192
+      },
+      {
+        "id": "p001v3",
+        "label": "Case of 12",
+        "sku": "SHB-500-12",
+        "price": 201
+      }
+    ],
+    "price": 182,
+    "status": "ACTIVE",
+    "rating": 4.8,
+    "review_count": 214,
+    "featured": true,
+    "created_at": "2026-04-21T08:00:00.000Z",
+    "brand_id": "b001",
+    "product_type": "PHYSICAL",
+    "country_of_origin": "ZA"
+  },
+  {
+    "id": "p002",
+    "name": "Premium Braiding Hair Bundle",
+    "slug": "premium-braiding-hair-bundle",
+    "category_id": "c1",
+    "emoji": "💇🏾‍♀️",
+    "swatch": [
+      "#2a2a2a",
+      "#111111"
+    ],
+    "short_description": "Heat-resistant kanekalon, 26 inch, salon-grade tension.",
+    "description": "The braiding bundle most requested by salons on the platform. Kanekalon fibre rated to 180°C, pre-stretched, with a consistent tension that holds a knotless braid without slipping. Ships in sealed retail packs of five.",
+    "specs": [
+      {
+        "label": "Length",
+        "value": "26 inch"
+      },
+      {
+        "label": "Fibre",
+        "value": "Kanekalon"
+      },
+      {
+        "label": "Heat rating",
+        "value": "180°C"
+      },
+      {
+        "label": "Pack",
+        "value": "5 bundles"
+      }
+    ],
+    "variants": [
+      {
+        "id": "p002v1",
+        "label": "Natural Black 1B",
+        "sku": "BRD-26-1B",
+        "price": 108
+      },
+      {
+        "id": "p002v2",
+        "label": "Dark Brown 2",
+        "sku": "BRD-26-2",
+        "price": 108
+      },
+      {
+        "id": "p002v3",
+        "label": "Burgundy 99J",
+        "sku": "BRD-26-99J",
+        "price": 114
+      },
+      {
+        "id": "p002v4",
+        "label": "Honey Blonde 27",
+        "sku": "BRD-26-27",
+        "price": 116
+      }
+    ],
+    "price": 108,
+    "status": "ACTIVE",
+    "rating": 4.6,
+    "review_count": 388,
+    "featured": true,
+    "created_at": "2026-04-27T08:18:00.000Z",
+    "brand_id": "b001",
+    "product_type": "PHYSICAL",
+    "country_of_origin": "ZA",
+    "compare_at_price": 121,
+    "promotion": {
+      "discount_pct": 11,
+      "ends_at": "2026-08-22T15:00:00.000Z",
+      "stock_allocated": 57,
+      "stock_sold": 13
+    }
+  },
+  {
+    "id": "p003",
+    "name": "Argan Repair Serum 100ml",
+    "slug": "argan-repair-serum-100ml",
+    "category_id": "c1",
+    "emoji": "💧",
+    "swatch": [
+      "#f0c040",
+      "#D4920A"
+    ],
+    "short_description": "Cold-pressed Moroccan argan with a lightweight silicone carrier.",
+    "description": "A finishing serum for chemically treated hair. Cold-pressed argan oil in a lightweight carrier that does not weigh down a blow-dry. Popular as an add-on sale at the till rather than a planned purchase, which makes it a reliable margin line.",
+    "specs": [
+      {
+        "label": "Volume",
+        "value": "100ml"
+      },
+      {
+        "label": "Key oil",
+        "value": "Moroccan argan"
+      },
+      {
+        "label": "Finish",
+        "value": "Non-greasy"
+      },
+      {
+        "label": "Shelf life",
+        "value": "18 months"
+      }
+    ],
+    "variants": [
+      {
+        "id": "p003v1",
+        "label": "Single bottle",
+        "sku": "ARG-100-1",
+        "price": 145
+      },
+      {
+        "id": "p003v2",
+        "label": "Case of 12",
+        "sku": "ARG-100-12",
+        "price": 157
+      }
+    ],
+    "price": 145,
+    "status": "ACTIVE",
+    "rating": 4.5,
+    "review_count": 156,
+    "featured": false,
+    "created_at": "2026-05-03T08:36:00.000Z",
+    "brand_id": "b001",
+    "product_type": "PHYSICAL",
+    "country_of_origin": "ZA"
+  },
+  {
+    "id": "p004",
+    "name": "Solar Power Bank 20 000mAh",
+    "slug": "solar-power-bank-20-000mah",
+    "category_id": "c2",
+    "emoji": "🔋",
+    "swatch": [
+      "#1a1a1a",
+      "#2a2a2a"
+    ],
+    "short_description": "IP65 solar bank with dual USB-C PD and a 3W panel.",
+    "description": "Built for households and field crews on unreliable grid supply. A 20 000mAh cell with dual USB-C power delivery and a 3W monocrystalline panel for trickle top-up. The panel will not charge it from flat in a day — it is a maintenance charge, not a primary source, and the listing says so plainly.",
+    "specs": [
+      {
+        "label": "Capacity",
+        "value": "20 000mAh"
+      },
+      {
+        "label": "Panel",
+        "value": "3W monocrystalline"
+      },
+      {
+        "label": "Ports",
+        "value": "2× USB-C PD, 1× USB-A"
+      },
+      {
+        "label": "Rating",
+        "value": "IP65"
+      },
+      {
+        "label": "Warranty",
+        "value": "12 months"
+      }
+    ],
+    "variants": [
+      {
+        "id": "p004v1",
+        "label": "Black",
+        "sku": "SPB-20-BK",
+        "price": 476
+      },
+      {
+        "id": "p004v2",
+        "label": "Desert Sand",
+        "sku": "SPB-20-DS",
+        "price": 476
+      },
+      {
+        "id": "p004v3",
+        "label": "Olive",
+        "sku": "SPB-20-OL",
+        "price": 476
+      }
+    ],
+    "price": 476,
+    "status": "ACTIVE",
+    "rating": 4.4,
+    "review_count": 92,
+    "featured": true,
+    "created_at": "2026-05-09T08:54:00.000Z",
+    "brand_id": "b002",
+    "product_type": "PHYSICAL",
+    "country_of_origin": "ZA"
+  },
+  {
+    "id": "p005",
+    "name": "Wireless Earbuds Pro ANC",
+    "slug": "wireless-earbuds-pro-anc",
+    "category_id": "c2",
+    "emoji": "🎧",
+    "swatch": [
+      "#2a2a2a",
+      "#4d4d4d"
+    ],
+    "short_description": "Hybrid active noise cancellation, 32h with the case.",
+    "description": "Hybrid ANC earbuds with a 32-hour total runtime including the charging case. Bluetooth 5.3 with multipoint, so they hold a laptop and a phone at once. The most returned item on the platform in its first month, which is why the size guide now sits above the fold.",
+    "specs": [
+      {
+        "label": "ANC",
+        "value": "Hybrid, 35dB"
+      },
+      {
+        "label": "Runtime",
+        "value": "8h buds / 32h case"
+      },
+      {
+        "label": "Bluetooth",
+        "value": "5.3 multipoint"
+      },
+      {
+        "label": "Charging",
+        "value": "USB-C + Qi"
+      },
+      {
+        "label": "Warranty",
+        "value": "12 months"
+      }
+    ],
+    "variants": [
+      {
+        "id": "p005v1",
+        "label": "Midnight",
+        "sku": "WEP-ANC-MN",
+        "price": 644
+      },
+      {
+        "id": "p005v2",
+        "label": "Pearl",
+        "sku": "WEP-ANC-PL",
+        "price": 644
+      }
+    ],
+    "price": 644,
+    "status": "ACTIVE",
+    "rating": 4.2,
+    "review_count": 141,
+    "featured": false,
+    "created_at": "2026-05-15T08:12:00.000Z",
+    "brand_id": "b002",
+    "product_type": "PHYSICAL",
+    "country_of_origin": "ZA"
+  },
+  {
+    "id": "p006",
+    "name": "Portland Cement 42.5N — 50kg",
+    "slug": "portland-cement-42-5n-50kg",
+    "category_id": "c3",
+    "emoji": "🧱",
+    "swatch": [
+      "#8A918B",
+      "#5A615C"
+    ],
+    "short_description": "CEM II 42.5N structural grade, palletised.",
+    "description": "Structural grade cement to SANS 50197-1, supplied palletised at 40 bags. The default specification for slab and column work on residential builds across the south-east district. Sold per bag or per pallet; pallet pricing is where contractors actually buy.",
+    "specs": [
+      {
+        "label": "Grade",
+        "value": "CEM II 42.5N"
+      },
+      {
+        "label": "Bag",
+        "value": "50kg"
+      },
+      {
+        "label": "Pallet",
+        "value": "40 bags"
+      },
+      {
+        "label": "Standard",
+        "value": "SANS 50197-1"
+      }
+    ],
+    "variants": [
+      {
+        "id": "p006v1",
+        "label": "Single bag",
+        "sku": "CEM-425-1",
+        "price": 134
+      },
+      {
+        "id": "p006v2",
+        "label": "Half pallet — 20 bags",
+        "sku": "CEM-425-20",
+        "price": 134
+      },
+      {
+        "id": "p006v3",
+        "label": "Full pallet — 40 bags",
+        "sku": "CEM-425-40",
+        "price": 134
+      }
+    ],
+    "price": 134,
+    "status": "ACTIVE",
+    "rating": 4.9,
+    "review_count": 67,
+    "featured": true,
+    "created_at": "2026-05-21T08:30:00.000Z",
+    "brand_id": "b003",
+    "product_type": "PHYSICAL",
+    "country_of_origin": "BW"
+  },
+  {
+    "id": "p007",
+    "name": "Corrugated Roofing Sheet 3.6m",
+    "slug": "corrugated-roofing-sheet-3-6m",
+    "category_id": "c3",
+    "emoji": "🏗️",
+    "swatch": [
+      "#5A615C",
+      "#2a2a2a"
+    ],
+    "short_description": "Galvanised IBR profile, 0.5mm, Z275 coated.",
+    "description": "IBR profile galvanised sheeting at 0.5mm gauge with a Z275 zinc coating, cut to 3.6m. The standard span for a single-storey pitched roof in the region. Delivered flat-packed and strapped; the platform does not carry the fixings, which is called out on the listing so nobody orders a roof and no screws.",
+    "specs": [
+      {
+        "label": "Profile",
+        "value": "IBR 686"
+      },
+      {
+        "label": "Gauge",
+        "value": "0.5mm"
+      },
+      {
+        "label": "Coating",
+        "value": "Z275 galvanised"
+      },
+      {
+        "label": "Length",
+        "value": "3.6m"
+      },
+      {
+        "label": "Cover width",
+        "value": "686mm"
+      }
+    ],
+    "variants": [
+      {
+        "id": "p007v1",
+        "label": "Galvanised",
+        "sku": "IBR-36-GV",
+        "price": 333
+      },
+      {
+        "id": "p007v2",
+        "label": "Charcoal coated",
+        "sku": "IBR-36-CH",
+        "price": 373
+      },
+      {
+        "id": "p007v3",
+        "label": "Brick red coated",
+        "sku": "IBR-36-BR",
+        "price": 373
+      }
+    ],
+    "price": 333,
+    "status": "ACTIVE",
+    "rating": 4.7,
+    "review_count": 44,
+    "featured": false,
+    "created_at": "2026-05-27T08:48:00.000Z",
+    "brand_id": "b003",
+    "product_type": "PHYSICAL",
+    "country_of_origin": "BW"
+  },
+  {
+    "id": "p008",
+    "name": "White Maize Meal — 12.5kg",
+    "slug": "white-maize-meal-12-5kg",
+    "category_id": "c4",
+    "emoji": "🌽",
+    "swatch": [
+      "#f0c040",
+      "#D4920A"
+    ],
+    "short_description": "Super-sifted white maize, milled in Botswana.",
+    "description": "Super-sifted white maize meal milled locally and packed in 12.5kg woven bags. The single highest-volume staple line on the platform, bought almost entirely by tuck shops and small retailers on a weekly reorder cycle.",
+    "specs": [
+      {
+        "label": "Weight",
+        "value": "12.5kg"
+      },
+      {
+        "label": "Grade",
+        "value": "Super sifted"
+      },
+      {
+        "label": "Milled",
+        "value": "Botswana"
+      },
+      {
+        "label": "Shelf life",
+        "value": "9 months"
+      }
+    ],
+    "variants": [
+      {
+        "id": "p008v1",
+        "label": "Single bag",
+        "sku": "MZE-125-1",
+        "price": 143
+      },
+      {
+        "id": "p008v2",
+        "label": "Bale of 4",
+        "sku": "MZE-125-4",
+        "price": 143
+      }
+    ],
+    "price": 143,
+    "status": "ACTIVE",
+    "rating": 4.6,
+    "review_count": 302,
+    "featured": true,
+    "created_at": "2026-06-02T08:06:00.000Z",
+    "brand_id": "b004",
+    "product_type": "PHYSICAL",
+    "country_of_origin": "BW",
+    "compare_at_price": 154,
+    "promotion": {
+      "discount_pct": 7,
+      "ends_at": "2026-08-21T15:00:00.000Z",
+      "stock_allocated": 89,
+      "stock_sold": 27
+    }
+  },
+  {
+    "id": "p009",
+    "name": "Certified Sorghum Seed — 25kg",
+    "slug": "certified-sorghum-seed-25kg",
+    "category_id": "c4",
+    "emoji": "🌾",
+    "swatch": [
+      "#1A5C2A",
+      "#0F3A1B"
+    ],
+    "short_description": "Drought-tolerant Segaolane, certified, treated.",
+    "description": "Certified Segaolane sorghum seed, the variety the extension service recommends for the eastern hardveld. Treated against seed-borne smut and packed at 25kg, which plants roughly three hectares at conventional spacing. Sold in season only.",
+    "specs": [
+      {
+        "label": "Variety",
+        "value": "Segaolane"
+      },
+      {
+        "label": "Weight",
+        "value": "25kg"
+      },
+      {
+        "label": "Treatment",
+        "value": "Fungicide dressed"
+      },
+      {
+        "label": "Coverage",
+        "value": "≈3 ha"
+      },
+      {
+        "label": "Certification",
+        "value": "Seed Unit certified"
+      }
+    ],
+    "variants": [
+      {
+        "id": "p009v1",
+        "label": "25kg bag",
+        "sku": "SRG-25-1",
+        "price": 682
+      },
+      {
+        "id": "p009v2",
+        "label": "Pallet — 20 bags",
+        "sku": "SRG-25-20",
+        "price": 682
+      }
+    ],
+    "price": 682,
+    "status": "ACTIVE",
+    "rating": 4.8,
+    "review_count": 38,
+    "featured": false,
+    "created_at": "2026-06-08T08:24:00.000Z",
+    "brand_id": "b004",
+    "product_type": "PHYSICAL",
+    "country_of_origin": "BW"
+  },
+  {
+    "id": "p010",
+    "name": "A4 Copy Paper — Box of 5 Reams",
+    "slug": "a4-copy-paper-box-of-5-reams",
+    "category_id": "c5",
+    "emoji": "📄",
+    "swatch": [
+      "#ECEBE7",
+      "#8A918B"
+    ],
+    "short_description": "80gsm, FSC certified, 2500 sheets.",
+    "description": "The reorder line every office runs out of at the worst moment. 80gsm FSC-certified A4 at 2500 sheets to the box. Nothing interesting about it, which is the point — it needs to arrive on the day it was promised and cost what it said it would.",
+    "specs": [
+      {
+        "label": "Size",
+        "value": "A4 210×297mm"
+      },
+      {
+        "label": "Weight",
+        "value": "80gsm"
+      },
+      {
+        "label": "Sheets",
+        "value": "2500 (5 reams)"
+      },
+      {
+        "label": "Certification",
+        "value": "FSC Mix"
+      },
+      {
+        "label": "Brightness",
+        "value": "161 CIE"
+      }
+    ],
+    "variants": [
+      {
+        "id": "p010v1",
+        "label": "Single box",
+        "sku": "A4-80-1",
+        "price": 275
+      },
+      {
+        "id": "p010v2",
+        "label": "Carton of 5 boxes",
+        "sku": "A4-80-5",
+        "price": 275
+      }
+    ],
+    "price": 275,
+    "status": "ACTIVE",
+    "rating": 4.3,
+    "review_count": 89,
+    "featured": false,
+    "created_at": "2026-06-14T08:42:00.000Z",
+    "brand_id": "b005",
+    "product_type": "PHYSICAL",
+    "country_of_origin": "ZA"
+  },
+  {
+    "id": "p011",
+    "name": "Heavy-Duty Cotton Work Overall",
+    "slug": "heavy-duty-cotton-work-overall",
+    "category_id": "c6",
+    "emoji": "🦺",
+    "swatch": [
+      "#1A5C2A",
+      "#2E7D3F"
+    ],
+    "short_description": "100% cotton, D59 conti-suit, reflective banded.",
+    "description": "A two-piece conti-suit in 100% cotton D59, with reflective banding on the arms and legs. Cut for site work in heat — the cotton matters, and the polyester equivalents that undercut it on price fail the same flame test. Sold to construction and municipal buyers.",
+    "specs": [
+      {
+        "label": "Fabric",
+        "value": "100% cotton D59"
+      },
+      {
+        "label": "Style",
+        "value": "Two-piece conti-suit"
+      },
+      {
+        "label": "Reflective",
+        "value": "Arms and legs"
+      },
+      {
+        "label": "Sizes",
+        "value": "32–46"
+      },
+      {
+        "label": "Colours",
+        "value": "Navy, royal, orange"
+      }
+    ],
+    "variants": [
+      {
+        "id": "p011v1",
+        "label": "Navy",
+        "sku": "OVR-D59-NV",
+        "price": 335
+      },
+      {
+        "id": "p011v2",
+        "label": "Royal Blue",
+        "sku": "OVR-D59-RB",
+        "price": 335
+      },
+      {
+        "id": "p011v3",
+        "label": "Hi-Viz Orange",
+        "sku": "OVR-D59-OR",
+        "price": 386
+      }
+    ],
+    "price": 335,
+    "status": "ACTIVE",
+    "rating": 4.5,
+    "review_count": 73,
+    "featured": false,
+    "created_at": "2026-06-20T08:00:00.000Z",
+    "brand_id": "b006",
+    "product_type": "PHYSICAL",
+    "country_of_origin": "ZA"
+  },
+  {
+    "id": "p012",
+    "name": "School Uniform Set — Primary",
+    "slug": "school-uniform-set-primary",
+    "category_id": "c6",
+    "emoji": "🎒",
+    "swatch": [
+      "#2E7D3F",
+      "#1A5C2A"
+    ],
+    "short_description": "Shirt, shorts or skirt, jersey. Poly-cotton blend.",
+    "description": "A complete primary set in a 65/35 poly-cotton blend that survives a term of washing. Demand on this line is violently seasonal — it does roughly nine months of volume in the four weeks before January intake, which is exactly the kind of spike the supplier routing engine exists to absorb.",
+    "specs": [
+      {
+        "label": "Blend",
+        "value": "65/35 poly-cotton"
+      },
+      {
+        "label": "Includes",
+        "value": "Shirt, bottom, jersey"
+      },
+      {
+        "label": "Sizes",
+        "value": "Age 5–13"
+      },
+      {
+        "label": "Care",
+        "value": "Machine wash 40°C"
+      }
+    ],
+    "variants": [
+      {
+        "id": "p012v1",
+        "label": "Age 5–7",
+        "sku": "UNI-PRI-57",
+        "price": 238
+      },
+      {
+        "id": "p012v2",
+        "label": "Age 8–10",
+        "sku": "UNI-PRI-810",
+        "price": 258
+      },
+      {
+        "id": "p012v3",
+        "label": "Age 11–13",
+        "sku": "UNI-PRI-1113",
+        "price": 277
+      }
+    ],
+    "price": 238,
+    "status": "ACTIVE",
+    "rating": 4.4,
+    "review_count": 218,
+    "featured": true,
+    "created_at": "2026-06-26T08:18:00.000Z",
+    "brand_id": "b006",
+    "product_type": "PHYSICAL",
+    "country_of_origin": "ZA",
+    "compare_at_price": 263,
+    "promotion": {
+      "discount_pct": 10,
+      "ends_at": "2026-08-25T15:00:00.000Z",
+      "stock_allocated": 50,
+      "stock_sold": 10
+    }
+  }
+]

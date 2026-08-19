@@ -1,0 +1,403 @@
+[
+  {
+    "id": "e001",
+    "order_id": "o001",
+    "supplier_order_id": "sup001",
+    "supplier_id": "s001",
+    "amount": 819,
+    "status": "RELEASED",
+    "gateway": "DPO_PAY",
+    "held_at": "2026-07-23T07:39:00.000Z",
+    "released_at": "2026-07-27T13:31:00.000Z",
+    "refunded_at": null,
+    "hold_window_days": 7,
+    "history": [
+      {
+        "from": null,
+        "to": "HELD",
+        "at": "2026-07-23T07:39:00.000Z",
+        "actor": "System",
+        "note": "Payment confirmed — funds held."
+      },
+      {
+        "from": "HELD",
+        "to": "RELEASED",
+        "at": "2026-07-27T13:31:00.000Z",
+        "actor": "Keabetswe Molapo",
+        "note": "Delivery confirmed by customer."
+      }
+    ]
+  },
+  {
+    "id": "e002",
+    "order_id": "o002",
+    "supplier_order_id": "sup002",
+    "supplier_id": "s004",
+    "amount": 134,
+    "status": "RELEASED",
+    "gateway": "ORANGE_MONEY",
+    "held_at": "2026-07-26T08:48:00.000Z",
+    "released_at": "2026-07-30T13:40:00.000Z",
+    "refunded_at": null,
+    "hold_window_days": 7,
+    "history": [
+      {
+        "from": null,
+        "to": "HELD",
+        "at": "2026-07-26T08:48:00.000Z",
+        "actor": "System",
+        "note": "Payment confirmed — funds held."
+      },
+      {
+        "from": "HELD",
+        "to": "RELEASED",
+        "at": "2026-07-30T13:40:00.000Z",
+        "actor": "Keabetswe Molapo",
+        "note": "Delivery confirmed by customer."
+      }
+    ]
+  },
+  {
+    "id": "e003",
+    "order_id": "o003",
+    "supplier_order_id": "sup003",
+    "supplier_id": "s003",
+    "amount": 1120,
+    "status": "RELEASED",
+    "gateway": "PAYGATE",
+    "held_at": "2026-07-31T09:23:00.000Z",
+    "released_at": "2026-08-04T13:15:00.000Z",
+    "refunded_at": null,
+    "hold_window_days": 7,
+    "history": [
+      {
+        "from": null,
+        "to": "HELD",
+        "at": "2026-07-31T09:23:00.000Z",
+        "actor": "System",
+        "note": "Payment confirmed — funds held."
+      },
+      {
+        "from": "HELD",
+        "to": "RELEASED",
+        "at": "2026-08-04T13:15:00.000Z",
+        "actor": "Keabetswe Molapo",
+        "note": "Delivery confirmed by customer."
+      }
+    ]
+  },
+  {
+    "id": "e004",
+    "order_id": "o004",
+    "supplier_order_id": "sup004",
+    "supplier_id": "s005",
+    "amount": 1166,
+    "status": "RELEASED",
+    "gateway": "DPO_PAY",
+    "held_at": "2026-08-04T10:15:00.000Z",
+    "released_at": "2026-08-08T13:07:00.000Z",
+    "refunded_at": null,
+    "hold_window_days": 7,
+    "history": [
+      {
+        "from": null,
+        "to": "HELD",
+        "at": "2026-08-04T10:15:00.000Z",
+        "actor": "System",
+        "note": "Payment confirmed — funds held."
+      },
+      {
+        "from": "HELD",
+        "to": "RELEASED",
+        "at": "2026-08-08T13:07:00.000Z",
+        "actor": "Keabetswe Molapo",
+        "note": "Delivery confirmed by customer."
+      }
+    ]
+  },
+  {
+    "id": "e005",
+    "order_id": "o005",
+    "supplier_order_id": "sup005",
+    "supplier_id": "s001",
+    "amount": 605,
+    "status": "HELD",
+    "gateway": "ORANGE_MONEY",
+    "held_at": "2026-08-13T11:42:00.000Z",
+    "released_at": null,
+    "refunded_at": null,
+    "hold_window_days": 7,
+    "history": [
+      {
+        "from": null,
+        "to": "HELD",
+        "at": "2026-08-13T11:42:00.000Z",
+        "actor": "System",
+        "note": "Payment confirmed — funds held."
+      }
+    ]
+  },
+  {
+    "id": "e006",
+    "order_id": "o006",
+    "supplier_order_id": "sup006",
+    "supplier_id": "s004",
+    "amount": 4272,
+    "status": "HELD",
+    "gateway": "DPO_PAY",
+    "held_at": "2026-08-14T12:25:00.000Z",
+    "released_at": null,
+    "refunded_at": null,
+    "hold_window_days": 7,
+    "history": [
+      {
+        "from": null,
+        "to": "HELD",
+        "at": "2026-08-14T12:25:00.000Z",
+        "actor": "System",
+        "note": "Payment confirmed — funds held."
+      }
+    ]
+  },
+  {
+    "id": "e007",
+    "order_id": "o007",
+    "supplier_order_id": "sup007",
+    "supplier_id": "s002",
+    "amount": 1525,
+    "status": "HELD",
+    "gateway": "PAYGATE",
+    "held_at": "2026-08-15T13:08:00.000Z",
+    "released_at": null,
+    "refunded_at": null,
+    "hold_window_days": 7,
+    "history": [
+      {
+        "from": null,
+        "to": "HELD",
+        "at": "2026-08-15T13:08:00.000Z",
+        "actor": "System",
+        "note": "Payment confirmed — funds held."
+      }
+    ]
+  },
+  {
+    "id": "e008",
+    "order_id": "o008",
+    "supplier_order_id": "sup008",
+    "supplier_id": "s001",
+    "amount": 616,
+    "status": "HELD",
+    "gateway": "DPO_PAY",
+    "held_at": "2026-08-16T14:51:00.000Z",
+    "released_at": null,
+    "refunded_at": null,
+    "hold_window_days": 7,
+    "history": [
+      {
+        "from": null,
+        "to": "HELD",
+        "at": "2026-08-16T14:51:00.000Z",
+        "actor": "System",
+        "note": "Payment confirmed — funds held."
+      }
+    ]
+  },
+  {
+    "id": "e009",
+    "order_id": "o009",
+    "supplier_order_id": "sup009",
+    "supplier_id": "s005",
+    "amount": 1364,
+    "status": "HELD",
+    "gateway": "ORANGE_MONEY",
+    "held_at": "2026-08-17T07:34:00.000Z",
+    "released_at": null,
+    "refunded_at": null,
+    "hold_window_days": 7,
+    "history": [
+      {
+        "from": null,
+        "to": "HELD",
+        "at": "2026-08-17T07:34:00.000Z",
+        "actor": "System",
+        "note": "Payment confirmed — funds held."
+      }
+    ]
+  },
+  {
+    "id": "e010",
+    "order_id": "o010",
+    "supplier_order_id": "sup010",
+    "supplier_id": "s005",
+    "amount": 924,
+    "status": "HELD",
+    "gateway": "PAYGATE",
+    "held_at": "2026-08-17T08:34:00.000Z",
+    "released_at": null,
+    "refunded_at": null,
+    "hold_window_days": 7,
+    "history": [
+      {
+        "from": null,
+        "to": "HELD",
+        "at": "2026-08-17T08:34:00.000Z",
+        "actor": "System",
+        "note": "Payment confirmed — funds held."
+      }
+    ]
+  },
+  {
+    "id": "e011",
+    "order_id": "o011",
+    "supplier_order_id": "sup011",
+    "supplier_id": "s003",
+    "amount": 644,
+    "status": "HELD",
+    "gateway": "DPO_PAY",
+    "held_at": "2026-08-18T09:17:00.000Z",
+    "released_at": null,
+    "refunded_at": null,
+    "hold_window_days": 7,
+    "history": [
+      {
+        "from": null,
+        "to": "HELD",
+        "at": "2026-08-18T09:17:00.000Z",
+        "actor": "System",
+        "note": "Payment confirmed — funds held."
+      }
+    ]
+  },
+  {
+    "id": "e012",
+    "order_id": "o012",
+    "supplier_order_id": "sup012",
+    "supplier_id": "s005",
+    "amount": 275,
+    "status": "HELD",
+    "gateway": "ORANGE_MONEY",
+    "held_at": "2026-08-19T10:00:00.000Z",
+    "released_at": null,
+    "refunded_at": null,
+    "hold_window_days": 7,
+    "history": [
+      {
+        "from": null,
+        "to": "HELD",
+        "at": "2026-08-19T10:00:00.000Z",
+        "actor": "System",
+        "note": "Payment confirmed — funds held."
+      }
+    ]
+  },
+  {
+    "id": "e013",
+    "order_id": "o012",
+    "supplier_order_id": "sup013",
+    "supplier_id": "s001",
+    "amount": 364,
+    "status": "HELD",
+    "gateway": "ORANGE_MONEY",
+    "held_at": "2026-08-19T10:00:00.000Z",
+    "released_at": null,
+    "refunded_at": null,
+    "hold_window_days": 7,
+    "history": [
+      {
+        "from": null,
+        "to": "HELD",
+        "at": "2026-08-19T10:00:00.000Z",
+        "actor": "System",
+        "note": "Payment confirmed — funds held."
+      }
+    ]
+  },
+  {
+    "id": "e014",
+    "order_id": "o013",
+    "supplier_order_id": "sup014",
+    "supplier_id": "s003",
+    "amount": 1288,
+    "status": "DISPUTED",
+    "gateway": "PAYGATE",
+    "held_at": "2026-08-07T11:24:00.000Z",
+    "released_at": null,
+    "refunded_at": null,
+    "hold_window_days": 7,
+    "history": [
+      {
+        "from": null,
+        "to": "HELD",
+        "at": "2026-08-07T11:24:00.000Z",
+        "actor": "System",
+        "note": "Payment confirmed — funds held."
+      },
+      {
+        "from": "HELD",
+        "to": "DISPUTED",
+        "at": "2026-08-10T09:33:00.000Z",
+        "actor": "Thabo Modise",
+        "note": "Customer raised a dispute."
+      }
+    ]
+  },
+  {
+    "id": "e015",
+    "order_id": "o014",
+    "supplier_order_id": "sup015",
+    "supplier_id": "s004",
+    "amount": 2238,
+    "status": "DISPUTED",
+    "gateway": "DPO_PAY",
+    "held_at": "2026-08-10T12:33:00.000Z",
+    "released_at": null,
+    "refunded_at": null,
+    "hold_window_days": 7,
+    "history": [
+      {
+        "from": null,
+        "to": "HELD",
+        "at": "2026-08-10T12:33:00.000Z",
+        "actor": "System",
+        "note": "Payment confirmed — funds held."
+      },
+      {
+        "from": "HELD",
+        "to": "DISPUTED",
+        "at": "2026-08-13T09:42:00.000Z",
+        "actor": "Kefilwe Dithebe",
+        "note": "Customer raised a dispute."
+      }
+    ]
+  },
+  {
+    "id": "e016",
+    "order_id": "o015",
+    "supplier_order_id": "sup016",
+    "supplier_id": "s003",
+    "amount": 476,
+    "status": "REFUNDED",
+    "gateway": "ORANGE_MONEY",
+    "held_at": "2026-07-29T13:57:00.000Z",
+    "released_at": null,
+    "refunded_at": "2026-08-02T13:49:00.000Z",
+    "hold_window_days": 7,
+    "history": [
+      {
+        "from": null,
+        "to": "HELD",
+        "at": "2026-07-29T13:57:00.000Z",
+        "actor": "System",
+        "note": "Payment confirmed — funds held."
+      },
+      {
+        "from": "HELD",
+        "to": "REFUNDED",
+        "at": "2026-08-02T13:49:00.000Z",
+        "actor": "Keabetswe Molapo",
+        "note": "Order cancelled before dispatch."
+      }
+    ]
+  }
+]

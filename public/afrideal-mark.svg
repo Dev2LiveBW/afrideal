@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 112" width="100" height="112">
+  <title>AfriDeal</title>
+  <path
+    d="M18 23 C30 15 46 11 58 13 C69 15 77 17 79 21 C81 27 82 31 84 35 C88 37 95 41 97 45 C98 48 93 51 88 51 C86 57 82 63 78 71 C74 81 68 93 60 101 C56 106 50 107 47 102 C44 96 43 89 42 81 C40 75 36 71 30 69 C22 67 14 63 10 55 C6 48 6 41 8 35 C10 29 13 25 18 23 Z"
+    fill="none"
+    stroke="#0B4A2E"
+    stroke-width="4"
+    stroke-linejoin="round"
+    stroke-linecap="round"
+  />
+  <path
+    d="M40 24 L61 90 H49.8 L46.2 78 H33.8 L30.2 90 H19 Z M36 70 H44 L40 49 Z"
+    fill="#0B4A2E"
+    fill-rule="evenodd"
+  />
+</svg>

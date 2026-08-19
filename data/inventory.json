@@ -1,0 +1,570 @@
+[
+  {
+    "id": "inv0001",
+    "product_id": "p001",
+    "variant_id": "p001v1",
+    "supplier_id": "s001",
+    "on_hand": 113,
+    "reserved": 9
+  },
+  {
+    "id": "inv0002",
+    "product_id": "p001",
+    "variant_id": "p001v1",
+    "supplier_id": "s002",
+    "on_hand": 60,
+    "reserved": 5
+  },
+  {
+    "id": "inv0003",
+    "product_id": "p001",
+    "variant_id": "p001v1",
+    "supplier_id": "s005",
+    "on_hand": 0,
+    "reserved": 0
+  },
+  {
+    "id": "inv0004",
+    "product_id": "p001",
+    "variant_id": "p001v2",
+    "supplier_id": "s001",
+    "on_hand": 113,
+    "reserved": 9
+  },
+  {
+    "id": "inv0005",
+    "product_id": "p001",
+    "variant_id": "p001v2",
+    "supplier_id": "s002",
+    "on_hand": 60,
+    "reserved": 5
+  },
+  {
+    "id": "inv0006",
+    "product_id": "p001",
+    "variant_id": "p001v2",
+    "supplier_id": "s005",
+    "on_hand": 0,
+    "reserved": 0
+  },
+  {
+    "id": "inv0007",
+    "product_id": "p001",
+    "variant_id": "p001v3",
+    "supplier_id": "s001",
+    "on_hand": 113,
+    "reserved": 9
+  },
+  {
+    "id": "inv0008",
+    "product_id": "p001",
+    "variant_id": "p001v3",
+    "supplier_id": "s002",
+    "on_hand": 60,
+    "reserved": 5
+  },
+  {
+    "id": "inv0009",
+    "product_id": "p001",
+    "variant_id": "p001v3",
+    "supplier_id": "s005",
+    "on_hand": 0,
+    "reserved": 0
+  },
+  {
+    "id": "inv0010",
+    "product_id": "p002",
+    "variant_id": "p002v1",
+    "supplier_id": "s001",
+    "on_hand": 155,
+    "reserved": 12
+  },
+  {
+    "id": "inv0011",
+    "product_id": "p002",
+    "variant_id": "p002v1",
+    "supplier_id": "s002",
+    "on_hand": 103,
+    "reserved": 8
+  },
+  {
+    "id": "inv0012",
+    "product_id": "p002",
+    "variant_id": "p002v2",
+    "supplier_id": "s001",
+    "on_hand": 155,
+    "reserved": 12
+  },
+  {
+    "id": "inv0013",
+    "product_id": "p002",
+    "variant_id": "p002v2",
+    "supplier_id": "s002",
+    "on_hand": 103,
+    "reserved": 8
+  },
+  {
+    "id": "inv0014",
+    "product_id": "p002",
+    "variant_id": "p002v3",
+    "supplier_id": "s001",
+    "on_hand": 155,
+    "reserved": 12
+  },
+  {
+    "id": "inv0015",
+    "product_id": "p002",
+    "variant_id": "p002v3",
+    "supplier_id": "s002",
+    "on_hand": 103,
+    "reserved": 8
+  },
+  {
+    "id": "inv0016",
+    "product_id": "p002",
+    "variant_id": "p002v4",
+    "supplier_id": "s001",
+    "on_hand": 155,
+    "reserved": 12
+  },
+  {
+    "id": "inv0017",
+    "product_id": "p002",
+    "variant_id": "p002v4",
+    "supplier_id": "s002",
+    "on_hand": 103,
+    "reserved": 8
+  },
+  {
+    "id": "inv0018",
+    "product_id": "p003",
+    "variant_id": "p003v1",
+    "supplier_id": "s002",
+    "on_hand": 145,
+    "reserved": 12
+  },
+  {
+    "id": "inv0019",
+    "product_id": "p003",
+    "variant_id": "p003v1",
+    "supplier_id": "s001",
+    "on_hand": 48,
+    "reserved": 4
+  },
+  {
+    "id": "inv0020",
+    "product_id": "p003",
+    "variant_id": "p003v1",
+    "supplier_id": "s005",
+    "on_hand": 70,
+    "reserved": 6
+  },
+  {
+    "id": "inv0021",
+    "product_id": "p003",
+    "variant_id": "p003v2",
+    "supplier_id": "s002",
+    "on_hand": 145,
+    "reserved": 12
+  },
+  {
+    "id": "inv0022",
+    "product_id": "p003",
+    "variant_id": "p003v2",
+    "supplier_id": "s001",
+    "on_hand": 48,
+    "reserved": 4
+  },
+  {
+    "id": "inv0023",
+    "product_id": "p003",
+    "variant_id": "p003v2",
+    "supplier_id": "s005",
+    "on_hand": 70,
+    "reserved": 6
+  },
+  {
+    "id": "inv0024",
+    "product_id": "p004",
+    "variant_id": "p004v1",
+    "supplier_id": "s003",
+    "on_hand": 48,
+    "reserved": 4
+  },
+  {
+    "id": "inv0025",
+    "product_id": "p004",
+    "variant_id": "p004v1",
+    "supplier_id": "s005",
+    "on_hand": 20,
+    "reserved": 2
+  },
+  {
+    "id": "inv0026",
+    "product_id": "p004",
+    "variant_id": "p004v2",
+    "supplier_id": "s003",
+    "on_hand": 48,
+    "reserved": 4
+  },
+  {
+    "id": "inv0027",
+    "product_id": "p004",
+    "variant_id": "p004v2",
+    "supplier_id": "s005",
+    "on_hand": 20,
+    "reserved": 2
+  },
+  {
+    "id": "inv0028",
+    "product_id": "p004",
+    "variant_id": "p004v3",
+    "supplier_id": "s003",
+    "on_hand": 48,
+    "reserved": 4
+  },
+  {
+    "id": "inv0029",
+    "product_id": "p004",
+    "variant_id": "p004v3",
+    "supplier_id": "s005",
+    "on_hand": 20,
+    "reserved": 2
+  },
+  {
+    "id": "inv0030",
+    "product_id": "p005",
+    "variant_id": "p005v1",
+    "supplier_id": "s003",
+    "on_hand": 44,
+    "reserved": 4
+  },
+  {
+    "id": "inv0031",
+    "product_id": "p005",
+    "variant_id": "p005v1",
+    "supplier_id": "s005",
+    "on_hand": 105,
+    "reserved": 8
+  },
+  {
+    "id": "inv0032",
+    "product_id": "p005",
+    "variant_id": "p005v1",
+    "supplier_id": "s002",
+    "on_hand": 0,
+    "reserved": 0
+  },
+  {
+    "id": "inv0033",
+    "product_id": "p005",
+    "variant_id": "p005v2",
+    "supplier_id": "s003",
+    "on_hand": 44,
+    "reserved": 4
+  },
+  {
+    "id": "inv0034",
+    "product_id": "p005",
+    "variant_id": "p005v2",
+    "supplier_id": "s005",
+    "on_hand": 105,
+    "reserved": 8
+  },
+  {
+    "id": "inv0035",
+    "product_id": "p005",
+    "variant_id": "p005v2",
+    "supplier_id": "s002",
+    "on_hand": 0,
+    "reserved": 0
+  },
+  {
+    "id": "inv0036",
+    "product_id": "p006",
+    "variant_id": "p006v1",
+    "supplier_id": "s004",
+    "on_hand": 1600,
+    "reserved": 128
+  },
+  {
+    "id": "inv0037",
+    "product_id": "p006",
+    "variant_id": "p006v1",
+    "supplier_id": "s005",
+    "on_hand": 400,
+    "reserved": 32
+  },
+  {
+    "id": "inv0038",
+    "product_id": "p006",
+    "variant_id": "p006v2",
+    "supplier_id": "s004",
+    "on_hand": 1600,
+    "reserved": 128
+  },
+  {
+    "id": "inv0039",
+    "product_id": "p006",
+    "variant_id": "p006v2",
+    "supplier_id": "s005",
+    "on_hand": 400,
+    "reserved": 32
+  },
+  {
+    "id": "inv0040",
+    "product_id": "p006",
+    "variant_id": "p006v3",
+    "supplier_id": "s004",
+    "on_hand": 1600,
+    "reserved": 128
+  },
+  {
+    "id": "inv0041",
+    "product_id": "p006",
+    "variant_id": "p006v3",
+    "supplier_id": "s005",
+    "on_hand": 400,
+    "reserved": 32
+  },
+  {
+    "id": "inv0042",
+    "product_id": "p007",
+    "variant_id": "p007v1",
+    "supplier_id": "s004",
+    "on_hand": 320,
+    "reserved": 26
+  },
+  {
+    "id": "inv0043",
+    "product_id": "p007",
+    "variant_id": "p007v1",
+    "supplier_id": "s005",
+    "on_hand": 113,
+    "reserved": 9
+  },
+  {
+    "id": "inv0044",
+    "product_id": "p007",
+    "variant_id": "p007v2",
+    "supplier_id": "s004",
+    "on_hand": 320,
+    "reserved": 26
+  },
+  {
+    "id": "inv0045",
+    "product_id": "p007",
+    "variant_id": "p007v2",
+    "supplier_id": "s005",
+    "on_hand": 113,
+    "reserved": 9
+  },
+  {
+    "id": "inv0046",
+    "product_id": "p007",
+    "variant_id": "p007v3",
+    "supplier_id": "s004",
+    "on_hand": 320,
+    "reserved": 26
+  },
+  {
+    "id": "inv0047",
+    "product_id": "p007",
+    "variant_id": "p007v3",
+    "supplier_id": "s005",
+    "on_hand": 113,
+    "reserved": 9
+  },
+  {
+    "id": "inv0048",
+    "product_id": "p008",
+    "variant_id": "p008v1",
+    "supplier_id": "s005",
+    "on_hand": 700,
+    "reserved": 56
+  },
+  {
+    "id": "inv0049",
+    "product_id": "p008",
+    "variant_id": "p008v1",
+    "supplier_id": "s006",
+    "on_hand": 400,
+    "reserved": 32
+  },
+  {
+    "id": "inv0050",
+    "product_id": "p008",
+    "variant_id": "p008v2",
+    "supplier_id": "s005",
+    "on_hand": 700,
+    "reserved": 56
+  },
+  {
+    "id": "inv0051",
+    "product_id": "p008",
+    "variant_id": "p008v2",
+    "supplier_id": "s006",
+    "on_hand": 400,
+    "reserved": 32
+  },
+  {
+    "id": "inv0052",
+    "product_id": "p009",
+    "variant_id": "p009v1",
+    "supplier_id": "s006",
+    "on_hand": 110,
+    "reserved": 9
+  },
+  {
+    "id": "inv0053",
+    "product_id": "p009",
+    "variant_id": "p009v1",
+    "supplier_id": "s005",
+    "on_hand": 45,
+    "reserved": 4
+  },
+  {
+    "id": "inv0054",
+    "product_id": "p009",
+    "variant_id": "p009v2",
+    "supplier_id": "s006",
+    "on_hand": 110,
+    "reserved": 9
+  },
+  {
+    "id": "inv0055",
+    "product_id": "p009",
+    "variant_id": "p009v2",
+    "supplier_id": "s005",
+    "on_hand": 45,
+    "reserved": 4
+  },
+  {
+    "id": "inv0056",
+    "product_id": "p010",
+    "variant_id": "p010v1",
+    "supplier_id": "s007",
+    "on_hand": 200,
+    "reserved": 16
+  },
+  {
+    "id": "inv0057",
+    "product_id": "p010",
+    "variant_id": "p010v1",
+    "supplier_id": "s005",
+    "on_hand": 130,
+    "reserved": 10
+  },
+  {
+    "id": "inv0058",
+    "product_id": "p010",
+    "variant_id": "p010v2",
+    "supplier_id": "s007",
+    "on_hand": 200,
+    "reserved": 16
+  },
+  {
+    "id": "inv0059",
+    "product_id": "p010",
+    "variant_id": "p010v2",
+    "supplier_id": "s005",
+    "on_hand": 130,
+    "reserved": 10
+  },
+  {
+    "id": "inv0060",
+    "product_id": "p011",
+    "variant_id": "p011v1",
+    "supplier_id": "s002",
+    "on_hand": 80,
+    "reserved": 6
+  },
+  {
+    "id": "inv0061",
+    "product_id": "p011",
+    "variant_id": "p011v1",
+    "supplier_id": "s005",
+    "on_hand": 43,
+    "reserved": 3
+  },
+  {
+    "id": "inv0062",
+    "product_id": "p011",
+    "variant_id": "p011v2",
+    "supplier_id": "s002",
+    "on_hand": 80,
+    "reserved": 6
+  },
+  {
+    "id": "inv0063",
+    "product_id": "p011",
+    "variant_id": "p011v2",
+    "supplier_id": "s005",
+    "on_hand": 43,
+    "reserved": 3
+  },
+  {
+    "id": "inv0064",
+    "product_id": "p011",
+    "variant_id": "p011v3",
+    "supplier_id": "s002",
+    "on_hand": 80,
+    "reserved": 6
+  },
+  {
+    "id": "inv0065",
+    "product_id": "p011",
+    "variant_id": "p011v3",
+    "supplier_id": "s005",
+    "on_hand": 43,
+    "reserved": 3
+  },
+  {
+    "id": "inv0066",
+    "product_id": "p012",
+    "variant_id": "p012v1",
+    "supplier_id": "s002",
+    "on_hand": 127,
+    "reserved": 10
+  },
+  {
+    "id": "inv0067",
+    "product_id": "p012",
+    "variant_id": "p012v1",
+    "supplier_id": "s005",
+    "on_hand": 30,
+    "reserved": 2
+  },
+  {
+    "id": "inv0068",
+    "product_id": "p012",
+    "variant_id": "p012v2",
+    "supplier_id": "s002",
+    "on_hand": 127,
+    "reserved": 10
+  },
+  {
+    "id": "inv0069",
+    "product_id": "p012",
+    "variant_id": "p012v2",
+    "supplier_id": "s005",
+    "on_hand": 30,
+    "reserved": 2
+  },
+  {
+    "id": "inv0070",
+    "product_id": "p012",
+    "variant_id": "p012v3",
+    "supplier_id": "s002",
+    "on_hand": 127,
+    "reserved": 10
+  },
+  {
+    "id": "inv0071",
+    "product_id": "p012",
+    "variant_id": "p012v3",
+    "supplier_id": "s005",
+    "on_hand": 30,
+    "reserved": 2
+  }
+]

@@ -1,0 +1,79 @@
+[
+  {
+    "id": "u001",
+    "name": "AfriDeal Admin",
+    "email": "admin@afrideal.co.bw",
+    "password": "Admin@2026",
+    "role": "SUPER_ADMIN",
+    "avatar": "AA",
+    "status": "ACTIVE"
+  },
+  {
+    "id": "u002",
+    "name": "Keabetswe Molapo",
+    "email": "ops@afrideal.co.bw",
+    "password": "Ops@2026",
+    "role": "OPERATIONS_ADMIN",
+    "avatar": "KM",
+    "status": "ACTIVE"
+  },
+  {
+    "id": "u003",
+    "name": "Naledi Beauty Supplies",
+    "email": "supplier@naledi.co.bw",
+    "password": "Supplier@2026",
+    "role": "SUPPLIER_OWNER",
+    "supplier_id": "s001",
+    "avatar": "NB",
+    "status": "ACTIVE"
+  },
+  {
+    "id": "u004",
+    "name": "GlowUp Distributors",
+    "email": "supplier@glowup.co.za",
+    "password": "Supplier@2026",
+    "role": "SUPPLIER_OWNER",
+    "supplier_id": "s002",
+    "avatar": "GU",
+    "status": "ACTIVE"
+  },
+  {
+    "id": "u005",
+    "name": "Kagiso Sithole",
+    "email": "runner@afrideal.co.bw",
+    "password": "Runner@2026",
+    "role": "RUNNER",
+    "runner_id": "r001",
+    "avatar": "KS",
+    "status": "ACTIVE"
+  },
+  {
+    "id": "u006",
+    "name": "Thabo Modise",
+    "email": "thabo@gmail.com",
+    "password": "Customer@2026",
+    "role": "CUSTOMER",
+    "avatar": "TM",
+    "status": "ACTIVE",
+    "customer_type": "RETAIL"
+  },
+  {
+    "id": "u007",
+    "name": "Kefilwe Dithebe",
+    "email": "kefilwe@gmail.com",
+    "password": "Customer@2026",
+    "role": "CUSTOMER",
+    "avatar": "KD",
+    "status": "ACTIVE",
+    "customer_type": "BUSINESS"
+  },
+  {
+    "id": "u008",
+    "name": "Finance Admin",
+    "email": "finance@afrideal.co.bw",
+    "password": "Finance@2026",
+    "role": "FINANCE_ADMIN",
+    "avatar": "FA",
+    "status": "ACTIVE"
+  }
+]
