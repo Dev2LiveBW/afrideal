@@ -1,5 +1,5 @@
 import Link from 'next/link';
-import { ArrowRight, Lock } from 'lucide-react';
+import { ArrowRight, FileText } from 'lucide-react';
 
 import { MoneyText } from '@/components/brand/MoneyText';
 import { cn } from '@/lib/utils';
@@ -14,11 +14,10 @@ import type { TierDoor } from '@/lib/tier-doors';
  * further you go, the less each unit costs. A row of equal cards would state
  * the tiers; the stagger demonstrates them.
  *
- * A rung the visitor cannot yet buy at keeps its figure and its geometry and
- * changes only in temperature: the money goes muted, and the action becomes the
- * condition for reaching it. Blanking the price would have made a three-rung
- * catalogue look like a one-price one, which is the opposite of what these
- * pages are here to say.
+ * Two rungs carry a published figure. The third does not — past a hundred
+ * units the price depends on the volume, the delivery point and the lead time,
+ * so it is quoted. That rung keeps the same geometry and swaps the number for
+ * the action that gets one, which is the honest version of the same offer.
  *
  * Two tones, one component. `dark` is the hero instrument on ink; `light` is
  * the same ladder restated on the product page, where it sits inside a column
@@ -116,15 +115,15 @@ function Rung({
   active?: boolean;
 }) {
   const dark = tone === 'dark';
-  const priced = !door.locked && door.unitPrice !== null;
-  const destination = priced ? door.href : (door.unlock?.href ?? door.href);
+  const priced = door.unitPrice !== null;
+  const destination = door.byQuotation ? '/browse?tier=WHOLESALE' : door.href;
 
   /*
-   * A rung that acts is a button; a rung that navigates is a link. A locked
-   * rung always navigates, because the thing it offers is the account, not a
-   * quantity this visitor could pick.
+   * A rung that acts is a button; a rung that navigates is a link. The
+   * quotation rung always navigates, because what it offers is a conversation,
+   * not a quantity this visitor can pick on the spot.
    */
-  const acts = Boolean(onSelect) && priced;
+  const acts = Boolean(onSelect) && priced && !door.byQuotation;
 
   const behaviour: Record<string, unknown> = acts
     ? { type: 'button', onClick: () => onSelect!(door), 'aria-pressed': active }
@@ -141,11 +140,11 @@ function Rung({
        * reader it navigates to a catalogue it no longer opens.
        */
       aria-label={
-        acts
-          ? `Price ${productName} at ${door.range} units — ${door.label.toLowerCase()}`
-          : priced
-            ? `Shop ${door.label.toLowerCase()} — ${door.range} units of ${productName}`
-            : `${door.label} pricing for ${productName}, ${door.range} units — requires ${door.unlock?.label ?? 'an account'}`
+        door.byQuotation
+          ? `Request a quotation for ${door.range} units of ${productName}`
+          : acts
+            ? `Price ${productName} at ${door.range} units — ${door.label.toLowerCase()}`
+            : `Shop ${door.label.toLowerCase()} — ${door.range} units of ${productName}`
       }
       className={cn(
         'group relative flex items-center gap-4 rounded-lg text-left',
@@ -159,7 +158,7 @@ function Rung({
               'gap-4 sm:gap-5',
               scale.pad,
               'hover:-translate-y-0.5 focus-visible:-translate-y-0.5',
-              // Depth, not pallor, separates a reachable rung from a locked one.
+              // Depth, not pallor, separates a listed rung from a quoted one.
               priced
                 ? 'bg-white/[0.07] shadow-[inset_0_1px_0_rgba(255,255,255,0.10)] hover:bg-white/[0.11]'
                 : 'bg-white/[0.045] shadow-[inset_0_1px_0_rgba(255,255,255,0.06)] hover:bg-white/[0.075]',
@@ -212,35 +211,46 @@ function Rung({
             size={dark ? scale.money : 'sm'}
             tone={dark ? 'white' : 'ink'}
             bare={!dark}
-            className={door.locked ? (dark ? 'text-white/70' : 'text-body') : undefined}
           />
 
-          {door.locked ? (
-            <p
-              className={cn(
-                'mt-0.5 flex items-center justify-end gap-1.5 text-[11px] font-medium',
-                dark ? 'text-gold-light' : 'text-gold-dark',
-              )}
-            >
-              <Lock size={10} strokeWidth={2} aria-hidden="true" />
-              {door.unlock?.label}
-            </p>
-          ) : (
-            <p
-              className={cn(
-                'mt-0.5 font-mono text-[11px] tabular-nums',
-                door.savingPerUnit > 0
-                  ? dark
-                    ? 'text-[#8FD69F]'
-                    : 'text-forest'
-                  : dark
-                    ? 'text-white/50'
-                    : 'text-muted',
-              )}
-            >
-              {door.savingPerUnit > 0 ? `−${door.savingPct.toFixed(0)}% a unit` : 'list price'}
-            </p>
-          )}
+          <p
+            className={cn(
+              'mt-0.5 font-mono text-[11px] tabular-nums',
+              door.savingPerUnit > 0
+                ? dark
+                  ? 'text-[#8FD69F]'
+                  : 'text-forest'
+                : dark
+                  ? 'text-white/50'
+                  : 'text-muted',
+            )}
+          >
+            {door.savingPerUnit > 0 ? `−${door.savingPct.toFixed(0)}% a unit` : 'list price'}
+          </p>
+        </div>
+      )}
+
+      {/*
+        The quoted rung. No figure, because there is no published figure to
+        show — putting an indicative one here would be the exact thing the
+        published ladder exists to avoid.
+      */}
+      {door.byQuotation && (
+        <div className="shrink-0 text-right">
+          <p
+            className={cn(
+              'flex items-center justify-end gap-1.5 font-display font-semibold tracking-[-0.01em]',
+              dark ? 'text-[15px] text-white' : 'text-[13.5px] text-ink',
+            )}
+          >
+            <FileText size={dark ? 13 : 12} strokeWidth={1.75} aria-hidden="true" />
+            Request a quote
+          </p>
+          <p
+            className={cn('mt-0.5 text-[11px]', dark ? 'text-white/50' : 'text-muted')}
+          >
+            Priced on volume
+          </p>
         </div>
       )}
 

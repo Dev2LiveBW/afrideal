@@ -1,6 +1,6 @@
 import { StatGridSkeleton, TableSkeleton } from '@/app/(admin)/admin/_components/Skeletons';
 
-export default function EscrowLoading() {
+export default function PayablesLoading() {
   return (
     <div className="mx-auto max-w-console space-y-5 px-6 py-6">
       <div className="mb-2 space-y-2">

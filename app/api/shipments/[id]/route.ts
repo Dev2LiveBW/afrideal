@@ -77,7 +77,7 @@ export const PATCH = handled(async (request: Request, { params }: { params: { id
       await notify({
         userId: order.customer_id,
         title: 'Delivered',
-        body: `${order.reference} was delivered. Confirm receipt to release the escrow.`,
+        body: `${order.reference} was delivered. Confirm receipt to close the order.`,
         kind: 'ORDER',
       });
     }

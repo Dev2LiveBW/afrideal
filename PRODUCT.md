@@ -27,38 +27,62 @@ operations, finance and super-admin.
 
 ## Product Purpose
 
-An escrow-backed marketplace connecting verified suppliers in Botswana and South
-Africa with buyers who need the goods to actually arrive. Payment is held by
-AfriDeal until the buyer confirms delivery. Suppliers are verified before they
-can list, and an order routes to whichever verified supplier is most likely to
-deliver it, not to whichever is cheapest.
+A procurement marketplace connecting verified suppliers in Botswana and South
+Africa with buyers who need the goods to actually arrive.
+
+**AfriDeal is the merchant of record.** The customer buys from AfriDeal and pays
+AfriDeal through a licensed payment provider; AfriDeal buys the goods from a
+verified supplier and settles that invoice on its own terms. Nothing is held on
+another party's behalf. This is a deliberate commercial choice as much as a
+regulatory one — it keeps the platform out of scope for a Bank of Botswana
+escrow licence, and it means one invoice, one point of contact, and one party
+answerable when an order goes wrong.
+
+Suppliers are verified before they can list, and an order routes to whichever
+verified supplier is most likely to deliver it, not to whichever is cheapest.
+
+**There are two ways onto the platform, and the design has to carry both.** The
+marketplace answers "I know what I want and you list it". A runner sourcing
+request answers "I know what I want and nobody lists it": the buyer describes
+it, a verified runner goes and finds it, sends back the price and the condition,
+and buys it only once the buyer approves. The second path is what makes the
+catalogue's own limits survivable, so it is drawn as the marketplace's equal
+rather than as a footnote to it.
 
 Success is a buyer who understands, before they commit, exactly what they will
 pay at the quantity they need — and gets the goods.
 
 ## Positioning
 
-**The price ladder is the mechanism.** A product on AfriDeal does not have "a
-price"; it has a ladder of published bands, and which rung a buyer stands on is
-decided by how many units they take and what kind of account they hold. The
-ladder is published rather than negotiated, so a buyer can see the whole thing
-before committing and can decide to move up a rung.
+**The price ladder is the mechanism, and the comparison is the message.** A
+product on AfriDeal does not have "a price"; it has a ladder of published bands,
+and which rung a buyer stands on is decided by one thing they control — how many
+units they take.
+
+AfriDeal buys from the supplier and resells at a published markup:
+
+| Quantity | Tier | Price |
+|---|---|---|
+| 1–4 | Retail | supplier cost + 60% |
+| 5–99 | Bulk | supplier cost + 44% |
+| 100+ | Wholesale | by quotation |
+
+The ladder does not vary by account type. Everyone is shown and charged the same
+published figure for the same quantity, with no account required to see it. A
+price a buyer has to apply for is not a price advantage they can act on.
 
 This is what a neighbouring marketplace cannot truthfully copy: most show one
 retail price and hide wholesale behind a sales conversation. Confirmed, live in
-`data/customer-prices.json`, and computed by `lib/pricing-tiers.ts`.
+`data/customer-prices.json`, generated from `lib/pricing-model.ts` and resolved
+by `lib/pricing-tiers.ts`.
 
-Worked example, Shea Butter Deep Treatment (p001), RETAIL account:
+Worked example, HD Lace Frontal 13×4 (p014), supplier cost BWP 715:
 
 | Quantity | Tier | Unit price |
 |---|---|---|
-| 1–4 | Retail | BWP 182 |
-| 5–19 | Bulk | BWP 161 |
-| 20–99 | Bulk | BWP 157 |
-
-Business, Reseller and Institutional accounts stand on lower rungs of the same
-ladder (down to BWP 139 at reseller wholesale). Above the published ladder, a
-buyer asks for a quotation (RFQ) instead of being quoted automatically.
+| 1–4 | Retail | BWP 1,144.00 |
+| 5–99 | Bulk | BWP 1,030.00 |
+| 100+ | By quotation | RFQ |
 
 ## Operating Context
 
@@ -67,8 +91,12 @@ buyer asks for a quotation (RFQ) instead of being quoted automatically.
   cross-border fulfilment and its lead times are ordinary, not exceptional.
 - Buyers arrive on a wide spread of devices and connection quality; mobile is
   the common case, not the adaptation.
-- Categories in the live catalogue: Hair & Beauty, Electronics, Building
-  Materials, Food & Agriculture, Office Supplies, Clothing.
+- **Hair extensions and weaves are the business.** Bundles, frontals, closures,
+  wigs and braiding hair are what the platform actually sells, and the
+  catalogue, the navigation and the landing page are ordered accordingly.
+  Categories in the live catalogue, in that order: Hair Weaves & Extensions,
+  Beauty & Personal Care, Electronics, Clothing & Uniforms, Food & Agriculture,
+  Building Materials, Office Supplies.
 - The demo is driven live in front of a room, so every screen reads real data
   and every state-changing action writes back to disk.
 
@@ -76,11 +104,18 @@ buyer asks for a quotation (RFQ) instead of being quoted automatically.
 
 **Confirmed and live:**
 
-- Published tier ladder per product, resolved on (customer_type, quantity).
-- Escrow: funds held from checkout until the buyer confirms delivery, with
-  dispute handling.
+- Published tier ladder per product, resolved on quantity alone.
+- Supplier payables: AfriDeal's own trade-creditors ledger, settled after
+  delivery is confirmed, with claim handling that pauses settlement.
+- Buyer protection stated as a returns-and-refunds commitment by AfriDeal as
+  merchant, open for seven days after delivery.
 - Supplier verification, reliability scoring, and reliability-based routing.
 - RFQ / quotation flow for quantities above the published ladder.
+- Runner sourcing requests: a seven-state flow from REQUESTED through to
+  CONFIRMED, with the price set by the runner and approved by the buyer before
+  anything is bought. Live in `data/runner-requests.json`, governed by
+  `lib/runner-requests.ts`, and surfaced on the storefront, the runner portal
+  and the operations console.
 - Fulfilment comparison across the verified suppliers carrying a product: who
   has stock, how fast, how reliably.
 - Four portals over one JSON store: storefront, supplier, runner, admin.
@@ -101,6 +136,14 @@ buyer asks for a quotation (RFQ) instead of being quoted automatically.
 - Margin floors (§19) must hold; a tier band can never price below them.
 - Self-registration creates buyers only. Supplier and runner accounts are
   verified by staff before they can trade.
+- **A sourcing quote is the runner's figure, not the platform's.** Nothing may
+  display an estimated price on a request a runner has not yet priced, and a
+  buyer may not move their own request to QUOTED. The whole reason the flow is
+  worth trusting is that the number came from someone who looked at the goods.
+- **AfriDeal is not a payment provider, and the footer says so on every page.**
+  Payments are processed by licensed partners and the platform holds no funds on
+  anyone's behalf. That sentence is a legal position; it may be relocated but not
+  softened or removed.
 
 **Stack:** Next.js 14 App Router, TypeScript, Tailwind, framer-motion,
 next-auth, Zustand. JSON files under `data/` as the store. No database.
@@ -116,12 +159,14 @@ next-auth, Zustand. JSON files under `data/` as the store. No database.
 
 ## Evidence on Hand
 
-- 12 real products with photography fetched from Pexels into `public/products/`,
-  provenance per file in `CREDITS.json`.
+- 17 real products, 6 of them hair lines, with photography fetched from Pexels
+  into `public/products/`, provenance per file in `CREDITS.json`. The hair
+  photography is stock standing in for the client's own product shots and should
+  not ship as-is.
 - 5 verified suppliers, 8 seeded accounts, 15 orders across every status,
-  escrow records, disputes, settlements, runners and shipments.
+  supplier payables, disputes, settlements, runners and shipments.
 - Live tier bands for every product in `data/customer-prices.json`.
-- `npm run verify` (86 checks) and `npm run audit` (37 routes) both pass.
+- `npm run verify` (104 checks) and `npm run audit` (41 routes) both pass.
 
 **Must not be fabricated:** supplier counts, product counts, GMV, delivery
 times, testimonials, press, or ratings beyond what `data/` actually holds. The
@@ -134,14 +179,18 @@ support. Real numbers today are 12 products and 5 verified suppliers.
 1. **Show the ladder, not just the price.** A buyer should be able to see what
    the next rung costs before deciding how much to take. Hiding it turns a
    published advantage back into a sales conversation.
-2. **Quantity is the lever the buyer controls.** Design should make moving up a
-   rung feel available, not like a separate wholesale channel they must apply to.
+2. **Quantity is the lever the buyer controls.** It is the only thing that moves
+   the price, and moving up a rung must feel available rather than like a
+   separate wholesale channel to apply to.
 3. **Confidentiality is structural, not editorial.** Never imply per-supplier
    price comparison the platform does not offer.
 4. **Claims must be answerable from `data/`.** If a number cannot be computed
    from the store, it does not go on the page.
-5. **Escrow is the reason to trust the price.** The saving means nothing if the
-   goods never arrive; the two arguments belong together.
+5. **The platform is answerable, and says so as a merchant would.** The saving
+   means nothing if the goods never arrive, so buyer protection travels with the
+   price — but stated as what AfriDeal will do about a bad order, never as money
+   held on someone's behalf. Nothing on any surface may describe the platform as
+   holding, escrowing or releasing a customer's funds.
 
 ## Accessibility & Inclusion
 

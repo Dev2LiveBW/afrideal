@@ -11,11 +11,11 @@
     "requested_quantity": 240,
     "target_price": 300,
     "delivery_location": "Gaborone",
-    "required_delivery_date": "2026-09-09T15:00:00.000Z",
+    "required_delivery_date": "2026-09-10T15:00:00.000Z",
     "notes": "School intake order for a private group of three campuses. Delivery must land before the January term.",
     "status": "QUOTED",
-    "created_at": "2026-08-13T08:42:00.000Z",
-    "updated_at": "2026-08-14T12:25:00.000Z"
+    "created_at": "2026-08-14T08:42:00.000Z",
+    "updated_at": "2026-08-15T12:25:00.000Z"
   },
   {
     "id": "rfq002",
@@ -29,11 +29,11 @@
     "requested_quantity": 800,
     "target_price": null,
     "delivery_location": "Francistown",
-    "required_delivery_date": "2026-09-16T15:00:00.000Z",
+    "required_delivery_date": "2026-09-17T15:00:00.000Z",
     "notes": "Slab pour scheduled. Needs to be palletised and delivered to site, not to a depot.",
     "status": "SOURCING",
-    "created_at": "2026-08-16T08:51:00.000Z",
-    "updated_at": "2026-08-17T12:34:00.000Z"
+    "created_at": "2026-08-17T08:51:00.000Z",
+    "updated_at": "2026-08-18T12:34:00.000Z"
   },
   {
     "id": "rfq003",
@@ -47,11 +47,11 @@
     "requested_quantity": 150,
     "target_price": 60,
     "delivery_location": "Gaborone",
-    "required_delivery_date": "2026-09-23T15:00:00.000Z",
+    "required_delivery_date": "2026-09-24T15:00:00.000Z",
     "notes": "Opening a salon. Want a standing monthly order if the first one goes well.",
     "status": "SUBMITTED",
-    "created_at": "2026-08-18T08:17:00.000Z",
-    "updated_at": "2026-08-19T12:00:00.000Z"
+    "created_at": "2026-08-19T08:17:00.000Z",
+    "updated_at": "2026-08-20T12:00:00.000Z"
   },
   {
     "id": "rfq004",
@@ -68,7 +68,25 @@
     "required_delivery_date": null,
     "notes": "Verification probe.",
     "status": "QUOTED",
-    "created_at": "2026-08-19T16:41:52.132Z",
-    "updated_at": "2026-08-19T16:41:53.926Z"
+    "created_at": "2026-08-20T11:01:45.924Z",
+    "updated_at": "2026-08-20T11:01:49.116Z"
+  },
+  {
+    "id": "rfq005",
+    "reference": "RFQ-2604",
+    "customer_id": "u007",
+    "customer_name": "Kefilwe Dithebe",
+    "customer_type": "BUSINESS",
+    "product_id": "p001",
+    "product_name": "Shea Butter Deep Treatment 500ml",
+    "variant_id": null,
+    "requested_quantity": 400,
+    "target_price": 120,
+    "delivery_location": "Gaborone",
+    "required_delivery_date": null,
+    "notes": "Verification probe.",
+    "status": "QUOTED",
+    "created_at": "2026-08-21T05:24:25.233Z",
+    "updated_at": "2026-08-21T05:24:28.962Z"
   }
 ]

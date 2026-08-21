@@ -1,4 +1,4 @@
-import { CalendarClock, Lock, ShieldAlert, TrendingUp, Unlock, Wallet } from 'lucide-react';
+import { CalendarClock, FileText, HandCoins, ShieldAlert, TrendingUp, Wallet } from 'lucide-react';
 
 import { EmptyState, PageHeader, Panel, PanelBody, PanelHeader } from '@/components/brand/Panel';
 import { StatCard } from '@/components/brand/StatCard';
@@ -33,16 +33,16 @@ export default async function SupplierEarningsPage() {
   const lifetime = lifetimeNet(workspace);
   const series = buildEarningsSeries(workspace);
 
-  const held = workspace.escrow
-    .filter((record) => record.status === 'HELD' || record.status === 'DISPUTED')
+  const owed = workspace.payables
+    .filter((record) => record.status === 'PENDING' || record.status === 'ON_HOLD')
     .reduce((sum, record) => sum + record.amount, 0);
-  const released = workspace.escrow
-    .filter((record) => record.status === 'RELEASED')
+  const released = workspace.payables
+    .filter((record) => record.status === 'SETTLED')
     .reduce((sum, record) => sum + record.amount, 0);
-  const refunded = workspace.escrow
-    .filter((record) => record.status === 'REFUNDED')
+  const refunded = workspace.payables
+    .filter((record) => record.status === 'CANCELLED')
     .reduce((sum, record) => sum + record.amount, 0);
-  const escrowTotal = held + released + refunded;
+  const payablesTotal = owed + released + refunded;
 
   const settlements = [...workspace.settlements].sort((a, b) => b.period.localeCompare(a.period));
 
@@ -51,14 +51,14 @@ export default async function SupplierEarningsPage() {
       <PageHeader
         eyebrow="Earnings"
         title="Your earnings"
-        description="What you've made on AfriDeal, what's still in escrow, and when it lands in your account."
+        description="What you've made on AfriDeal, what is still owed to you, and when it lands in your account."
       />
 
       <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
         <StatCard label="Earnings MTD" value={net} format="money" accent="gold" icon={<Wallet size={16} strokeWidth={1.5} />} hint="Net of 12% commission" />
         <StatCard label="Lifetime earnings" value={lifetime} format="money" accent="gold" icon={<TrendingUp size={16} strokeWidth={1.5} />} hint="All settled + this month" />
-        <StatCard label="Escrow held" value={held} format="money" accent="ink" icon={<Lock size={16} strokeWidth={1.5} />} hint="Not yet released" />
-        <StatCard label="Escrow released" value={released} format="money" accent="forest" icon={<Unlock size={16} strokeWidth={1.5} />} hint="Paid out to date" />
+        <StatCard label="Owed to you" value={owed} format="money" accent="ink" icon={<FileText size={16} strokeWidth={1.5} />} hint="Invoices not yet settled" />
+        <StatCard label="Settled" value={released} format="money" accent="forest" icon={<HandCoins size={16} strokeWidth={1.5} />} hint="Paid out to date" />
       </div>
 
       <div className="grid gap-6 lg:grid-cols-[1.1fr_1fr]">
@@ -70,21 +70,21 @@ export default async function SupplierEarningsPage() {
         </Panel>
 
         <Panel>
-          <PanelHeader title="Escrow breakdown" description="Across every order routed to you" />
+          <PanelHeader title="Invoice breakdown" description="Across every order routed to you" />
           <PanelBody>
-            {escrowTotal > 0 ? (
+            {payablesTotal > 0 ? (
               <RevenueDonut
                 data={[
-                  { name: 'Held', value: held },
-                  { name: 'Released', value: released },
-                  { name: 'Refunded', value: refunded },
+                  { name: 'Outstanding', value: owed },
+                  { name: 'Settled', value: released },
+                  { name: 'Cancelled', value: refunded },
                 ]}
               />
             ) : (
               <EmptyState
-                icon={<Lock size={20} strokeWidth={1.5} />}
-                title="No escrow activity yet"
-                description="Funds held against your orders will show up here."
+                icon={<FileText size={20} strokeWidth={1.5} />}
+                title="No invoices yet"
+                description="What AfriDeal owes you against your orders will show up here."
                 className="py-10"
               />
             )}

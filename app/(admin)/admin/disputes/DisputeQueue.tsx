@@ -20,7 +20,7 @@ export interface DisputeRow {
   dispute: Dispute;
   orderReference: string;
   supplierName: string;
-  escrowAmount: number;
+  payableAmount: number;
 }
 
 type Filter = 'ALL' | 'OPEN' | 'UNDER_REVIEW' | 'RESOLVED';
@@ -77,8 +77,8 @@ export function DisputeQueue({ rows, canResolve }: { rows: DisputeRow[]; canReso
         resolving.status === 'UNDER_REVIEW'
           ? `${resolving.row.orderReference} moved to under review`
           : resolving.status === 'RESOLVED_CUSTOMER'
-            ? "Resolved in the customer's favour — escrow refunded"
-            : "Resolved in the supplier's favour — escrow released",
+            ? "Resolved in the customer's favour — customer refunded"
+            : "Resolved in the supplier's favour — supplier invoice settled",
       );
       close();
       router.refresh();
@@ -164,7 +164,7 @@ export function DisputeQueue({ rows, canResolve }: { rows: DisputeRow[]; canReso
                 </div>
 
                 <div className="flex shrink-0 flex-col items-end gap-2">
-                  <MoneyText amount={row.escrowAmount} size="md" tone={resolved ? 'muted' : 'gold'} />
+                  <MoneyText amount={row.payableAmount} size="md" tone={resolved ? 'muted' : 'gold'} />
                   {canResolve && !resolved && (
                     <div className="flex flex-wrap justify-end gap-1.5">
                       {row.dispute.status === 'OPEN' && (
@@ -206,9 +206,9 @@ export function DisputeQueue({ rows, canResolve }: { rows: DisputeRow[]; canReso
           resolving?.status === 'UNDER_REVIEW'
             ? 'Marks the dispute as actively being investigated. No funds move yet.'
             : resolving?.status === 'RESOLVED_CUSTOMER'
-              ? `The held escrow will be refunded to ${resolving.row.dispute.customer_name} and the order will be marked cancelled. This cannot be undone from here.`
+              ? `${resolving.row.dispute.customer_name} will be refunded, the supplier invoice on this leg will be cancelled, and the order will be marked cancelled. This cannot be undone from here.`
               : resolving?.status === 'RESOLVED_SUPPLIER'
-                ? `The held escrow will be released to ${resolving.row.supplierName} and the order will be marked delivered. This cannot be undone from here.`
+                ? `The supplier invoice will be settled with ${resolving.row.supplierName} and the order will be marked delivered. This cannot be undone from here.`
                 : ''
         }
         confirmLabel={resolving?.status === 'UNDER_REVIEW' ? 'Mark under review' : 'Resolve dispute'}

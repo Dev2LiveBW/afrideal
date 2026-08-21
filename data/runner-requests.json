@@ -1,0 +1,394 @@
+[
+  {
+    "id": "rr001",
+    "reference": "RUN-24810",
+    "customer_id": "u006",
+    "customer_name": "Thabo Modise",
+    "item": "Ghana-weave 22 inch, natural black",
+    "detail": "Two suppliers in Gaborone had it last month and both are out. Any colour close to 1B is fine, but it has to be human hair, not synthetic.",
+    "quantity": 6,
+    "budget_per_unit": 640,
+    "delivery_city": "Gaborone",
+    "delivery_address": "Plot 5412, Extension 12",
+    "needed_by": "2026-08-24T15:00:00.000Z",
+    "status": "REQUESTED",
+    "runner_id": null,
+    "runner_name": null,
+    "quote": null,
+    "created_at": "2026-08-20T06:00:00.000Z",
+    "updated_at": "2026-08-20T07:00:00.000Z",
+    "timeline": [
+      {
+        "status": "REQUESTED",
+        "label": "Request submitted",
+        "at": "2026-08-20T07:00:00.000Z",
+        "actor": "Thabo Modise"
+      }
+    ]
+  },
+  {
+    "id": "rr002",
+    "reference": "RUN-24811",
+    "customer_id": "u007",
+    "customer_name": "Kefilwe Dithebe",
+    "item": "Salon backwash chair, second-hand acceptable",
+    "detail": "Replacing one that broke. Ceramic basin, adjustable, must have a working mixer tap. Would rather pay more for something that lasts than buy new and cheap.",
+    "quantity": 1,
+    "budget_per_unit": 3200,
+    "delivery_city": "Gaborone",
+    "delivery_address": "Plot 220, Block 6, Broadhurst",
+    "needed_by": "2026-08-26T15:00:00.000Z",
+    "status": "SOURCING",
+    "runner_id": "r001",
+    "runner_name": "Kagiso Sithole",
+    "quote": null,
+    "created_at": "2026-08-18T07:34:00.000Z",
+    "updated_at": "2026-08-20T09:00:00.000Z",
+    "timeline": [
+      {
+        "status": "REQUESTED",
+        "label": "Request submitted",
+        "at": "2026-08-18T07:34:00.000Z",
+        "actor": "Kefilwe Dithebe"
+      },
+      {
+        "status": "ACCEPTED",
+        "label": "Runner accepted the job",
+        "at": "2026-08-19T08:17:00.000Z",
+        "actor": "Kagiso Sithole"
+      },
+      {
+        "status": "SOURCING",
+        "label": "Runner is out looking",
+        "at": "2026-08-20T09:00:00.000Z",
+        "actor": "Kagiso Sithole"
+      }
+    ]
+  },
+  {
+    "id": "rr003",
+    "reference": "RUN-24812",
+    "customer_id": "u006",
+    "customer_name": "Thabo Modise",
+    "item": "Hooded dryer, 2-seat, 220V",
+    "detail": "For a salon in Extension 12. Needs to run off normal household power, not three-phase.",
+    "quantity": 2,
+    "budget_per_unit": 2800,
+    "delivery_city": "Gaborone",
+    "delivery_address": "Plot 5412, Extension 12",
+    "needed_by": "2026-08-28T15:00:00.000Z",
+    "status": "QUOTED",
+    "runner_id": "r001",
+    "runner_name": "Kagiso Sithole",
+    "quote": {
+      "unit_price": 2632,
+      "service_fee": 632,
+      "total": 5896,
+      "found_at": "Beauty wholesaler, Lobatse Road",
+      "condition": "New, sealed",
+      "note": "Two units in stock. Runs on 220V single phase as asked."
+    },
+    "created_at": "2026-08-16T08:08:00.000Z",
+    "updated_at": "2026-08-19T10:17:00.000Z",
+    "timeline": [
+      {
+        "status": "REQUESTED",
+        "label": "Request submitted",
+        "at": "2026-08-16T07:08:00.000Z",
+        "actor": "Thabo Modise"
+      },
+      {
+        "status": "ACCEPTED",
+        "label": "Runner accepted the job",
+        "at": "2026-08-17T08:51:00.000Z",
+        "actor": "Kagiso Sithole"
+      },
+      {
+        "status": "SOURCING",
+        "label": "Runner is out looking",
+        "at": "2026-08-18T09:34:00.000Z",
+        "actor": "Kagiso Sithole"
+      },
+      {
+        "status": "QUOTED",
+        "label": "Found it, price sent for approval",
+        "at": "2026-08-19T10:17:00.000Z",
+        "actor": "Kagiso Sithole"
+      }
+    ]
+  },
+  {
+    "id": "rr004",
+    "reference": "RUN-24813",
+    "customer_id": "u007",
+    "customer_name": "Kefilwe Dithebe",
+    "item": "Wig display mannequin heads, canvas block",
+    "detail": "Twelve of them for a shop fit-out. Canvas block rather than polystyrene, they need to take pins.",
+    "quantity": 12,
+    "budget_per_unit": 180,
+    "delivery_city": "Gaborone",
+    "delivery_address": "Plot 220, Block 6, Broadhurst",
+    "needed_by": "2026-08-30T15:00:00.000Z",
+    "status": "DELIVERING",
+    "runner_id": "r002",
+    "runner_name": "Onalenna Phiri",
+    "quote": {
+      "unit_price": 170,
+      "service_fee": 245,
+      "total": 2285,
+      "found_at": "Broadhurst trade counter",
+      "condition": "New, sealed",
+      "note": "Runner inspected before quoting."
+    },
+    "created_at": "2026-08-13T09:59:00.000Z",
+    "updated_at": "2026-08-18T12:34:00.000Z",
+    "timeline": [
+      {
+        "status": "REQUESTED",
+        "label": "Request submitted",
+        "at": "2026-08-13T07:59:00.000Z",
+        "actor": "Kefilwe Dithebe"
+      },
+      {
+        "status": "ACCEPTED",
+        "label": "Runner accepted the job",
+        "at": "2026-08-14T08:42:00.000Z",
+        "actor": "Onalenna Phiri"
+      },
+      {
+        "status": "SOURCING",
+        "label": "Runner is out looking",
+        "at": "2026-08-15T09:25:00.000Z",
+        "actor": "Onalenna Phiri"
+      },
+      {
+        "status": "QUOTED",
+        "label": "Found it, price sent for approval",
+        "at": "2026-08-16T10:08:00.000Z",
+        "actor": "Onalenna Phiri"
+      },
+      {
+        "status": "APPROVED",
+        "label": "Customer approved the purchase",
+        "at": "2026-08-17T11:51:00.000Z",
+        "actor": "Onalenna Phiri"
+      },
+      {
+        "status": "DELIVERING",
+        "label": "Bought and on the way",
+        "at": "2026-08-18T12:34:00.000Z",
+        "actor": "Onalenna Phiri"
+      }
+    ]
+  },
+  {
+    "id": "rr005",
+    "reference": "RUN-24814",
+    "customer_id": "u006",
+    "customer_name": "Thabo Modise",
+    "item": "Industrial hair steamer, floor standing",
+    "detail": "Whatever the two big beauty wholesalers on Lobatse Road have in stock.",
+    "quantity": 1,
+    "budget_per_unit": 4500,
+    "delivery_city": "Gaborone",
+    "delivery_address": "Plot 5412, Extension 12",
+    "needed_by": "2026-09-01T15:00:00.000Z",
+    "status": "CONFIRMED",
+    "runner_id": "r001",
+    "runner_name": "Kagiso Sithole",
+    "quote": {
+      "unit_price": 4230,
+      "service_fee": 508,
+      "total": 4738,
+      "found_at": "Broadhurst trade counter",
+      "condition": "New, sealed",
+      "note": "Runner inspected before quoting."
+    },
+    "created_at": "2026-08-04T10:32:00.000Z",
+    "updated_at": "2026-08-10T13:50:00.000Z",
+    "timeline": [
+      {
+        "status": "REQUESTED",
+        "label": "Request submitted",
+        "at": "2026-08-04T07:32:00.000Z",
+        "actor": "Thabo Modise"
+      },
+      {
+        "status": "ACCEPTED",
+        "label": "Runner accepted the job",
+        "at": "2026-08-05T08:15:00.000Z",
+        "actor": "Kagiso Sithole"
+      },
+      {
+        "status": "SOURCING",
+        "label": "Runner is out looking",
+        "at": "2026-08-06T09:58:00.000Z",
+        "actor": "Kagiso Sithole"
+      },
+      {
+        "status": "QUOTED",
+        "label": "Found it, price sent for approval",
+        "at": "2026-08-07T10:41:00.000Z",
+        "actor": "Kagiso Sithole"
+      },
+      {
+        "status": "APPROVED",
+        "label": "Customer approved the purchase",
+        "at": "2026-08-08T11:24:00.000Z",
+        "actor": "Kagiso Sithole"
+      },
+      {
+        "status": "DELIVERING",
+        "label": "Bought and on the way",
+        "at": "2026-08-09T12:07:00.000Z",
+        "actor": "Kagiso Sithole"
+      },
+      {
+        "status": "CONFIRMED",
+        "label": "Delivered and confirmed by customer",
+        "at": "2026-08-10T13:50:00.000Z",
+        "actor": "Kagiso Sithole"
+      }
+    ]
+  },
+  {
+    "id": "rr006",
+    "reference": "RUN-24815",
+    "customer_id": "u006",
+    "customer_name": "Thabo Modise",
+    "item": "Verification probe — bulk hair dryer",
+    "detail": "Raised by the verification suite.",
+    "quantity": 3,
+    "budget_per_unit": 900,
+    "delivery_city": "Gaborone",
+    "delivery_address": "Plot 5412, Extension 12",
+    "needed_by": null,
+    "status": "CONFIRMED",
+    "runner_id": "r001",
+    "runner_name": "Kagiso Sithole",
+    "quote": {
+      "unit_price": 850,
+      "service_fee": 306,
+      "total": 2856,
+      "found_at": "Sourced locally",
+      "condition": "New",
+      "note": ""
+    },
+    "created_at": "2026-08-20T11:01:51.356Z",
+    "updated_at": "2026-08-20T11:01:55.280Z",
+    "timeline": [
+      {
+        "status": "REQUESTED",
+        "label": "Request submitted",
+        "at": "2026-08-20T11:01:51.356Z",
+        "actor": "Thabo Modise"
+      },
+      {
+        "status": "ACCEPTED",
+        "label": "Runner accepted the job",
+        "at": "2026-08-20T11:01:54.604Z",
+        "actor": "Kagiso Sithole"
+      },
+      {
+        "status": "SOURCING",
+        "label": "Runner is out looking",
+        "at": "2026-08-20T11:01:54.795Z",
+        "actor": "Kagiso Sithole"
+      },
+      {
+        "status": "QUOTED",
+        "label": "Found it, price sent for approval",
+        "at": "2026-08-20T11:01:54.992Z",
+        "actor": "Kagiso Sithole"
+      },
+      {
+        "status": "APPROVED",
+        "label": "Customer approved the purchase",
+        "at": "2026-08-20T11:01:55.086Z",
+        "actor": "Thabo Modise"
+      },
+      {
+        "status": "DELIVERING",
+        "label": "Bought and on the way",
+        "at": "2026-08-20T11:01:55.187Z",
+        "actor": "Kagiso Sithole"
+      },
+      {
+        "status": "CONFIRMED",
+        "label": "Delivered and confirmed by customer",
+        "at": "2026-08-20T11:01:55.280Z",
+        "actor": "Thabo Modise"
+      }
+    ]
+  },
+  {
+    "id": "rr007",
+    "reference": "RUN-24816",
+    "customer_id": "u006",
+    "customer_name": "Thabo Modise",
+    "item": "Verification probe — bulk hair dryer",
+    "detail": "Raised by the verification suite.",
+    "quantity": 3,
+    "budget_per_unit": 900,
+    "delivery_city": "Gaborone",
+    "delivery_address": "Plot 5412, Extension 12",
+    "needed_by": null,
+    "status": "CONFIRMED",
+    "runner_id": "r001",
+    "runner_name": "Kagiso Sithole",
+    "quote": {
+      "unit_price": 850,
+      "service_fee": 306,
+      "total": 2856,
+      "found_at": "Sourced locally",
+      "condition": "New",
+      "note": ""
+    },
+    "created_at": "2026-08-21T05:24:31.400Z",
+    "updated_at": "2026-08-21T05:24:35.320Z",
+    "timeline": [
+      {
+        "status": "REQUESTED",
+        "label": "Request submitted",
+        "at": "2026-08-21T05:24:31.400Z",
+        "actor": "Thabo Modise"
+      },
+      {
+        "status": "ACCEPTED",
+        "label": "Runner accepted the job",
+        "at": "2026-08-21T05:24:34.681Z",
+        "actor": "Kagiso Sithole"
+      },
+      {
+        "status": "SOURCING",
+        "label": "Runner is out looking",
+        "at": "2026-08-21T05:24:34.846Z",
+        "actor": "Kagiso Sithole"
+      },
+      {
+        "status": "QUOTED",
+        "label": "Found it, price sent for approval",
+        "at": "2026-08-21T05:24:35.018Z",
+        "actor": "Kagiso Sithole"
+      },
+      {
+        "status": "APPROVED",
+        "label": "Customer approved the purchase",
+        "at": "2026-08-21T05:24:35.117Z",
+        "actor": "Thabo Modise"
+      },
+      {
+        "status": "DELIVERING",
+        "label": "Bought and on the way",
+        "at": "2026-08-21T05:24:35.222Z",
+        "actor": "Kagiso Sithole"
+      },
+      {
+        "status": "CONFIRMED",
+        "label": "Delivered and confirmed by customer",
+        "at": "2026-08-21T05:24:35.320Z",
+        "actor": "Thabo Modise"
+      }
+    ]
+  }
+]

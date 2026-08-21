@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { AlertCircle, Lock, ShoppingBag } from 'lucide-react';
+import { AlertCircle, ShieldCheck, ShoppingBag } from 'lucide-react';
 import { z } from 'zod';
 
 import { GoldButton } from '@/components/brand/GoldButton';
@@ -174,7 +174,7 @@ export function CheckoutClient({
   return (
     <>
       <h1 className="font-display text-headline-lg font-semibold text-ink">
-        Confirm and pay into escrow
+        Confirm and pay
       </h1>
 
       <form
@@ -239,8 +239,8 @@ export function CheckoutClient({
           <section className="rounded-md border border-hairline bg-surface-raised p-5">
             <h2 className="text-[15px] font-semibold text-ink">Payment method</h2>
             <p className="mt-1 text-[12.5px] text-body">
-              Whichever you choose, the money settles into AfriDeal&rsquo;s escrow account, not to the
-              supplier.
+              Payments are processed by licensed providers. AfriDeal does not see or store your
+              card or wallet details.
             </p>
 
             <div className="mt-5 space-y-2.5">
@@ -346,7 +346,7 @@ export function CheckoutClient({
                   </dd>
                 </div>
                 <div className="flex items-baseline justify-between border-t border-hairline pt-3">
-                  <dt className="font-medium text-ink">Total held in escrow</dt>
+                  <dt className="font-medium text-ink">Total to pay</dt>
                   <dd>
                     <MoneyText amount={total} size="lg" tone="gold" />
                   </dd>
@@ -367,10 +367,11 @@ export function CheckoutClient({
           </Enclosure>
 
           <div className="mt-4 flex items-start gap-3 rounded-md border border-gold/25 bg-gold-50/70 px-4 py-3.5">
-            <Lock size={16} strokeWidth={1.5} className="mt-0.5 shrink-0 text-gold-700" />
+            <ShieldCheck size={16} strokeWidth={1.5} className="mt-0.5 shrink-0 text-gold-700" />
             <p className="text-[12.5px] leading-5 text-gold-700">
-              Placing this order moves the total into escrow. Suppliers are notified and can start
-              preparing, but none of them are paid until you confirm delivery.
+              Placing this order buys the goods from AfriDeal. We procure them from a verified
+              supplier, deliver them to you, and cover the order under our returns and refunds
+              policy until seven days after delivery.
             </p>
           </div>
         </div>

@@ -36,12 +36,12 @@ const SYSTEM_HEALTH = [
 ] as const;
 
 export default async function AdminDashboardPage() {
-  const [session, orders, items, suppliers, escrowRecords, disputes] = await Promise.all([
+  const [session, orders, items, suppliers, payableRecords, disputes] = await Promise.all([
     auth(),
     readAll('orders'),
     readAll('order-items'),
     readAll('suppliers'),
-    readAll('escrow'),
+    readAll('supplier-payables'),
     readAll('disputes'),
   ]);
 
@@ -67,11 +67,11 @@ export default async function AdminDashboardPage() {
   const featured = verifiedCount * 180;
   const totalRevenue = commissions + subscriptions + featured;
 
-  const refunded = escrowRecords
-    .filter((record) => record.status === 'REFUNDED')
+  const refunded = payableRecords
+    .filter((record) => record.status === 'CANCELLED')
     .reduce((sum, record) => sum + record.amount, 0);
-  const disputedHeld = escrowRecords
-    .filter((record) => record.status === 'DISPUTED')
+  const disputedHeld = payableRecords
+    .filter((record) => record.status === 'ON_HOLD')
     .reduce((sum, record) => sum + record.amount, 0);
   const cancelledTotal = inPeriod
     .filter((order) => order.status === 'CANCELLED')
@@ -79,7 +79,7 @@ export default async function AdminDashboardPage() {
 
   const exclusions = [
     {
-      label: 'Refunded escrow',
+      label: 'Cancelled supplier invoices',
       amount: refunded,
       why: 'Funds returned to the customer never became platform revenue.',
     },
@@ -144,7 +144,7 @@ export default async function AdminDashboardPage() {
         <PageHeader
           eyebrow="Overview"
           title="Platform dashboard"
-          description="Activity across every supplier, order and escrow leg on AfriDeal."
+          description="Activity across every supplier, order and settlement on AfriDeal."
         />
 
         <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6">

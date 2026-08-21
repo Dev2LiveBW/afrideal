@@ -2,7 +2,7 @@
 
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
-import { Lock, RotateCcw, ShieldCheck, Unlock } from 'lucide-react';
+import { FileText, HandCoins, RotateCcw, ShieldCheck } from 'lucide-react';
 import toast from 'react-hot-toast';
 
 import { ConfirmDialog } from '@/components/brand/ConfirmDialog';
@@ -12,61 +12,68 @@ import { StatusBadge } from '@/components/brand/StatusBadge';
 import { Enclosure } from '@/components/brand/Panel';
 import { PAYMENT_LABELS, dateTime, daysSince } from '@/lib/format';
 import { cn } from '@/lib/utils';
-import type { EscrowRecord, EscrowStatus } from '@/types';
+import type { SupplierPayable, PayableStatus } from '@/types';
 
 /**
- * Escrow control panel.
+ * Supplier settlement panel.
  *
- * Both destructive-ish actions are behind a confirmation that names the amount
- * and the counterparty, because the failure mode here is releasing the wrong
- * supplier's money and there is no undo.
+ * One procurement invoice: what AfriDeal owes this supplier for the goods it
+ * bought from them on this order. Both actions sit behind a confirmation that
+ * names the amount and the counterparty, because the failure mode is paying the
+ * wrong supplier and there is no undo.
  */
 
-const COPY: Record<'RELEASED' | 'REFUNDED', { title: string; body: (n: string, s: string) => string; label: string }> = {
-  RELEASED: {
-    title: 'Release escrow to supplier?',
+const COPY: Record<
+  'SETTLED' | 'CANCELLED',
+  { title: string; body: (n: string, s: string) => string; label: string }
+> = {
+  SETTLED: {
+    title: 'Settle this supplier invoice?',
     body: (amount, supplier) =>
-      `${amount} will be released to ${supplier}. Funds leave the platform account immediately and this cannot be reversed from here — a mistaken release has to be recovered as a new payment.`,
-    label: 'Release funds',
+      `BWP ${amount} will be paid to ${supplier}. The payment is issued immediately and cannot be reversed from here — a payment made in error has to be recovered separately.`,
+    label: 'Settle invoice',
   },
-  REFUNDED: {
-    title: 'Refund escrow to customer?',
+  CANCELLED: {
+    title: 'Cancel this supplier invoice?',
     body: (amount, supplier) =>
-      `${amount} will be returned to the customer and ${supplier} will not be paid for this leg. Use this when a dispute resolves in the customer's favour.`,
-    label: 'Refund customer',
+      `The BWP ${amount} owed to ${supplier} will be written off and nothing will be paid on this leg. Use this when the goods were never supplied, or when a claim resolves in the customer's favour.`,
+    label: 'Cancel invoice',
   },
 };
 
-export function EscrowPanel({
+export function SettlementPanel({
   record,
   supplierName,
   canAct = true,
   className,
 }: {
-  record: EscrowRecord;
+  record: SupplierPayable;
   supplierName: string;
   canAct?: boolean;
   className?: string;
 }) {
   const router = useRouter();
-  const [action, setAction] = useState<'RELEASED' | 'REFUNDED' | null>(null);
+  const [action, setAction] = useState<'SETTLED' | 'CANCELLED' | null>(null);
   const [saving, setSaving] = useState(false);
 
-  const held = record.status === 'HELD' || record.status === 'DISPUTED';
-  const ageDays = daysSince(record.held_at);
-  const overdue = record.status === 'HELD' && ageDays > record.hold_window_days;
+  const open = record.status === 'PENDING' || record.status === 'ON_HOLD';
+  const ageDays = daysSince(record.raised_at);
+  const overdue = record.status === 'PENDING' && ageDays > record.terms_days;
 
   async function submit() {
     if (!action) return;
     setSaving(true);
 
     try {
-      const response = await fetch(`/api/escrow/${record.id}`, {
+      const response = await fetch(`/api/payables/${record.id}`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           status: action,
-          note: action === 'RELEASED' ? 'Released by operations.' : 'Refunded by operations.',
+          note:
+            action === 'SETTLED'
+              ? 'Supplier invoice settled by operations.'
+              : 'Supplier invoice cancelled by operations.',
         }),
       });
 
@@ -75,11 +82,11 @@ export function EscrowPanel({
         throw new Error(error);
       }
 
-      toast.success(action === 'RELEASED' ? 'Escrow released' : 'Escrow refunded');
+      toast.success(action === 'SETTLED' ? 'Invoice settled' : 'Invoice cancelled');
       setAction(null);
       router.refresh();
     } catch (error) {
-      toast.error(error instanceof Error ? error.message : 'Could not update escrow');
+      toast.error(error instanceof Error ? error.message : 'Could not update the invoice');
     } finally {
       setSaving(false);
     }
@@ -94,13 +101,13 @@ export function EscrowPanel({
               <span
                 className={cn(
                   'flex h-10 w-10 items-center justify-center rounded-full',
-                  held ? 'bg-gold-50 text-gold-dark' : 'bg-forest-wash text-forest',
+                  open ? 'bg-gold-50 text-gold-dark' : 'bg-forest-wash text-forest',
                 )}
               >
-                {held ? <Lock size={18} strokeWidth={1.5} /> : <ShieldCheck size={18} strokeWidth={1.5} />}
+                {open ? <FileText size={18} strokeWidth={1.5} /> : <ShieldCheck size={18} strokeWidth={1.5} />}
               </span>
               <div>
-                <p className="eyebrow">Escrow</p>
+                <p className="eyebrow">Supplier invoice</p>
                 <p className="mt-1 text-[15px] font-semibold text-ink">{supplierName}</p>
               </div>
             </div>
@@ -109,11 +116,11 @@ export function EscrowPanel({
 
           <div className="mt-5 flex items-end justify-between gap-4">
             <div>
-              <p className="text-[12px] text-muted">Amount held</p>
-              <MoneyText amount={record.amount} size="xl" tone={held ? 'gold' : 'forest'} />
+              <p className="text-[12px] text-muted">Amount owed</p>
+              <MoneyText amount={record.amount} size="xl" tone={open ? 'gold' : 'forest'} />
             </div>
             <div className="text-right">
-              <p className="text-[12px] text-muted">Gateway</p>
+              <p className="text-[12px] text-muted">Paid by customer via</p>
               <p className="text-[13.5px] font-medium text-ink">
                 {PAYMENT_LABELS[record.gateway] ?? record.gateway}
               </p>
@@ -122,63 +129,63 @@ export function EscrowPanel({
 
           <dl className="mt-5 grid grid-cols-2 gap-x-4 gap-y-3 border-t border-hairline pt-4 text-[12.5px]">
             <div>
-              <dt className="text-muted">Held since</dt>
-              <dd className="mt-0.5 font-mono tabular-nums text-ink">{dateTime(record.held_at)}</dd>
+              <dt className="text-muted">Raised</dt>
+              <dd className="mt-0.5 font-mono tabular-nums text-ink">{dateTime(record.raised_at)}</dd>
             </div>
             <div>
-              <dt className="text-muted">Days held</dt>
+              <dt className="text-muted">Age</dt>
               <dd
                 className={cn(
                   'mt-0.5 font-mono tabular-nums',
                   overdue ? 'font-semibold text-danger-ink' : 'text-ink',
                 )}
               >
-                {ageDays} of {record.hold_window_days}
+                {ageDays} of {record.terms_days}
                 {overdue && ' · overdue'}
               </dd>
             </div>
-            {record.released_at && (
+            {record.settled_at && (
               <div>
-                <dt className="text-muted">Released</dt>
+                <dt className="text-muted">Settled</dt>
                 <dd className="mt-0.5 font-mono tabular-nums text-forest">
-                  {dateTime(record.released_at)}
+                  {dateTime(record.settled_at)}
                 </dd>
               </div>
             )}
-            {record.refunded_at && (
+            {record.cancelled_at && (
               <div>
-                <dt className="text-muted">Refunded</dt>
+                <dt className="text-muted">Cancelled</dt>
                 <dd className="mt-0.5 font-mono tabular-nums text-slateish-ink">
-                  {dateTime(record.refunded_at)}
+                  {dateTime(record.cancelled_at)}
                 </dd>
               </div>
             )}
           </dl>
 
-          {canAct && held && (
+          {canAct && open && (
             <div className="mt-5 flex flex-wrap gap-2 border-t border-hairline pt-4">
               <GoldButton
                 size="sm"
                 variant="forest"
-                icon={<Unlock size={14} strokeWidth={1.5} />}
-                onClick={() => setAction('RELEASED')}
+                icon={<HandCoins size={14} strokeWidth={1.5} />}
+                onClick={() => setAction('SETTLED')}
               >
-                Release to supplier
+                Settle invoice
               </GoldButton>
               <GoldButton
                 size="sm"
                 variant="ghost"
                 icon={<RotateCcw size={14} strokeWidth={1.5} />}
-                onClick={() => setAction('REFUNDED')}
+                onClick={() => setAction('CANCELLED')}
               >
-                Refund customer
+                Cancel invoice
               </GoldButton>
             </div>
           )}
 
-          {!held && (
+          {!open && (
             <p className="mt-5 border-t border-hairline pt-4 text-[12.5px] text-body">
-              This escrow reached a terminal state and can no longer be moved.
+              This invoice is closed and can no longer be moved.
             </p>
           )}
         </div>
@@ -224,7 +231,7 @@ export function EscrowPanel({
             : ''
         }
         confirmLabel={action ? COPY[action].label : 'Confirm'}
-        tone={action === 'RELEASED' ? 'forest' : 'danger'}
+        tone={action === 'SETTLED' ? 'forest' : 'danger'}
       />
     </>
   );

@@ -32,7 +32,7 @@ export default async function OrderTrackingPage({
   const detail = await getOrderDetail(params.id);
   if (!detail) notFound();
 
-  const { order, items, escrow } = detail;
+  const { order, items, payables } = detail;
 
   const isStaff = ['SUPER_ADMIN', 'OPERATIONS_ADMIN', 'FINANCE_ADMIN'].includes(session.user.role);
   if (order.customer_id !== session.user.id && !isStaff) notFound();
@@ -58,13 +58,13 @@ export default async function OrderTrackingPage({
     .sort((a, b) => b.placed_at.localeCompare(a.placed_at))
     .slice(0, 2);
 
-  const held = escrow.filter((record) => record.status === 'HELD');
-  const released = escrow.filter((record) => record.status === 'RELEASED');
-  const disputed = escrow.filter((record) => record.status === 'DISPUTED');
-  const totalHeld = held.reduce((sum, record) => sum + record.amount, 0);
+  const outstanding = payables.filter((record) => record.status === 'PENDING');
+  const settled = payables.filter((record) => record.status === 'SETTLED');
+  const underReview = payables.filter((record) => record.status === 'ON_HOLD');
+  const orderValue = payables.reduce((sum, record) => sum + record.amount, 0);
 
   const canConfirm = order.status === 'IN_TRANSIT' || order.status === 'DELIVERED';
-  const canDispute = held.length > 0 && order.status !== 'CANCELLED';
+  const canDispute = outstanding.length > 0 && order.status !== 'CANCELLED';
 
   const expected = new Date(order.placed_at);
   expected.setDate(expected.getDate() + 3);
@@ -75,12 +75,14 @@ export default async function OrderTrackingPage({
         <div className="mb-7 flex items-start gap-3 rounded-md border border-forest/25 bg-forest-wash px-5 py-4">
           <ShieldCheck size={18} strokeWidth={1.5} className="mt-0.5 shrink-0 text-forest" />
           <div>
-            <p className="text-[14px] font-semibold text-forest-ink">Order placed</p>
+            <p className="text-[14px] font-semibold text-forest-ink">Order confirmed</p>
             <p className="mt-1 text-[13px] leading-5 text-forest-ink/85">
-              Your payment is held in escrow.{' '}
-              {escrow.length === 1 ? 'The supplier has' : `All ${escrow.length} suppliers have`} been
-              notified and can start preparing, but none of them are paid until you confirm the goods
-              arrived.
+              Your payment has been processed.{' '}
+              {payables.length === 1
+                ? 'The supplier has'
+                : `All ${payables.length} suppliers have`}{' '}
+              been notified and are preparing your order. Tell us as soon as it arrives, and if
+              anything is wrong we will put it right.
             </p>
           </div>
         </div>
@@ -227,52 +229,61 @@ export default async function OrderTrackingPage({
                 </div>
               </Enclosure>
 
+              {/*
+                Buyer protection, stated as what AfriDeal will do rather than as
+                a custody arrangement. AfriDeal is the merchant of record: the
+                customer buys from AfriDeal, AfriDeal buys from the supplier,
+                and the guarantee is a returns-and-refunds commitment on that
+                sale — not money held on anyone else's behalf.
+              */}
               <div
                 className={`rounded-md border px-5 py-4 ${
-                  disputed.length > 0
+                  underReview.length > 0
                     ? 'border-danger/25 bg-danger-wash'
-                    : held.length > 0
+                    : outstanding.length > 0
                       ? 'border-gold/25 bg-gold-50/70'
                       : 'border-forest/25 bg-forest-wash'
                 }`}
               >
                 <div className="flex items-start gap-3">
-                  <Lock
+                  <ShieldCheck
                     size={16}
                     strokeWidth={1.5}
                     className={`mt-0.5 shrink-0 ${
-                      disputed.length > 0
+                      underReview.length > 0
                         ? 'text-danger-ink'
-                        : held.length > 0
+                        : outstanding.length > 0
                           ? 'text-gold-700'
                           : 'text-forest'
                     }`}
                   />
                   <div className="min-w-0">
-                    {disputed.length > 0 ? (
+                    {underReview.length > 0 ? (
                       <>
-                        <p className="text-[13px] font-semibold text-danger-ink">Funds frozen</p>
+                        <p className="text-[13px] font-semibold text-danger-ink">Claim under review</p>
                         <p className="mt-1 text-[12.5px] leading-5 text-danger-ink/85">
-                          You raised a dispute on this order. Nothing is paid to the supplier while
-                          our team reviews it, and we will come back to you within five days.
+                          You have raised a claim on this order. Our team is reviewing it and will
+                          come back to you within five working days with a replacement, a refund or
+                          an explanation.
                         </p>
                       </>
-                    ) : held.length > 0 ? (
+                    ) : outstanding.length > 0 ? (
                       <>
                         <p className="text-[13px] font-semibold text-gold-700">
-                          <MoneyText amount={totalHeld} size="sm" tone="gold" /> held in escrow
+                          Covered by AfriDeal buyer protection
                         </p>
                         <p className="mt-1 text-[12.5px] leading-5 text-gold-700/85">
-                          We are holding your payment. It goes to the supplier only when you confirm
-                          the order arrived, and never on a timer.
+                          You bought this order from AfriDeal, so the order is ours to put right.
+                          If it arrives late, short or not as described, tell us and we will replace
+                          it or refund you.
                         </p>
                       </>
-                    ) : released.length > 0 ? (
+                    ) : settled.length > 0 ? (
                       <>
-                        <p className="text-[13px] font-semibold text-forest-ink">Escrow released</p>
+                        <p className="text-[13px] font-semibold text-forest-ink">Order complete</p>
                         <p className="mt-1 text-[12.5px] leading-5 text-forest-ink/85">
-                          You confirmed delivery, so the payment has settled to the supplier. This
-                          order is closed.
+                          You confirmed delivery and this order is closed. Returns stay open for
+                          seven days from delivery.
                         </p>
                       </>
                     ) : (
@@ -290,8 +301,8 @@ export default async function OrderTrackingPage({
               <OrderActions
                 orderId={order.id}
                 reference={order.reference}
-                heldAmount={totalHeld}
-                canConfirm={canConfirm && held.length > 0}
+                orderAmount={orderValue}
+                canConfirm={canConfirm && outstanding.length > 0}
                 canDispute={canDispute}
               />
             </div>

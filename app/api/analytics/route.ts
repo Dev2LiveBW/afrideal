@@ -1,6 +1,6 @@
 import { guard, handled, ok } from '@/lib/api';
 import { readAll } from '@/lib/db';
-import { summarise } from '@/lib/escrow';
+import { summarise } from '@/lib/payables';
 
 export const dynamic = 'force-dynamic';
 
@@ -28,11 +28,11 @@ export const GET = handled(async (request: Request) => {
   const period = new URL(request.url).searchParams.get('period') ?? 'MTD';
   const days = period === 'YTD' ? 365 : period === 'QTD' ? 90 : 30;
 
-  const [orders, items, suppliers, escrowRecords, settlements] = await Promise.all([
+  const [orders, items, suppliers, payableRecords, settlements] = await Promise.all([
     readAll('orders'),
     readAll('order-items'),
     readAll('suppliers'),
-    readAll('escrow'),
+    readAll('supplier-payables'),
     readAll('settlements'),
   ]);
 
@@ -81,18 +81,18 @@ export const GET = handled(async (request: Request) => {
   const totalRevenue = commissions + subscriptions + featured;
 
   // ── APR: revenue share, with exclusions itemised ─────────────────────
-  const refunded = escrowRecords
-    .filter((record) => record.status === 'REFUNDED')
+  const refunded = payableRecords
+    .filter((record) => record.status === 'CANCELLED')
     .reduce((sum, record) => sum + record.amount, 0);
-  const disputedHeld = escrowRecords
-    .filter((record) => record.status === 'DISPUTED')
+  const disputedHeld = payableRecords
+    .filter((record) => record.status === 'ON_HOLD')
     .reduce((sum, record) => sum + record.amount, 0);
   const cancelled = inPeriod
     .filter((order) => order.status === 'CANCELLED')
     .reduce((sum, order) => sum + order.total, 0);
 
   const exclusions = [
-    { label: 'Refunded escrow', amount: refunded, why: 'Funds returned to the customer never became platform revenue.' },
+    { label: 'Cancelled supplier invoices', amount: refunded, why: 'Refunded to the customer, so it never became platform revenue.' },
     { label: 'Disputed and unsettled', amount: disputedHeld, why: 'Outcome unknown; excluded until the dispute resolves.' },
     { label: 'Cancelled orders', amount: cancelled, why: 'No goods moved and no commission was earned.' },
     { label: 'Delivery fees collected', amount: billable.length * 45, why: 'Passed through to logistics at cost.' },
@@ -139,7 +139,7 @@ export const GET = handled(async (request: Request) => {
       rate: REVENUE_SHARE_RATE,
       revenue_share_due: revenueShareDue,
     },
-    escrow: summarise(escrowRecords),
+    payables: summarise(payableRecords),
     top_suppliers: topSuppliers,
     settlements_pending: settlements.filter((settlement) => settlement.status === 'PENDING').length,
   });

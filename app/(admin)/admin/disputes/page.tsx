@@ -9,12 +9,12 @@ import { DisputeQueue, type DisputeRow } from './DisputeQueue';
 export const dynamic = 'force-dynamic';
 
 export default async function AdminDisputesPage() {
-  const [session, disputes, orders, suppliers, escrowRecords] = await Promise.all([
+  const [session, disputes, orders, suppliers, payableRecords] = await Promise.all([
     auth(),
     readAll('disputes'),
     readAll('orders'),
     readAll('suppliers'),
-    readAll('escrow'),
+    readAll('supplier-payables'),
   ]);
 
   const notifications = session?.user ? await getNotifications(session.user.id) : [];
@@ -22,7 +22,7 @@ export default async function AdminDisputesPage() {
 
   const orderReference = new Map(orders.map((order) => [order.id, order.reference]));
   const supplierName = new Map(suppliers.map((supplier) => [supplier.id, supplier.name]));
-  const escrowById = new Map(escrowRecords.map((record) => [record.id, record]));
+  const payableById = new Map(payableRecords.map((record) => [record.id, record]));
 
   const rows: DisputeRow[] = [...disputes]
     .sort((a, b) => {
@@ -35,7 +35,7 @@ export default async function AdminDisputesPage() {
       dispute,
       orderReference: orderReference.get(dispute.order_id) ?? dispute.order_id,
       supplierName: supplierName.get(dispute.supplier_id) ?? dispute.supplier_id,
-      escrowAmount: escrowById.get(dispute.escrow_id)?.amount ?? 0,
+      payableAmount: payableById.get(dispute.payable_id)?.amount ?? 0,
     }));
 
   return (

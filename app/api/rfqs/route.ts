@@ -12,7 +12,7 @@ export const dynamic = 'force-dynamic';
  *
  * A quotation request is what happens when a buyer wants a quantity nobody has
  * published a band for. It is deliberately a separate flow from checkout: no
- * money moves, no escrow opens, and suppliers are asked rather than routed.
+ * money moves, no invoice is raised, and suppliers are asked rather than routed.
  */
 
 const CreateSchema = z.object({

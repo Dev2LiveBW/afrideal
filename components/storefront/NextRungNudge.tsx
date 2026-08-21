@@ -57,25 +57,16 @@ export function NextRungNudge({
       </span>
 
       {/*
-        A rung the account cannot reach sends them to the thing that unlocks it
-        rather than offering a quantity change that would not get the price.
+        Every published rung is reachable now, so the nudge always offers the
+        quantity rather than sometimes offering an account instead.
       */}
-      {locked ? (
-        <Link
-          href="/signup"
-          className="font-medium text-gold-dark underline underline-offset-4 transition-colors duration-200 hover:text-ink"
-        >
-          with an account
-        </Link>
-      ) : (
-        <button
-          type="button"
-          onClick={onTake}
-          className="font-medium text-forest underline underline-offset-4 transition-colors duration-200 hover:text-forest-ink"
-        >
-          Add {unitsAway}
-        </button>
-      )}
+      <button
+        type="button"
+        onClick={onTake}
+        className="font-medium text-forest underline underline-offset-4 transition-colors duration-200 hover:text-forest-ink"
+      >
+        Add {unitsAway}
+      </button>
     </p>
   );
 }

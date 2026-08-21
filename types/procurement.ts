@@ -216,3 +216,69 @@ export interface MarginRule {
   commercial_model: CommercialModel;
   active: boolean;
 }
+
+// ═════════════════════════════════════════════════════════════════════════════
+// Runner sourcing requests.
+//
+// The second way onto the platform. The marketplace answers "I know what I
+// want and you list it"; this answers "I know what I want and nobody lists
+// it". A verified runner takes the request, finds the item, sends back what it
+// costs and what condition it is in, and buys it once the customer approves.
+//
+// It is deliberately not an Rfq. An Rfq prices a catalogue product AfriDeal
+// already sells at a volume above the published ladder; a sourcing request has
+// no product_id at all, because the whole point is that the thing is not in the
+// catalogue yet.
+// ═════════════════════════════════════════════════════════════════════════════
+
+export type RunnerRequestStatus =
+  | 'REQUESTED'
+  | 'ACCEPTED'
+  | 'SOURCING'
+  | 'QUOTED'
+  | 'APPROVED'
+  | 'DELIVERING'
+  | 'CONFIRMED'
+  | 'CANCELLED';
+
+export interface RunnerRequestEvent {
+  status: RunnerRequestStatus;
+  label: string;
+  at: string;
+  actor: string;
+  note?: string;
+}
+
+export interface RunnerRequest {
+  id: string;
+  reference: string;
+  customer_id: string;
+  customer_name: string;
+  /** What the buyer is looking for, in their own words. */
+  item: string;
+  detail: string;
+  quantity: number;
+  /** What they hope to pay per unit, in Pula. Null when they would rather be told. */
+  budget_per_unit: number | null;
+  delivery_city: string;
+  delivery_address: string;
+  needed_by: string | null;
+  status: RunnerRequestStatus;
+  runner_id: string | null;
+  runner_name: string | null;
+  /**
+   * What the runner found. Set at QUOTED and never before, because a price the
+   * runner has not yet confirmed with a seller is a guess.
+   */
+  quote: {
+    unit_price: number;
+    service_fee: number;
+    total: number;
+    found_at: string;
+    condition: string;
+    note: string;
+  } | null;
+  created_at: string;
+  updated_at: string;
+  timeline: RunnerRequestEvent[];
+}

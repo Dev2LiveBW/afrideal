@@ -12,7 +12,7 @@ import type { CustomerType } from '@/types';
 /**
  * Request for quotation (§21).
  *
- * Deliberately not a checkout. No money moves and no escrow opens: submitting
+ * Deliberately not a checkout. No money moves and no order is raised: submitting
  * asks every verified supplier carrying the product to quote privately, and
  * operations comes back with one landed price. What each supplier quotes is
  * confidential and never surfaces here.

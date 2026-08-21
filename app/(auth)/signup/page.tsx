@@ -9,7 +9,7 @@ import { SignupClient } from './SignupClient';
 export const metadata: Metadata = {
   title: 'Create an account',
   description:
-    'Open an AfriDeal buyer account. Every order is paid into escrow and held until you confirm delivery.',
+    'Open an AfriDeal buyer account. Published prices at every quantity, verified suppliers, and delivery you can follow.',
 };
 
 export const dynamic = 'force-dynamic';

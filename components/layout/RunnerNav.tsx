@@ -4,7 +4,7 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { signOut } from 'next-auth/react';
 import { motion } from 'framer-motion';
-import { Briefcase, LayoutDashboard, LogOut, Wallet } from 'lucide-react';
+import { Briefcase, LayoutDashboard, LogOut, PackageSearch, Wallet } from 'lucide-react';
 
 import { AfriDealLogo } from '@/components/brand/AfriDealLogo';
 import { cn } from '@/lib/utils';
@@ -20,6 +20,7 @@ import { cn } from '@/lib/utils';
 const TABS = [
   { href: '/runner/dashboard', label: 'Home', icon: LayoutDashboard },
   { href: '/runner/jobs', label: 'Jobs', icon: Briefcase },
+  { href: '/runner/sourcing', label: 'Sourcing', icon: PackageSearch },
   { href: '/runner/earnings', label: 'Earnings', icon: Wallet },
 ];
 

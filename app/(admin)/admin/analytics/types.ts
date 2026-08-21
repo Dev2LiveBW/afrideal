@@ -1,4 +1,4 @@
-import type { EscrowSummary } from '@/lib/escrow';
+import type { PayableSummary } from '@/lib/payables';
 
 /**
  * Shape of `GET /api/analytics`. Mirrored here so the server-rendered initial
@@ -33,7 +33,7 @@ export interface AnalyticsData {
     rate: number;
     revenue_share_due: number;
   };
-  escrow: EscrowSummary;
+  payables: PayableSummary;
   top_suppliers: {
     id: string;
     name: string;

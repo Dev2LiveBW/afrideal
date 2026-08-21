@@ -11,7 +11,7 @@ import { motion } from 'framer-motion';
  * staged, and the movement gives navigation a sense of place.
  *
  * Console gets opacity only, at half the duration. An operator moving between
- * dispute and escrow twenty times an hour does not want the page to travel;
+ * dispute and payables queue twenty times an hour does not want the page to travel;
  * motion there is confirmation that something changed, nothing more.
  *
  * Both settle on an exponential ease-out, so they decelerate like something with

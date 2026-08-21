@@ -2,7 +2,7 @@
   "name": "afrideal",
   "version": "1.0.0",
   "private": true,
-  "description": "AfriDeal — Africa's Marketplace. Your Way. Multi-portal escrow marketplace MVP.",
+  "description": "AfriDeal — Africa's Marketplace. Your Way. Multi-portal procurement marketplace MVP.",
   "scripts": {
     "dev": "next dev",
     "build": "next build",

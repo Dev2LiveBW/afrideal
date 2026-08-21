@@ -116,22 +116,22 @@ export function LoginClient() {
         <p className="eyebrow mt-14 text-white/35">Sign in</p>
 
         <h1 className="mt-3 font-display text-[34px] font-bold leading-[1.08] tracking-[-0.03em] text-white sm:text-[42px]">
-          Money that waits
+          The price is on
           <br />
-          until the goods arrive.
+          the page already.
         </h1>
 
         <p className="measure mt-5 text-[15px] leading-7 text-white/55">
-          Every order on AfriDeal is paid into escrow and held until the buyer confirms delivery.
-          Suppliers are verified before they can list, and orders route to whoever is most likely to
-          deliver, not to whoever is cheapest.
+          AfriDeal publishes what a product costs at one unit and at fifty, so a buyer can compare
+          before committing rather than after. Suppliers are verified before they can list, and
+          orders route to whoever is most likely to deliver, not to whoever is cheapest.
         </p>
 
         <dl className="mt-10 grid grid-cols-3 gap-5 border-t border-white/10 pt-7">
           {[
             ['5', 'verified suppliers'],
-            ['12', 'live products'],
-            ['7 days', 'escrow hold window'],
+            ['17', 'live products'],
+            ['60 / 44%', 'retail / bulk markup'],
           ].map(([value, label]) => (
             <div key={label}>
               <dt className="font-mono text-[19px] font-semibold tabular-nums text-gold-light">

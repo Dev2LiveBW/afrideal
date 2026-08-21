@@ -82,7 +82,7 @@
       },
       "money": {
         "displayName": "Money",
-        "purpose": "Every price, total, payout and escrow figure. Mono, tabular, two decimals always, BWP prefixed unless a column header carries it."
+        "purpose": "Every price, total, payout and invoice figure. Mono, tabular, two decimals always, BWP prefixed unless a column header carries it."
       }
     },
     "shadows": [
@@ -187,7 +187,7 @@
       "name": "Money Text",
       "kind": "custom",
       "refersTo": "typography.money",
-      "description": "Every price, total, payout and escrow figure. Mono, tabular, two decimals always.",
+      "description": "Every price, total, payout and invoice figure. Mono, tabular, two decimals always.",
       "html": "<div class=\"ds-money-row\"><span class=\"ds-money ds-money-xl\">BWP 182.00</span><span class=\"ds-money ds-money-md\">BWP 161.00</span><span class=\"ds-money ds-money-forest\">BWP 139.00</span></div>",
       "css": ".ds-money-row { display: flex; align-items: baseline; gap: 20px; } .ds-money { font-family: 'Geist Mono', ui-monospace, monospace; font-weight: 500; font-variant-numeric: tabular-nums; font-feature-settings: 'tnum' 1; color: #111111; } .ds-money-md { font-size: 15px; } .ds-money-xl { font-size: 26px; line-height: 32px; letter-spacing: -0.02em; font-weight: 600; } .ds-money-forest { font-size: 15px; color: #1A5C2A; }"
     },
@@ -212,7 +212,7 @@
       "kind": "card",
       "refersTo": "panel",
       "description": "The repeating chrome of every console screen — header strip on a hairline, 20px body, tables running edge to edge.",
-      "html": "<section class=\"ds-panel\"><header class=\"ds-panel-header\"><div><h2 class=\"ds-panel-title\">Escrow queue</h2><p class=\"ds-panel-desc\">Funds held against undelivered orders</p></div><button class=\"ds-btn-ghost\" style=\"height:36px;padding:0 16px;font-size:13px\">Export</button></header><table class=\"ds-table\"><thead><tr><th>Order</th><th>Supplier</th><th>Amount</th></tr></thead><tbody><tr><td>ORD-1042</td><td>Kalahari Trading</td><td class=\"ds-num\">3,640.00</td></tr><tr><td>ORD-1043</td><td>Gaborone Supply Co</td><td class=\"ds-num\">812.50</td></tr><tr><td>ORD-1044</td><td>Limpopo Wholesale</td><td class=\"ds-num\">15,220.00</td></tr></tbody></table></section>",
+      "html": "<section class=\"ds-panel\"><header class=\"ds-panel-header\"><div><h2 class=\"ds-panel-title\">Supplier payables</h2><p class=\"ds-panel-desc\">Invoices owed for goods procured</p></div><button class=\"ds-btn-ghost\" style=\"height:36px;padding:0 16px;font-size:13px\">Export</button></header><table class=\"ds-table\"><thead><tr><th>Order</th><th>Supplier</th><th>Amount</th></tr></thead><tbody><tr><td>ORD-1042</td><td>Kalahari Trading</td><td class=\"ds-num\">3,640.00</td></tr><tr><td>ORD-1043</td><td>Gaborone Supply Co</td><td class=\"ds-num\">812.50</td></tr><tr><td>ORD-1044</td><td>Limpopo Wholesale</td><td class=\"ds-num\">15,220.00</td></tr></tbody></table></section>",
       "css": ".ds-panel { overflow: hidden; width: 520px; border-radius: 14px; border: 1px solid rgba(23,26,24,0.08); background: #FFFFFF; box-shadow: 0 1px 2px rgba(23,26,24,0.04), 0 8px 24px -12px rgba(23,26,24,0.12); } .ds-panel-header { display: flex; align-items: center; justify-content: space-between; gap: 16px; padding: 16px 20px; border-bottom: 1px solid rgba(23,26,24,0.08); } .ds-panel-title { margin: 0; font-family: 'Satoshi', ui-sans-serif, sans-serif; font-size: 15px; font-weight: 600; color: #111111; } .ds-panel-desc { margin: 2px 0 0; font-family: 'Geist Sans', ui-sans-serif, sans-serif; font-size: 13px; color: #5A615C; } .ds-table { width: 100%; border-collapse: collapse; text-align: left; font-family: 'Geist Sans', ui-sans-serif, sans-serif; font-size: 13px; color: #171a18; } .ds-table thead th { padding: 12px 16px; border-bottom: 1px solid rgba(23,26,24,0.14); background: rgba(212,146,10,0.07); font-family: 'Geist Mono', ui-monospace, monospace; font-size: 10px; font-weight: 500; line-height: 12px; letter-spacing: 0.2em; text-transform: uppercase; color: #8B5E0A; } .ds-table tbody td { padding: 14px 16px; border-bottom: 1px solid rgba(23,26,24,0.08); vertical-align: middle; } .ds-table tbody tr { transition: background-color 160ms cubic-bezier(0.22,1,0.36,1); } .ds-table tbody tr:nth-child(even) { background: rgba(23,26,24,0.015); } .ds-table tbody tr:hover { background: rgba(212,146,10,0.05); } .ds-num { text-align: right; font-family: 'Geist Mono', ui-monospace, monospace; font-variant-numeric: tabular-nums; }"
     },
     {
@@ -274,7 +274,7 @@
       },
       {
         "name": "The Tabular Money Rule",
-        "body": "Every price, total, payout and escrow figure renders through one component, in mono with tabular figures, at two decimals always — including on round numbers, because BWP 1,200 beside BWP 1,199.50 reads as a typo. BWP is prefixed unless a column header already carries it. No surface formats currency by hand.",
+        "body": "Every price, total, payout and invoice figure renders through one component, in mono with tabular figures, at two decimals always — including on round numbers, because BWP 1,200 beside BWP 1,199.50 reads as a typo. BWP is prefixed unless a column header already carries it. No surface formats currency by hand.",
         "section": "typography"
       },
       {
@@ -314,7 +314,7 @@
       },
       {
         "name": "The Reserved Enclosure Rule",
-        "body": "The nested tray is for surfaces that carry weight — a stat cluster, an escrow control, the checkout summary, the hero ladder. It never appears on anything that repeats more than eight times on a page; a list of trays is just a list.",
+        "body": "The nested tray is for surfaces that carry weight — a stat cluster, a settlement control, the checkout summary, the hero ladder. It never appears on anything that repeats more than eight times on a page; a list of trays is just a list.",
         "section": "shapes"
       },
       {

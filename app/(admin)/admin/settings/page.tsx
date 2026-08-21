@@ -26,7 +26,7 @@ export default async function AdminSettingsPage() {
         <PageHeader
           eyebrow="Operations"
           title="Platform settings"
-          description="Commission, escrow and gateway configuration for the whole marketplace."
+          description="Commission, supplier payment terms and gateway configuration for the whole marketplace."
         />
 
         {!isSuperAdmin ? (
@@ -40,7 +40,7 @@ export default async function AdminSettingsPage() {
         ) : (
           <SettingsForm
             initialCommissionRate={12}
-            initialEscrowHoldDays={7}
+            initialSupplierTermsDays={7}
             initialRevenueShareRate={5}
             initialGateways={[
               { id: 'dpo', label: 'DPO Pay', connected: true },

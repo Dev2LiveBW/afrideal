@@ -33,7 +33,7 @@ export const metadata: Metadata = {
     template: '%s · AfriDeal',
   },
   description:
-    'A escrow-backed marketplace connecting verified suppliers across Botswana and South Africa with buyers who need the goods to actually arrive.',
+    'A procurement marketplace for Botswana and South Africa. Published prices at every quantity, verified suppliers, and delivery you can follow.',
   icons: { icon: '/afrideal-mark.svg' },
 };
 
@@ -62,18 +62,21 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           suppressHydrationWarning
           dangerouslySetInnerHTML={{
             __html: `<!--
-  THESIS: A product here has three published prices, not one, and the buyer
-    picks the rung. Refuses the marketplace default of a single price plus a
-    hidden "contact us for wholesale".
+  THESIS: The buyer can compare the price before committing. A product here
+    publishes what it costs at one unit and at fifty, with no account and no
+    enquiry in between. Refuses the marketplace default of a single price plus
+    a hidden "contact us for wholesale".
   OWN-WORLD: AfriDeal ink/gold/forest on warm neutrals, Satoshi display, mono
     tabular money. Structure is a descending ladder: rungs step down and to the
     right, cheaper rungs carry more weight.
-  STORY: The buyer sees the same product at three real prices, learns the price
-    is a function of quantity, and enters the catalogue through the rung that
-    matches how they buy.
-  FIRST VIEWPORT: Left, the mechanism stated in one line. Right, one real
-    product on a three-rung ladder with live BWP figures. The three rungs are
-    the primary action; each opens the catalogue at that tier.
+  STORY: The buyer sees one hair line — the category the business actually
+    sells — at its real published rungs, learns the price is a function of
+    quantity alone, and enters the catalogue through the rung that matches how
+    they buy.
+  FIRST VIEWPORT: Left, the comparison stated in one line. Right, one real
+    product on its ladder with live BWP figures: two published rungs and a
+    third answered by quotation. The rungs are the primary action; each opens
+    the catalogue at that tier.
   FORM: Three-door split, candidate 2 of 7, user-pinned over assigned candidate
     7. Seed key 9326abdf.
   FINISH: unreviewed and undocumented is unfinished; this build ends with the

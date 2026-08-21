@@ -20,8 +20,8 @@ export interface OrderRow {
   order: Order;
   itemCount: number;
   legs: { id: string; supplierName: string; status: SupplierOrderStatus }[];
-  heldEscrowIds: string[];
-  heldEscrowTotal: number;
+  pendingPayablesIds: string[];
+  pendingPayablesTotal: number;
 }
 
 const STATUS_TABS: { id: OrderStatus | 'ALL'; label: string }[] = [
@@ -52,11 +52,11 @@ export function OrdersTable({ rows }: { rows: OrderRow[] }) {
     if (!pending) return;
     setSaving(true);
     try {
-      const response = await fetch('/api/escrow', {
+      const response = await fetch('/api/payables', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          ids: pending.heldEscrowIds,
+          ids: pending.pendingPayablesIds,
           status: 'RELEASED',
           note: `Released from the orders queue for ${pending.order.reference}.`,
         }),
@@ -68,7 +68,7 @@ export function OrdersTable({ rows }: { rows: OrderRow[] }) {
       const { moved, skipped } = (await response.json()) as { moved: string[]; skipped: { id: string; reason: string }[] };
 
       if (skipped.length === 0) {
-        toast.success(`Released ${moved.length} escrow leg${moved.length === 1 ? '' : 's'} for ${pending.order.reference}`);
+        toast.success(`Settled ${moved.length} supplier invoice${moved.length === 1 ? '' : 's'} for ${pending.order.reference}`);
       } else if (moved.length === 0) {
         toast.error(`Nothing released — ${skipped.length} leg${skipped.length === 1 ? '' : 's'} could not move.`);
       } else {
@@ -78,7 +78,7 @@ export function OrdersTable({ rows }: { rows: OrderRow[] }) {
       setPending(null);
       router.refresh();
     } catch (error) {
-      toast.error(error instanceof Error ? error.message : 'Could not release escrow');
+      toast.error(error instanceof Error ? error.message : 'Could not settle the invoices');
     } finally {
       setSaving(false);
     }
@@ -113,7 +113,7 @@ export function OrdersTable({ rows }: { rows: OrderRow[] }) {
                   <th>Payment</th>
                   <th className="w-[22%]">Supplier legs</th>
                   <th>Status</th>
-                  <th className="text-right">Escrow</th>
+                  <th className="text-right">Owed to suppliers</th>
                 </tr>
               </thead>
               <tbody>
@@ -155,7 +155,7 @@ export function OrdersTable({ rows }: { rows: OrderRow[] }) {
                       <StatusBadge status={row.order.status} size="sm" />
                     </td>
                     <td className="text-right">
-                      {row.heldEscrowIds.length > 0 ? (
+                      {row.pendingPayablesIds.length > 0 ? (
                         <GoldButton
                           size="sm"
                           variant="forest"
@@ -182,10 +182,10 @@ export function OrdersTable({ rows }: { rows: OrderRow[] }) {
         onConfirm={confirmRelease}
         loading={saving}
         tone="forest"
-        title={pending ? `Release escrow for ${pending.order.reference}?` : ''}
+        title={pending ? `Settle supplier invoices for ${pending.order.reference}?` : ''}
         description={
           pending
-            ? `${pending.heldEscrowIds.length} escrow leg${pending.heldEscrowIds.length === 1 ? '' : 's'} totalling ${new Intl.NumberFormat('en-BW', { minimumFractionDigits: 2 }).format(pending.heldEscrowTotal)} BWP will be released to the supplier(s) immediately. This cannot be reversed from here.`
+            ? `${pending.pendingPayablesIds.length} supplier invoice${pending.pendingPayablesIds.length === 1 ? '' : 's'} totalling BWP ${new Intl.NumberFormat('en-BW', { minimumFractionDigits: 2 }).format(pending.pendingPayablesTotal)} will be paid out immediately. This cannot be reversed from here.`
             : ''
         }
         confirmLabel="Release funds"

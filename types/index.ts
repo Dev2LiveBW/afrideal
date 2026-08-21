@@ -155,7 +155,7 @@ export interface InventoryRecord {
   reserved: number;
 }
 
-// ── Orders, escrow, fulfilment ───────────────────────────────────────────────
+// ── Orders, settlement, fulfilment ───────────────────────────────────────────
 
 export type OrderStatus =
   | 'PENDING'
@@ -233,30 +233,40 @@ export interface SupplierOrder {
   created_at: string;
 }
 
-export type EscrowStatus = 'HELD' | 'RELEASED' | 'REFUNDED' | 'DISPUTED';
+export type PayableStatus = 'PENDING' | 'SETTLED' | 'CANCELLED' | 'ON_HOLD';
 
-export interface EscrowTransition {
-  from: EscrowStatus | null;
-  to: EscrowStatus;
+export interface PayableTransition {
+  from: PayableStatus | null;
+  to: PayableStatus;
   at: string;
   actor: string;
   note: string;
 }
 
-export interface EscrowRecord {
+/**
+ * What AfriDeal owes a supplier for goods it has procured on a customer order.
+ *
+ * This is a trade payable, not custodied client money. The customer buys from
+ * AfriDeal and pays AfriDeal through a licensed payment provider; AfriDeal
+ * then buys the goods from the supplier and settles that invoice on the
+ * supplier's agreed terms once delivery is confirmed. At no point does the
+ * platform hold funds on another party's behalf.
+ */
+export interface SupplierPayable {
   id: string;
   order_id: string;
   supplier_order_id: string;
   supplier_id: string;
   amount: number;
-  status: EscrowStatus;
+  status: PayableStatus;
   gateway: PaymentMethod;
-  held_at: string;
-  released_at: string | null;
-  refunded_at: string | null;
-  /** Days the funds may sit before ops is nudged. */
-  hold_window_days: number;
-  history: EscrowTransition[];
+  /** When the procurement invoice was raised against the order. */
+  raised_at: string;
+  settled_at: string | null;
+  cancelled_at: string | null;
+  /** Agreed supplier payment terms, in days from delivery confirmation. */
+  terms_days: number;
+  history: PayableTransition[];
 }
 
 export type DisputeStatus =
@@ -268,7 +278,7 @@ export type DisputeStatus =
 export interface Dispute {
   id: string;
   order_id: string;
-  escrow_id: string;
+  payable_id: string;
   customer_id: string;
   customer_name: string;
   supplier_id: string;
@@ -403,7 +413,7 @@ export interface AppNotification {
   user_id: string;
   title: string;
   body: string;
-  kind: 'ORDER' | 'ESCROW' | 'SUPPLIER' | 'DISPUTE' | 'SYSTEM';
+  kind: 'ORDER' | 'PAYMENT' | 'SUPPLIER' | 'DISPUTE' | 'SYSTEM';
   read: boolean;
   at: string;
 }

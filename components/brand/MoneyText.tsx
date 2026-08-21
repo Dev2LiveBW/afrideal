@@ -2,7 +2,7 @@ import { bwp, bwpBare } from '@/lib/format';
 import { cn } from '@/lib/utils';
 
 /**
- * Every price, total, payout and escrow amount goes through here.
+ * Every price, total, payout and invoice amount goes through here.
  *
  * Mono with tabular figures so a column of Pula aligns on the decimal without
  * anyone hand-tuning widths, and two decimals always — including on round

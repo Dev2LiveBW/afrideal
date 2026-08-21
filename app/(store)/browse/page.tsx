@@ -29,6 +29,18 @@ export default async function BrowsePage({
   const customerType = session?.user?.customer_type ?? 'GUEST';
 
   /*
+   * `?category=` accepts either the slug or the raw id, and resolves to an id
+   * before the client sees it. Links written by hand — in the header, the
+   * footer, a shared URL — read far better as `hair-weaves-extensions` than as
+   * `c1`, and an id that changes on a reseed should not break a bookmark.
+   */
+  const categoryId =
+    categories.find(
+      (category) =>
+        category.slug === searchParams.category || category.id === searchParams.category,
+    )?.id ?? null;
+
+  /*
    * The rung comes off the URL, so the three doors on the landing page land
    * somewhere that actually honours them. An unrecognised value falls back to
    * the default view rather than 404-ing a browse route.
@@ -51,7 +63,7 @@ export default async function BrowsePage({
       // the product's own list price.
       tierPrice: door?.unitPrice ?? null,
       tierSavingPct: door?.savingPct ?? 0,
-      tierLocked: door?.locked ?? false,
+      tierByQuotation: door?.byQuotation ?? false,
       // Parsed off the band range ("5–19" → 5) so quick-add can take the
       // quantity that actually earns the price the card is showing.
       tierMinQty: door?.range ? Number.parseInt(door.range, 10) : undefined,
@@ -68,7 +80,7 @@ export default async function BrowsePage({
 
   const params = (next: string | null) => {
     const search = new URLSearchParams();
-    if (searchParams.category) search.set('category', searchParams.category);
+    if (categoryId) search.set('category', categoryId);
     if (searchParams.q) search.set('q', searchParams.q);
     if (next) search.set('tier', next);
     const query = search.toString();
@@ -79,7 +91,7 @@ export default async function BrowsePage({
     tier: door.tier,
     label: door.label,
     range: door.range ? `${door.range}` : null,
-    locked: door.locked,
+    byQuotation: door.byQuotation,
     // Selecting the active rung again clears it, so the control is also the way
     // back to the default view.
     href: params(tier === door.tier ? null : door.tier),
@@ -91,7 +103,7 @@ export default async function BrowsePage({
         categories={categories}
         products={enriched}
         images={images}
-        initialCategory={searchParams.category ?? 'all'}
+        initialCategory={categoryId ?? 'all'}
         initialQuery={searchParams.q ?? ''}
         tier={tier}
         tierOptions={tierOptions}

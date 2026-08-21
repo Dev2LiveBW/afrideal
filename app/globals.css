@@ -90,7 +90,7 @@
   /*
    * The nested enclosure. An outer tray with a hairline ring holding an inner
    * core with a mathematically smaller radius, so the curves stay concentric.
-   * Reserved for surfaces that matter — stat clusters, escrow controls, the
+   * Reserved for surfaces that matter — stat clusters, settlement controls, the
    * checkout summary. Never on anything that repeats more than eight times.
    */
   .enclosure {

@@ -104,10 +104,21 @@ const PRODUCT_QUERIES = {
   p010: ['stack of paper', 'printer paper', 'office paper ream'],
   p011: ['boiler suit', 'coverall clothing', 'overalls workwear garment'],
   p012: ['african school children uniform', 'school uniform folded clothing', 'kids uniform clothes'],
+  // The hair category is the shop window, and the first run got it wrong in
+  // exactly the way this file already warns about: unanchored queries returned
+  // a platinum wig on an East Asian model and a beach portrait with no product
+  // in it. Both queries are now anchored to the hair itself and to the market
+  // the catalogue actually sells into.
+  p013: ['black hair extensions bundle', 'wavy hair extensions', 'hair weave bundle'],
+  p014: ['black woman long hair studio portrait', 'african woman long hairstyle', 'black woman hair salon'],
+  p015: ['african woman straight long hair', 'black woman sleek straight hair', 'black woman long dark hair'],
+  p016: ['african woman box braids', 'braided hairstyle african woman', 'braids hairstyle black woman'],
+  p017: ['african woman short bob hair', 'black woman bob haircut', 'african woman short hairstyle'],
 };
 
 const CATEGORY_QUERIES = {
-  c1: ['beauty cosmetics flatlay', 'cosmetic products'],
+  c1: ['african woman braided hair', 'hair extensions bundles', 'afro hair styling'],
+  c7: ['beauty cosmetics flatlay', 'cosmetic products'],
   c2: ['consumer electronics gadgets', 'electronics devices'],
   c3: ['construction materials site', 'building materials'],
   c4: ['grain sacks market africa', 'agriculture harvest grain'],
@@ -180,15 +191,43 @@ async function firstHit(queries) {
 
 // ─── Run ─────────────────────────────────────────────────────────────────────
 
+/*
+ * `--only p014,p016` re-fetches a subset. Taking a list rather than a single id
+ * matters more than it looks: a partial run used to overwrite CREDITS.json with
+ * just the products it touched, silently dropping the provenance of every file
+ * it left alone. So the ids are a set, and the credits below are merged.
+ */
 const onlyArg = process.argv.indexOf('--only');
-const only = onlyArg !== -1 ? process.argv[onlyArg + 1] : null;
+const only =
+  onlyArg !== -1 && process.argv[onlyArg + 1]
+    ? new Set(process.argv[onlyArg + 1].split(',').map((id) => id.trim()).filter(Boolean))
+    : null;
 
 await fs.mkdir(OUT, { recursive: true });
 
 const products = JSON.parse(await fs.readFile(path.join(DATA, 'products.json'), 'utf8'));
 const images = JSON.parse(await fs.readFile(path.join(DATA, 'product-images.json'), 'utf8'));
 
-const credits = [];
+/*
+ * Start from whatever provenance is already recorded, so a partial run adds to
+ * the record instead of truncating it.
+ */
+const credits = await (async () => {
+  try {
+    return JSON.parse(await fs.readFile(path.join(OUT, 'CREDITS.json'), 'utf8'));
+  } catch {
+    return [];
+  }
+})();
+
+const creditFor = (file) => credits.findIndex((entry) => entry.file === file);
+
+function recordCredit(entry) {
+  const at = creditFor(entry.file);
+  if (at === -1) credits.push(entry);
+  else credits[at] = entry;
+}
+
 let fetched = 0;
 let skipped = 0;
 
@@ -196,7 +235,7 @@ console.log(`Provider: ${PROVIDER}\n`);
 
 // Products get up to three distinct views for the detail-page thumbnail rail.
 for (const product of products) {
-  if (only && product.id !== only) continue;
+  if (only && !only.has(product.id)) continue;
 
   const queries = PRODUCT_QUERIES[product.id];
   if (!queries) continue;
@@ -223,7 +262,7 @@ for (const product of products) {
     try {
       const bytes = await download(candidate.url, path.join(OUT, filename));
       rows[i].image_url = `/products/${filename}`;
-      credits.push({ file: filename, product_id: product.id, ...candidate, url: undefined });
+      recordCredit({ file: filename, product_id: product.id, ...candidate, url: undefined });
       fetched += 1;
       console.log(`      ✓ ${filename}  ${Math.round(bytes / 1024)}kb  — ${candidate.credit}`);
     } catch (error) {
@@ -249,7 +288,7 @@ if (!only) {
 
     try {
       const bytes = await download(candidate.url, path.join(OUT, filename));
-      credits.push({ file: filename, scope: key, ...candidate, url: undefined });
+      recordCredit({ file: filename, scope: key, ...candidate, url: undefined });
       fetched += 1;
       console.log(`${key}   ✓ ${filename}  ${Math.round(bytes / 1024)}kb  — ${candidate.credit}  ("${hit.query}")`);
     } catch (error) {
@@ -275,4 +314,4 @@ console.log(`${fetched} image(s) downloaded, ${skipped} query group(s) with no r
 console.log(`\nProvenance written to public/products/CREDITS.json`);
 console.log(`\nNow LOOK at them before trusting the run:`);
 console.log(`  a wrong-but-plausible photo is the failure mode here, not a crash.`);
-console.log(`  re-fetch a single product with:  npm run images -- --only p004`);
+console.log(`  re-fetch specific products with:  npm run images -- --only p014,p016`);

@@ -46,7 +46,7 @@ export const DEMO_GROUPS: { heading: string; caption: string; accounts: DemoAcco
         name: 'Finance Admin',
         role: 'FINANCE_ADMIN',
         avatar: 'FA',
-        blurb: 'Escrow, settlements and analytics only.',
+        blurb: 'Supplier payables, settlements and analytics only.',
       },
     ],
   },

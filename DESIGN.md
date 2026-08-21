@@ -1,6 +1,6 @@
 ---
 name: AfriDeal
-description: An escrow-backed marketplace where every product publishes three prices, drawn as a descending ladder in ink, gold and forest on warm neutrals.
+description: A procurement marketplace where every product publishes its price at one unit and at fifty, drawn as a descending ladder in ink, gold and forest on warm neutrals.
 colors:
   ink: "#111111"
   ink-800: "#1a1a1a"
@@ -318,11 +318,11 @@ as flowed text; body copy is quiet and long-lined; numbers are mechanical.
 - **Label** (Geist Mono 500, 0.625rem/0.75rem, tracking 0.2em, uppercase): table
   column headers and small structural labels.
 - **Money and figures** (Geist Mono 500, tabular, 12px → 26px): every price,
-  total, payout, escrow amount, count, percentage and range.
+  total, payout, invoice amount, count, percentage and range.
 
 ### Named Rules
 
-**The Tabular Money Rule.** Every price, total, payout and escrow figure renders
+**The Tabular Money Rule.** Every price, total, payout and invoice figure renders
 through one component, in mono with tabular figures, at two decimals always —
 including on round numbers, because `BWP 1,200` beside `BWP 1,199.50` reads as a
 typo. `BWP` is prefixed unless a column header already carries it. No surface
@@ -434,7 +434,7 @@ the outer radius minus the padding: a 2rem tray with 0.375rem of padding holds a
 radius as its parent is wrong.
 
 **The Reserved Enclosure Rule.** The nested tray is for surfaces that carry
-weight — a stat cluster, an escrow control, the checkout summary, the hero
+weight — a stat cluster, a settlement control, the checkout summary, the hero
 ladder. It never appears on anything that repeats more than eight times on a
 page; a list of trays is just a list.
 

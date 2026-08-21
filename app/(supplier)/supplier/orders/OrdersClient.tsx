@@ -17,10 +17,10 @@ import { EmptyState, Panel, PanelBody, PanelHeader } from '@/components/brand/Pa
 import { GoldButton } from '@/components/brand/GoldButton';
 import { MoneyText } from '@/components/brand/MoneyText';
 import { StatusBadge } from '@/components/brand/StatusBadge';
-import { EscrowPanel } from '@/components/orders/EscrowPanel';
+import { SettlementPanel } from '@/components/orders/SettlementPanel';
 import { Swatch } from '@/components/storefront/Swatch';
 import { dateTime, humanise } from '@/lib/format';
-import type { EscrowRecord, Order, OrderItem, SupplierOrder, SupplierOrderStatus } from '@/types';
+import type { SupplierPayable, Order, OrderItem, SupplierOrder, SupplierOrderStatus } from '@/types';
 
 /**
  * Order fulfilment list.
@@ -28,14 +28,14 @@ import type { EscrowRecord, Order, OrderItem, SupplierOrder, SupplierOrderStatus
  * Each card exposes exactly one forward action — the next step in
  * Confirm → Preparing → Ready for collection — because that's the whole
  * supplier-side flow; a runner takes it from READY_FOR_COLLECTION onward.
- * The escrow banner underneath is always read-only here: a supplier cannot
- * release or refund their own escrow.
+ * The settlement panel underneath is always read-only here: a supplier cannot
+ * settle or cancel their own invoice.
  */
 
 type Leg = SupplierOrder & {
   order: Order | null;
   items: OrderItem[];
-  escrow: EscrowRecord | null;
+  payable: SupplierPayable | null;
 };
 
 const NEXT_ACTION: Partial<Record<SupplierOrderStatus, { status: SupplierOrderStatus; label: string }>> = {
@@ -185,11 +185,11 @@ export function OrdersClient({
                 )}
               </div>
 
-              {leg.escrow ? (
-                <EscrowPanel record={leg.escrow} supplierName={supplierName} canAct={false} />
+              {leg.payable ? (
+                <SettlementPanel record={leg.payable} supplierName={supplierName} canAct={false} />
               ) : (
                 <p className="rounded border border-hairline bg-surface px-3.5 py-2.5 text-[12px] text-muted">
-                  No escrow record for this order yet.
+                  No supplier invoice has been raised on this order yet.
                 </p>
               )}
             </PanelBody>

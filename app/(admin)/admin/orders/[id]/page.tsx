@@ -5,7 +5,7 @@ import { Bike, CreditCard, MapPin, Star, User } from 'lucide-react';
 import { MoneyText } from '@/components/brand/MoneyText';
 import { PageHeader, Panel, PanelBody, PanelHeader } from '@/components/brand/Panel';
 import { StatusBadge } from '@/components/brand/StatusBadge';
-import { EscrowPanel } from '@/components/orders/EscrowPanel';
+import { SettlementPanel } from '@/components/orders/SettlementPanel';
 import { OrderTimeline, OrderTimelineLog } from '@/components/orders/OrderTimeline';
 import { ConsoleTopbar } from '@/components/layout/ConsoleTopbar';
 import { Swatch } from '@/components/storefront/Swatch';
@@ -28,7 +28,7 @@ export default async function AdminOrderDetailPage({ params }: { params: { id: s
   ]);
 
   if (!detail) notFound();
-  const { order, items, legs, escrow } = detail;
+  const { order, items, legs, payables } = detail;
 
   const notifications = session?.user ? await getNotifications(session.user.id) : [];
   const runnerById = new Map(runners.map((runner) => [runner.id, runner]));
@@ -227,19 +227,22 @@ export default async function AdminOrderDetailPage({ params }: { params: { id: s
           </div>
         </Panel>
 
-        {/* ── Escrow legs ────────────────────────────────────────────────── */}
+        {/* ── Supplier invoices ──────────────────────────────────────────── */}
         <div>
           <p className="eyebrow mb-3">
-            Escrow {escrow.length > 0 && `(${escrow.length} leg${escrow.length === 1 ? '' : 's'})`}
+            Supplier invoices{' '}
+            {payables.length > 0 && `(${payables.length} leg${payables.length === 1 ? '' : 's'})`}
           </p>
-          {escrow.length === 0 ? (
+          {payables.length === 0 ? (
             <Panel>
-              <PanelBody className="text-[12.5px] text-muted">No escrow has been recorded for this order.</PanelBody>
+              <PanelBody className="text-[12.5px] text-muted">
+                No supplier invoice has been raised against this order yet.
+              </PanelBody>
             </Panel>
           ) : (
             <div className="grid grid-cols-1 gap-5 md:grid-cols-2">
-              {escrow.map((record) => (
-                <EscrowPanel
+              {payables.map((record) => (
+                <SettlementPanel
                   key={record.id}
                   record={record}
                   supplierName={legs.find((leg) => leg.id === record.supplier_order_id)?.supplier?.name ?? 'Supplier'}

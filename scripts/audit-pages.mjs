@@ -134,6 +134,8 @@ section('Customer (thabo@gmail.com)');
   await auditPage(jar, '/orders/o013', ['AFD-'], '/orders/o013 (disputed)');
   await auditPage(jar, '/checkout', ['heck'], '/checkout');
   await auditPage(jar, '/products/p012', ['School Uniform'], '/products/p012');
+  await auditPage(jar, '/request-a-runner', ['runner', 'looking'], '/request-a-runner');
+  await auditPage(jar, '/requests', ['Runner requests'], '/requests');
 }
 
 // ── Admin ────────────────────────────────────────────────────────────────────
@@ -142,7 +144,7 @@ section('Admin console (admin@afrideal.co.bw)');
 {
   const jar = await signIn('admin@afrideal.co.bw', 'Admin@2026');
 
-  await auditPage(jar, '/admin/dashboard', ['GMV', 'scrow'], '/admin/dashboard');
+  await auditPage(jar, '/admin/dashboard', ['GMV', 'ayable'], '/admin/dashboard');
   await auditPage(jar, '/admin/products', ['Shea Butter'], '/admin/products');
   await auditPage(jar, '/admin/products/p001', ['Shea Butter', 'Naledi'], '/admin/products/p001');
   await auditPage(jar, '/admin/suppliers', ['Naledi', 'GlowUp'], '/admin/suppliers');
@@ -150,11 +152,12 @@ section('Admin console (admin@afrideal.co.bw)');
   await auditPage(jar, '/admin/suppliers/s006', ['Tsholofelo'], '/admin/suppliers/s006 (pending)');
   await auditPage(jar, '/admin/orders', ['AFD-'], '/admin/orders');
   await auditPage(jar, '/admin/orders/o001', ['AFD-'], '/admin/orders/o001');
-  await auditPage(jar, '/admin/escrow', ['scrow'], '/admin/escrow');
+  await auditPage(jar, '/admin/payables', ['ayable'], '/admin/payables');
   await auditPage(jar, '/admin/disputes', ['ispute'], '/admin/disputes');
   await auditPage(jar, '/admin/pricing', ['ricing', 'argin'], '/admin/pricing');
   await auditPage(jar, '/admin/analytics', ['evenue'], '/admin/analytics');
   await auditPage(jar, '/admin/runners', ['Kagiso'], '/admin/runners');
+  await auditPage(jar, '/admin/sourcing', ['RUN-', 'ourcing'], '/admin/sourcing');
   await auditPage(jar, '/admin/settings', ['etting'], '/admin/settings');
 }
 
@@ -164,7 +167,7 @@ section('Finance scoping (finance@afrideal.co.bw)');
 {
   const jar = await signIn('finance@afrideal.co.bw', 'Finance@2026');
   await auditPage(jar, '/admin/analytics', ['evenue'], '/admin/analytics');
-  await auditPage(jar, '/admin/escrow', ['scrow'], '/admin/escrow');
+  await auditPage(jar, '/admin/payables', ['ayable'], '/admin/payables');
 
   // Finance must be bounced off the surfaces it is not scoped to.
   const denied = await request(jar, '/admin/settings');
@@ -208,6 +211,7 @@ section('Runner portal (runner@afrideal.co.bw)');
   await auditPage(jar, '/runner/dashboard', ['Kagiso'], '/runner/dashboard');
   await auditPage(jar, '/runner/jobs', ['ob'], '/runner/jobs');
   await auditPage(jar, '/runner/earnings', ['arning'], '/runner/earnings');
+  await auditPage(jar, '/runner/sourcing', ['ourcing'], '/runner/sourcing');
 }
 
 // ── Report ───────────────────────────────────────────────────────────────────

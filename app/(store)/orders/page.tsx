@@ -23,7 +23,7 @@ export default async function OrdersPage() {
         <EmptyState
           icon={<LogIn size={22} strokeWidth={1.5} />}
           title="Sign in to see your orders"
-          description="Order history and escrow status are tied to your account."
+          description="Your order history and delivery status, tied to your account."
           action={
             <Link href="/login">
               <GoldButton variant="gold" size="md" withArrow>
@@ -56,15 +56,15 @@ export default async function OrdersPage() {
     <div className="mx-auto max-w-market px-6 pb-24 pt-28">
       <h1 className="font-display text-headline-lg font-semibold text-ink">Your orders</h1>
       <p className="measure mt-2 text-[14px] leading-6 text-body">
-        Every order here is backed by escrow. Nothing is paid out to a supplier until you confirm it
-        arrived.
+        Every order here is covered by AfriDeal buyer protection. Confirm each one as it arrives,
+        and if something is wrong, report it and we will put it right.
       </p>
 
       {orders.length === 0 ? (
         <EmptyState
           icon={<PackageOpen size={22} strokeWidth={1.5} />}
           title="No orders yet"
-          description="When you place an order it will appear here with live tracking and its escrow status."
+          description="When you place an order it will appear here with live tracking and delivery status."
           action={
             <Link href="/browse">
               <GoldButton variant="gold" size="md" withArrow>

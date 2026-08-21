@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { useEffect, useState } from 'react';
-import { Lock, Minus, Plus, ShoppingBag, Trash2 } from 'lucide-react';
+import { ShieldCheck, Minus, Plus, ShoppingBag, Trash2 } from 'lucide-react';
 
 import { GoldButton } from '@/components/brand/GoldButton';
 import { MoneyText } from '@/components/brand/MoneyText';
@@ -100,7 +100,7 @@ export function CartClient({
         <EmptyState
           icon={<ShoppingBag size={22} strokeWidth={1.5} />}
           title="Nothing in the cart yet"
-          description="Everything on AfriDeal settles through escrow, so you can fill this without committing your money up front."
+          description="Add what you need and the price adjusts to the quantity as you go. Nothing is charged until you check out."
           action={
             <Link href="/browse">
               <GoldButton variant="gold" size="md" withArrow>
@@ -262,12 +262,12 @@ export function CartClient({
 
             {/* Always visible, per the brief. */}
             <div className="mt-4 flex items-start gap-3 rounded-md border border-gold/25 bg-gold-50/70 px-4 py-3.5">
-              <Lock size={16} strokeWidth={1.5} className="mt-0.5 shrink-0 text-gold-700" />
+              <ShieldCheck size={16} strokeWidth={1.5} className="mt-0.5 shrink-0 text-gold-700" />
               <div>
-                <p className="text-[13px] font-semibold text-gold-700">Protected by escrow</p>
+                <p className="text-[13px] font-semibold text-gold-700">AfriDeal buyer protection</p>
                 <p className="mt-1 text-[12.5px] leading-5 text-gold-700/85">
-                  AfriDeal holds your payment. The supplier is paid only after you confirm the goods
-                  arrived, and nothing releases on a timer.
+                  You buy from AfriDeal, not from the supplier directly. If an order arrives late,
+                  short or not as described, it is ours to replace or refund.
                 </p>
               </div>
             </div>

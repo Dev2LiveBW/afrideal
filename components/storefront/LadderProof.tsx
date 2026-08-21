@@ -1,6 +1,8 @@
 import Link from 'next/link';
 
 import { MoneyText } from '@/components/brand/MoneyText';
+import { bwpBare } from '@/lib/format';
+import { cn } from '@/lib/utils';
 import { Swatch } from '@/components/storefront/Swatch';
 import type { Product, ProductImage } from '@/types';
 
@@ -23,14 +25,14 @@ export interface LadderProofRow {
  * would be a design that cannot be wrong, which is a design that proves
  * nothing.
  */
-export function LadderProof({ rows }: { rows: LadderProofRow[] }) {
+export function LadderProof({ rows, className }: { rows: LadderProofRow[]; className?: string }) {
   if (rows.length === 0) return null;
 
   // One shared scale, set by the deepest ladder on show.
   const deepest = Math.max(...rows.map((row) => row.pct));
 
   return (
-    <ul className="divide-y divide-hairline">
+    <ul className={cn('divide-y divide-hairline', className)}>
       {rows.map(({ product, image, from, to, pct, lowestRange }) => (
         <li key={product.id}>
           <Link
@@ -77,8 +79,14 @@ export function LadderProof({ rows }: { rows: LadderProofRow[] }) {
             </div>
 
             <div className="shrink-0 text-right">
+              {/*
+                Grouped the same way MoneyText groups the figure below it.
+                `toFixed` drops the thousands separator, so a four-figure
+                struck-through price sat next to a grouped one and read as a
+                different kind of number.
+              */}
               <p className="font-mono text-[12px] tabular-nums text-muted line-through">
-                {from.toFixed(2)}
+                {bwpBare(from)}
               </p>
               <MoneyText amount={to} size="md" bare className="text-ink" />
             </div>

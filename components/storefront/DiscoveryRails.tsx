@@ -39,7 +39,7 @@ export function CategoryTiles({
         <div>
           <h2 className="font-display text-headline-md font-semibold text-ink">Shop by category</h2>
           <p className="mt-1 text-[13.5px] text-body">
-            Six trades, one settlement layer and one escrow account behind all of them
+            Ranked by what the platform actually sells, hair first
           </p>
         </div>
         <Link
@@ -67,7 +67,7 @@ export function CategoryTiles({
               transition={{ delay: index * 0.045, duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
             >
             <Link
-              href={`/browse?category=${category.id}`}
+              href={`/browse?category=${category.slug}`}
               className="group block overflow-hidden rounded-md border border-hairline bg-surface-raised transition-all duration-400 ease-[cubic-bezier(0.16,1,0.3,1)] hover:-translate-y-0.5 hover:border-gold/30 hover:shadow-lift"
             >
               <div

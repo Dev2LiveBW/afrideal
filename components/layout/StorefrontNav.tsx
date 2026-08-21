@@ -5,17 +5,24 @@ import { usePathname, useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import { useSession, signOut } from 'next-auth/react';
 import { AnimatePresence, motion } from 'framer-motion';
-import { LogOut, Menu, Package, ShoppingBag, User, X } from 'lucide-react';
+import { ChevronRight, LogOut, Menu, Package, ShoppingBag, User, X } from 'lucide-react';
 
 import { AfriDealLogo } from '@/components/brand/AfriDealLogo';
+import { CategoryIcon } from '@/components/storefront/CategoryIcon';
 import { GoldButton } from '@/components/brand/GoldButton';
 import { cartCount, useAfriDealStore } from '@/store/useAfriDealStore';
+import type { Category } from '@/types';
 import { cn } from '@/lib/utils';
 
+/*
+ * Two category shortcuts at most, and they go to what the platform sells. This
+ * used to point at Building Materials and Agriculture, which between them are
+ * four listings — the header was advertising the tail of the catalogue.
+ */
 const LINKS = [
   { href: '/browse', label: 'Browse' },
-  { href: '/browse?category=c3', label: 'Building' },
-  { href: '/browse?category=c4', label: 'Agriculture' },
+  { href: '/browse?category=hair-weaves-extensions', label: 'Hair & Weaves' },
+  { href: '/request-a-runner', label: 'Request a runner' },
   { href: '/orders', label: 'My orders' },
 ];
 
@@ -23,7 +30,7 @@ const LINKS = [
  * Storefront navigation — a floating pill that detaches from the top and gains
  * a glass ground once the page scrolls under it.
  */
-export function StorefrontNav() {
+export function StorefrontNav({ categories = [] }: { categories?: Category[] }) {
   const pathname = usePathname();
   const router = useRouter();
   const { data: session } = useSession();
@@ -48,7 +55,15 @@ export function StorefrontNav() {
   useEffect(() => setMenuOpen(false), [pathname]);
 
   const count = mounted ? cartCount(cart) : 0;
-  const onDarkHero = pathname === '/' && !scrolled;
+
+  /*
+   * The nav used to switch to white type at the top of the landing page, on the
+   * assumption that the hero sat on a dark ground. It does not — the hero is on
+   * the warm page surface and the only dark object is the price ladder beside
+   * it — so every control in the header was white on #f5f5f5 until the first
+   * scroll. Ink throughout: the pill still fades its own background in, which
+   * is what the effect was actually for.
+   */
 
   return (
     <>
@@ -65,7 +80,7 @@ export function StorefrontNav() {
           )}
         >
           <Link href="/" className="shrink-0">
-            <AfriDealLogo variant={onDarkHero ? 'dark' : 'light'} size="sm" />
+            <AfriDealLogo variant="light" size="sm" />
           </Link>
 
           <div className="mx-auto hidden items-center gap-1 md:flex">
@@ -77,11 +92,9 @@ export function StorefrontNav() {
                   href={link.href}
                   className={cn(
                     'rounded-full px-3.5 py-2 text-[13.5px] font-medium transition-colors duration-200',
-                    onDarkHero
-                      ? 'text-white/70 hover:bg-white/10 hover:text-white'
-                      : active
-                        ? 'bg-ink/[0.06] text-ink'
-                        : 'text-body hover:bg-ink/[0.04] hover:text-ink',
+                    active
+                      ? 'bg-ink/[0.06] text-ink'
+                      : 'text-body hover:bg-ink/[0.04] hover:text-ink',
                   )}
                 >
                   {link.label}
@@ -96,7 +109,7 @@ export function StorefrontNav() {
               aria-label={`Cart, ${count} item${count === 1 ? '' : 's'}`}
               className={cn(
                 'relative rounded-full p-2.5 transition-colors',
-                onDarkHero ? 'text-white/80 hover:bg-white/10' : 'text-body hover:bg-ink/[0.05] hover:text-ink',
+                'text-body hover:bg-ink/[0.05] hover:text-ink',
               )}
             >
               <ShoppingBag size={18} strokeWidth={1.5} />
@@ -121,7 +134,7 @@ export function StorefrontNav() {
                   href="/orders"
                   className={cn(
                     'flex items-center gap-2 rounded-full py-1.5 pl-1.5 pr-3.5 transition-colors',
-                    onDarkHero ? 'bg-white/10 text-white hover:bg-white/15' : 'bg-ink/[0.05] text-ink hover:bg-ink/[0.08]',
+                    'bg-ink/[0.05] text-ink hover:bg-ink/[0.08]',
                   )}
                 >
                   <span className="flex h-7 w-7 items-center justify-center rounded-full bg-gold font-mono text-[10.5px] font-semibold text-ink">
@@ -136,7 +149,7 @@ export function StorefrontNav() {
                   aria-label="Sign out"
                   className={cn(
                     'rounded-full p-2.5 transition-colors',
-                    onDarkHero ? 'text-white/70 hover:bg-white/10' : 'text-muted hover:bg-ink/[0.05] hover:text-ink',
+                    'text-muted hover:bg-ink/[0.05] hover:text-ink',
                   )}
                 >
                   <LogOut size={16} strokeWidth={1.5} />
@@ -154,9 +167,7 @@ export function StorefrontNav() {
                   href="/login"
                   className={cn(
                     'rounded-full px-3.5 py-2 text-[13px] font-medium transition-colors',
-                    onDarkHero
-                      ? 'text-white/80 hover:bg-white/10 hover:text-white'
-                      : 'text-body hover:bg-ink/[0.05] hover:text-ink',
+                    'text-body hover:bg-ink/[0.05] hover:text-ink',
                   )}
                 >
                   Sign in
@@ -170,7 +181,7 @@ export function StorefrontNav() {
                 */}
                 <GoldButton
                   size="sm"
-                  variant={onDarkHero ? 'gold' : 'ink'}
+                  variant="ink"
                   onClick={() => router.push('/signup')}
                 >
                   Sign up
@@ -183,7 +194,7 @@ export function StorefrontNav() {
               aria-label="Open menu"
               className={cn(
                 'rounded-full p-2.5 transition-colors md:hidden',
-                onDarkHero ? 'text-white' : 'text-ink',
+                'text-ink',
               )}
             >
               <Menu size={19} strokeWidth={1.5} />
@@ -209,7 +220,7 @@ export function StorefrontNav() {
               </button>
             </div>
 
-            <nav className="px-6 pt-8">
+            <nav className="max-h-[calc(100dvh-4rem)] overflow-y-auto px-6 pb-10 pt-6">
               {[...LINKS, { href: '/cart', label: 'Cart' }].map((link, index) => (
                 <motion.div
                   key={link.href}
@@ -219,12 +230,49 @@ export function StorefrontNav() {
                 >
                   <Link
                     href={link.href}
-                    className="block border-b border-white/10 py-4 font-display text-[26px] font-semibold text-white"
+                    className="block border-b border-white/10 py-3.5 font-display text-[24px] font-semibold text-white"
                   >
                     {link.label}
                   </Link>
                 </motion.div>
               ))}
+
+              {/*
+                The catalogue, in the order the business actually sells it.
+                A menu that opens on four verbs and no goods makes a shopper
+                guess what is in here; naming the categories is the difference
+                between a navigation and a table of contents.
+              */}
+              {categories.length > 0 && (
+                <motion.div
+                  initial={{ opacity: 0, y: 24 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.3, duration: 0.45, ease: [0.16, 1, 0.3, 1] }}
+                  className="pt-7"
+                >
+                  <p className="font-mono text-eyebrow font-medium uppercase text-white/35">
+                    Shop by category
+                  </p>
+                  <ul className="mt-3">
+                    {categories.map((category) => (
+                      <li key={category.id}>
+                        <Link
+                          href={`/browse?category=${category.slug}`}
+                          className="flex items-center gap-3.5 border-b border-white/[0.07] py-3 text-[15px] text-white/75 transition-colors hover:text-gold-light"
+                        >
+                          <CategoryIcon
+                            categoryId={category.id}
+                            size={17}
+                            className="shrink-0 text-gold-light/70"
+                          />
+                          <span className="min-w-0 flex-1 truncate">{category.name}</span>
+                          <ChevronRight size={15} strokeWidth={1.75} className="shrink-0 text-white/25" />
+                        </Link>
+                      </li>
+                    ))}
+                  </ul>
+                </motion.div>
+              )}
 
               <motion.div
                 initial={{ opacity: 0, y: 24 }}
@@ -273,13 +321,14 @@ export function StorefrontFooter() {
           <div>
             <AfriDealLogo variant="dark" size="md" />
             <p className="measure mt-4 text-[13.5px] leading-6 text-white/55">
-              Every order is paid into escrow and held until you confirm delivery. Suppliers are
-              verified before they can list, and routed on reliability rather than the lowest price.
+              A procurement marketplace for Botswana and South Africa. Retail and bulk prices are
+              published on every product, suppliers are verified before they can list, and orders
+              are routed on reliability rather than on the lowest cost.
             </p>
           </div>
 
           {[
-            { heading: 'Marketplace', links: [['Browse all', '/browse'], ['Building materials', '/browse?category=c3'], ['Agriculture', '/browse?category=c4'], ['Your orders', '/orders']] },
+            { heading: 'Marketplace', links: [['Hair, weaves & extensions', '/browse?category=hair-weaves-extensions'], ['Beauty & personal care', '/browse?category=beauty-personal-care'], ['Browse all', '/browse'], ['Request a runner', '/request-a-runner'], ['Your orders', '/orders']] },
             { heading: 'Suppliers', links: [['Become a supplier', '/login'], ['Supplier portal', '/supplier/dashboard'], ['Verification', '/login']] },
             { heading: 'Platform', links: [['Runner portal', '/runner/dashboard'], ['Admin console', '/admin/dashboard'], ['Create an account', '/signup'], ['Sign in', '/login']] },
           ].map((column) => (
@@ -303,14 +352,28 @@ export function StorefrontFooter() {
           ))}
         </div>
 
-        <div className="mt-12 flex flex-wrap items-center justify-between gap-4 border-t border-white/10 pt-6">
-          <p className="text-[12.5px] text-white/40">
-            © {new Date().getFullYear()} AfriDeal. Gaborone, Botswana.
+        {/*
+          The payment line is a legal position and is worded exactly as the
+          business needs it worded. AfriDeal is the merchant on the sale and the
+          money is processed by licensed partners; the platform is not itself a
+          payment provider and holds nothing on a customer's behalf. Do not
+          soften this into a reassurance about money being safe with us.
+        */}
+        <div className="mt-12 border-t border-white/10 pt-6">
+          <p className="text-[12px] leading-5 text-white/45">
+            AfriDeal is not a payment provider. Customer payments are processed by licensed payment
+            partners, and AfriDeal does not hold funds on behalf of buyers or suppliers.
           </p>
-          <p className="flex items-center gap-2 font-mono text-[10.5px] uppercase tracking-[0.16em] text-white/35">
-            <Package size={13} strokeWidth={1.5} />
-            Escrow-backed · DPO Pay · Orange Money · PayGate
-          </p>
+
+          <div className="mt-5 flex flex-wrap items-center justify-between gap-4">
+            <p className="text-[12.5px] text-white/40">
+              © {new Date().getFullYear()} AfriDeal. Gaborone, Botswana.
+            </p>
+            <p className="flex items-center gap-2 font-mono text-[10.5px] uppercase tracking-[0.16em] text-white/35">
+              <Package size={13} strokeWidth={1.5} />
+              DPO Pay · Orange Money · PayGate
+            </p>
+          </div>
         </div>
       </div>
     </footer>

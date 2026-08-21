@@ -52,8 +52,8 @@ type SignupValues = z.infer<typeof SignupSchema>;
 const PROMISES = [
   {
     icon: Wallet,
-    title: 'Escrow by default',
-    body: 'Your payment is held by AfriDeal and released to the supplier only once you confirm the goods arrived.',
+    title: 'One price list, every quantity',
+    body: 'Retail and bulk prices are published against every product, so you can see what a larger order costs before you place it.',
   },
   {
     icon: ShieldCheck,

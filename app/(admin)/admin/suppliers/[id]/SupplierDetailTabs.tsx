@@ -12,7 +12,7 @@ import { PerformanceScore, type PerformanceMetric } from '@/components/supplier/
 import { VerificationChecklist } from '@/components/supplier/VerificationChecklist';
 import { dateTime, shortDate } from '@/lib/format';
 import { cn } from '@/lib/utils';
-import type { EscrowRecord, Product, Settlement, Supplier, SupplierOffer } from '@/types';
+import type { SupplierPayable, Product, Settlement, Supplier, SupplierOffer } from '@/types';
 
 const TABS = [
   { id: 'verification', label: 'Verification', icon: ShieldCheck },
@@ -28,7 +28,7 @@ export function SupplierDetailTabs({
   offers,
   products,
   settlements,
-  escrow,
+  payables,
   performanceMetrics,
   radarData,
   canDecide,
@@ -37,7 +37,7 @@ export function SupplierDetailTabs({
   offers: SupplierOffer[];
   products: Product[];
   settlements: Settlement[];
-  escrow: EscrowRecord[];
+  payables: SupplierPayable[];
   performanceMetrics: PerformanceMetric[];
   radarData: { metric: string; value: number }[];
   canDecide: boolean;
@@ -200,9 +200,9 @@ export function SupplierDetailTabs({
             </div>
 
             <div>
-              <p className="eyebrow mb-2">Escrow legs</p>
-              {escrow.length === 0 ? (
-                <p className="text-[12.5px] text-muted">No escrow activity recorded yet.</p>
+              <p className="eyebrow mb-2">Supplier invoices</p>
+              {payables.length === 0 ? (
+                <p className="text-[12.5px] text-muted">No invoices raised against this supplier yet.</p>
               ) : (
                 <div className="overflow-x-auto rounded-md border border-hairline bg-surface-raised">
                   <table className="data-table">
@@ -216,7 +216,7 @@ export function SupplierDetailTabs({
                       </tr>
                     </thead>
                     <tbody>
-                      {escrow.map((record) => (
+                      {payables.map((record) => (
                         <tr key={record.id}>
                           <td>
                             <Link
@@ -229,9 +229,9 @@ export function SupplierDetailTabs({
                           <td>
                             <MoneyText amount={record.amount} size="sm" />
                           </td>
-                          <td className="text-[12px] text-muted">{dateTime(record.held_at)}</td>
+                          <td className="text-[12px] text-muted">{dateTime(record.raised_at)}</td>
                           <td className="font-mono text-[12px] tabular-nums text-ink">
-                            {record.hold_window_days}d
+                            {record.terms_days}d
                           </td>
                           <td className="text-right">
                             <StatusBadge status={record.status} size="sm" />

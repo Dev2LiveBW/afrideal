@@ -3,7 +3,7 @@
 import { useMemo, useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { Lock } from 'lucide-react';
+import { FileText } from 'lucide-react';
 import toast from 'react-hot-toast';
 
 import { TabButton } from '@/app/(admin)/admin/_components/TabButton';
@@ -12,42 +12,42 @@ import { GoldButton } from '@/components/brand/GoldButton';
 import { MoneyText } from '@/components/brand/MoneyText';
 import { EmptyState } from '@/components/brand/Panel';
 import { StatusBadge } from '@/components/brand/StatusBadge';
-import { heldDays, isOverdue } from '@/lib/escrow';
+import { openDays, isOverdue } from '@/lib/payables';
 import { PAYMENT_LABELS, dateTime } from '@/lib/format';
 import { cn } from '@/lib/utils';
-import type { EscrowRecord } from '@/types';
+import type { SupplierPayable } from '@/types';
 
-export interface EscrowRow {
-  record: EscrowRecord;
+export interface PayableRow {
+  record: SupplierPayable;
   supplierName: string;
   orderReference: string;
 }
 
-type Filter = 'AWAITING' | 'DISPUTED' | 'OVERDUE' | 'ALL';
+type Filter = 'OUTSTANDING' | 'ON_HOLD' | 'OVERDUE' | 'ALL';
 
 const TABS: { id: Filter; label: string }[] = [
-  { id: 'AWAITING', label: 'Awaiting release' },
-  { id: 'DISPUTED', label: 'Disputed' },
+  { id: 'OUTSTANDING', label: 'Outstanding' },
+  { id: 'ON_HOLD', label: 'On hold' },
   { id: 'OVERDUE', label: 'Overdue' },
   { id: 'ALL', label: 'All' },
 ];
 
-function matches(row: EscrowRow, id: Filter) {
+function matches(row: PayableRow, id: Filter) {
   if (id === 'ALL') return true;
-  if (id === 'AWAITING') return row.record.status === 'HELD';
-  if (id === 'DISPUTED') return row.record.status === 'DISPUTED';
+  if (id === 'OUTSTANDING') return row.record.status === 'PENDING';
+  if (id === 'ON_HOLD') return row.record.status === 'ON_HOLD';
   return isOverdue(row.record);
 }
 
-function actionable(row: EscrowRow) {
-  return row.record.status === 'HELD' || row.record.status === 'DISPUTED';
+function actionable(row: PayableRow) {
+  return row.record.status === 'PENDING' || row.record.status === 'ON_HOLD';
 }
 
-export function EscrowQueue({ rows }: { rows: EscrowRow[] }) {
+export function PayablesQueue({ rows }: { rows: PayableRow[] }) {
   const router = useRouter();
-  const [filter, setFilter] = useState<Filter>('AWAITING');
+  const [filter, setFilter] = useState<Filter>('OUTSTANDING');
   const [selected, setSelected] = useState<Set<string>>(new Set());
-  const [action, setAction] = useState<'RELEASED' | 'REFUNDED' | null>(null);
+  const [action, setAction] = useState<'SETTLED' | 'CANCELLED' | null>(null);
   const [saving, setSaving] = useState(false);
 
   const countFor = (id: Filter) => rows.filter((row) => matches(row, id)).length;
@@ -76,13 +76,13 @@ export function EscrowQueue({ rows }: { rows: EscrowRow[] }) {
     if (!action || selected.size === 0) return;
     setSaving(true);
     try {
-      const response = await fetch('/api/escrow', {
+      const response = await fetch('/api/payables', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           ids: Array.from(selected),
           status: action,
-          note: `Batch ${action.toLowerCase()} from the escrow queue.`,
+          note: `Batch ${action.toLowerCase()} from the supplier payables queue.`,
         }),
       });
       if (!response.ok) {
@@ -96,10 +96,10 @@ export function EscrowQueue({ rows }: { rows: EscrowRow[] }) {
 
       if (skipped.length === 0) {
         toast.success(
-          `${moved.length} record${moved.length === 1 ? '' : 's'} ${action === 'RELEASED' ? 'released' : 'refunded'}`,
+          `${moved.length} invoice${moved.length === 1 ? '' : 's'} ${action === 'SETTLED' ? 'settled' : 'cancelled'}`,
         );
       } else if (moved.length === 0) {
-        toast.error(`Nothing moved — all ${skipped.length} record(s) were skipped (${skipped[0]?.reason}).`);
+        toast.error(`Nothing moved — all ${skipped.length} invoice(s) were skipped (${skipped[0]?.reason}).`);
       } else {
         toast(`${moved.length} moved, ${skipped.length} skipped — ${skipped.map((s) => s.reason).join(', ')}`, {
           icon: '⚠️',
@@ -136,11 +136,11 @@ export function EscrowQueue({ rows }: { rows: EscrowRow[] }) {
         {selected.size > 0 && (
           <div className="flex items-center gap-2 rounded-full bg-ink/[0.05] py-1.5 pl-4 pr-1.5">
             <span className="text-[12.5px] font-medium text-ink">{selected.size} selected</span>
-            <GoldButton size="sm" variant="forest" onClick={() => setAction('RELEASED')}>
-              Release
+            <GoldButton size="sm" variant="forest" onClick={() => setAction('SETTLED')}>
+              Settle
             </GoldButton>
-            <GoldButton size="sm" variant="danger" onClick={() => setAction('REFUNDED')}>
-              Refund
+            <GoldButton size="sm" variant="danger" onClick={() => setAction('CANCELLED')}>
+              Cancel
             </GoldButton>
           </div>
         )}
@@ -149,9 +149,9 @@ export function EscrowQueue({ rows }: { rows: EscrowRow[] }) {
       {filtered.length === 0 ? (
         <div className="panel">
           <EmptyState
-            icon={<Lock size={20} strokeWidth={1.5} />}
+            icon={<FileText size={20} strokeWidth={1.5} />}
             title="Nothing in this view"
-            description="No escrow records match this filter right now."
+            description="No supplier invoices match this filter right now."
           />
         </div>
       ) : (
@@ -163,7 +163,7 @@ export function EscrowQueue({ rows }: { rows: EscrowRow[] }) {
                   <th className="w-10">
                     <input
                       type="checkbox"
-                      aria-label="Select all actionable records"
+                      aria-label="Select all open invoices"
                       checked={actionableInView.length > 0 && actionableInView.every((row) => selected.has(row.record.id))}
                       onChange={toggleAll}
                       className="h-3.5 w-3.5 accent-gold"
@@ -172,9 +172,9 @@ export function EscrowQueue({ rows }: { rows: EscrowRow[] }) {
                   <th>Order</th>
                   <th>Supplier</th>
                   <th>Amount</th>
-                  <th>Gateway</th>
-                  <th>Held since</th>
-                  <th>Days held</th>
+                  <th>Customer paid via</th>
+                  <th>Raised</th>
+                  <th>Age</th>
                   <th className="text-right">Status</th>
                 </tr>
               </thead>
@@ -216,7 +216,7 @@ export function EscrowQueue({ rows }: { rows: EscrowRow[] }) {
                       <td className="text-[12px] text-body">
                         {PAYMENT_LABELS[row.record.gateway] ?? row.record.gateway}
                       </td>
-                      <td className="text-[12px] text-muted">{dateTime(row.record.held_at)}</td>
+                      <td className="text-[12px] text-muted">{dateTime(row.record.raised_at)}</td>
                       <td>
                         <span
                           className={cn(
@@ -224,7 +224,7 @@ export function EscrowQueue({ rows }: { rows: EscrowRow[] }) {
                             overdue ? 'font-semibold text-danger-ink' : 'text-ink',
                           )}
                         >
-                          {heldDays(row.record)}d{overdue && ' · overdue'}
+                          {openDays(row.record)}d{overdue && ' · overdue'}
                         </span>
                       </td>
                       <td className="text-right">
@@ -244,20 +244,20 @@ export function EscrowQueue({ rows }: { rows: EscrowRow[] }) {
         onClose={() => setAction(null)}
         onConfirm={confirmBatch}
         loading={saving}
-        tone={action === 'RELEASED' ? 'forest' : 'danger'}
+        tone={action === 'SETTLED' ? 'forest' : 'danger'}
         title={
           action
-            ? `${action === 'RELEASED' ? 'Release' : 'Refund'} ${selected.size} escrow record${selected.size === 1 ? '' : 's'}?`
+            ? `${action === 'SETTLED' ? 'Settle' : 'Cancel'} ${selected.size} supplier invoice${selected.size === 1 ? '' : 's'}?`
             : ''
         }
         description={
           action
-            ? `${new Intl.NumberFormat('en-BW', { minimumFractionDigits: 2 }).format(selectedTotal)} BWP total across ${selected.size} record(s) will ${
-                action === 'RELEASED' ? 'be released to suppliers' : 'be refunded to customers'
-              } immediately. Any record already in a terminal state will be skipped and reported back to you.`
+            ? `BWP ${new Intl.NumberFormat('en-BW', { minimumFractionDigits: 2 }).format(selectedTotal)} across ${selected.size} invoice(s) will ${
+                action === 'SETTLED' ? 'be paid to the suppliers' : 'be written off and not paid'
+              } immediately. Any invoice already closed will be skipped and reported back to you.`
             : ''
         }
-        confirmLabel={action === 'RELEASED' ? 'Release funds' : 'Refund customers'}
+        confirmLabel={action === 'SETTLED' ? 'Settle invoices' : 'Cancel invoices'}
       />
     </div>
   );

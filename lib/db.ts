@@ -9,7 +9,7 @@ import type {
   Category,
   CustomerPrice,
   Dispute,
-  EscrowRecord,
+  SupplierPayable,
   InventoryRecord,
   MarginRule,
   Order,
@@ -20,6 +20,7 @@ import type {
   Rfq,
   RfqResponse,
   Runner,
+  RunnerRequest,
   Settlement,
   Shipment,
   Supplier,
@@ -55,9 +56,10 @@ export interface Schema {
   'order-items': OrderItem;
   'supplier-orders': SupplierOrder;
   'pricing-rules': PricingRule;
-  escrow: EscrowRecord;
+  'supplier-payables': SupplierPayable;
   disputes: Dispute;
   runners: Runner;
+  'runner-requests': RunnerRequest;
   shipments: Shipment;
   settlements: Settlement;
   'audit-log': AuditEntry;

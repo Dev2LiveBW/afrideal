@@ -1,5 +1,5 @@
 import Link from 'next/link';
-import { Lock } from 'lucide-react';
+import { FileText } from 'lucide-react';
 
 import { cn } from '@/lib/utils';
 import type { DoorTier } from '@/lib/tier-doors';
@@ -8,7 +8,7 @@ export interface TierSwitchOption {
   tier: DoorTier;
   label: string;
   range: string | null;
-  locked: boolean;
+  byQuotation: boolean;
   href: string;
 }
 
@@ -65,8 +65,8 @@ export function TierSwitch({
               </span>
             )}
 
-            {option.locked && (
-              <Lock
+            {option.byQuotation && (
+              <FileText
                 size={10}
                 strokeWidth={2}
                 aria-hidden="true"

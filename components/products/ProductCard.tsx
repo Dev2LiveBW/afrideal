@@ -30,7 +30,7 @@ export function ProductCard({
   primarySupplierId,
   tierPrice,
   tierSavingPct,
-  tierLocked,
+  tierByQuotation,
   tierMinQty,
   className,
 }: {
@@ -45,7 +45,7 @@ export function ProductCard({
   tierPrice?: number | null;
   tierSavingPct?: number;
   /** The rung is real but this account cannot buy at it yet. */
-  tierLocked?: boolean;
+  tierByQuotation?: boolean;
   /** Smallest quantity that actually earns the rung price shown on this card. */
   tierMinQty?: number;
   className?: string;
@@ -74,10 +74,10 @@ export function ProductCard({
      * On a tier-filtered grid the card is quoting a band price, so adding a
      * single unit would land the buyer in a cart showing the list price they
      * were not offered. Quick-add takes the quantity that actually earns the
-     * figure on the card. A locked rung is excluded: this account cannot have
+     * figure on the card. The quoted rung is excluded: there is no published
      * that price at any quantity.
      */
-    const qty = showingTier && !tierLocked && tierMinQty ? Math.max(1, tierMinQty) : 1;
+    const qty = showingTier && !tierByQuotation && tierMinQty ? Math.max(1, tierMinQty) : 1;
 
     addToCart({
       product_id: product.id,
@@ -184,17 +184,17 @@ export function ProductCard({
                 filtered to, or the sort order stops matching what is read.
               */}
               {/*
-                A locked rung says so once, above the grid — every card is in
+                The quoted rung says so once, above the grid — every card is in
                 the same state, so repeating it twelve times is noise that
                 crowds out the figure the card exists to show.
               */}
               <p className="text-[10.5px] text-muted">
-                {showingTier ? (tierLocked ? 'At this band' : 'Your price') : 'From'}
+                {showingTier ? (tierByQuotation ? 'On quotation' : 'Your price') : 'From'}
               </p>
               <MoneyText
                 amount={showingTier ? tierPrice! : product.price}
                 size="md"
-                tone={tierLocked ? 'muted' : 'gold'}
+                tone={tierByQuotation ? 'muted' : 'gold'}
               />
               {showingTier ? (
                 tierPrice! < product.price && (

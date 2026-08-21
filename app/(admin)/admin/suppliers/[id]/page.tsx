@@ -155,7 +155,7 @@ export default async function AdminSupplierDetailPage({ params }: { params: { id
               offers={workspace.offers}
               products={workspace.products}
               settlements={workspace.settlements}
-              escrow={workspace.escrow}
+              payables={workspace.payables}
               performanceMetrics={performanceMetrics}
               radarData={radarData}
               canDecide={canDecide}

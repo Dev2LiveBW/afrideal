@@ -1,7 +1,7 @@
 [
   {
     "id": "a001",
-    "at": "2026-02-10T11:50:00.000Z",
+    "at": "2026-02-11T11:50:00.000Z",
     "actor_id": "u002",
     "actor_name": "Keabetswe Molapo",
     "action": "SUPPLIER_APPROVED",
@@ -11,17 +11,17 @@
   },
   {
     "id": "a002",
-    "at": "2026-07-27T11:31:00.000Z",
+    "at": "2026-07-28T11:31:00.000Z",
     "actor_id": "u002",
     "actor_name": "Keabetswe Molapo",
-    "action": "ESCROW_RELEASED",
-    "entity": "escrow",
-    "entity_id": "e001",
-    "detail": "Released escrow on AFD-24810 following delivery confirmation."
+    "action": "PAYABLE_SETTLED",
+    "entity": "supplier-payable",
+    "entity_id": "pay001",
+    "detail": "Settled the supplier invoice on AFD-24810 following delivery confirmation."
   },
   {
     "id": "a003",
-    "at": "2026-08-01T11:06:00.000Z",
+    "at": "2026-08-02T11:06:00.000Z",
     "actor_id": "u001",
     "actor_name": "AfriDeal Admin",
     "action": "PRICING_RULE_UPDATED",
@@ -31,7 +31,7 @@
   },
   {
     "id": "a004",
-    "at": "2026-08-05T11:58:00.000Z",
+    "at": "2026-08-06T11:58:00.000Z",
     "actor_id": "u002",
     "actor_name": "Keabetswe Molapo",
     "action": "SUPPLIER_SUSPENDED",
@@ -41,7 +41,7 @@
   },
   {
     "id": "a005",
-    "at": "2026-08-07T11:24:00.000Z",
+    "at": "2026-08-08T11:24:00.000Z",
     "actor_id": "u008",
     "actor_name": "Finance Admin",
     "action": "SETTLEMENT_PAID",
@@ -51,7 +51,7 @@
   },
   {
     "id": "a006",
-    "at": "2026-08-10T11:33:00.000Z",
+    "at": "2026-08-11T11:33:00.000Z",
     "actor_id": "u002",
     "actor_name": "Keabetswe Molapo",
     "action": "DISPUTE_OPENED",
@@ -61,7 +61,7 @@
   },
   {
     "id": "a007",
-    "at": "2026-08-13T11:42:00.000Z",
+    "at": "2026-08-14T11:42:00.000Z",
     "actor_id": "u001",
     "actor_name": "AfriDeal Admin",
     "action": "USER_ROLE_CHANGED",
@@ -71,7 +71,7 @@
   },
   {
     "id": "a008",
-    "at": "2026-08-15T11:08:00.000Z",
+    "at": "2026-08-16T11:08:00.000Z",
     "actor_id": "u002",
     "actor_name": "Keabetswe Molapo",
     "action": "SUPPLIER_OVERRIDDEN",
@@ -81,7 +81,7 @@
   },
   {
     "id": "a009",
-    "at": "2026-08-19T16:41:44.122Z",
+    "at": "2026-08-20T11:01:37.053Z",
     "actor_id": "u006",
     "actor_name": "Thabo Modise",
     "action": "ORDER_CREATED",
@@ -91,7 +91,7 @@
   },
   {
     "id": "a010",
-    "at": "2026-08-19T16:41:45.499Z",
+    "at": "2026-08-20T11:01:39.844Z",
     "actor_id": "u005",
     "actor_name": "Kagiso Sithole",
     "action": "RUNNER_STATUS_CHANGED",
@@ -101,7 +101,7 @@
   },
   {
     "id": "a011",
-    "at": "2026-08-19T16:41:45.587Z",
+    "at": "2026-08-20T11:01:39.921Z",
     "actor_id": "u005",
     "actor_name": "Kagiso Sithole",
     "action": "RUNNER_STATUS_CHANGED",
@@ -111,7 +111,7 @@
   },
   {
     "id": "a012",
-    "at": "2026-08-19T16:41:45.707Z",
+    "at": "2026-08-20T11:01:40.079Z",
     "actor_id": "u002",
     "actor_name": "Keabetswe Molapo",
     "action": "SUPPLIER_APPROVED",
@@ -121,7 +121,7 @@
   },
   {
     "id": "a013",
-    "at": "2026-08-19T16:41:45.770Z",
+    "at": "2026-08-20T11:01:40.188Z",
     "actor_id": "u002",
     "actor_name": "Keabetswe Molapo",
     "action": "SUPPLIER_REJECTED",
@@ -131,7 +131,7 @@
   },
   {
     "id": "a014",
-    "at": "2026-08-19T16:41:45.976Z",
+    "at": "2026-08-20T11:01:40.577Z",
     "actor_id": "u007",
     "actor_name": "Kefilwe Dithebe",
     "action": "ORDER_CREATED",
@@ -141,7 +141,7 @@
   },
   {
     "id": "a015",
-    "at": "2026-08-19T16:41:46.102Z",
+    "at": "2026-08-20T11:01:40.770Z",
     "actor_id": "u007",
     "actor_name": "Kefilwe Dithebe",
     "action": "ORDER_CREATED",
@@ -151,7 +151,7 @@
   },
   {
     "id": "a016",
-    "at": "2026-08-19T16:41:46.261Z",
+    "at": "2026-08-20T11:01:40.957Z",
     "actor_id": "u007",
     "actor_name": "Kefilwe Dithebe",
     "action": "ORDER_CREATED",
@@ -161,7 +161,7 @@
   },
   {
     "id": "a017",
-    "at": "2026-08-19T16:41:46.386Z",
+    "at": "2026-08-20T11:01:41.150Z",
     "actor_id": "u006",
     "actor_name": "Thabo Modise",
     "action": "ORDER_CREATED",
@@ -171,7 +171,7 @@
   },
   {
     "id": "a018",
-    "at": "2026-08-19T16:41:52.224Z",
+    "at": "2026-08-20T11:01:46.014Z",
     "actor_id": "u007",
     "actor_name": "Kefilwe Dithebe",
     "action": "RFQ_SUBMITTED",
@@ -181,7 +181,7 @@
   },
   {
     "id": "a019",
-    "at": "2026-08-19T16:41:53.825Z",
+    "at": "2026-08-20T11:01:48.928Z",
     "actor_id": "u003",
     "actor_name": "Naledi Beauty Supplies",
     "action": "RFQ_QUOTED",
@@ -191,12 +191,272 @@
   },
   {
     "id": "a020",
-    "at": "2026-08-19T16:41:53.951Z",
+    "at": "2026-08-20T11:01:49.152Z",
     "actor_id": "u002",
     "actor_name": "Keabetswe Molapo",
     "action": "RFQ_RESPONSE_SELECTED",
     "entity": "rfq",
     "entity_id": "rfq004",
     "detail": "Selected response rr007 at BWP 68.00 per unit."
+  },
+  {
+    "id": "a021",
+    "at": "2026-08-20T11:01:51.416Z",
+    "actor_id": "u006",
+    "actor_name": "Thabo Modise",
+    "action": "SOURCING_REQUESTED",
+    "entity": "runner-request",
+    "entity_id": "rr006",
+    "detail": "RUN-24815: Verification probe — bulk hair dryer × 3 to Gaborone."
+  },
+  {
+    "id": "a022",
+    "at": "2026-08-20T11:01:54.627Z",
+    "actor_id": "u005",
+    "actor_name": "Kagiso Sithole",
+    "action": "SOURCING_ACCEPTED",
+    "entity": "runner-request",
+    "entity_id": "rr006",
+    "detail": "REQUESTED → ACCEPTED on RUN-24815."
+  },
+  {
+    "id": "a023",
+    "at": "2026-08-20T11:01:54.823Z",
+    "actor_id": "u005",
+    "actor_name": "Kagiso Sithole",
+    "action": "SOURCING_ADVANCED",
+    "entity": "runner-request",
+    "entity_id": "rr006",
+    "detail": "ACCEPTED → SOURCING on RUN-24815."
+  },
+  {
+    "id": "a024",
+    "at": "2026-08-20T11:01:55.013Z",
+    "actor_id": "u005",
+    "actor_name": "Kagiso Sithole",
+    "action": "SOURCING_QUOTED",
+    "entity": "runner-request",
+    "entity_id": "rr006",
+    "detail": "SOURCING → QUOTED on RUN-24815."
+  },
+  {
+    "id": "a025",
+    "at": "2026-08-20T11:01:55.112Z",
+    "actor_id": "u006",
+    "actor_name": "Thabo Modise",
+    "action": "SOURCING_ADVANCED",
+    "entity": "runner-request",
+    "entity_id": "rr006",
+    "detail": "QUOTED → APPROVED on RUN-24815."
+  },
+  {
+    "id": "a026",
+    "at": "2026-08-20T11:01:55.212Z",
+    "actor_id": "u005",
+    "actor_name": "Kagiso Sithole",
+    "action": "SOURCING_ADVANCED",
+    "entity": "runner-request",
+    "entity_id": "rr006",
+    "detail": "APPROVED → DELIVERING on RUN-24815."
+  },
+  {
+    "id": "a027",
+    "at": "2026-08-20T11:01:55.304Z",
+    "actor_id": "u006",
+    "actor_name": "Thabo Modise",
+    "action": "SOURCING_ADVANCED",
+    "entity": "runner-request",
+    "entity_id": "rr006",
+    "detail": "DELIVERING → CONFIRMED on RUN-24815."
+  },
+  {
+    "id": "a028",
+    "at": "2026-08-21T05:24:15.503Z",
+    "actor_id": "u006",
+    "actor_name": "Thabo Modise",
+    "action": "ORDER_CREATED",
+    "entity": "order",
+    "entity_id": "o021",
+    "detail": "AFD-24830 placed — 2 line(s) split across 2 supplier(s)."
+  },
+  {
+    "id": "a029",
+    "at": "2026-08-21T05:24:18.879Z",
+    "actor_id": "u005",
+    "actor_name": "Kagiso Sithole",
+    "action": "RUNNER_STATUS_CHANGED",
+    "entity": "runner",
+    "entity_id": "r001",
+    "detail": "Kagiso Sithole went offline."
+  },
+  {
+    "id": "a030",
+    "at": "2026-08-21T05:24:18.966Z",
+    "actor_id": "u005",
+    "actor_name": "Kagiso Sithole",
+    "action": "RUNNER_STATUS_CHANGED",
+    "entity": "runner",
+    "entity_id": "r001",
+    "detail": "Kagiso Sithole went online."
+  },
+  {
+    "id": "a031",
+    "at": "2026-08-21T05:24:19.122Z",
+    "actor_id": "u002",
+    "actor_name": "Keabetswe Molapo",
+    "action": "SUPPLIER_APPROVED",
+    "entity": "supplier",
+    "entity_id": "s007",
+    "detail": "Setlhoa Office Group moved from PENDING to VERIFIED."
+  },
+  {
+    "id": "a032",
+    "at": "2026-08-21T05:24:19.214Z",
+    "actor_id": "u002",
+    "actor_name": "Keabetswe Molapo",
+    "action": "SUPPLIER_REJECTED",
+    "entity": "supplier",
+    "entity_id": "s007",
+    "detail": "Setlhoa Office Group moved from VERIFIED to PENDING."
+  },
+  {
+    "id": "a033",
+    "at": "2026-08-21T05:24:19.531Z",
+    "actor_id": "u007",
+    "actor_name": "Kefilwe Dithebe",
+    "action": "ORDER_CREATED",
+    "entity": "order",
+    "entity_id": "o022",
+    "detail": "AFD-24831 placed — 1 line(s) split across 1 supplier(s)."
+  },
+  {
+    "id": "a034",
+    "at": "2026-08-21T05:24:19.708Z",
+    "actor_id": "u007",
+    "actor_name": "Kefilwe Dithebe",
+    "action": "ORDER_CREATED",
+    "entity": "order",
+    "entity_id": "o023",
+    "detail": "AFD-24832 placed — 1 line(s) split across 1 supplier(s)."
+  },
+  {
+    "id": "a035",
+    "at": "2026-08-21T05:24:19.893Z",
+    "actor_id": "u007",
+    "actor_name": "Kefilwe Dithebe",
+    "action": "ORDER_CREATED",
+    "entity": "order",
+    "entity_id": "o024",
+    "detail": "AFD-24833 placed — 1 line(s) split across 1 supplier(s)."
+  },
+  {
+    "id": "a036",
+    "at": "2026-08-21T05:24:20.106Z",
+    "actor_id": "u006",
+    "actor_name": "Thabo Modise",
+    "action": "ORDER_CREATED",
+    "entity": "order",
+    "entity_id": "o025",
+    "detail": "AFD-24834 placed — 1 line(s) split across 1 supplier(s)."
+  },
+  {
+    "id": "a037",
+    "at": "2026-08-21T05:24:25.335Z",
+    "actor_id": "u007",
+    "actor_name": "Kefilwe Dithebe",
+    "action": "RFQ_SUBMITTED",
+    "entity": "rfq",
+    "entity_id": "rfq005",
+    "detail": "RFQ-2604 — 400 × Shea Butter Deep Treatment 500ml, 3 supplier(s) invited."
+  },
+  {
+    "id": "a038",
+    "at": "2026-08-21T05:24:28.766Z",
+    "actor_id": "u003",
+    "actor_name": "Naledi Beauty Supplies",
+    "action": "RFQ_QUOTED",
+    "entity": "rfq",
+    "entity_id": "rfq005",
+    "detail": "Naledi Beauty Supplies quoted 400 units at BWP 68.00."
+  },
+  {
+    "id": "a039",
+    "at": "2026-08-21T05:24:28.997Z",
+    "actor_id": "u002",
+    "actor_name": "Keabetswe Molapo",
+    "action": "RFQ_RESPONSE_SELECTED",
+    "entity": "rfq",
+    "entity_id": "rfq005",
+    "detail": "Selected response rr008 at BWP 68.00 per unit."
+  },
+  {
+    "id": "a040",
+    "at": "2026-08-21T05:24:31.441Z",
+    "actor_id": "u006",
+    "actor_name": "Thabo Modise",
+    "action": "SOURCING_REQUESTED",
+    "entity": "runner-request",
+    "entity_id": "rr007",
+    "detail": "RUN-24816: Verification probe — bulk hair dryer × 3 to Gaborone."
+  },
+  {
+    "id": "a041",
+    "at": "2026-08-21T05:24:34.704Z",
+    "actor_id": "u005",
+    "actor_name": "Kagiso Sithole",
+    "action": "SOURCING_ACCEPTED",
+    "entity": "runner-request",
+    "entity_id": "rr007",
+    "detail": "REQUESTED → ACCEPTED on RUN-24816."
+  },
+  {
+    "id": "a042",
+    "at": "2026-08-21T05:24:34.869Z",
+    "actor_id": "u005",
+    "actor_name": "Kagiso Sithole",
+    "action": "SOURCING_ADVANCED",
+    "entity": "runner-request",
+    "entity_id": "rr007",
+    "detail": "ACCEPTED → SOURCING on RUN-24816."
+  },
+  {
+    "id": "a043",
+    "at": "2026-08-21T05:24:35.040Z",
+    "actor_id": "u005",
+    "actor_name": "Kagiso Sithole",
+    "action": "SOURCING_QUOTED",
+    "entity": "runner-request",
+    "entity_id": "rr007",
+    "detail": "SOURCING → QUOTED on RUN-24816."
+  },
+  {
+    "id": "a044",
+    "at": "2026-08-21T05:24:35.141Z",
+    "actor_id": "u006",
+    "actor_name": "Thabo Modise",
+    "action": "SOURCING_ADVANCED",
+    "entity": "runner-request",
+    "entity_id": "rr007",
+    "detail": "QUOTED → APPROVED on RUN-24816."
+  },
+  {
+    "id": "a045",
+    "at": "2026-08-21T05:24:35.243Z",
+    "actor_id": "u005",
+    "actor_name": "Kagiso Sithole",
+    "action": "SOURCING_ADVANCED",
+    "entity": "runner-request",
+    "entity_id": "rr007",
+    "detail": "APPROVED → DELIVERING on RUN-24816."
+  },
+  {
+    "id": "a046",
+    "at": "2026-08-21T05:24:35.346Z",
+    "actor_id": "u006",
+    "actor_name": "Thabo Modise",
+    "action": "SOURCING_ADVANCED",
+    "entity": "runner-request",
+    "entity_id": "rr007",
+    "detail": "DELIVERING → CONFIRMED on RUN-24816."
   }
 ]

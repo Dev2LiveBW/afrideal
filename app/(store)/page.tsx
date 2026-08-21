@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { BadgeCheck, Lock, PackageCheck, Truck } from "lucide-react";
+import { BadgeCheck, ClipboardCheck, PackageSearch, Truck } from "lucide-react";
 
 import { GoldButton } from "@/components/brand/GoldButton";
 import { CategoryTiles } from "@/components/storefront/DiscoveryRails";
@@ -9,10 +9,14 @@ import {
   type LadderProofRow,
 } from "@/components/storefront/LadderProof";
 import { PriceLadder } from "@/components/storefront/PriceLadder";
+import { PathChooser } from "@/components/storefront/PathChooser";
 import { ProductRail } from "@/components/storefront/ProductRail";
+import { TierCards } from "@/components/storefront/TierCards";
+import { TrustStrip } from "@/components/storefront/TrustStrip";
 import { Swatch } from "@/components/storefront/Swatch";
 import { auth } from "@/lib/auth";
 import { readAll } from "@/lib/db";
+import { MARKUP_PCT, QUOTATION_THRESHOLD } from "@/lib/pricing-model";
 import { getCatalogue } from "@/lib/queries";
 import { rankOffers } from "@/lib/supplier-selection";
 import { ladderSpread, tierDoors } from "@/lib/tier-doors";
@@ -21,11 +25,13 @@ import { Reveal } from "./_components/Reveal";
 
 export const dynamic = "force-dynamic";
 
+/** The category the platform actually sells. It leads the page. */
+const FLAGSHIP_CATEGORY = "c1";
+
 export default async function LandingPage() {
   const [
     { categories, products },
     suppliers,
-    orders,
     images,
     offers,
     bands,
@@ -33,7 +39,6 @@ export default async function LandingPage() {
   ] = await Promise.all([
     getCatalogue(),
     readAll("suppliers"),
-    readAll("orders"),
     readAll("product-images"),
     readAll("supplier-offers"),
     readAll("customer-prices"),
@@ -66,20 +71,13 @@ export default async function LandingPage() {
       ).primary?.supplier.id ?? "",
   });
 
+  const hair = products.filter(
+    (product) => product.category_id === FLAGSHIP_CATEGORY,
+  );
   const onPromotion = products
     .filter((product) => product.promotion)
     .map(decorate);
-  const newArrivals = [...products]
-    .sort((a, b) => b.created_at.localeCompare(a.created_at))
-    .slice(0, 8)
-    .map(decorate);
 
-  /*
-   * Every product's published spread, deepest first. This drives two things:
-   * the hero prices its ladder against the product with the most to show, and
-   * the proof strip below lists the next few. Chosen from data rather than
-   * pinned to an id, so re-seeding cannot leave the hero quoting a flat ladder.
-   */
   const spreads = products
     .map((product) => ({ product, spread: ladderSpread(bands, product) }))
     .filter(
@@ -89,23 +87,47 @@ export default async function LandingPage() {
         product: (typeof products)[number];
         spread: NonNullable<ReturnType<typeof ladderSpread>>;
       } => row.spread !== null,
-    )
-    .sort((a, b) => b.spread.pct - a.spread.pct);
+    );
 
-  const featured = spreads[0]?.product ?? products[0];
+  /*
+   * The hero prices its ladder against a hair line, because that is what the
+   * business sells. Within the category it takes the most expensive product
+   * that is not currently discounted: the highest figures make the gap between
+   * the rungs legible at a glance, and a promotional price would have the hero
+   * arguing about a sale when the point is the standing price list.
+   */
+  const featured =
+    hair
+      .filter((product) => !product.promotion)
+      .sort((a, b) => b.price - a.price)[0] ??
+    hair[0] ??
+    products[0];
+
   const doors = featured ? tierDoors(bands, featured, customerType) : [];
 
   const proofRows: LadderProofRow[] = spreads
-    .slice(1, 5)
+    .filter(({ product }) => product.id !== featured?.id)
+    .sort((a, b) => {
+      // Hair first, then by value, so the strip reads as the same catalogue
+      // the hero came from rather than a random sample of it.
+      const aHair = a.product.category_id === FLAGSHIP_CATEGORY ? 0 : 1;
+      const bHair = b.product.category_id === FLAGSHIP_CATEGORY ? 0 : 1;
+      return aHair - bHair || b.spread.from - a.spread.from;
+    })
+    .slice(0, 4)
     .map(({ product, spread }) => ({
       product,
       image: primaryImage.get(product.id),
       ...spread,
     }));
 
+  const hairCategory = categories.find(
+    (category) => category.id === FLAGSHIP_CATEGORY,
+  );
+
   return (
     <>
-      {/* ── The mechanism, priced ──────────────────────────────────────── */}
+      {/* ── The offer, priced ──────────────────────────────────────────── */}
       <section className="mx-auto max-w-market px-6 pb-16 pt-28 sm:pt-32 lg:pb-24 lg:pt-40">
         <div className="grid gap-12 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.05fr)] lg:items-center lg:gap-20">
           {/*
@@ -115,41 +137,42 @@ export default async function LandingPage() {
           */}
           <div className="min-w-0">
             <h1 className="font-display text-[32px] font-bold leading-[1.06] tracking-[-0.035em] text-ink sm:text-[52px] lg:text-[58px]">
-              Every product here
+              Compare the price
               <br />
-              has <span className="text-gold-dark">three prices</span>.
+              <span className="text-gold-dark">before</span> you commit.
             </h1>
 
             <p className="measure mt-6 text-[16px] leading-8 text-body">
-              Retail, bulk and wholesale, all published before you commit.
-              Nobody has to ask what a hundred would cost — the rung is on the
-              page, and you pick the one that matches how you buy.
+              Every product on AfriDeal publishes what it costs at one unit and
+              what it costs at fifty. You can see both before you open an
+              account, and neither figure is behind an enquiry form.
             </p>
 
             {/*
-                Both secondary. The contract puts the primary action on the
-                three rungs, and a filled gold button here was outranking the
+                Both secondary. The primary action belongs to the ladder beside
+                this column, and a filled gold button here was outranking the
                 object the page is about.
               */}
             <div className="mt-9 flex flex-wrap items-center gap-x-6 gap-y-3">
               <Link
-                href="/browse"
+                href="/browse?category=hair-weaves-extensions"
                 className="text-[14.5px] font-medium text-ink underline decoration-gold decoration-2 underline-offset-[6px] transition-colors duration-300 hover:text-gold-dark"
               >
-                Browse the whole catalogue
+                Shop hair, weaves and extensions
               </Link>
               <Link
                 href="#how-it-works"
                 className="text-[14.5px] text-body underline-offset-4 transition-colors duration-300 hover:text-ink hover:underline"
               >
-                How escrow works
+                How AfriDeal works
               </Link>
             </div>
 
             {/*
                 Deliberately a sentence, not a stat block. The real figures are
                 small — this is a young marketplace — and three big numerals
-                would make 12 products look like a boast rather than a fact.
+                would make a modest catalogue look like a boast rather than a
+                fact.
               */}
             <p className="mt-10 border-t border-hairline pt-6 text-[13px] leading-6 text-muted">
               <span className="font-mono tabular-nums text-ink">
@@ -159,8 +182,8 @@ export default async function LandingPage() {
               <span className="font-mono tabular-nums text-ink">
                 {verified.length}
               </span>{" "}
-              verified suppliers in Botswana and South Africa. Escrow on every
-              order.
+              verified suppliers in Botswana and South Africa, delivered to your
+              door.
             </p>
           </div>
 
@@ -199,8 +222,8 @@ export default async function LandingPage() {
                         {featured.name}
                       </p>
                       <p className="mt-0.5 text-[12px] text-white/60">
-                        {categoryName.get(featured.category_id)} · same product,
-                        three rungs
+                        {categoryName.get(featured.category_id)} · one product,
+                        three quantities
                       </p>
                     </div>
                   </div>
@@ -211,47 +234,103 @@ export default async function LandingPage() {
 
                   <p className="mt-5 text-[11.5px] leading-5 text-white/55">
                     Prices are per unit in Pula and applied automatically at
-                    checkout.
-                    {customerType === "GUEST" &&
-                      " Bulk and wholesale rungs open with an account."}
+                    checkout. The same rungs are published on every product in
+                    the catalogue.
                   </p>
                 </div>
               </div>
             </Reveal>
           )}
         </div>
+
+        {/*
+          The two ways in, closing the hero block rather than opening a section
+          of their own. A visitor who already knows which one they want should
+          not have to scroll past the argument to find the door.
+        */}
+        <PathChooser
+          marketplaceImage={featured ? primaryImage.get(featured.id) : undefined}
+          productCount={products.length}
+          className="mt-14 lg:mt-20"
+        />
       </section>
 
-      {/* ── The ladder is not one product's promotion ──────────────────── */}
+      {/* ── What you pay at each quantity ──────────────────────────────── */}
       {proofRows.length > 0 && (
         <section className="border-y border-hairline bg-surface-raised">
           <div className="mx-auto max-w-market px-6 py-20 lg:py-24">
             <div className="grid gap-10 lg:grid-cols-[minmax(0,0.72fr)_minmax(0,1.28fr)] lg:gap-20">
               <div className="min-w-0 lg:sticky lg:top-28 lg:self-start">
                 <h2 className="font-display text-headline-lg font-semibold leading-tight text-ink">
-                  It is how the catalogue is priced, not a sale
+                  What you pay, at every quantity
                 </h2>
                 <p className="measure mt-4 text-[14.5px] leading-7 text-body">
-                  Each product carries its own ladder, set against what the
-                  supplier charges and the margin floor beneath it. Some fall
-                  further than others, and the ones that barely move say so.
+                  AfriDeal buys from the supplier and resells to you at a
+                  published markup:{" "}
+                  <span className="font-mono tabular-nums text-ink">
+                    {MARKUP_PCT.RETAIL}%
+                  </span>{" "}
+                  on retail quantities and{" "}
+                  <span className="font-mono tabular-nums text-ink">
+                    {MARKUP_PCT.BULK}%
+                  </span>{" "}
+                  from five units up. The same arithmetic runs on every product,
+                  so the saving holds whatever you are buying.
                 </p>
                 <Link
                   href="/browse"
                   className="mt-6 inline-flex items-center gap-1.5 text-[13.5px] font-medium text-gold-dark underline-offset-4 hover:underline"
                 >
-                  See every ladder
+                  See the whole catalogue
                 </Link>
               </div>
 
-              <LadderProof rows={proofRows} />
+              <div className="min-w-0">
+                {featured && doors.length > 0 && (
+                  <TierCards doors={doors} productName={featured.name} />
+                )}
+
+                {/*
+                  The same claim, checked against four more products. The tier
+                  cards above could be one generous product; this is the part
+                  that says it is the catalogue.
+                */}
+                <div className="mt-10 border-t border-hairline pt-8">
+                  <h3 className="text-[14px] font-semibold text-ink">
+                    And on everything else
+                  </h3>
+                  <p className="mt-1.5 text-[13px] leading-5 text-muted">
+                    Retail price, bulk price, and what the drop is worth per unit.
+                  </p>
+                  <LadderProof rows={proofRows} className="mt-5" />
+                </div>
+              </div>
             </div>
           </div>
         </section>
       )}
 
+      {/* ── The flagship category ──────────────────────────────────────── */}
+      {hair.length > 0 && (
+        <section className="mx-auto max-w-market px-6 pt-20 lg:pt-24">
+          <ProductRail
+            products={hair.map(decorate)}
+            images={images}
+            title={hairCategory?.name ?? "Hair, Weaves & Extensions"}
+            description="Bundles, frontals, closures, wigs and braiding hair, in the range salons reorder"
+            action={
+              <Link href="/browse?category=hair-weaves-extensions">
+                <GoldButton variant="ghost" size="sm">
+                  See all {hair.length}
+                </GoldButton>
+              </Link>
+            }
+          />
+        </section>
+      )}
+
       {/* ── Categories ─────────────────────────────────────────────────── */}
-      <section className="mx-auto max-w-market px-6 pt-20 lg:pt-24">
+      <section className="mx-auto max-w-market px-6 pt-20">
         <CategoryTiles categories={categories} products={products} />
       </section>
 
@@ -262,24 +341,7 @@ export default async function LandingPage() {
         </section>
       )}
 
-      {/* ── New arrivals ───────────────────────────────────────────────── */}
-      <section className="mx-auto max-w-market px-6 pt-20">
-        <ProductRail
-          products={newArrivals}
-          images={images}
-          title="New arrivals"
-          description="Most recently listed by verified suppliers"
-          action={
-            <Link href="/browse">
-              <GoldButton variant="ghost" size="sm">
-                See all {products.length}
-              </GoldButton>
-            </Link>
-          }
-        />
-      </section>
-
-      {/* ── Why the price is worth trusting ────────────────────────────── */}
+      {/* ── How the order actually runs ────────────────────────────────── */}
       <section
         id="how-it-works"
         className="mt-24 border-y border-hairline bg-surface-raised"
@@ -287,42 +349,49 @@ export default async function LandingPage() {
         <div className="mx-auto grid max-w-market gap-14 px-6 py-24 lg:grid-cols-[minmax(0,0.8fr)_minmax(0,1.2fr)] lg:gap-20">
           <div className="min-w-0 lg:sticky lg:top-28 lg:self-start">
             <h2 className="font-display text-headline-lg font-semibold leading-tight text-ink">
-              A good price is worth nothing if the goods never arrive
+              You are buying from AfriDeal, not from the supplier.
             </h2>
             <p className="measure mt-4 text-[14.5px] leading-7 text-body">
-              So the money moves last. Every order runs through the same four
-              states, and a supplier is paid at the fourth.
+              We are the merchant on your order rather than an introduction
+              service. You get one invoice and one number to call, and if the
+              order goes wrong it is ours to fix rather than something to take
+              up with a supplier you have never dealt with.
+            </p>
+            <p className="measure mt-4 text-[14.5px] leading-7 text-body">
+              A runner request runs the same way, with one step added: nothing
+              is bought until you have seen the price the runner found and said
+              yes to it.
             </p>
           </div>
 
           <ol className="relative">
             {[
               {
-                state: "Paid",
+                state: "Order",
                 tone: "amber",
-                title: "You pay AfriDeal, not the supplier",
-                body: "The payment settles into a platform-held account through DPO Pay, Orange Money or PayGate. The supplier can see that it landed. They cannot touch it.",
-                icon: <Lock size={15} strokeWidth={1.5} />,
+                title: "You order at the published price",
+                body: "The rung your quantity falls on is applied automatically at checkout. Payment is processed by a licensed provider (DPO Pay, Orange Money or PayGate), so your card details never reach us.",
+                icon: <ClipboardCheck size={15} strokeWidth={1.5} />,
               },
               {
-                state: "Held",
+                state: "Source",
                 tone: "amber",
-                title: "The order is routed and prepared",
-                body: "Your order splits to whichever verified suppliers are carrying the stock. Each of them sees only their own part of it, and each has their own escrow leg.",
-                icon: <PackageCheck size={15} strokeWidth={1.5} />,
+                title: "We buy the goods from a verified supplier",
+                body: "Orders route to whichever verified supplier is carrying the stock and most likely to deliver on time. A mixed basket splits across several, and each supplier sees only their own part of it.",
+                icon: <PackageSearch size={15} strokeWidth={1.5} />,
               },
               {
-                state: "In transit",
+                state: "Deliver",
                 tone: "ink",
-                title: "A runner collects and delivers",
-                body: "Pickup and delivery are tracked against the order. If a leg fails, that leg refunds without unwinding the rest of the order.",
+                title: "A vetted courier brings it to you",
+                body: "Pickup and delivery are tracked against the order, so you can see where it is. If one leg of a split order fails, that leg is refunded without unwinding the rest.",
                 icon: <Truck size={15} strokeWidth={1.5} />,
               },
               {
-                state: "Released",
+                state: "Confirm",
                 tone: "green",
-                title: "You confirm, and only then is the supplier paid",
-                body: "Nothing releases automatically on a timer. If what arrived is wrong, you raise a dispute instead and the funds freeze until it is resolved.",
+                title: "You confirm, and you are covered either way",
+                body: "Tell us it arrived and the order closes. If it is late, short or not as described, report it and we will replace it or refund you. Returns stay open for seven days after delivery.",
                 icon: <BadgeCheck size={15} strokeWidth={1.5} />,
               },
             ].map((step, index, all) => (
@@ -334,8 +403,14 @@ export default async function LandingPage() {
                   <span className="absolute left-[19px] top-11 h-[calc(100%-1rem)] w-px bg-hairline-strong" />
                 )}
 
+                {/*
+                  The medallion carries the step number and the glyph together.
+                  Four states that must happen in order is a sequence the reader
+                  is actually tracking, which is what earns an ordinal here; a
+                  number pinned to an unordered list of features would not.
+                */}
                 <span
-                  className={`relative z-10 flex h-10 w-10 shrink-0 items-center justify-center rounded-full ring-1 ring-inset ${
+                  className={`relative z-10 flex h-10 w-10 shrink-0 flex-col items-center justify-center rounded-full ring-1 ring-inset ${
                     step.tone === "amber"
                       ? "bg-gold-50 text-gold-700 ring-gold/25"
                       : step.tone === "green"
@@ -344,6 +419,9 @@ export default async function LandingPage() {
                   }`}
                 >
                   {step.icon}
+                  <span className="mt-0.5 font-mono text-[9px] font-semibold tabular-nums opacity-70">
+                    {index + 1}
+                  </span>
                 </span>
 
                 <div className="min-w-0 flex-1 pt-1">
@@ -366,8 +444,17 @@ export default async function LandingPage() {
         </div>
       </section>
 
-      {/* ── Supplier CTA ───────────────────────────────────────────────── */}
-      <section className="mx-auto max-w-market px-6 py-24">
+      {/*
+        No heading. These four are the conditions under which everything above
+        is true, so they read as a specification plate under the sequence rather
+        than as a section making its own case.
+      */}
+      <section className="mx-auto max-w-market px-6 pt-14">
+        <TrustStrip />
+      </section>
+
+      {/* ── Trade enquiries ────────────────────────────────────────────── */}
+      <section className="mx-auto max-w-market px-6 pb-24 pt-16">
         <div className="grain relative overflow-hidden rounded-xl bg-ink px-8 py-14 text-center sm:px-14">
           <div
             aria-hidden="true"
@@ -375,26 +462,27 @@ export default async function LandingPage() {
           />
           <div className="relative">
             <h2 className="mx-auto max-w-2xl font-display text-[30px] font-bold leading-[1.12] tracking-[-0.025em] text-white sm:text-[38px]">
-              Sell into Botswana and South Africa without chasing payment
+              Buying {QUOTATION_THRESHOLD} units or more?
             </h2>
             <p className="mx-auto mt-5 max-w-xl text-[15px] leading-7 text-white/55">
-              You see the money land in escrow before you pick and pack, and it
-              settles to you once the buyer confirms. Verification takes a few
-              days.
+              Above the published ladder we quote rather than list, because at
+              that volume the price depends on your delivery point and how much
+              notice you can give us. Send the specification and we will come
+              back with a written quotation.
             </p>
             <div className="mt-8 flex flex-wrap justify-center gap-3">
-              <Link href="/login">
+              <Link href="/browse?tier=WHOLESALE">
                 <GoldButton variant="gold" size="lg" withArrow>
-                  Apply as a supplier
+                  Request a quotation
                 </GoldButton>
               </Link>
-              <Link href="/browse">
+              <Link href="/login">
                 <GoldButton
                   variant="ghost"
                   size="lg"
                   className="text-white ring-white/20 hover:bg-white/[0.08]"
                 >
-                  See what sells
+                  Apply as a supplier
                 </GoldButton>
               </Link>
             </div>

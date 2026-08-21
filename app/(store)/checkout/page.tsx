@@ -21,7 +21,7 @@ export default async function CheckoutPage() {
         <EmptyState
           icon={<LogIn size={22} strokeWidth={1.5} />}
           title="Sign in to complete this order"
-          description="Checkout needs an account so the order, the escrow record and the delivery can be tied to you. Your cart is saved and will still be here."
+          description="Checkout needs an account so the order, the invoice and the delivery can be tied to you. Your cart is saved and will still be here."
           action={
             <Link href="/login">
               <GoldButton variant="gold" size="md" withArrow>

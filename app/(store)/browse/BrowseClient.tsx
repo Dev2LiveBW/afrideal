@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { useMemo, useState } from 'react';
-import { Lock, PackageSearch, Search, X } from 'lucide-react';
+import { FileText, PackageSearch, Search, X } from 'lucide-react';
 
 import { EmptyState } from '@/components/brand/Panel';
 import { GoldButton } from '@/components/brand/GoldButton';
@@ -19,7 +19,7 @@ interface BrowseProduct extends Product {
   /** Published unit price at the selected rung; null in the default view. */
   tierPrice?: number | null;
   tierSavingPct?: number;
-  tierLocked?: boolean;
+  tierByQuotation?: boolean;
   tierMinQty?: number;
 }
 
@@ -116,7 +116,9 @@ export function BrowseClient({
     }));
   }, [tierOptions, category, query, tier]);
   const activeTierLabel = tierOptions.find((option) => option.tier === tier)?.label.toLowerCase();
-  const tierIsLocked = Boolean(tier && tierOptions.find((option) => option.tier === tier)?.locked);
+  const tierIsQuoted = Boolean(
+    tier && tierOptions.find((option) => option.tier === tier)?.byQuotation,
+  );
 
   return (
     <>
@@ -127,31 +129,34 @@ export function BrowseClient({
         <p className="measure mt-2 text-[14px] leading-6 text-body">
           {activeCategory
             ? activeCategory.blurb
-            : 'Every listing is carried by at least one verified supplier and settles through escrow.'}
+            : 'Every listing is carried by at least one verified supplier, and the price you see is the price at the quantity you take.'}
         </p>
 
         <div className="mt-6 flex flex-wrap items-center gap-x-4 gap-y-3">
           <TierSwitch options={tierHrefs} active={tier} />
           <p className="text-[12.5px] leading-5 text-muted">
-            {tier
-              ? `Showing ${activeTierLabel} prices per unit.`
-              : 'Prices shown per unit. Pick a quantity band to re-price the catalogue.'}
+            {tierIsQuoted
+              ? 'Cards keep their retail figure, because there is no listed wholesale price to show.'
+              : tier
+                ? `Showing ${activeTierLabel} prices per unit.`
+                : 'Prices shown per unit. Pick a quantity band to re-price the catalogue.'}
           </p>
         </div>
 
-        {tierIsLocked && (
+        {tierIsQuoted && (
           <p className="mt-4 flex flex-wrap items-center gap-x-2 gap-y-1 rounded-md bg-gold/[0.09] px-4 py-3 text-[12.5px] leading-5 text-ink">
-            <Lock size={12} strokeWidth={2} aria-hidden="true" className="text-gold-dark" />
-            These are real published {activeTierLabel} prices, but buying at this band needs an
-            account.
+            <FileText size={12} strokeWidth={2} aria-hidden="true" className="text-gold-dark" />
+            Orders of 100 units and above are quoted rather than listed, against your volume,
+            delivery point and lead time.
             <Link
-              href="/signup"
+              href="/browse"
               className="font-medium text-gold-dark underline underline-offset-4"
             >
-              Create one
+              Ask for a quotation
             </Link>
           </p>
         )}
+
       </header>
 
       {/* Filters */}
@@ -266,7 +271,7 @@ export function BrowseClient({
               index={index}
               tierPrice={product.tierPrice}
               tierSavingPct={product.tierSavingPct}
-              tierLocked={product.tierLocked}
+              tierByQuotation={product.tierByQuotation}
               tierMinQty={product.tierMinQty}
             />
           ))}

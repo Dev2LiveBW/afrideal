@@ -21,13 +21,13 @@ const REASONS = [
 export function OrderActions({
   orderId,
   reference,
-  heldAmount,
+  orderAmount,
   canConfirm,
   canDispute,
 }: {
   orderId: string;
   reference: string;
-  heldAmount: number;
+  orderAmount: number;
   canConfirm: boolean;
   canDispute: boolean;
 }) {
@@ -98,19 +98,19 @@ export function OrderActions({
         loading={saving}
         tone="forest"
         title="Confirm this order arrived?"
-        description={`This releases ${bwp(heldAmount)} from escrow to the supplier for ${reference}. Only confirm once you have the goods and they are what you ordered, because a release cannot be undone from here.`}
-        confirmLabel="Yes, release the payment"
+        description={`Confirming closes ${reference} and settles ${bwp(orderAmount)} with the supplier who filled it. Only confirm once you have the goods and they are what you ordered. Returns stay open for seven days afterwards, but this step cannot be undone from here.`}
+        confirmLabel="Yes, it arrived"
       />
 
       <ConfirmDialog
         open={dialog === 'dispute'}
         onClose={() => setDialog(null)}
-        onConfirm={() => send({ action: 'RAISE_DISPUTE', reason, detail }, 'Dispute raised')}
+        onConfirm={() => send({ action: 'RAISE_DISPUTE', reason, detail }, 'Problem reported')}
         loading={saving}
         tone="danger"
         title="Report a problem with this order"
-        description={`This freezes ${bwp(heldAmount)} in escrow so the supplier cannot be paid while we look into it. Our team responds within five days.`}
-        confirmLabel="Raise dispute"
+        description={`This puts ${reference} under review and pauses settlement on it while we look into what happened. Our team responds within five working days.`}
+        confirmLabel="Report the problem"
       >
         <div className="space-y-3">
           <div>

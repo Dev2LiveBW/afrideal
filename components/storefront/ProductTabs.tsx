@@ -15,7 +15,7 @@ export function ProductTabs({
   image,
 }: {
   product: Product;
-  /** Sits behind the escrow note; the swatch stands in when there is no photo. */
+  /** Sits behind the protection note; the swatch stands in when there is no photo. */
   image?: ProductImage;
 }) {
   const [tab, setTab] = useState<Tab>('description');
@@ -112,7 +112,7 @@ export function ProductTabs({
                 the base to carry white type on a bright image.
               */}
               <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-ink/90 via-ink/60 to-transparent p-5 pt-12">
-                <p className="text-[15px] font-semibold text-white">Backed by escrow</p>
+                <p className="text-[15px] font-semibold text-white">Buyer protection</p>
                 <p className="mt-1 text-[12.5px] leading-5 text-white/70">
                   Your payment is held until you confirm this arrived and is what you ordered.
                 </p>
@@ -191,7 +191,7 @@ export function ProductTabs({
 
             <p className="mt-3 text-[11.5px] leading-5 text-muted">
               Aggregated from {product.review_count.toLocaleString('en-GB')} verified purchases. Only
-              buyers whose escrow released against this product can review it. The per-star
+              buyers who took delivery of this product can review it. The per-star
               distribution is derived from the overall score rather than stored per review, so
               individual reviews are not shown.
             </p>
