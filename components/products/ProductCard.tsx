@@ -117,7 +117,7 @@ export function ProductCard({
         does identification work instead of decoration.
       */}
       <Link
-        href={href ?? `/unsplash/assets/${product.id}`}
+        href={href ?? `/products/${product.id}`}
         style={{ backgroundColor: palette.wash, borderColor: palette.edge }}
         className="flex h-full flex-col overflow-hidden rounded-md border shadow-card transition-shadow duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] hover:shadow-lift"
       >

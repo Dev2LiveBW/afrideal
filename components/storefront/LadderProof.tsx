@@ -36,7 +36,7 @@ export function LadderProof({ rows, className }: { rows: LadderProofRow[]; class
       {rows.map(({ product, image, from, to, pct, lowestRange }) => (
         <li key={product.id}>
           <Link
-            href={`/unsplash/assets/${product.id}`}
+            href={`/products/${product.id}`}
             className="group flex min-w-0 items-center gap-3 py-4 transition-colors duration-300 hover:bg-ink/[0.02] sm:gap-6"
           >
             <Swatch

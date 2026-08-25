@@ -78,7 +78,7 @@ export function CategoryTiles({
                   deliberate rather than a white hole in the grid.
                 */}
                 <Image
-                  src={`/unsplash/assets/${category.id}.jpg`}
+                  src={`/products/${category.id}.jpg`}
                   alt=""
                   fill
                   sizes="(max-width: 640px) 45vw, (max-width: 1024px) 30vw, 220px"

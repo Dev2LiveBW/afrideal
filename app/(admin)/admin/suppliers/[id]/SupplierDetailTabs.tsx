@@ -115,7 +115,7 @@ export function SupplierDetailTabs({
                       <tr key={offer.id}>
                         <td>
                           <Link
-                            href={`/admin/unsplash/assets/${offer.product_id}`}
+                            href={`/admin/products/${offer.product_id}`}
                             className="font-medium text-ink transition-colors hover:text-gold-dark"
                           >
                             {product?.emoji} {product?.name ?? offer.product_id}

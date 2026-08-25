@@ -136,7 +136,7 @@ export function CartClient({
                 className="flex min-w-0 flex-wrap gap-4 rounded-md border border-hairline bg-surface-raised p-4 sm:flex-nowrap"
               >
                 <Link
-                  href={`/unsplash/assets/${line.product_id}`}
+                  href={`/products/${line.product_id}`}
                   className="shrink-0"
                   aria-label={line.name}
                 >
@@ -145,7 +145,7 @@ export function CartClient({
 
                 <div className="min-w-0 flex-1">
                   <Link
-                    href={`/unsplash/assets/${line.product_id}`}
+                    href={`/products/${line.product_id}`}
                     className="text-[14.5px] font-semibold text-ink transition-colors hover:text-gold-dark"
                   >
                     {line.name}

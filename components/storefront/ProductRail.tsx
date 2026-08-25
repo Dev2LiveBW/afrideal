@@ -145,7 +145,7 @@ export function ProductRail({
                 cardWidth,
               )}
             >
-              <Link href={`/unsplash/assets/${product.id}`} className="block">
+              <Link href={`/products/${product.id}`} className="block">
                 <Swatch
                   image={primary}
                   fallback={product.swatch}
@@ -180,7 +180,7 @@ export function ProductRail({
                   kicker. It is a classification, not a heading, so it reads
                   under the name where the rest of the card's metadata lives.
                 */}
-                <Link href={`/unsplash/assets/${product.id}`}>
+                <Link href={`/products/${product.id}`}>
                   <h3 className="line-clamp-2 min-h-[2.4em] text-[13.5px] font-medium leading-5 text-ink transition-colors hover:text-gold-dark">
                     {product.name}
                   </h3>
