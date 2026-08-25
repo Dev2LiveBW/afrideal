@@ -6,7 +6,7 @@ import { MoneyText } from '@/components/brand/MoneyText';
 import { Enclosure, PageHeader, Panel, PanelBody, PanelHeader } from '@/components/brand/Panel';
 import { PricingFormula } from '@/components/brand/PricingFormula';
 import { StatusBadge } from '@/components/brand/StatusBadge';
-import { SupplierOfferTable } from '@/components/unsplash/assets/SupplierOfferTable';
+import { SupplierOfferTable } from '@/components/products/SupplierOfferTable';
 import { Swatch } from '@/components/storefront/Swatch';
 import { ConsoleTopbar } from '@/components/layout/ConsoleTopbar';
 import { auth } from '@/lib/auth';
