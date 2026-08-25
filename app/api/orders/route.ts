@@ -60,7 +60,7 @@ export const GET = handled(async (request: Request) => {
   return ok(visible.sort((a, b) => b.placed_at.localeCompare(a.placed_at)));
 });
 
-// ── POST /api/orders — checkout, with the split engine ───────────────────────
+// ── POST /api/orders - checkout, with the split engine ───────────────────────
 
 /**
  * Placing an order does five things atomically enough for a demo:
@@ -95,7 +95,7 @@ export const POST = handled(async (request: Request) => {
   const orderId = await nextId('orders', 'o');
   const now = new Date().toISOString();
 
-  // 1 + 2 — resolve and route every line.
+  // 1 + 2 - resolve and route every line.
   let itemSeq = Number.parseInt((await nextId('order-items', 'oi')).slice(2), 10);
   const items: OrderItem[] = [];
 
@@ -115,7 +115,7 @@ export const POST = handled(async (request: Request) => {
     if (!route) return fail(`No verified supplier can currently fulfil ${product.name}.`, 409);
 
     /**
-     * §14 — price the line from the buyer's own tier ladder, at the server, for
+     * §14 - price the line from the buyer's own tier ladder, at the server, for
      * the quantity actually ordered. The client sends no prices at all, so a
      * tampered cart cannot set its own, and a buyer who qualifies for wholesale
      * gets it whether or not the page they came from showed it.
@@ -158,7 +158,7 @@ export const POST = handled(async (request: Request) => {
     { status: 'PAID', label: 'Payment confirmed', at: now },
   ];
 
-  // 3 — the customer-facing order.
+  // 3 - the customer-facing order.
   const orderCount = (await readAll('orders')).length;
   const order: Order = {
     id: orderId,
@@ -182,7 +182,7 @@ export const POST = handled(async (request: Request) => {
   await insert('orders', order);
   await insertMany('order-items', items);
 
-  // 4 + 5 — one supplier order and one procurement invoice per supplier.
+  // 4 + 5 - one supplier order and one procurement invoice per supplier.
   const bySupplier = new Map<string, OrderItem[]>();
   for (const item of items) {
     bySupplier.set(item.supplier_id, [...(bySupplier.get(item.supplier_id) ?? []), item]);
@@ -266,7 +266,7 @@ export const POST = handled(async (request: Request) => {
     action: EVENTS.ORDER_CREATED,
     entity: 'order',
     entityId: orderId,
-    detail: `${order.reference} placed — ${items.length} line(s) split across ${supplierOrders.length} supplier(s).`,
+    detail: `${order.reference} placed - ${items.length} line(s) split across ${supplierOrders.length} supplier(s).`,
   });
 
   return ok(

@@ -6,7 +6,7 @@ import { FileText, PackageSearch, Search, X } from 'lucide-react';
 
 import { EmptyState } from '@/components/brand/Panel';
 import { GoldButton } from '@/components/brand/GoldButton';
-import { ProductCard } from '@/components/products/ProductCard';
+import { ProductCard } from '@/components/unsplash/assets/ProductCard';
 import { TierSwitch, type TierSwitchOption } from '@/components/storefront/TierSwitch';
 import { cn } from '@/lib/utils';
 import type { DoorTier } from '@/lib/tier-doors';

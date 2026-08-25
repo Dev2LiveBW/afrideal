@@ -663,5 +663,159 @@
         "note": "Procurement invoice raised against the order."
       }
     ]
+  },
+  {
+    "id": "pay029",
+    "order_id": "o026",
+    "supplier_order_id": "sup029",
+    "supplier_id": "s001",
+    "amount": 292,
+    "status": "PENDING",
+    "gateway": "ORANGE_MONEY",
+    "raised_at": "2026-08-21T07:48:25.257Z",
+    "settled_at": null,
+    "cancelled_at": null,
+    "terms_days": 7,
+    "history": [
+      {
+        "from": null,
+        "to": "PENDING",
+        "at": "2026-08-21T07:48:25.257Z",
+        "actor": "System",
+        "note": "Procurement invoice raised against the order."
+      }
+    ]
+  },
+  {
+    "id": "pay030",
+    "order_id": "o026",
+    "supplier_order_id": "sup030",
+    "supplier_id": "s004",
+    "amount": 414,
+    "status": "PENDING",
+    "gateway": "ORANGE_MONEY",
+    "raised_at": "2026-08-21T07:48:25.257Z",
+    "settled_at": null,
+    "cancelled_at": null,
+    "terms_days": 7,
+    "history": [
+      {
+        "from": null,
+        "to": "PENDING",
+        "at": "2026-08-21T07:48:25.257Z",
+        "actor": "System",
+        "note": "Procurement invoice raised against the order."
+      }
+    ]
+  },
+  {
+    "id": "pay031",
+    "order_id": "o027",
+    "supplier_order_id": "sup031",
+    "supplier_id": "s001",
+    "amount": 146,
+    "status": "PENDING",
+    "gateway": "DPO_PAY",
+    "raised_at": "2026-08-21T07:48:29.143Z",
+    "settled_at": null,
+    "cancelled_at": null,
+    "terms_days": 7,
+    "history": [
+      {
+        "from": null,
+        "to": "PENDING",
+        "at": "2026-08-21T07:48:29.143Z",
+        "actor": "System",
+        "note": "Procurement invoice raised against the order."
+      }
+    ]
+  },
+  {
+    "id": "pay032",
+    "order_id": "o028",
+    "supplier_order_id": "sup032",
+    "supplier_id": "s001",
+    "amount": 660,
+    "status": "PENDING",
+    "gateway": "DPO_PAY",
+    "raised_at": "2026-08-21T07:48:29.395Z",
+    "settled_at": null,
+    "cancelled_at": null,
+    "terms_days": 7,
+    "history": [
+      {
+        "from": null,
+        "to": "PENDING",
+        "at": "2026-08-21T07:48:29.395Z",
+        "actor": "System",
+        "note": "Procurement invoice raised against the order."
+      }
+    ]
+  },
+  {
+    "id": "pay033",
+    "order_id": "o029",
+    "supplier_order_id": "sup033",
+    "supplier_id": "s001",
+    "amount": 2640,
+    "status": "PENDING",
+    "gateway": "DPO_PAY",
+    "raised_at": "2026-08-21T07:48:29.706Z",
+    "settled_at": null,
+    "cancelled_at": null,
+    "terms_days": 7,
+    "history": [
+      {
+        "from": null,
+        "to": "PENDING",
+        "at": "2026-08-21T07:48:29.706Z",
+        "actor": "System",
+        "note": "Procurement invoice raised against the order."
+      }
+    ]
+  },
+  {
+    "id": "pay034",
+    "order_id": "o030",
+    "supplier_order_id": "sup034",
+    "supplier_id": "s001",
+    "amount": 2640,
+    "status": "PENDING",
+    "gateway": "DPO_PAY",
+    "raised_at": "2026-08-21T07:48:29.975Z",
+    "settled_at": null,
+    "cancelled_at": null,
+    "terms_days": 7,
+    "history": [
+      {
+        "from": null,
+        "to": "PENDING",
+        "at": "2026-08-21T07:48:29.975Z",
+        "actor": "System",
+        "note": "Procurement invoice raised against the order."
+      }
+    ]
+  },
+  {
+    "id": "pay035",
+    "order_id": "o031",
+    "supplier_order_id": "sup035",
+    "supplier_id": "s001",
+    "amount": 838,
+    "status": "PENDING",
+    "gateway": "DPO_PAY",
+    "raised_at": "2026-08-24T16:00:09.358Z",
+    "settled_at": null,
+    "cancelled_at": null,
+    "terms_days": 7,
+    "history": [
+      {
+        "from": null,
+        "to": "PENDING",
+        "at": "2026-08-24T16:00:09.358Z",
+        "actor": "System",
+        "note": "Procurement invoice raised against the order."
+      }
+    ]
   }
 ]

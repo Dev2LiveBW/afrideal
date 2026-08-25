@@ -122,7 +122,7 @@ export function ConsoleSidebar({
                             : 'text-body hover:bg-ink/[0.04] hover:text-ink',
                       )}
                     >
-                      {/* Active rail — 2px, and only on the active item. */}
+                      {/* Active rail - 2px, and only on the active item. */}
                       {active && (
                         <motion.span
                           layoutId={`rail-${tone}`}

@@ -60,7 +60,7 @@ export default async function SupplierOrdersPage() {
       <PageHeader
         eyebrow="Fulfilment"
         title="Your orders"
-        description="Confirm, prepare and hand off to collection — a runner takes it from there."
+        description="Confirm, prepare and hand off to collection - a runner takes it from there."
       />
 
       <OrdersClient legs={legs} supplierName={workspace.supplier.name} photos={photos} />

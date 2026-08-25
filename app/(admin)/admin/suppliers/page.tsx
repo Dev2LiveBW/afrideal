@@ -14,7 +14,7 @@ export default async function AdminSuppliersPage() {
   const canDecide = session?.user ? ['SUPER_ADMIN', 'OPERATIONS_ADMIN'].includes(session.user.role) : false;
 
   const sorted = [...suppliers].sort((a, b) => {
-    // Pending applications first — that is the queue this page exists to clear.
+    // Pending applications first - that is the queue this page exists to clear.
     if (a.status === 'PENDING' && b.status !== 'PENDING') return -1;
     if (b.status === 'PENDING' && a.status !== 'PENDING') return 1;
     return b.joined_at.localeCompare(a.joined_at);

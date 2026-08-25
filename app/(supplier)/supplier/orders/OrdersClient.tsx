@@ -25,8 +25,8 @@ import type { SupplierPayable, Order, OrderItem, SupplierOrder, SupplierOrderSta
 /**
  * Order fulfilment list.
  *
- * Each card exposes exactly one forward action — the next step in
- * Confirm → Preparing → Ready for collection — because that's the whole
+ * Each card exposes exactly one forward action - the next step in
+ * Confirm → Preparing → Ready for collection - because that's the whole
  * supplier-side flow; a runner takes it from READY_FOR_COLLECTION onward.
  * The settlement panel underneath is always read-only here: a supplier cannot
  * settle or cancel their own invoice.
@@ -49,7 +49,7 @@ function statusCaption(status: SupplierOrderStatus): { icon: React.ReactNode; te
     case 'READY_FOR_COLLECTION':
       return { icon: <PackageSearch size={14} strokeWidth={1.5} />, text: 'Waiting for a runner to collect.' };
     case 'COLLECTED':
-      return { icon: <Truck size={14} strokeWidth={1.5} />, text: 'Collected — on its way to the customer.' };
+      return { icon: <Truck size={14} strokeWidth={1.5} />, text: 'Collected - on its way to the customer.' };
     case 'DELIVERED':
       return { icon: <PackageCheck size={14} strokeWidth={1.5} />, text: 'Delivered to the customer.' };
     case 'CANCELLED':

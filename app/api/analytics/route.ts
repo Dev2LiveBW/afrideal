@@ -10,8 +10,8 @@ export const dynamic = 'force-dynamic';
  * Two GMV figures are reported and they mean different things, so both are
  * labelled rather than merged into one impressive-looking number:
  *
- *   period_gmv    — orders actually on this platform in the window
- *   lifetime_gmv  — cumulative trading across all verified suppliers
+ *   period_gmv    - orders actually on this platform in the window
+ *   lifetime_gmv  - cumulative trading across all verified suppliers
  *
  * The APR (annual platform report) section computes the 5% revenue share on
  * qualifying revenue only. Exclusions are itemised so the figure can be

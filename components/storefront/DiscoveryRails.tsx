@@ -5,26 +5,23 @@ import Link from 'next/link';
 import { motion } from 'framer-motion';
 import { ArrowRight, BadgeCheck, MapPin, Star } from 'lucide-react';
 
+import { CategoryIcon } from '@/components/storefront/CategoryIcon';
+import { categoryPalette } from '@/lib/category-palette';
 import { cn } from '@/lib/utils';
 import type { Category, Product, Supplier } from '@/types';
 
 /**
  * Category and supplier discovery.
  *
- * Both are image-led in the reference design. With no photography, each tile
- * uses the category's own colour field with the glyph set large and low
- * contrast, which reads as a deliberate treatment rather than a missing asset.
+ * The tiles used to hold a hand-kept table of gradient pairs that had drifted
+ * out of sync with the catalogue: it covered c1 to c6 and the seventh category,
+ * Beauty and Personal Care, fell through to a default near-black. Colour now
+ * comes from the shared palette, so adding a trade cannot leave a hole.
+ *
+ * Two of those old pairs were amber and forest, which this system spends on
+ * money in motion and on settled state. A category wearing either makes a claim
+ * about status it cannot back, so both are gone from the set.
  */
-
-/** Colour field behind a category tile if its photograph is missing. */
-const CATEGORY_FIELDS: Record<string, [string, string]> = {
-  c1: ['#D4920A', '#8B5E0A'],
-  c2: ['#2a2a2a', '#111111'],
-  c3: ['#8A918B', '#5A615C'],
-  c4: ['#1A5C2A', '#0F3A1B'],
-  c5: ['#ECEBE7', '#8A918B'],
-  c6: ['#2E7D3F', '#1A5C2A'],
-};
 
 export function CategoryTiles({
   categories,
@@ -53,7 +50,7 @@ export function CategoryTiles({
 
       <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-6">
         {categories.map((category, index) => {
-          const [from, to] = CATEGORY_FIELDS[category.id] ?? ['#2a2a2a', '#111111'];
+          const palette = categoryPalette(category.id);
           const count = products.filter((product) => product.category_id === category.id).length;
 
           return (
@@ -68,11 +65,12 @@ export function CategoryTiles({
             >
             <Link
               href={`/browse?category=${category.slug}`}
-              className="group block overflow-hidden rounded-md border border-hairline bg-surface-raised transition-all duration-400 ease-[cubic-bezier(0.16,1,0.3,1)] hover:-translate-y-0.5 hover:border-gold/30 hover:shadow-lift"
+              style={{ backgroundColor: palette.wash, borderColor: palette.edge }}
+              className="group block overflow-hidden rounded-md border transition-all duration-400 ease-[cubic-bezier(0.16,1,0.3,1)] hover:-translate-y-0.5 hover:shadow-lift"
             >
               <div
                 className="relative aspect-[4/3] overflow-hidden"
-                style={{ background: `linear-gradient(140deg, ${from} 0%, ${to} 100%)` }}
+                style={{ backgroundColor: palette.hue }}
               >
                 {/*
                   Photograph when `npm run images` has fetched one, colour field
@@ -80,7 +78,7 @@ export function CategoryTiles({
                   deliberate rather than a white hole in the grid.
                 */}
                 <Image
-                  src={`/products/${category.id}.jpg`}
+                  src={`/unsplash/assets/${category.id}.jpg`}
                   alt=""
                   fill
                   sizes="(max-width: 640px) 45vw, (max-width: 1024px) 30vw, 220px"
@@ -99,11 +97,19 @@ export function CategoryTiles({
                 />
               </div>
 
-              <div className="px-3 py-2.5">
-                <p className="truncate text-[13px] font-medium text-ink">{category.name}</p>
-                <p className="font-mono text-[10.5px] tabular-nums text-muted">
-                  {count} {count === 1 ? 'listing' : 'listings'}
-                </p>
+              <div className="flex items-start gap-2 px-3 py-2.5">
+                <CategoryIcon
+                  categoryId={category.id}
+                  size={15}
+                  className="mt-px shrink-0"
+                  style={{ color: palette.hue }}
+                />
+                <div className="min-w-0">
+                  <p className="truncate text-[13px] font-medium text-ink">{category.name}</p>
+                  <p className="font-mono text-[10.5px] tabular-nums text-muted">
+                    {count} {count === 1 ? 'listing' : 'listings'}
+                  </p>
+                </div>
               </div>
             </Link>
             </motion.div>

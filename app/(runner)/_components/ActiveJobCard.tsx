@@ -13,7 +13,7 @@ import type { ShipmentStatus } from '@/types';
 import type { DecoratedShipment } from '../_lib/types';
 
 /**
- * The active job card — pickup phase, then delivery phase.
+ * The active job card - pickup phase, then delivery phase.
  *
  * `variant="compact"` (dashboard) keeps the one-tap ASSIGNED/PICKED_UP
  * actions but hands the final delivery confirmation off to the Jobs page,
@@ -26,7 +26,7 @@ const PHASE_ORDER: ShipmentStatus[] = ['ASSIGNED', 'PICKED_UP', 'IN_TRANSIT', 'D
 const PHASE_LABELS: Record<ShipmentStatus, string> = {
   UNASSIGNED: 'Waiting to be assigned',
   ASSIGNED: 'Heading to pickup',
-  PICKED_UP: 'Picked up — preparing to depart',
+  PICKED_UP: 'Picked up - preparing to depart',
   IN_TRANSIT: 'On the way to drop-off',
   DELIVERED: 'Delivered',
   FAILED: 'Delivery failed',
@@ -61,7 +61,7 @@ export function ActiveJobCard({
         throw new Error(error ?? 'Could not update this job.');
       }
 
-      toast.success(status === 'DELIVERED' ? 'Delivery confirmed — nice work' : PHASE_LABELS[status]);
+      toast.success(status === 'DELIVERED' ? 'Delivery confirmed - nice work' : PHASE_LABELS[status]);
       router.refresh();
     } catch (error) {
       toast.error(error instanceof Error ? error.message : 'Could not update this job.');
@@ -117,7 +117,7 @@ export function ActiveJobCard({
                 <div className="flex items-center gap-3 rounded-md border border-dashed border-hairline-strong bg-surface px-3.5 py-3 text-muted">
                   <Camera size={18} strokeWidth={1.5} className="shrink-0" />
                   <p className="text-[12px] leading-4">
-                    Photo capture placeholder — not wired up in this preview build.
+                    Photo capture placeholder - not wired up in this preview build.
                   </p>
                 </div>
                 <GoldButton

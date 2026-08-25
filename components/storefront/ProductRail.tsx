@@ -6,8 +6,10 @@ import { ChevronLeft, ChevronRight, Heart, Plus } from 'lucide-react';
 import toast from 'react-hot-toast';
 
 import { MoneyText } from '@/components/brand/MoneyText';
+import { CategoryIcon } from '@/components/storefront/CategoryIcon';
 import { Swatch, photoUrl } from '@/components/storefront/Swatch';
 import { useAfriDealStore } from '@/store/useAfriDealStore';
+import { categoryPalette } from '@/lib/category-palette';
 import { cn } from '@/lib/utils';
 import type { Product, ProductImage } from '@/types';
 
@@ -125,17 +127,25 @@ export function ProductRail({
             (image) => image.product_id === product.id && image.sort_order === 0,
           );
           const isSaved = saved.has(product.id);
+          const palette = categoryPalette(product.category_id);
 
           return (
+            /*
+              The rail card carries its trade's colour, matching ProductCard.
+              Both exist because the rail scrolls horizontally and needs its own
+              width and snap behaviour, but they must not disagree about what a
+              product looks like.
+            */
             <article
               key={product.id}
+              style={{ backgroundColor: palette.wash, borderColor: palette.edge }}
               className={cn(
-                'group relative shrink-0 snap-start overflow-hidden rounded-md border border-hairline bg-surface-raised',
+                'group relative shrink-0 snap-start overflow-hidden rounded-md border',
                 'shadow-card transition-shadow duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] hover:shadow-lift',
                 cardWidth,
               )}
             >
-              <Link href={`/products/${product.id}`} className="block">
+              <Link href={`/unsplash/assets/${product.id}`} className="block">
                 <Swatch
                   image={primary}
                   fallback={product.swatch}
@@ -170,14 +180,20 @@ export function ProductRail({
                   kicker. It is a classification, not a heading, so it reads
                   under the name where the rest of the card's metadata lives.
                 */}
-                <Link href={`/products/${product.id}`}>
+                <Link href={`/unsplash/assets/${product.id}`}>
                   <h3 className="line-clamp-2 min-h-[2.4em] text-[13.5px] font-medium leading-5 text-ink transition-colors hover:text-gold-dark">
                     {product.name}
                   </h3>
                 </Link>
 
                 {product.categoryName && (
-                  <p className="mt-1 text-[11px] text-muted">{product.categoryName}</p>
+                  <p
+                    className="mt-1 inline-flex items-center gap-1.5 text-[11px] font-medium"
+                    style={{ color: palette.hue }}
+                  >
+                    <CategoryIcon categoryId={product.category_id} size={11} />
+                    {product.categoryName}
+                  </p>
                 )}
 
                 <div className="mt-2.5 flex items-end justify-between gap-2">

@@ -5,7 +5,7 @@ import { cn } from '@/lib/utils';
  * Every price, total, payout and invoice amount goes through here.
  *
  * Mono with tabular figures so a column of Pula aligns on the decimal without
- * anyone hand-tuning widths, and two decimals always — including on round
+ * anyone hand-tuning widths, and two decimals always - including on round
  * numbers, because `BWP 1,200` next to `BWP 1,199.50` reads as a typo.
  */
 

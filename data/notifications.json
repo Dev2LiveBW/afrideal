@@ -183,7 +183,7 @@
     "id": "n021",
     "user_id": "u003",
     "title": "Quotation requested",
-    "body": "RFQ-2603 — 400 units of Shea Butter Deep Treatment 500ml to Gaborone.",
+    "body": "RFQ-2603 - 400 units of Shea Butter Deep Treatment 500ml to Gaborone.",
     "kind": "ORDER",
     "read": false,
     "at": "2026-08-20T11:01:45.941Z"
@@ -192,7 +192,7 @@
     "id": "n022",
     "user_id": "u004",
     "title": "Quotation requested",
-    "body": "RFQ-2603 — 400 units of Shea Butter Deep Treatment 500ml to Gaborone.",
+    "body": "RFQ-2603 - 400 units of Shea Butter Deep Treatment 500ml to Gaborone.",
     "kind": "ORDER",
     "read": false,
     "at": "2026-08-20T11:01:45.961Z"
@@ -201,7 +201,7 @@
     "id": "n023",
     "user_id": "u001",
     "title": "New RFQ to source",
-    "body": "RFQ-2603 from Kefilwe Dithebe — 400 units of Shea Butter Deep Treatment 500ml.",
+    "body": "RFQ-2603 from Kefilwe Dithebe - 400 units of Shea Butter Deep Treatment 500ml.",
     "kind": "ORDER",
     "read": false,
     "at": "2026-08-20T11:01:45.985Z"
@@ -210,7 +210,7 @@
     "id": "n024",
     "user_id": "u002",
     "title": "New RFQ to source",
-    "body": "RFQ-2603 from Kefilwe Dithebe — 400 units of Shea Butter Deep Treatment 500ml.",
+    "body": "RFQ-2603 from Kefilwe Dithebe - 400 units of Shea Butter Deep Treatment 500ml.",
     "kind": "ORDER",
     "read": false,
     "at": "2026-08-20T11:01:46.004Z"
@@ -219,7 +219,7 @@
     "id": "n025",
     "user_id": "u007",
     "title": "Your quotation is ready",
-    "body": "RFQ-2603 — we have sourced 400 units of Shea Butter Deep Treatment 500ml.",
+    "body": "RFQ-2603 - we have sourced 400 units of Shea Butter Deep Treatment 500ml.",
     "kind": "ORDER",
     "read": false,
     "at": "2026-08-20T11:01:49.139Z"
@@ -228,7 +228,7 @@
     "id": "n026",
     "user_id": "u005",
     "title": "New sourcing request",
-    "body": "RUN-24815: Verification probe — bulk hair dryer in Gaborone.",
+    "body": "RUN-24815: Verification probe - bulk hair dryer in Gaborone.",
     "kind": "ORDER",
     "read": false,
     "at": "2026-08-20T11:01:51.374Z"
@@ -272,7 +272,7 @@
   {
     "id": "n031",
     "user_id": "u005",
-    "title": "RUN-24815 — approved",
+    "title": "RUN-24815 - approved",
     "body": "The customer approved your price. Go ahead and buy it.",
     "kind": "ORDER",
     "read": false,
@@ -290,7 +290,7 @@
   {
     "id": "n033",
     "user_id": "u005",
-    "title": "RUN-24815 — confirmed",
+    "title": "RUN-24815 - confirmed",
     "body": "The customer marked this request confirmed.",
     "kind": "ORDER",
     "read": false,
@@ -390,7 +390,7 @@
     "id": "n044",
     "user_id": "u003",
     "title": "Quotation requested",
-    "body": "RFQ-2604 — 400 units of Shea Butter Deep Treatment 500ml to Gaborone.",
+    "body": "RFQ-2604 - 400 units of Shea Butter Deep Treatment 500ml to Gaborone.",
     "kind": "ORDER",
     "read": false,
     "at": "2026-08-21T05:24:25.262Z"
@@ -399,7 +399,7 @@
     "id": "n045",
     "user_id": "u004",
     "title": "Quotation requested",
-    "body": "RFQ-2604 — 400 units of Shea Butter Deep Treatment 500ml to Gaborone.",
+    "body": "RFQ-2604 - 400 units of Shea Butter Deep Treatment 500ml to Gaborone.",
     "kind": "ORDER",
     "read": false,
     "at": "2026-08-21T05:24:25.282Z"
@@ -408,7 +408,7 @@
     "id": "n046",
     "user_id": "u001",
     "title": "New RFQ to source",
-    "body": "RFQ-2604 from Kefilwe Dithebe — 400 units of Shea Butter Deep Treatment 500ml.",
+    "body": "RFQ-2604 from Kefilwe Dithebe - 400 units of Shea Butter Deep Treatment 500ml.",
     "kind": "ORDER",
     "read": false,
     "at": "2026-08-21T05:24:25.304Z"
@@ -417,7 +417,7 @@
     "id": "n047",
     "user_id": "u002",
     "title": "New RFQ to source",
-    "body": "RFQ-2604 from Kefilwe Dithebe — 400 units of Shea Butter Deep Treatment 500ml.",
+    "body": "RFQ-2604 from Kefilwe Dithebe - 400 units of Shea Butter Deep Treatment 500ml.",
     "kind": "ORDER",
     "read": false,
     "at": "2026-08-21T05:24:25.325Z"
@@ -426,7 +426,7 @@
     "id": "n048",
     "user_id": "u007",
     "title": "Your quotation is ready",
-    "body": "RFQ-2604 — we have sourced 400 units of Shea Butter Deep Treatment 500ml.",
+    "body": "RFQ-2604 - we have sourced 400 units of Shea Butter Deep Treatment 500ml.",
     "kind": "ORDER",
     "read": false,
     "at": "2026-08-21T05:24:28.984Z"
@@ -435,7 +435,7 @@
     "id": "n049",
     "user_id": "u005",
     "title": "New sourcing request",
-    "body": "RUN-24816: Verification probe — bulk hair dryer in Gaborone.",
+    "body": "RUN-24816: Verification probe - bulk hair dryer in Gaborone.",
     "kind": "ORDER",
     "read": false,
     "at": "2026-08-21T05:24:31.415Z"
@@ -479,7 +479,7 @@
   {
     "id": "n054",
     "user_id": "u005",
-    "title": "RUN-24816 — approved",
+    "title": "RUN-24816 - approved",
     "body": "The customer approved your price. Go ahead and buy it.",
     "kind": "ORDER",
     "read": false,
@@ -497,10 +497,235 @@
   {
     "id": "n056",
     "user_id": "u005",
-    "title": "RUN-24816 — confirmed",
+    "title": "RUN-24816 - confirmed",
     "body": "The customer marked this request confirmed.",
     "kind": "ORDER",
     "read": false,
     "at": "2026-08-21T05:24:35.333Z"
+  },
+  {
+    "id": "n057",
+    "user_id": "u003",
+    "title": "New order to confirm",
+    "body": "AFD-24835 needs confirmation within 24 hours.",
+    "kind": "ORDER",
+    "read": false,
+    "at": "2026-08-21T07:48:25.316Z"
+  },
+  {
+    "id": "n058",
+    "user_id": "u006",
+    "title": "Order placed",
+    "body": "AFD-24835 is confirmed. We are procuring it now and will let you know when it ships.",
+    "kind": "ORDER",
+    "read": false,
+    "at": "2026-08-21T07:48:25.338Z"
+  },
+  {
+    "id": "n059",
+    "user_id": "u003",
+    "title": "New order to confirm",
+    "body": "AFD-24836 needs confirmation within 24 hours.",
+    "kind": "ORDER",
+    "read": false,
+    "at": "2026-08-21T07:48:29.220Z"
+  },
+  {
+    "id": "n060",
+    "user_id": "u007",
+    "title": "Order placed",
+    "body": "AFD-24836 is confirmed. We are procuring it now and will let you know when it ships.",
+    "kind": "ORDER",
+    "read": false,
+    "at": "2026-08-21T07:48:29.260Z"
+  },
+  {
+    "id": "n061",
+    "user_id": "u003",
+    "title": "New order to confirm",
+    "body": "AFD-24837 needs confirmation within 24 hours.",
+    "kind": "ORDER",
+    "read": false,
+    "at": "2026-08-21T07:48:29.489Z"
+  },
+  {
+    "id": "n062",
+    "user_id": "u007",
+    "title": "Order placed",
+    "body": "AFD-24837 is confirmed. We are procuring it now and will let you know when it ships.",
+    "kind": "ORDER",
+    "read": false,
+    "at": "2026-08-21T07:48:29.529Z"
+  },
+  {
+    "id": "n063",
+    "user_id": "u003",
+    "title": "New order to confirm",
+    "body": "AFD-24838 needs confirmation within 24 hours.",
+    "kind": "ORDER",
+    "read": false,
+    "at": "2026-08-21T07:48:29.785Z"
+  },
+  {
+    "id": "n064",
+    "user_id": "u007",
+    "title": "Order placed",
+    "body": "AFD-24838 is confirmed. We are procuring it now and will let you know when it ships.",
+    "kind": "ORDER",
+    "read": false,
+    "at": "2026-08-21T07:48:29.830Z"
+  },
+  {
+    "id": "n065",
+    "user_id": "u003",
+    "title": "New order to confirm",
+    "body": "AFD-24839 needs confirmation within 24 hours.",
+    "kind": "ORDER",
+    "read": false,
+    "at": "2026-08-21T07:48:30.059Z"
+  },
+  {
+    "id": "n066",
+    "user_id": "u006",
+    "title": "Order placed",
+    "body": "AFD-24839 is confirmed. We are procuring it now and will let you know when it ships.",
+    "kind": "ORDER",
+    "read": false,
+    "at": "2026-08-21T07:48:30.093Z"
+  },
+  {
+    "id": "n067",
+    "user_id": "u003",
+    "title": "Quotation requested",
+    "body": "RFQ-2605 - 400 units of Shea Butter Deep Treatment 500ml to Gaborone.",
+    "kind": "ORDER",
+    "read": false,
+    "at": "2026-08-21T07:48:35.112Z"
+  },
+  {
+    "id": "n068",
+    "user_id": "u004",
+    "title": "Quotation requested",
+    "body": "RFQ-2605 - 400 units of Shea Butter Deep Treatment 500ml to Gaborone.",
+    "kind": "ORDER",
+    "read": false,
+    "at": "2026-08-21T07:48:35.144Z"
+  },
+  {
+    "id": "n069",
+    "user_id": "u001",
+    "title": "New RFQ to source",
+    "body": "RFQ-2605 from Kefilwe Dithebe - 400 units of Shea Butter Deep Treatment 500ml.",
+    "kind": "ORDER",
+    "read": false,
+    "at": "2026-08-21T07:48:35.175Z"
+  },
+  {
+    "id": "n070",
+    "user_id": "u002",
+    "title": "New RFQ to source",
+    "body": "RFQ-2605 from Kefilwe Dithebe - 400 units of Shea Butter Deep Treatment 500ml.",
+    "kind": "ORDER",
+    "read": false,
+    "at": "2026-08-21T07:48:35.205Z"
+  },
+  {
+    "id": "n071",
+    "user_id": "u007",
+    "title": "Your quotation is ready",
+    "body": "RFQ-2605 - we have sourced 400 units of Shea Butter Deep Treatment 500ml.",
+    "kind": "ORDER",
+    "read": false,
+    "at": "2026-08-21T07:48:38.806Z"
+  },
+  {
+    "id": "n072",
+    "user_id": "u005",
+    "title": "New sourcing request",
+    "body": "RUN-24817: Verification probe - bulk hair dryer in Gaborone.",
+    "kind": "ORDER",
+    "read": false,
+    "at": "2026-08-21T07:48:40.664Z"
+  },
+  {
+    "id": "n073",
+    "user_id": "u006",
+    "title": "Request received",
+    "body": "RUN-24817 is with our runners. You will hear back with a price before anything is bought.",
+    "kind": "ORDER",
+    "read": false,
+    "at": "2026-08-21T07:48:40.690Z"
+  },
+  {
+    "id": "n074",
+    "user_id": "u006",
+    "title": "RUN-24817 moved to accepted",
+    "body": "Kagiso Sithole has updated your request.",
+    "kind": "ORDER",
+    "read": false,
+    "at": "2026-08-21T07:48:43.803Z"
+  },
+  {
+    "id": "n075",
+    "user_id": "u006",
+    "title": "RUN-24817 moved to sourcing",
+    "body": "Kagiso Sithole has updated your request.",
+    "kind": "ORDER",
+    "read": false,
+    "at": "2026-08-21T07:48:44.020Z"
+  },
+  {
+    "id": "n076",
+    "user_id": "u006",
+    "title": "RUN-24817 has a price",
+    "body": "Kagiso Sithole found it. BWP 2856.00 all in, including the sourcing fee. Approve it and they will buy it.",
+    "kind": "ORDER",
+    "read": false,
+    "at": "2026-08-21T07:48:44.239Z"
+  },
+  {
+    "id": "n077",
+    "user_id": "u005",
+    "title": "RUN-24817 - approved",
+    "body": "The customer approved your price. Go ahead and buy it.",
+    "kind": "ORDER",
+    "read": false,
+    "at": "2026-08-21T07:48:44.385Z"
+  },
+  {
+    "id": "n078",
+    "user_id": "u006",
+    "title": "RUN-24817 moved to delivering",
+    "body": "Kagiso Sithole has updated your request.",
+    "kind": "ORDER",
+    "read": false,
+    "at": "2026-08-21T07:48:44.528Z"
+  },
+  {
+    "id": "n079",
+    "user_id": "u005",
+    "title": "RUN-24817 - confirmed",
+    "body": "The customer marked this request confirmed.",
+    "kind": "ORDER",
+    "read": false,
+    "at": "2026-08-21T07:48:44.698Z"
+  },
+  {
+    "id": "n080",
+    "user_id": "u003",
+    "title": "New order to confirm",
+    "body": "AFD-24840 needs confirmation within 24 hours.",
+    "kind": "ORDER",
+    "read": false,
+    "at": "2026-08-24T16:00:09.450Z"
+  },
+  {
+    "id": "n081",
+    "user_id": "u006",
+    "title": "Order placed",
+    "body": "AFD-24840 is confirmed. We are procuring it now and will let you know when it ships.",
+    "kind": "ORDER",
+    "read": false,
+    "at": "2026-08-24T16:00:09.475Z"
   }
 ]

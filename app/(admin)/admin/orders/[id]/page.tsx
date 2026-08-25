@@ -193,7 +193,7 @@ export default async function AdminOrderDetailPage({ params }: { params: { id: s
                   <tr key={item.id}>
                     <td>
                       <Link
-                        href={`/admin/products/${item.product_id}`}
+                        href={`/admin/unsplash/assets/${item.product_id}`}
                         className="flex items-center gap-2 font-medium text-ink transition-colors hover:text-gold-dark"
                       >
                         <Swatch

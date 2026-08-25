@@ -129,7 +129,7 @@ export const PATCH = handled(async (request: Request, { params }: { params: { id
         updated_at: now,
         timeline: [
           ...order.timeline,
-          { status: 'DISPUTED', label: 'Claim raised — under review', at: now, actor: actor.name },
+          { status: 'DISPUTED', label: 'Claim raised - under review', at: now, actor: actor.name },
         ],
       });
 
@@ -140,7 +140,7 @@ export const PATCH = handled(async (request: Request, { params }: { params: { id
         await notify({
           userId: member.id,
           title: 'New dispute raised',
-          body: `${order.reference} — ${parsed.data.reason}. Five-day SLA clock started.`,
+          body: `${order.reference} - ${parsed.data.reason}. Five-day SLA clock started.`,
           kind: 'DISPUTE',
         });
       }

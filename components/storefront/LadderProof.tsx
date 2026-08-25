@@ -21,7 +21,7 @@ export interface LadderProofRow {
  *
  * The bar is the point. Each row draws the drop from the retail rung to the
  * cheapest published one at the same scale across every row, so a shallow
- * ladder looks shallow — the graphic can lose. A row of matching percentages
+ * ladder looks shallow - the graphic can lose. A row of matching percentages
  * would be a design that cannot be wrong, which is a design that proves
  * nothing.
  */
@@ -36,7 +36,7 @@ export function LadderProof({ rows, className }: { rows: LadderProofRow[]; class
       {rows.map(({ product, image, from, to, pct, lowestRange }) => (
         <li key={product.id}>
           <Link
-            href={`/products/${product.id}`}
+            href={`/unsplash/assets/${product.id}`}
             className="group flex min-w-0 items-center gap-3 py-4 transition-colors duration-300 hover:bg-ink/[0.02] sm:gap-6"
           >
             <Swatch
@@ -68,7 +68,7 @@ export function LadderProof({ rows, className }: { rows: LadderProofRow[]; class
                 {/*
                   Allowed to wrap below `sm`. Held on one line, this string's
                   min-content sized the whole row to 359px and pushed the page
-                  into a horizontal scroll on a 375px phone — the bar beside it
+                  into a horizontal scroll on a 375px phone - the bar beside it
                   is hidden at that width anyway, so there is nothing for it to
                   stay level with.
                 */}

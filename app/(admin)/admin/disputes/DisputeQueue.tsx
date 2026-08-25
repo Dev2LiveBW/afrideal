@@ -77,8 +77,8 @@ export function DisputeQueue({ rows, canResolve }: { rows: DisputeRow[]; canReso
         resolving.status === 'UNDER_REVIEW'
           ? `${resolving.row.orderReference} moved to under review`
           : resolving.status === 'RESOLVED_CUSTOMER'
-            ? "Resolved in the customer's favour — customer refunded"
-            : "Resolved in the supplier's favour — supplier invoice settled",
+            ? "Resolved in the customer's favour - customer refunded"
+            : "Resolved in the supplier's favour - supplier invoice settled",
       );
       close();
       router.refresh();
@@ -128,7 +128,7 @@ export function DisputeQueue({ rows, canResolve }: { rows: DisputeRow[]; canReso
                         resolved ? 'text-muted' : daysLeft < 0 ? 'text-danger-ink' : 'text-ink',
                       )}
                     >
-                      {resolved ? '—' : daysLeft < 0 ? `${Math.abs(daysLeft)}d over` : `${daysLeft}d`}
+                      {resolved ? '-' : daysLeft < 0 ? `${Math.abs(daysLeft)}d over` : `${daysLeft}d`}
                     </p>
                     <p className="text-[10.5px] text-muted">{resolved ? 'closed' : 'SLA remaining'}</p>
                   </div>
@@ -217,7 +217,7 @@ export function DisputeQueue({ rows, canResolve }: { rows: DisputeRow[]; canReso
           <textarea
             value={note}
             onChange={(event) => setNote(event.target.value)}
-            placeholder="Resolution note (optional) — what tipped the decision…"
+            placeholder="Resolution note (optional) - what tipped the decision…"
             rows={3}
             className="w-full rounded border border-hairline-strong bg-surface px-3 py-2 text-[13px] text-ink outline-none focus:border-gold"
           />

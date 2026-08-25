@@ -10,7 +10,7 @@ import type {
  * Supplier selection engine.
  *
  * The platform does not route to the cheapest offer. It routes to the offer
- * most likely to actually arrive, which is a different question — a supplier
+ * most likely to actually arrive, which is a different question - a supplier
  * who is BWP 40 cheaper but ships in eleven days and is out of stock loses to
  * one who is in stock and ships in two.
  *
@@ -57,7 +57,7 @@ export function totalScore(breakdown: ScoreBreakdown): number {
  */
 function explain(offer: SupplierOffer, supplier: Supplier, breakdown: ScoreBreakdown, rank: number): string {
   if (offer.stock <= 0) {
-    return `Out of stock. Held as fallback only — ${supplier.name} carries a ${supplier.reliability_score}/100 reliability score when supplied.`;
+    return `Out of stock. Held as fallback only - ${supplier.name} carries a ${supplier.reliability_score}/100 reliability score when supplied.`;
   }
 
   const strengths: string[] = [];
@@ -79,7 +79,7 @@ function labelFor(rank: number): string {
 /**
  * Rank every live offer for a product.
  *
- * Suspended suppliers are excluded outright — they cannot be routed to at any
+ * Suspended suppliers are excluded outright - they cannot be routed to at any
  * score. Out-of-stock offers stay in the list, deliberately: operations needs
  * to see who *could* supply if stock returns, and the −20 stock penalty already
  * pushes them below anyone who can ship today.

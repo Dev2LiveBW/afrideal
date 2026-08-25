@@ -10,7 +10,7 @@ declare module 'next-auth' {
       avatar: string;
       supplier_id: string | null;
       runner_id: string | null;
-      /** §7 — decides which pricing tiers this buyer can be quoted. */
+      /** §7 - decides which pricing tiers this buyer can be quoted. */
       customer_type: CustomerType;
     } & DefaultSession['user'];
   }

@@ -13,7 +13,7 @@ import { LADDER } from './pricing-model';
  *   price  = ceil(supplier_cost × (1 + markup))
  *   margin = price − supplier_cost − logistics − gateway fee
  *
- * Rules are data, not code — they live in /data/pricing-rules.json and are
+ * Rules are data, not code - they live in /data/pricing-rules.json and are
  * editable from /admin/pricing. Changing a category's markup there changes
  * every recommended price on the next read, with no redeploy. The defaults are
  * the platform ladder in `pricing-model.ts`.
@@ -31,7 +31,7 @@ export const DEFAULT_MARKUP_PCT = LADDER[0].markup * 100;
  *
  * `margin_pct` is margin over the *selling price*, not over cost, so it reads
  * the way a finance team expects on a P&L. `markup` is reported separately and
- * is the figure the pricing rule is actually set in — conflating the two
+ * is the figure the pricing rule is actually set in - conflating the two
  * overstates profitability on every report.
  */
 export function calculatePrice(supplierCost: number, rule: PricingRule | null): PriceResult {

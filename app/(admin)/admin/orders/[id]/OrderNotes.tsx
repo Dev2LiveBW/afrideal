@@ -41,7 +41,7 @@ export function OrderNotes({ orderId, initialNote }: { orderId: string; initialN
         value={note}
         onChange={(event) => setNote(event.target.value)}
         rows={6}
-        placeholder="Notes visible to staff only — escalation context, delivery exceptions, customer calls…"
+        placeholder="Notes visible to staff only - escalation context, delivery exceptions, customer calls…"
         className="w-full resize-y rounded border border-hairline-strong bg-surface px-3 py-2.5 text-[13px] leading-5 text-ink outline-none focus:border-gold"
       />
       <div className="mt-3 flex items-center justify-between gap-3">

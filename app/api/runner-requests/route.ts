@@ -8,7 +8,7 @@ import type { RunnerRequest } from '@/types';
 export const dynamic = 'force-dynamic';
 
 /**
- * GET /api/runner-requests — scoped by who is asking.
+ * GET /api/runner-requests - scoped by who is asking.
  *
  * A customer sees their own. A runner sees the open pool plus whatever they
  * have taken. Staff see everything. The scoping happens here rather than in the
@@ -46,7 +46,7 @@ const CreateSchema = z.object({
 });
 
 /**
- * POST /api/runner-requests — a buyer asks for something the catalogue does not
+ * POST /api/runner-requests - a buyer asks for something the catalogue does not
  * carry.
  *
  * Nothing is charged and no order is raised. The request enters the pool at

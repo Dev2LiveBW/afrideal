@@ -127,7 +127,13 @@ const CATEGORY_QUERIES = {
 };
 
 const HERO_QUERIES = {
-  hero: ['warehouse logistics africa', 'shipping warehouse pallets', 'logistics warehouse'],
+  // The hero used to be a logistics warehouse, from when the catalogue was a
+  // general marketplace. Hair and weaves are the business now, and the first
+  // image on the page should say which shop you have walked into.
+  // Lead with the salon rather than a portrait: the portrait queries return the
+  // same photograph already used on the braiding-hair product card, and one
+  // image cannot be both the hero and a tile in the grid beneath it.
+  hero: ['african hair salon braiding', 'hairdresser braiding hair', 'hair salon interior'],
 };
 
 // ─── Providers ───────────────────────────────────────────────────────────────
@@ -274,8 +280,12 @@ for (const product of products) {
 }
 
 // Categories and the hero land as standalone files the pages reference directly.
-if (!only) {
-  for (const [key, queries] of Object.entries({ ...CATEGORY_QUERIES, ...HERO_QUERIES })) {
+// `--only` accepts their keys too (`--only hero`, `--only c1,c7`); without it,
+// every scope runs. Gating these behind "no filter at all" meant the only way to
+// replace one hero was refetching the whole catalogue over it.
+for (const [key, queries] of Object.entries({ ...CATEGORY_QUERIES, ...HERO_QUERIES })) {
+  if (only && !only.has(key)) continue;
+  {
     const hit = await firstHit(queries);
     if (!hit) {
       console.log(`${key}   ✗ no results`);

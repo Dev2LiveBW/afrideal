@@ -10,7 +10,7 @@ import { cn } from '@/lib/utils';
  *
  * When it carries a directional arrow, the arrow lives inside its own circle
  * flush against the right padding. On hover the circle translates up and right
- * while the button body stays put — the internal tension is the point.
+ * while the button body stays put - the internal tension is the point.
  */
 
 type Variant = 'gold' | 'ink' | 'ghost' | 'danger' | 'forest';

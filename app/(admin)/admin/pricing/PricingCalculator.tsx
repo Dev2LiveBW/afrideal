@@ -10,7 +10,7 @@ import { PricingFormula } from '@/components/brand/PricingFormula';
 import type { PriceResult, PricingRule } from '@/types';
 
 /**
- * The live pricing calculator. Doubles as the "formula at a glance" panel —
+ * The live pricing calculator. Doubles as the "formula at a glance" panel -
  * it opens already computed against a sample cost so the shape of the
  * formula is visible before anyone touches an input, then genuinely
  * recalculates against the real API on every category or cost change.

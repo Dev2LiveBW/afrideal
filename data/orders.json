@@ -535,7 +535,7 @@
       },
       {
         "status": "DISPUTED",
-        "label": "Customer raised a claim — under review",
+        "label": "Customer raised a claim - under review",
         "at": "2026-08-13T11:59:00.000Z"
       }
     ],
@@ -579,7 +579,7 @@
       },
       {
         "status": "DISPUTED",
-        "label": "Customer raised a claim — under review",
+        "label": "Customer raised a claim - under review",
         "at": "2026-08-16T11:08:00.000Z"
       }
     ],
@@ -900,6 +900,180 @@
         "status": "PAID",
         "label": "Payment confirmed",
         "at": "2026-08-21T05:24:20.006Z"
+      }
+    ],
+    "internal_notes": ""
+  },
+  {
+    "id": "o026",
+    "reference": "AFD-24835",
+    "customer_id": "u006",
+    "customer_name": "Thabo Modise",
+    "status": "PROCESSING",
+    "subtotal": 706,
+    "delivery_fee": 45,
+    "total": 751,
+    "payment_method": "ORANGE_MONEY",
+    "payment_reference": "ORANGE-505262",
+    "delivery_address": "Plot 5412, Extension 12",
+    "delivery_city": "Gaborone",
+    "placed_at": "2026-08-21T07:48:25.257Z",
+    "updated_at": "2026-08-21T07:48:25.257Z",
+    "timeline": [
+      {
+        "status": "PENDING",
+        "label": "Order placed",
+        "at": "2026-08-21T07:48:25.257Z"
+      },
+      {
+        "status": "PAID",
+        "label": "Payment confirmed",
+        "at": "2026-08-21T07:48:25.257Z"
+      }
+    ],
+    "internal_notes": ""
+  },
+  {
+    "id": "o027",
+    "reference": "AFD-24836",
+    "customer_id": "u007",
+    "customer_name": "Kefilwe Dithebe",
+    "status": "PROCESSING",
+    "subtotal": 146,
+    "delivery_fee": 45,
+    "total": 191,
+    "payment_method": "DPO_PAY",
+    "payment_reference": "DPO-509147",
+    "delivery_address": "Plot 220, Block 6",
+    "delivery_city": "Gaborone",
+    "placed_at": "2026-08-21T07:48:29.143Z",
+    "updated_at": "2026-08-21T07:48:29.143Z",
+    "timeline": [
+      {
+        "status": "PENDING",
+        "label": "Order placed",
+        "at": "2026-08-21T07:48:29.143Z"
+      },
+      {
+        "status": "PAID",
+        "label": "Payment confirmed",
+        "at": "2026-08-21T07:48:29.143Z"
+      }
+    ],
+    "internal_notes": ""
+  },
+  {
+    "id": "o028",
+    "reference": "AFD-24837",
+    "customer_id": "u007",
+    "customer_name": "Kefilwe Dithebe",
+    "status": "PROCESSING",
+    "subtotal": 660,
+    "delivery_fee": 45,
+    "total": 705,
+    "payment_method": "DPO_PAY",
+    "payment_reference": "DPO-509399",
+    "delivery_address": "Plot 220, Block 6",
+    "delivery_city": "Gaborone",
+    "placed_at": "2026-08-21T07:48:29.395Z",
+    "updated_at": "2026-08-21T07:48:29.395Z",
+    "timeline": [
+      {
+        "status": "PENDING",
+        "label": "Order placed",
+        "at": "2026-08-21T07:48:29.395Z"
+      },
+      {
+        "status": "PAID",
+        "label": "Payment confirmed",
+        "at": "2026-08-21T07:48:29.395Z"
+      }
+    ],
+    "internal_notes": ""
+  },
+  {
+    "id": "o029",
+    "reference": "AFD-24838",
+    "customer_id": "u007",
+    "customer_name": "Kefilwe Dithebe",
+    "status": "PROCESSING",
+    "subtotal": 2640,
+    "delivery_fee": 45,
+    "total": 2685,
+    "payment_method": "DPO_PAY",
+    "payment_reference": "DPO-509710",
+    "delivery_address": "Plot 220, Block 6",
+    "delivery_city": "Gaborone",
+    "placed_at": "2026-08-21T07:48:29.706Z",
+    "updated_at": "2026-08-21T07:48:29.706Z",
+    "timeline": [
+      {
+        "status": "PENDING",
+        "label": "Order placed",
+        "at": "2026-08-21T07:48:29.706Z"
+      },
+      {
+        "status": "PAID",
+        "label": "Payment confirmed",
+        "at": "2026-08-21T07:48:29.706Z"
+      }
+    ],
+    "internal_notes": ""
+  },
+  {
+    "id": "o030",
+    "reference": "AFD-24839",
+    "customer_id": "u006",
+    "customer_name": "Thabo Modise",
+    "status": "PROCESSING",
+    "subtotal": 2640,
+    "delivery_fee": 45,
+    "total": 2685,
+    "payment_method": "DPO_PAY",
+    "payment_reference": "DPO-509980",
+    "delivery_address": "Plot 5412, Extension 12",
+    "delivery_city": "Gaborone",
+    "placed_at": "2026-08-21T07:48:29.975Z",
+    "updated_at": "2026-08-21T07:48:29.975Z",
+    "timeline": [
+      {
+        "status": "PENDING",
+        "label": "Order placed",
+        "at": "2026-08-21T07:48:29.975Z"
+      },
+      {
+        "status": "PAID",
+        "label": "Payment confirmed",
+        "at": "2026-08-21T07:48:29.975Z"
+      }
+    ],
+    "internal_notes": ""
+  },
+  {
+    "id": "o031",
+    "reference": "AFD-24840",
+    "customer_id": "u006",
+    "customer_name": "Thabo Modise",
+    "status": "PROCESSING",
+    "subtotal": 838,
+    "delivery_fee": 45,
+    "total": 883,
+    "payment_method": "DPO_PAY",
+    "payment_reference": "DPO-209375",
+    "delivery_address": "yu67r56r56r56",
+    "delivery_city": "Gaborone",
+    "placed_at": "2026-08-24T16:00:09.358Z",
+    "updated_at": "2026-08-24T16:00:09.358Z",
+    "timeline": [
+      {
+        "status": "PENDING",
+        "label": "Order placed",
+        "at": "2026-08-24T16:00:09.358Z"
+      },
+      {
+        "status": "PAID",
+        "label": "Payment confirmed",
+        "at": "2026-08-24T16:00:09.358Z"
       }
     ],
     "internal_notes": ""

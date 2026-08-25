@@ -118,7 +118,7 @@ export const PATCH = handled(async (request: Request, { params }: { params: { id
     if (runnerUser) {
       await notify({
         userId: runnerUser.id,
-        title: `${record.reference} — ${target.toLowerCase()}`,
+        title: `${record.reference} - ${target.toLowerCase()}`,
         body:
           target === 'APPROVED'
             ? 'The customer approved your price. Go ahead and buy it.'

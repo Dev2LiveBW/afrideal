@@ -52,7 +52,7 @@ export default async function SupplierDashboardPage() {
   const urgent = quoteInbox.slice(0, 6).map((quote) => ({
     id: quote.id,
     href: quote.kind === 'ORDER' ? '/supplier/orders' : '/supplier/quotes',
-    title: quote.kind === 'ORDER' ? `Confirm order ${quote.orderRef ?? ''}`.trim() : `Respond — ${quote.productName}`,
+    title: quote.kind === 'ORDER' ? `Confirm order ${quote.orderRef ?? ''}`.trim() : `Respond - ${quote.productName}`,
     subtitle: `${quote.emoji} ${quote.productName}${quote.variantLabel ? ` · ${quote.variantLabel}` : ''} · qty ${quote.qty}`,
     chip: slaChip(quote.expiresAt),
   }));

@@ -129,11 +129,11 @@ export function SuppliersTable({ suppliers, canDecide }: { suppliers: Supplier[]
                     <td>
                       <span className="inline-flex items-center gap-1 font-mono text-[12.5px] tabular-nums text-ink">
                         <Star size={11} strokeWidth={1.5} className="fill-gold text-gold" />
-                        {supplier.rating > 0 ? supplier.rating.toFixed(1) : '—'}
+                        {supplier.rating > 0 ? supplier.rating.toFixed(1) : '-'}
                       </span>
                     </td>
                     <td className="font-mono text-[12.5px] tabular-nums text-ink">
-                      {supplier.reliability_score > 0 ? `${supplier.reliability_score}/100` : '—'}
+                      {supplier.reliability_score > 0 ? `${supplier.reliability_score}/100` : '-'}
                     </td>
                     <td>
                       <MoneyText amount={supplier.total_gmv} size="sm" />

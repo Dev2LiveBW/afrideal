@@ -1,6 +1,6 @@
 import { cn } from '@/lib/utils';
 
-/** Console surface primitives — the repeating chrome of every admin screen. */
+/** Console surface primitives - the repeating chrome of every admin screen. */
 
 export function Panel({
   className,
@@ -47,7 +47,7 @@ export function PanelBody({
 }
 
 /**
- * The nested enclosure from DESIGN.md — outer tray, inner core, concentric
+ * The nested enclosure from DESIGN.md - outer tray, inner core, concentric
  * radii. Reserved for surfaces that carry weight, never for repeating rows.
  */
 export function Enclosure({

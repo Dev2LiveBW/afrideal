@@ -256,7 +256,7 @@
     "reference": "RUN-24815",
     "customer_id": "u006",
     "customer_name": "Thabo Modise",
-    "item": "Verification probe — bulk hair dryer",
+    "item": "Verification probe - bulk hair dryer",
     "detail": "Raised by the verification suite.",
     "quantity": 3,
     "budget_per_unit": 900,
@@ -326,7 +326,7 @@
     "reference": "RUN-24816",
     "customer_id": "u006",
     "customer_name": "Thabo Modise",
-    "item": "Verification probe — bulk hair dryer",
+    "item": "Verification probe - bulk hair dryer",
     "detail": "Raised by the verification suite.",
     "quantity": 3,
     "budget_per_unit": 900,
@@ -387,6 +387,76 @@
         "status": "CONFIRMED",
         "label": "Delivered and confirmed by customer",
         "at": "2026-08-21T05:24:35.320Z",
+        "actor": "Thabo Modise"
+      }
+    ]
+  },
+  {
+    "id": "rr008",
+    "reference": "RUN-24817",
+    "customer_id": "u006",
+    "customer_name": "Thabo Modise",
+    "item": "Verification probe - bulk hair dryer",
+    "detail": "Raised by the verification suite.",
+    "quantity": 3,
+    "budget_per_unit": 900,
+    "delivery_city": "Gaborone",
+    "delivery_address": "Plot 5412, Extension 12",
+    "needed_by": null,
+    "status": "CONFIRMED",
+    "runner_id": "r001",
+    "runner_name": "Kagiso Sithole",
+    "quote": {
+      "unit_price": 850,
+      "service_fee": 306,
+      "total": 2856,
+      "found_at": "Sourced locally",
+      "condition": "New",
+      "note": ""
+    },
+    "created_at": "2026-08-21T07:48:40.635Z",
+    "updated_at": "2026-08-21T07:48:44.676Z",
+    "timeline": [
+      {
+        "status": "REQUESTED",
+        "label": "Request submitted",
+        "at": "2026-08-21T07:48:40.635Z",
+        "actor": "Thabo Modise"
+      },
+      {
+        "status": "ACCEPTED",
+        "label": "Runner accepted the job",
+        "at": "2026-08-21T07:48:43.790Z",
+        "actor": "Kagiso Sithole"
+      },
+      {
+        "status": "SOURCING",
+        "label": "Runner is out looking",
+        "at": "2026-08-21T07:48:44.006Z",
+        "actor": "Kagiso Sithole"
+      },
+      {
+        "status": "QUOTED",
+        "label": "Found it, price sent for approval",
+        "at": "2026-08-21T07:48:44.224Z",
+        "actor": "Kagiso Sithole"
+      },
+      {
+        "status": "APPROVED",
+        "label": "Customer approved the purchase",
+        "at": "2026-08-21T07:48:44.367Z",
+        "actor": "Thabo Modise"
+      },
+      {
+        "status": "DELIVERING",
+        "label": "Bought and on the way",
+        "at": "2026-08-21T07:48:44.514Z",
+        "actor": "Kagiso Sithole"
+      },
+      {
+        "status": "CONFIRMED",
+        "label": "Delivered and confirmed by customer",
+        "at": "2026-08-21T07:48:44.676Z",
         "actor": "Thabo Modise"
       }
     ]

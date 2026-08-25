@@ -8,7 +8,7 @@ web
 
 ## Users
 
-**Primary — the buyer on the storefront.** One person buying across a wide range
+**Primary - the buyer on the storefront.** One person buying across a wide range
 of need and quantity, in Botswana and increasingly South Africa:
 
 - a household shopper taking one or four units of a consumable;
@@ -17,7 +17,7 @@ of need and quantity, in Botswana and increasingly South Africa:
 
 The important fact is that these are not three separate audiences with three
 separate products. They are the same catalogue, and the same buyer moves
-between them — a salon owner buys one blender for the shop and forty bottles of
+between them - a salon owner buys one blender for the shop and forty bottles of
 treatment for the shelf. What changes is the quantity, and the price per unit
 changes with it.
 
@@ -34,7 +34,7 @@ Africa with buyers who need the goods to actually arrive.
 AfriDeal through a licensed payment provider; AfriDeal buys the goods from a
 verified supplier and settles that invoice on its own terms. Nothing is held on
 another party's behalf. This is a deliberate commercial choice as much as a
-regulatory one — it keeps the platform out of scope for a Bank of Botswana
+regulatory one - it keeps the platform out of scope for a Bank of Botswana
 escrow licence, and it means one invoice, one point of contact, and one party
 answerable when an order goes wrong.
 
@@ -50,13 +50,13 @@ catalogue's own limits survivable, so it is drawn as the marketplace's equal
 rather than as a footnote to it.
 
 Success is a buyer who understands, before they commit, exactly what they will
-pay at the quantity they need — and gets the goods.
+pay at the quantity they need - and gets the goods.
 
 ## Positioning
 
 **The price ladder is the mechanism, and the comparison is the message.** A
 product on AfriDeal does not have "a price"; it has a ladder of published bands,
-and which rung a buyer stands on is decided by one thing they control — how many
+and which rung a buyer stands on is decided by one thing they control - how many
 units they take.
 
 AfriDeal buys from the supplier and resells at a published markup:
@@ -131,7 +131,7 @@ Worked example, HD Lace Frontal 13×4 (p014), supplier cost BWP 715:
 - **Transparent procurement is not a shopper toggle (§23).** It is a commercial
   decision made per supplier agreement; if it ships it arrives as server-
   resolved props on a separate B2B surface.
-- Customer type comes from the account, resolved server-side — never chosen in
+- Customer type comes from the account, resolved server-side - never chosen in
   the browser, or any visitor could quote themselves wholesale via localStorage.
 - Margin floors (§19) must hold; a tier band can never price below them.
 - Self-registration creates buyers only. Supplier and runner accounts are
@@ -160,7 +160,7 @@ next-auth, Zustand. JSON files under `data/` as the store. No database.
 ## Evidence on Hand
 
 - 17 real products, 6 of them hair lines, with photography fetched from Pexels
-  into `public/products/`, provenance per file in `CREDITS.json`. The hair
+  into `public/unsplash/assets/`, provenance per file in `CREDITS.json`. The hair
   photography is stock standing in for the client's own product shots and should
   not ship as-is.
 - 5 verified suppliers, 8 seeded accounts, 15 orders across every status,
@@ -170,8 +170,8 @@ next-auth, Zustand. JSON files under `data/` as the store. No database.
 
 **Must not be fabricated:** supplier counts, product counts, GMV, delivery
 times, testimonials, press, or ratings beyond what `data/` actually holds. The
-reference mockups carry figures — "Millions of Products", "10,000+ Products",
-"100+ Verified Suppliers", "1,250+ products" — that the live catalogue does not
+reference mockups carry figures - "Millions of Products", "10,000+ Products",
+"100+ Verified Suppliers", "1,250+ products" - that the live catalogue does not
 support. Real numbers today are 12 products and 5 verified suppliers.
 
 ## Product Principles
@@ -188,7 +188,7 @@ support. Real numbers today are 12 products and 5 verified suppliers.
    from the store, it does not go on the page.
 5. **The platform is answerable, and says so as a merchant would.** The saving
    means nothing if the goods never arrive, so buyer protection travels with the
-   price — but stated as what AfriDeal will do about a bad order, never as money
+   price - but stated as what AfriDeal will do about a bad order, never as money
    held on someone's behalf. Nothing on any surface may describe the platform as
    holding, escrowing or releasing a customer's funds.
 
@@ -196,5 +196,5 @@ support. Real numbers today are 12 products and 5 verified suppliers.
 
 No formal standard was set for this build. Established expectations: full
 keyboard reachability, visible focus, honest labels on icon-only controls, and
-motion that respects `prefers-reduced-motion` — the storefront already regressed
+motion that respects `prefers-reduced-motion` - the storefront already regressed
 once on that last point and it is treated as a defect, not a nicety.

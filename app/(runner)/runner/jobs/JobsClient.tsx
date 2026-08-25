@@ -15,7 +15,7 @@ import type { DecoratedShipment } from '../../_lib/types';
 /**
  * Orchestrates the jobs page: the active-job screen, the available feed, and
  * the incoming-job alert. The alert only ever fires for a job this runner
- * hasn't already seen this session (`seenIds`), and only while online — a
+ * hasn't already seen this session (`seenIds`), and only while online - a
  * runner who has gone offline shouldn't get paged.
  */
 export function JobsClient({
@@ -59,7 +59,7 @@ export function JobsClient({
       return;
     }
 
-    toast.success(`Job accepted — head to ${alertJob.pickup_name}`);
+    toast.success(`Job accepted - head to ${alertJob.pickup_name}`);
     seenIds.current.add(alertJob.id);
     setAlertJob(null);
     router.refresh();
@@ -84,7 +84,7 @@ export function JobsClient({
             title="No jobs available right now"
             description={
               online
-                ? "You're online — new jobs will alert you the moment one opens up nearby."
+                ? "You're online - new jobs will alert you the moment one opens up nearby."
                 : 'Go online from the dashboard to start receiving job alerts.'
             }
             className="rounded-lg border border-hairline bg-surface-raised py-12"

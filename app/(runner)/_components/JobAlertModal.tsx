@@ -8,13 +8,13 @@ import { MoneyText } from '@/components/brand/MoneyText';
 import type { DecoratedShipment } from '../_lib/types';
 
 /**
- * The incoming-job alert — a real countdown, not a decorative one.
+ * The incoming-job alert - a real countdown, not a decorative one.
  *
  * Two effects on purpose. The first owns the interval: it (re)starts a fresh
  * 45-second countdown whenever a new job comes in, and clears it on unmount
  * or when the job changes. The second only watches the countdown value and
  * fires `onExpire` the moment it reaches zero. Keeping expiry keyed off
- * `secondsLeft` alone — not `job.id` — matters: if it also depended on the
+ * `secondsLeft` alone - not `job.id` - matters: if it also depended on the
  * job, swapping in a new alert while the old countdown was still sitting at 0
  * would fire `onExpire` immediately for the *new* job before its own timer
  * ever started.
@@ -55,7 +55,7 @@ export function JobAlertModal({
     if (job && secondsLeft === 0) {
       onExpire();
     }
-    // Intentionally depends on `secondsLeft` only — see file note above.
+    // Intentionally depends on `secondsLeft` only - see file note above.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [secondsLeft]);
 

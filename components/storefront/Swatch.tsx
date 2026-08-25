@@ -8,7 +8,7 @@ import type { ProductImage } from '@/types';
  *
  * `product-images.json` holds one of two things per row:
  *
- *   /products/p001-0.jpg          a real photograph, vendored into /public
+ *   /unsplash/assets/p001-0.jpg          a real photograph, vendored into /public
  *   swatch:#D4920A,#8B5E0A,140    a gradient stand-in
  *
  * Photographs win when they exist. The gradient is the fallback for products
@@ -45,7 +45,7 @@ export function isPhoto(imageUrl: string | undefined): boolean {
 /**
  * The photograph for an image row, or undefined when it holds only a gradient.
  *
- * For callers that need the bare URL rather than the rendered slot — the cart
+ * For callers that need the bare URL rather than the rendered slot - the cart
  * copies it onto the line, so a basket built from a rail card shows the same
  * picture the card did.
  */
@@ -81,7 +81,7 @@ export function Swatch({
       <div className={cn('relative overflow-hidden bg-surface-sunk', className)}>
         {/*
           The source photos are all fixed at 940x627 regardless of where they
-          render — a 72px gallery thumbnail was shipping the same bytes as a
+          render - a 72px gallery thumbnail was shipping the same bytes as a
           full-width hero. next/image resizes and re-encodes per breakpoint
           via Vercel's image CDN instead of serving that file whole everywhere.
 

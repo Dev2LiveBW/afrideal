@@ -14,7 +14,7 @@ import type { PricingRule } from '@/types';
  * Category pricing rules, edited inline.
  *
  * Each row owns its own draft state, seeded from the server props once. A
- * successful save overwrites that draft with the API's own response — the
+ * successful save overwrites that draft with the API's own response - the
  * source of truth after a write is what the server just persisted, not
  * whatever `router.refresh()` eventually re-delivers as new props.
  */
@@ -26,7 +26,7 @@ export function PricingRulesTable({ rules, canEdit }: { rules: PricingRule[]; ca
         title="Category rules"
         description={
           canEdit
-            ? 'Edit a value and save — the new rule applies to every price computed from this point on.'
+            ? 'Edit a value and save - the new rule applies to every price computed from this point on.'
             : 'Read-only for your role. Super Admin and Finance can edit these rules.'
         }
       />

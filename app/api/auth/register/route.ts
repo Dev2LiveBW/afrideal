@@ -11,8 +11,8 @@ export const dynamic = 'force-dynamic';
  * Buyer self-registration.
  *
  * Deliberately narrow: this creates a CUSTOMER on the RETAIL tier and nothing
- * else. Supplier, runner and staff accounts carry commercial consequences — a
- * supplier can be routed real orders, a runner can mark a delivery complete —
+ * else. Supplier, runner and staff accounts carry commercial consequences - a
+ * supplier can be routed real orders, a runner can mark a delivery complete -
  * so those stay behind admin creation and verification. Letting a signup form
  * mint them would make §8 verification decorative.
  *

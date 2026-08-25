@@ -11,7 +11,7 @@ import './globals.css';
  * Satoshi, self-hosted.
  *
  * It used to arrive from Fontshare as a render-blocking third-party stylesheet,
- * with `--font-satoshi` falling back to Geist — the body face. Any hiccup at
+ * with `--font-satoshi` falling back to Geist - the body face. Any hiccup at
  * that CDN and the display voice silently became the text voice, which erases
  * the type contrast the whole visual system is built on. One 41kb variable file
  * covering 300–900 removes both the dependency and the fallback that hid it.
@@ -29,7 +29,7 @@ const satoshi = localFont({
 
 export const metadata: Metadata = {
   title: {
-    default: 'AfriDeal — Africa’s Marketplace. Your Way.',
+    default: 'AfriDeal - Africa’s Marketplace. Your Way.',
     template: '%s · AfriDeal',
   },
   description:
@@ -69,8 +69,8 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   OWN-WORLD: AfriDeal ink/gold/forest on warm neutrals, Satoshi display, mono
     tabular money. Structure is a descending ladder: rungs step down and to the
     right, cheaper rungs carry more weight.
-  STORY: The buyer sees one hair line — the category the business actually
-    sells — at its real published rungs, learns the price is a function of
+  STORY: The buyer sees one hair line - the category the business actually
+    sells - at its real published rungs, learns the price is a function of
     quantity alone, and enters the catalogue through the rung that matches how
     they buy.
   FIRST VIEWPORT: Left, the comparison stated in one line. Right, one real

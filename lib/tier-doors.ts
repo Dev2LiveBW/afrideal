@@ -3,7 +3,7 @@ import { bandRange, priceLadder } from '@/lib/pricing-tiers';
 import { LADDER, QUOTATION_THRESHOLD } from '@/lib/pricing-model';
 
 /**
- * The three doors: retail, bulk, wholesale — priced from real bands.
+ * The three doors: retail, bulk, wholesale - priced from real bands.
  *
  * The storefront's argument is that a product does not have one price. It has a
  * published ladder, and the buyer decides which rung they stand on by deciding
@@ -28,7 +28,7 @@ export interface TierDoor {
   label: string;
   /** What buying at this rung actually means, in the buyer's terms. */
   blurb: string;
-  /** `1–4`, `5–99`, `100+` — from the live band, never hard-coded. */
+  /** `1–4`, `5–99`, `100+` - from the live band, never hard-coded. */
   range: string | null;
   /** The published unit price at this rung. Null on the quotation rung. */
   unitPrice: number | null;
@@ -64,8 +64,8 @@ const COPY: Record<DoorTier, { label: string; blurb: string }> = {
  * knows which product it is showing, and pricing the doors against a different
  * one would put figures on screen that the page never explains.
  *
- * `customerType` no longer gates which rungs are visible — the published ladder
- * is the same for everyone — but it still selects the buyer's own bands, so an
+ * `customerType` no longer gates which rungs are visible - the published ladder
+ * is the same for everyone - but it still selects the buyer's own bands, so an
  * account priced under a negotiated agreement sees its own figures.
  */
 export function tierDoors(
@@ -96,7 +96,7 @@ export function tierDoors(
 
     /*
      * The band shown is the cheapest one this account could be given at this
-     * rung — the rung's best case, which is what a buyer comparing doors wants.
+     * rung - the rung's best case, which is what a buyer comparing doors wants.
      */
     const atTier = ladder.filter((band) => matchesDoor(band, tier));
     const shown = atTier[atTier.length - 1] ?? null;
@@ -179,7 +179,7 @@ export function ladderSpread(
  *
  * `/browse?tier=BULK` has to mean something, or the ladder on the landing page
  * is a promise the next click breaks. This gives every card the same published
- * figure the ladder quoted, resolved through exactly the same rules — so a
+ * figure the ladder quoted, resolved through exactly the same rules - so a
  * price cannot disagree with itself between two surfaces.
  */
 export function doorFor(

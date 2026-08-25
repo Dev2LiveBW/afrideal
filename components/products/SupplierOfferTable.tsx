@@ -185,7 +185,7 @@ export function SupplierOfferTable({
       <div className="flex items-start gap-2.5 border-t border-hairline bg-forest-wash/40 px-5 py-3.5">
         <CheckCircle2 size={15} strokeWidth={1.5} className="mt-0.5 shrink-0 text-forest" />
         <p className="text-[13px] leading-5 text-forest-ink">
-          <span className="font-medium">{offers[0].supplier.name}</span> — {offers[0].reason}
+          <span className="font-medium">{offers[0].supplier.name}</span> - {offers[0].reason}
         </p>
       </div>
 

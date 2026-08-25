@@ -95,7 +95,7 @@ export default async function SupplierEarningsPage() {
       <Panel>
         <PanelHeader
           title="Settlements"
-          description="Paid monthly, in arrears — this month's row appears once the period closes."
+          description="Paid monthly, in arrears - this month's row appears once the period closes."
         />
         {settlements.length === 0 ? (
           <EmptyState
@@ -134,7 +134,7 @@ export default async function SupplierEarningsPage() {
                       <StatusBadge status={settlement.status} size="sm" />
                     </td>
                     <td className="text-right text-[12.5px] text-body">
-                      {settlement.paid_at ? dateTime(settlement.paid_at) : '—'}
+                      {settlement.paid_at ? dateTime(settlement.paid_at) : '-'}
                     </td>
                   </tr>
                 ))}

@@ -180,9 +180,9 @@ gradients stay on button bodies where they read as material rather than as
 decoration, and the loudest thing on any page is a real figure.
 
 The system runs in two modes over one token set, and the difference between them
-is temperament, not palette. **Marketplace mode** — the storefront — is allowed
-to be image-led and to stage one arrival per page. **Console mode** — `/admin`,
-`/supplier`, `/runner` — is tighter and quieter, denser panels, no staged
+is temperament, not palette. **Marketplace mode** - the storefront - is allowed
+to be image-led and to stage one arrival per page. **Console mode** - `/admin`,
+`/supplier`, `/runner` - is tighter and quieter, denser panels, no staged
 entrances, every control in the same place every time, because an operator
 releasing money should never have to wait for a page to finish composing itself.
 A flourish that belongs in the first is a defect in the second.
@@ -190,8 +190,8 @@ A flourish that belongs in the first is a defect in the second.
 The signature structure is a descending ladder. Where a marketplace would
 normally show three matched cards side by side, this system steps its rungs down
 and to the right, widening each one as the unit price falls, so the geometry
-argues the same thing the numbers do. That stagger is unconditional — it exists
-at 375px as well as at 1440px — because a signature that only appears on desktop
+argues the same thing the numbers do. That stagger is unconditional - it exists
+at 375px as well as at 1440px - because a signature that only appears on desktop
 is not a signature.
 
 **Key Characteristics:**
@@ -223,8 +223,8 @@ outcomes rather than for emphasis.
   carries gold as *text*, since the pure gold does not clear contrast at body
   sizes; **Gold Light** (`#f0c040`) is its dark-ground counterpart and the
   selection highlight.
-- **Gold 50 / Gold 700** (`#FBF0D8` / `#7A5709`): the held-money badge pair —
-  pale wash, deep text, gold ring at 25% — used for `PENDING`, `HELD`,
+- **Gold 50 / Gold 700** (`#FBF0D8` / `#7A5709`): the held-money badge pair -
+  pale wash, deep text, gold ring at 25% - used for `PENDING`, `HELD`,
   `AWAITING_CONFIRMATION`, `UNDER_REVIEW`.
 
 ### Secondary
@@ -273,7 +273,7 @@ outcomes rather than for emphasis.
 
 **The Money-In-Motion Rule.** Amber means money that exists but has not settled.
 Green means settled or verified. A status may not borrow amber for emphasis, and
-green may not be used to make something look important — colour here is a claim
+green may not be used to make something look important - colour here is a claim
 about state, not a volume knob.
 
 **The Warm Neutral Rule.** There is no cool grey in this system. Neutrals are
@@ -307,7 +307,7 @@ as flowed text; body copy is quiet and long-lined; numbers are mechanical.
   tracking −0.035em): one per page, the hero statement only. Set responsively in
   discrete steps rather than a clamp, and always `text-wrap: balance`.
 - **Headline** (Satoshi 600, 1.875rem/2.25rem, tracking −0.02em): section
-  headings on the storefront — the sticky left-hand argument of a two-column
+  headings on the storefront - the sticky left-hand argument of a two-column
   band.
 - **Title** (Satoshi 600, 1.375rem/1.75rem, tracking −0.015em): console page
   titles and dialog headings.
@@ -323,20 +323,20 @@ as flowed text; body copy is quiet and long-lined; numbers are mechanical.
 ### Named Rules
 
 **The Tabular Money Rule.** Every price, total, payout and invoice figure renders
-through one component, in mono with tabular figures, at two decimals always —
+through one component, in mono with tabular figures, at two decimals always -
 including on round numbers, because `BWP 1,200` beside `BWP 1,199.50` reads as a
 typo. `BWP` is prefixed unless a column header already carries it. No surface
 formats currency by hand.
 
 **The Two Voices Rule.** Satoshi sets headings; Geist Sans sets text. The body
-face may never stand in for the display face — that substitution erases the type
+face may never stand in for the display face - that substitution erases the type
 contrast the whole system rests on, which is why Satoshi is self-hosted as one
 41kb variable file with a grotesque fallback rather than pulled from a CDN with
 the text face behind it.
 
 **The Counting Rule.** If a number can change, shift a column, or be compared to
 the number above it, it is mono and tabular. Prose numerals inside a sentence
-still take mono when they are real data — the hero's product and supplier counts
+still take mono when they are real data - the hero's product and supplier counts
 are set in mono inside running text for exactly this reason.
 
 ## Layout
@@ -348,7 +348,7 @@ is 24px everywhere and does not grow with the viewport.
 
 The storefront's recurring band is a two-column asymmetric grid where the
 narrow column holds the argument and sticks (`lg:sticky top-28`) while the wide
-column scrolls its evidence past it — roughly `0.72fr / 1.28fr` for proof bands
+column scrolls its evidence past it - roughly `0.72fr / 1.28fr` for proof bands
 and `1fr / 1.05fr` for the hero. Below `lg` these collapse to a single column
 with a 40–48px gap. Section rhythm is 80px of top padding on the storefront,
 96px on the heavier bands, with full-bleed bands marked by a top and bottom
@@ -364,7 +364,7 @@ with hidden scrollbars on mobile.
 **The min-w-0 Rule.** Every grid or flex child that holds a headline, a form, a
 table, or a wide row carries `min-w-0`. A grid item defaults to
 `min-width: auto`, so one missing declaration lets a headline's min-content width
-set the page width — which is exactly how this build once shipped a 420px page on
+set the page width - which is exactly how this build once shipped a 420px page on
 a 375px screen. Where a long string cannot shrink, it is allowed to wrap below
 `sm` instead of being held on one line.
 
@@ -412,16 +412,16 @@ wash and the colour of its condition line.
 
 ## Shapes
 
-Two geometries, cleanly divided. **Anything you press is a pill** —
+Two geometries, cleanly divided. **Anything you press is a pill** -
 `border-radius: 9999px` on every button, status badge, nav link, tier switch,
 category chip, search field, count bubble and icon button. **Anything that
-contains is softly rectangular** — 0.875rem (14px) for panels and product cards,
+contains is softly rectangular** - 0.875rem (14px) for panels and product cards,
 1.25rem (20px) for a ladder rung, 2rem (32px) for the outer tray of a nested
 enclosure, 0.625rem (10px) for small inline slots such as thumbnails.
 
 Borders are a single warm hairline; the build sets `border-color` globally to the
 hairline token so an undecorated `border` is always right. Rings are used instead
-of borders when the edge must not affect layout — `ring-1 ring-inset` on ghost
+of borders when the edge must not affect layout - `ring-1 ring-inset` on ghost
 buttons, status badges and enclosure trays. Product imagery is a 4:3 slot that
 clips its own overflow so a photograph can push in on hover without moving the
 card.
@@ -434,7 +434,7 @@ the outer radius minus the padding: a 2rem tray with 0.375rem of padding holds a
 radius as its parent is wrong.
 
 **The Reserved Enclosure Rule.** The nested tray is for surfaces that carry
-weight — a stat cluster, a settlement control, the checkout summary, the hero
+weight - a stat cluster, a settlement control, the checkout summary, the hero
 ladder. It never appears on anything that repeats more than eight times on a
 page; a list of trays is just a list.
 
@@ -452,7 +452,7 @@ page; a list of trays is just a list.
 - **Ghost:** transparent with an inset hairline-strong ring and ink text; hovers
   to a 4% ink wash. This is the default secondary and is also the variant used on
   ink grounds with its ring swapped to `white/20`.
-- **Forest / Danger:** state actions only — forest for release and confirm,
+- **Forest / Danger:** state actions only - forest for release and confirm,
   danger as a ring-only outline for destructive controls.
 - **The nested arrow chip:** when a button carries direction, the arrow sits in
   its own circle flush against the trailing padding (negative margin pulls it
@@ -469,7 +469,7 @@ page; a list of trays is just a list.
   a deep text colour of the same family.
 - **State:** one badge component owns every status in the system, mapped through
   a single table so the same word is never two colours on two screens.
-- **Motion:** exactly two statuses move — a soft 2.4s opacity pulse on `PENDING`
+- **Motion:** exactly two statuses move - a soft 2.4s opacity pulse on `PENDING`
   and `AWAITING_CONFIRMATION`, and a 480ms shake on `DISPUTED`. These are the
   states an operator should catch from across a room; nothing else animates.
 
@@ -478,7 +478,7 @@ page; a list of trays is just a list.
 - **Corner Style:** 14px (`rounded-md`).
 - **Background:** raised white on the page ground, hairline border, card shadow.
 - **Shadow Strategy:** card at rest, lift on hover, 500ms exponential ease-out on
-  the shadow alone — the card does not translate.
+  the shadow alone - the card does not translate.
 - **Image slot:** 4:3, clipped. A real photograph pushes in 6% over 900ms on
   hover with a bottom gradient scrim fading in beneath it; where no photograph
   exists the slot falls back to a two-stop gradient built from the product's own
@@ -513,7 +513,7 @@ page; a list of trays is just a list.
   white text.
 - **Focus:** the border shifts to gold at 50–60% and the dark variant's fill
   lifts to `white/6`. There is no glow. Outside inputs, the global focus ring is
-  a 2px solid gold outline at 2px offset — visible on every interactive element,
+  a 2px solid gold outline at 2px offset - visible on every interactive element,
   never removed.
 - **Error:** border to danger at 60%, message beneath at 12px; on dark grounds the
   message uses a lifted red (`#F2A9A2`) so it clears contrast on ink.
@@ -536,7 +536,7 @@ page; a list of trays is just a list.
 The storefront's thesis object, and the reason several of the rules above exist.
 
 - **Structure:** three rungs stacked, each stepping right and widening as the
-  unit price falls — the cheapest rung is the widest and heaviest object in the
+  unit price falls - the cheapest rung is the widest and heaviest object in the
   set. Type size, vertical padding and money size all climb as price descends
   (15→18px labels, `md`→`xl` money). A row of equal cards would *state* the
   tiers; the stagger *demonstrates* them.
@@ -549,7 +549,7 @@ The storefront's thesis object, and the reason several of the rules above exist.
   that tier, and a `<button>` when it acts on the product already on screen. The
   accessible name follows the behaviour, never the styling.
 - **Locked rungs:** a price the visitor cannot yet buy at keeps its real
-  published figure and its full geometry, and changes only in temperature — the
+  published figure and its full geometry, and changes only in temperature - the
   money goes muted and the action line becomes the condition for reaching it,
   marked with a 10px lock glyph in gold. Blanking it would make a three-rung
   catalogue look like a one-price one.
@@ -561,7 +561,7 @@ The storefront's thesis object, and the reason several of the rules above exist.
   thumbnail, a forest progress bar and the spread as a mono percentage. All bars
   share one scale set by the deepest ladder on show, so a shallow ladder looks
   shallow. A graphic that cannot lose proves nothing.
-- **Next-rung nudge:** a sentence with a button, not a badge or a countdown —
+- **Next-rung nudge:** a sentence with a button, not a badge or a countdown -
   forest wash when the buyer can act, gold wash with a link to signup when the
   rung needs an account.
 - **Tier switch:** pill links (not client state) so the chosen rung lives in the
@@ -571,7 +571,7 @@ The storefront's thesis object, and the reason several of the rules above exist.
 ### Motion
 
 - **Easing:** three variables, and exponential ease-out
-  (`cubic-bezier(0.16, 1, 0.3, 1)`) is the default — mass that settles, never a
+  (`cubic-bezier(0.16, 1, 0.3, 1)`) is the default - mass that settles, never a
   linear slide. A quint ease-out handles fast state colour changes and a spring
   handles the cart-count pop.
 - **Durations:** 160–300ms for state (colour, background, ring), 500–700ms for
@@ -584,7 +584,7 @@ The storefront's thesis object, and the reason several of the rules above exist.
   ceremony than a footer. Console mode gets none at all.
 - **The Same-Shape Rule.** `prefers-reduced-motion` changes durations and drops
   continuous loops; it never changes what is rendered. A reduced-motion branch
-  that returns different markup — or a different `initial` style — hydrates
+  that returns different markup - or a different `initial` style - hydrates
   against the wrong shape and makes React throw the server HTML away. Same
   elements, same start, same end, no perceptible movement.
 - **Skeletons:** a moving sheen across a sunk-neutral block, never a static grey
@@ -606,7 +606,7 @@ The storefront's thesis object, and the reason several of the rules above exist.
 - **Do** separate surfaces with a warm hairline and a change of ground before
   reaching for a shadow.
 - **Do** keep the descending-ladder geometry at every width, including 375px.
-- **Do** let a comparison graphic lose — shared scales across rows, not
+- **Do** let a comparison graphic lose - shared scales across rows, not
   self-normalised bars.
 - **Do** give every icon-only control a real accessible name describing the
   object and the action, and let the name follow the behaviour when a component
@@ -616,20 +616,20 @@ The storefront's thesis object, and the reason several of the rules above exist.
 
 ### Don't:
 
-- **Don't** use cool grey anywhere — neutrals are warm, and dividers are warm
+- **Don't** use cool grey anywhere - neutrals are warm, and dividers are warm
   translucent black.
 - **Don't** spend amber on emphasis or green on importance. Both are claims about
   state.
 - **Don't** blank, hide, or grey out a published price to indicate it is
   unavailable; change temperature, never geometry or figure.
 - **Don't** fade an element to express unavailability when the world's own rule
-  says weight belongs to the cheaper rung — running the weight rule backwards
+  says weight belongs to the cheaper rung - running the weight rule backwards
   makes the most important rungs the faintest things on the page.
 - **Don't** put more than one staged entrance on a page, and don't animate
   anything in the console.
 - **Don't** branch markup on `prefers-reduced-motion`; branch only duration.
 - **Don't** stack a second gold-filled button beside the primary one, or place a
-  filled primary next to the ladder — the rungs are the primary action there.
+  filled primary next to the ladder - the rungs are the primary action there.
 - **Don't** use gradient text, and don't let gradients do anything other than
   sit inside a button body or a fallback image slot.
 - **Don't** build a page section as a row of identical icon-plus-heading-plus-

@@ -1,7 +1,7 @@
 import type { PayableStatus, PayableTransition, SupplierPayable } from '@/types';
 
 /**
- * Supplier payables — the platform's own trade creditors ledger.
+ * Supplier payables - the platform's own trade creditors ledger.
  *
  * AfriDeal is the merchant of record. The customer buys from AfriDeal and pays
  * AfriDeal through a licensed payment provider; AfriDeal buys the goods from
@@ -16,7 +16,7 @@ import type { PayableStatus, PayableTransition, SupplierPayable } from '@/types'
  *           ──▶ CANCELLED   resolved in the customer's favour
  *
  * SETTLED and CANCELLED are terminal. An invoice that has been paid is not
- * unpaid by a later event — that would be a credit note, which is a new
+ * unpaid by a later event - that would be a credit note, which is a new
  * document rather than a transition on this one.
  */
 
@@ -38,7 +38,7 @@ export class PayableTransitionError extends Error {
   ) {
     super(
       `Cannot move a supplier payable from ${from} to ${to}. Allowed from ${from}: ${
-        PAYABLE_TRANSITIONS[from]?.join(', ') || 'nothing — this is a terminal state'
+        PAYABLE_TRANSITIONS[from]?.join(', ') || 'nothing - this is a terminal state'
       }.`,
     );
     this.name = 'PayableTransitionError';
@@ -72,7 +72,7 @@ export function applyTransition(
   };
 }
 
-/** Invoices past their agreed payment terms — the payables queue's "Overdue" tab. */
+/** Invoices past their agreed payment terms - the payables queue's "Overdue" tab. */
 export function isOverdue(record: SupplierPayable, now: Date = new Date()): boolean {
   if (record.status !== 'PENDING') return false;
   const ageDays = (now.getTime() - new Date(record.raised_at).getTime()) / 86_400_000;

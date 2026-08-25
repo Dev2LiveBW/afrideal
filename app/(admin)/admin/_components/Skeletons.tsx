@@ -4,7 +4,7 @@ import { cn } from '@/lib/utils';
  * Composable loading-state building blocks for every /admin route.
  *
  * One shared vocabulary so a route's `loading.tsx` never invents its own
- * skeleton shape — the console should feel like it is still there while data
+ * skeleton shape - the console should feel like it is still there while data
  * loads, not like a different, simpler screen flashed in front of it.
  */
 

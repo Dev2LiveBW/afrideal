@@ -89,9 +89,9 @@ export default async function RequestsPage() {
                       </h2>
                       <p className="mt-1 text-[12.5px] text-muted">
                         <span className="font-mono tabular-nums">{request.quantity}</span>{' '}
-                        {request.quantity === 1 ? 'unit' : 'units'} to {request.delivery_city} ·
+                        {request.quantity === 1 ? 'unit' : 'units'} to {request.delivery_city} Â·
                         asked {dateTime(request.created_at)}
-                        {request.runner_name && ` · ${request.runner_name}`}
+                        {request.runner_name && ` Â· ${request.runner_name}`}
                       </p>
                     </div>
 

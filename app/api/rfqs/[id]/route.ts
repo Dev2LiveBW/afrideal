@@ -29,7 +29,7 @@ export const GET = handled(async (_request: Request, { params }: { params: { id:
   const all = (await readAll('rfq-responses')).filter((entry) => entry.rfq_id === rfq.id);
   const suppliers = await readAll('suppliers');
 
-  // §5 — scope what comes back to what the caller is entitled to see.
+  // §5 - scope what comes back to what the caller is entitled to see.
   if (actor.role === 'CUSTOMER') {
     const submitted = all.filter((entry) => entry.status === 'SUBMITTED');
     return ok({
@@ -163,7 +163,7 @@ export const PATCH = handled(async (request: Request, { params }: { params: { id
     await notify({
       userId: rfq.customer_id,
       title: 'Your quotation is ready',
-      body: `${rfq.reference} — we have sourced ${rfq.requested_quantity} units of ${rfq.product_name}.`,
+      body: `${rfq.reference} - we have sourced ${rfq.requested_quantity} units of ${rfq.product_name}.`,
       kind: 'ORDER',
     });
 

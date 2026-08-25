@@ -109,8 +109,8 @@ export default async function OrdersPage() {
                       {order.reference}
                     </p>
                     <p className="mt-0.5 text-[12.5px] text-body">
-                      {shortDate(order.placed_at)} · {items.length}{' '}
-                      {items.length === 1 ? 'item' : 'items'} ·{' '}
+                      {shortDate(order.placed_at)} Â· {items.length}{' '}
+                      {items.length === 1 ? 'item' : 'items'} Â·{' '}
                       {PAYMENT_LABELS[order.payment_method] ?? order.payment_method}
                     </p>
                   </div>

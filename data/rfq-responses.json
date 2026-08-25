@@ -118,5 +118,20 @@
     "notes": "",
     "valid_until": "2026-09-04T05:24:28.743Z",
     "status": "SELECTED"
+  },
+  {
+    "id": "rr009",
+    "rfq_id": "rfq006",
+    "supplier_id": "s001",
+    "currency": "BWP",
+    "created_at": "2026-08-21T07:48:38.498Z",
+    "quantity": 400,
+    "unit_price": 68,
+    "lead_time_days": 9,
+    "minimum_order_quantity": 100,
+    "shipping_terms": "Ex-works",
+    "notes": "",
+    "valid_until": "2026-09-04T07:48:38.496Z",
+    "status": "SELECTED"
   }
 ]

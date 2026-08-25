@@ -9,12 +9,12 @@ import { Panel, PanelBody, PanelHeader } from '@/components/brand/Panel';
 import { cn } from '@/lib/utils';
 
 /**
- * Platform settings — fully interactive, honestly not persisted.
+ * Platform settings - fully interactive, honestly not persisted.
  *
  * There is no settings collection in the data store yet, so every control
  * here is real local state (you can actually change it and see it move) but
  * "Save" only confirms the value for this browser session. The rates shown
- * as defaults are not placeholders — they are the exact commission, payment-term
+ * as defaults are not placeholders - they are the exact commission, payment-term
  * window and revenue-share figures the pricing and analytics engines use
  * today, read from the same constants.
  */
@@ -55,7 +55,7 @@ export function SettingsForm({
     setSaving(true);
     window.setTimeout(() => {
       setSaving(false);
-      toast('Held for this session only — settings do not persist in this demo build.', { icon: 'ℹ️' });
+      toast('Held for this session only - settings do not persist in this demo build.', { icon: 'ℹ️' });
     }, 450);
   }
 
@@ -64,7 +64,7 @@ export function SettingsForm({
       <div className="flex items-start gap-2.5 rounded-md border border-gold/30 bg-gold/[0.06] px-4 py-3">
         <Info size={16} strokeWidth={1.5} className="mt-0.5 shrink-0 text-gold-dark" />
         <p className="text-[12.5px] leading-5 text-gold-700">
-          Demo build — every control below genuinely responds when you change it, but nothing here writes to a
+          Demo build - every control below genuinely responds when you change it, but nothing here writes to a
           settings store yet. The values shown are not placeholders: they are the real commission, supplier
           payment-term and revenue-share figures the pricing and analytics engines use right now.
         </p>

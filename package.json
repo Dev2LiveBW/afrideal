@@ -2,7 +2,7 @@
   "name": "afrideal",
   "version": "1.0.0",
   "private": true,
-  "description": "AfriDeal — Africa's Marketplace. Your Way. Multi-portal procurement marketplace MVP.",
+  "description": "AfriDeal - Africa's Marketplace. Your Way. Multi-portal procurement marketplace MVP.",
   "scripts": {
     "dev": "next dev",
     "build": "next build",
@@ -16,6 +16,8 @@
   },
   "dependencies": {
     "@hookform/resolvers": "3.10.0",
+    "@radix-ui/react-dialog": "^1.1.23",
+    "@radix-ui/react-select": "^2.3.7",
     "class-variance-authority": "0.7.1",
     "clsx": "2.1.1",
     "framer-motion": "11.15.0",

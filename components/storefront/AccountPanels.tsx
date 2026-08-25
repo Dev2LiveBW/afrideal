@@ -104,7 +104,7 @@ export function RunnerContactCard({ runner }: { runner: Runner }) {
           </span>
         </p>
         <p className="mt-0.5 text-[12.5px] text-body">
-          {runner.vehicle} · {runner.plate} — carrying your order
+          {runner.vehicle} · {runner.plate} - carrying your order
         </p>
       </div>
 

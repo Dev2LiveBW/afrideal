@@ -68,7 +68,7 @@ const config: Config = {
         },
         body: '#5A615C',
         /*
-         * Was #8A918B, which computes to 2.95:1 on the #f5f5f5 page ground —
+         * Was #8A918B, which computes to 2.95:1 on the #f5f5f5 page ground -
          * under the 4.5:1 floor at every body size, and it was carrying the
          * hero's only real-numbers claim. #6B726C clears 4.6:1 and keeps the
          * warm-neutral cast that separates this palette from cool grey.

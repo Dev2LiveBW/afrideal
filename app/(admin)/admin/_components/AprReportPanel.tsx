@@ -40,7 +40,7 @@ export function AprReportPanel({
   return (
     <Panel className={className}>
       <PanelHeader
-        title="Annual Platform Report — revenue share"
+        title="Annual Platform Report - revenue share"
         description={`${periodLabel} · computed transparently, line by line`}
       />
       <PanelBody>

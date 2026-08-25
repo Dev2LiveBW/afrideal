@@ -14,7 +14,7 @@ import type { TierDoor } from '@/lib/tier-doors';
  * further you go, the less each unit costs. A row of equal cards would state
  * the tiers; the stagger demonstrates them.
  *
- * Two rungs carry a published figure. The third does not — past a hundred
+ * Two rungs carry a published figure. The third does not - past a hundred
  * units the price depends on the volume, the delivery point and the lead time,
  * so it is quoted. That rung keeps the same geometry and swaps the number for
  * the action that gets one, which is the honest version of the same offer.
@@ -26,7 +26,7 @@ import type { TierDoor } from '@/lib/tier-doors';
  *
  * A rung navigates by default, which is right on the landing page where the
  * rung IS the way into the catalogue. Given `onSelect` it becomes a button and
- * acts on whatever is already on screen instead — on a product page, tapping
+ * acts on whatever is already on screen instead - on a product page, tapping
  * "Bulk 161.00" should set the quantity to that band, not abandon the product
  * for a filtered grid.
  */
@@ -143,8 +143,8 @@ function Rung({
         door.byQuotation
           ? `Request a quotation for ${door.range} units of ${productName}`
           : acts
-            ? `Price ${productName} at ${door.range} units — ${door.label.toLowerCase()}`
-            : `Shop ${door.label.toLowerCase()} — ${door.range} units of ${productName}`
+            ? `Price ${productName} at ${door.range} units - ${door.label.toLowerCase()}`
+            : `Shop ${door.label.toLowerCase()} - ${door.range} units of ${productName}`
       }
       className={cn(
         'group relative flex items-center gap-4 rounded-lg text-left',
@@ -232,7 +232,7 @@ function Rung({
 
       {/*
         The quoted rung. No figure, because there is no published figure to
-        show — putting an indicative one here would be the exact thing the
+        show - putting an indicative one here would be the exact thing the
         published ladder exists to avoid.
       */}
       {door.byQuotation && (

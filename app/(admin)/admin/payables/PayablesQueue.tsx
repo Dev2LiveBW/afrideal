@@ -99,9 +99,9 @@ export function PayablesQueue({ rows }: { rows: PayableRow[] }) {
           `${moved.length} invoice${moved.length === 1 ? '' : 's'} ${action === 'SETTLED' ? 'settled' : 'cancelled'}`,
         );
       } else if (moved.length === 0) {
-        toast.error(`Nothing moved — all ${skipped.length} invoice(s) were skipped (${skipped[0]?.reason}).`);
+        toast.error(`Nothing moved - all ${skipped.length} invoice(s) were skipped (${skipped[0]?.reason}).`);
       } else {
-        toast(`${moved.length} moved, ${skipped.length} skipped — ${skipped.map((s) => s.reason).join(', ')}`, {
+        toast(`${moved.length} moved, ${skipped.length} skipped - ${skipped.map((s) => s.reason).join(', ')}`, {
           icon: '⚠️',
         });
       }

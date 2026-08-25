@@ -36,11 +36,16 @@ export function CategoryIcon({
   categoryId,
   size = 18,
   className,
+  style,
 }: {
   categoryId: string;
   size?: number;
   className?: string;
+  /** Carries the trade's colour, which is per-category and so cannot be a class. */
+  style?: React.CSSProperties;
 }) {
   const Icon = ICONS[categoryId] ?? Package;
-  return <Icon size={size} strokeWidth={1.5} className={className} aria-hidden="true" />;
+  return (
+    <Icon size={size} strokeWidth={1.5} className={className} style={style} aria-hidden="true" />
+  );
 }

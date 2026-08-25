@@ -14,8 +14,8 @@ export const LOGO_GOLD = '#C5902E';
 /**
  * Africa as a single closed outline, on a 0 0 100 112 field.
  *
- * Plotted from real coordinates rather than drawn by eye — longitude mapped
- * across x, latitude down y — because a freehand Africa is the kind of thing a
+ * Plotted from real coordinates rather than drawn by eye - longitude mapped
+ * across x, latitude down y - because a freehand Africa is the kind of thing a
  * viewer cannot name as wrong but can see is wrong. Anchors sit on the points
  * that carry the silhouette: Tangier, Alexandria, the Horn, Maputo, Agulhas,
  * Walvis Bay, the Gulf of Guinea and Dakar.
@@ -48,7 +48,7 @@ const AFRICA_OUTLINE = [
 
 /**
  * The letter A, sized to sit inside the outline above. Used only where the
- * mark stands alone — the wordmark supplies its own A and nests it there.
+ * mark stands alone - the wordmark supplies its own A and nests it there.
  */
 const LETTER_A =
   'M40 26 L61 92 H49.8 L46.2 80 H33.8 L30.2 92 H19 Z M36 72 H44 L40 51 Z';

@@ -6,7 +6,7 @@ import { MoneyText } from '@/components/brand/MoneyText';
 import { Enclosure, PageHeader, Panel, PanelBody, PanelHeader } from '@/components/brand/Panel';
 import { PricingFormula } from '@/components/brand/PricingFormula';
 import { StatusBadge } from '@/components/brand/StatusBadge';
-import { SupplierOfferTable } from '@/components/products/SupplierOfferTable';
+import { SupplierOfferTable } from '@/components/unsplash/assets/SupplierOfferTable';
 import { Swatch } from '@/components/storefront/Swatch';
 import { ConsoleTopbar } from '@/components/layout/ConsoleTopbar';
 import { auth } from '@/lib/auth';
@@ -168,7 +168,7 @@ export default async function AdminProductDetailPage({ params }: { params: { id:
               <div className="flex items-start gap-2.5 border-t border-hairline bg-surface px-5 py-3.5">
                 <Info size={15} strokeWidth={1.5} className="mt-0.5 shrink-0 text-muted" />
                 <p className="text-[12.5px] leading-5 text-body">
-                  This ranking is a live preview, recomputed from current stock and reliability — it is not tied
+                  This ranking is a live preview, recomputed from current stock and reliability - it is not tied
                   to a real order. Routing can only be overridden on an order that already exists, from that
                   order&apos;s detail page, because there has to be a live supplier order for a reassignment to
                   apply to.
@@ -181,7 +181,7 @@ export default async function AdminProductDetailPage({ params }: { params: { id:
                 title="Pricing breakdown"
                 description={
                   pricingOffer
-                    ? `Computed from ${pricingOffer.supplier.name}'s offer — the ${
+                    ? `Computed from ${pricingOffer.supplier.name}'s offer - the ${
                         selection.primary ? 'current top verified supplier' : 'best available offer'
                       }`
                     : undefined

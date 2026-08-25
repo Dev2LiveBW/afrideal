@@ -5,7 +5,7 @@ import type { getSupplierWorkspace } from '@/lib/queries';
  *
  * AfriDeal settles suppliers monthly and takes a flat 12% commission on the
  * gross value they billed the platform that period (`supplier_subtotal`
- * summed across their legs) — the same rate the seeded settlements already
+ * summed across their legs) - the same rate the seeded settlements already
  * imply (commission ÷ gross ≈ 0.12 on every row in /data/settlements.json).
  */
 

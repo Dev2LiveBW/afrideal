@@ -140,7 +140,7 @@ export default async function AdminSourcingPage() {
                         {request.quote ? (
                           <MoneyText amount={request.quote.total} size="sm" />
                         ) : (
-                          <span className="text-[12px] text-muted">—</span>
+                          <span className="text-[12px] text-muted">-</span>
                         )}
                       </td>
                       <td className="text-[12px] text-muted">{dateTime(request.updated_at)}</td>

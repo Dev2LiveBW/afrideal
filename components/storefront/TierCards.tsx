@@ -59,7 +59,7 @@ function Card({ door, productName }: { door: TierDoor; productName: string }) {
       aria-label={
         door.byQuotation
           ? `Request a quotation for ${door.range} units of ${productName}`
-          : `Shop ${door.label.toLowerCase()} — ${door.range} units of ${productName}`
+          : `Shop ${door.label.toLowerCase()} - ${door.range} units of ${productName}`
       }
       className={cn(
         'group flex min-w-0 flex-col rounded-lg px-4 py-4 ring-1 ring-inset',

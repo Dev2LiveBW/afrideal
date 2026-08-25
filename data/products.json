@@ -197,7 +197,7 @@
       "#2a2a2a"
     ],
     "short_description": "IP65 solar bank with dual USB-C PD and a 3W panel.",
-    "description": "Built for households and field crews on unreliable grid supply. A 20 000mAh cell with dual USB-C power delivery and a 3W monocrystalline panel for trickle top-up. The panel will not charge it from flat in a day — it is a maintenance charge, not a primary source, and the listing says so plainly.",
+    "description": "Built for households and field crews on unreliable grid supply. A 20 000mAh cell with dual USB-C power delivery and a 3W monocrystalline panel for trickle top-up. The panel will not charge it from flat in a day - it is a maintenance charge, not a primary source, and the listing says so plainly.",
     "specs": [
       {
         "label": "Capacity",
@@ -310,7 +310,7 @@
   },
   {
     "id": "p006",
-    "name": "Portland Cement 42.5N — 50kg",
+    "name": "Portland Cement 42.5N - 50kg",
     "slug": "portland-cement-42-5n-50kg",
     "category_id": "c3",
     "emoji": "🧱",
@@ -347,13 +347,13 @@
       },
       {
         "id": "p006v2",
-        "label": "Half pallet — 20 bags",
+        "label": "Half pallet - 20 bags",
         "sku": "CEM-425-20",
         "price": 138
       },
       {
         "id": "p006v3",
-        "label": "Full pallet — 40 bags",
+        "label": "Full pallet - 40 bags",
         "sku": "CEM-425-40",
         "price": 138
       }
@@ -434,7 +434,7 @@
   },
   {
     "id": "p008",
-    "name": "White Maize Meal — 12.5kg",
+    "name": "White Maize Meal - 12.5kg",
     "slug": "white-maize-meal-12-5kg",
     "category_id": "c4",
     "emoji": "🌽",
@@ -495,7 +495,7 @@
   },
   {
     "id": "p009",
-    "name": "Certified Sorghum Seed — 25kg",
+    "name": "Certified Sorghum Seed - 25kg",
     "slug": "certified-sorghum-seed-25kg",
     "category_id": "c4",
     "emoji": "🌾",
@@ -536,7 +536,7 @@
       },
       {
         "id": "p009v2",
-        "label": "Pallet — 20 bags",
+        "label": "Pallet - 20 bags",
         "sku": "SRG-25-20",
         "price": 738
       }
@@ -553,7 +553,7 @@
   },
   {
     "id": "p010",
-    "name": "A4 Copy Paper — Box of 5 Reams",
+    "name": "A4 Copy Paper - Box of 5 Reams",
     "slug": "a4-copy-paper-box-of-5-reams",
     "category_id": "c5",
     "emoji": "📄",
@@ -562,7 +562,7 @@
       "#8A918B"
     ],
     "short_description": "80gsm, FSC certified, 2500 sheets.",
-    "description": "The reorder line every office runs out of at the worst moment. 80gsm FSC-certified A4 at 2500 sheets to the box. Nothing interesting about it, which is the point — it needs to arrive on the day it was promised and cost what it said it would.",
+    "description": "The reorder line every office runs out of at the worst moment. 80gsm FSC-certified A4 at 2500 sheets to the box. Nothing interesting about it, which is the point - it needs to arrive on the day it was promised and cost what it said it would.",
     "specs": [
       {
         "label": "Size",
@@ -620,7 +620,7 @@
       "#2E7D3F"
     ],
     "short_description": "100% cotton, D59 conti-suit, reflective banded.",
-    "description": "A two-piece conti-suit in 100% cotton D59, with reflective banding on the arms and legs. Cut for site work in heat — the cotton matters, and the polyester equivalents that undercut it on price fail the same flame test. Sold to construction and municipal buyers.",
+    "description": "A two-piece conti-suit in 100% cotton D59, with reflective banding on the arms and legs. Cut for site work in heat - the cotton matters, and the polyester equivalents that undercut it on price fail the same flame test. Sold to construction and municipal buyers.",
     "specs": [
       {
         "label": "Fabric",
@@ -675,7 +675,7 @@
   },
   {
     "id": "p012",
-    "name": "School Uniform Set — Primary",
+    "name": "School Uniform Set - Primary",
     "slug": "school-uniform-set-primary",
     "category_id": "c6",
     "emoji": "🎒",
@@ -684,7 +684,7 @@
       "#1A5C2A"
     ],
     "short_description": "Shirt, shorts or skirt, jersey. Poly-cotton blend.",
-    "description": "A complete primary set in a 65/35 poly-cotton blend that survives a term of washing. Demand on this line is violently seasonal — it does roughly nine months of volume in the four weeks before January intake, which is exactly the kind of spike the supplier routing engine exists to absorb.",
+    "description": "A complete primary set in a 65/35 poly-cotton blend that survives a term of washing. Demand on this line is violently seasonal - it does roughly nine months of volume in the four weeks before January intake, which is exactly the kind of spike the supplier routing engine exists to absorb.",
     "specs": [
       {
         "label": "Blend",
@@ -742,7 +742,7 @@
   },
   {
     "id": "p013",
-    "name": "Brazilian Body Wave Bundle — 20 inch",
+    "name": "Brazilian Body Wave Bundle - 20 inch",
     "slug": "brazilian-body-wave-bundle-20-inch",
     "category_id": "c1",
     "emoji": "💇🏾‍♀️",
@@ -813,7 +813,7 @@
   },
   {
     "id": "p014",
-    "name": "HD Lace Frontal 13×4 — 18 inch",
+    "name": "HD Lace Frontal 13×4 - 18 inch",
     "slug": "hd-lace-frontal-13-4-18-inch",
     "category_id": "c1",
     "emoji": "✨",
@@ -877,7 +877,7 @@
   },
   {
     "id": "p015",
-    "name": "Bone Straight Weave Bundle — 24 inch",
+    "name": "Bone Straight Weave Bundle - 24 inch",
     "slug": "bone-straight-weave-bundle-24-inch",
     "category_id": "c1",
     "emoji": "💫",
@@ -941,7 +941,7 @@
   },
   {
     "id": "p016",
-    "name": "Passion Twist Crochet Hair — 18 inch",
+    "name": "Passion Twist Crochet Hair - 18 inch",
     "slug": "passion-twist-crochet-hair-18-inch",
     "category_id": "c1",
     "emoji": "🌀",
@@ -1018,7 +1018,7 @@
   },
   {
     "id": "p017",
-    "name": "Glueless Bob Wig — 12 inch",
+    "name": "Glueless Bob Wig - 12 inch",
     "slug": "glueless-bob-wig-12-inch",
     "category_id": "c1",
     "emoji": "👩🏾‍🦱",

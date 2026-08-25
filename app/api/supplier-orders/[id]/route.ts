@@ -12,7 +12,7 @@ const PatchSchema = z.object({
   status: z
     .enum(['CONFIRMED', 'PREPARING', 'READY_FOR_COLLECTION', 'COLLECTED', 'DELIVERED', 'CANCELLED'])
     .optional(),
-  /** Admin override — reassign this leg to a different supplier. */
+  /** Admin override - reassign this leg to a different supplier. */
   supplier_id: z.string().optional(),
 });
 

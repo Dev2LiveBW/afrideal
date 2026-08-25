@@ -42,8 +42,8 @@ export const FINANCE_ALLOWED_PREFIXES = [
 
 /*
  * Sourcing sits with operations rather than finance. Nothing on that queue
- * moves money — the buyer approves a price and the runner is paid through the
- * ordinary payables run — so a finance login has no reason to be there.
+ * moves money - the buyer approves a price and the runner is paid through the
+ * ordinary payables run - so a finance login has no reason to be there.
  */
 
 export const OPS_DENIED_PREFIXES = ['/admin/settings', '/admin/finance', '/admin/settlements'];

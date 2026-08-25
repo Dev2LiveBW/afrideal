@@ -7,8 +7,10 @@ import { Heart, Plus, ShieldCheck, Star } from 'lucide-react';
 import toast from 'react-hot-toast';
 
 import { MoneyText } from '@/components/brand/MoneyText';
+import { CategoryIcon } from '@/components/storefront/CategoryIcon';
 import { Swatch, photoUrl } from '@/components/storefront/Swatch';
 import { useAfriDealStore } from '@/store/useAfriDealStore';
+import { categoryPalette } from '@/lib/category-palette';
 import { cn } from '@/lib/utils';
 import type { Product, ProductImage } from '@/types';
 
@@ -94,9 +96,11 @@ export function ProductCard({
     toast.success(
       qty === 1
         ? `${product.name} added to cart`
-        : `${qty} × ${product.name} added — bulk price applied`,
+        : `${qty} × ${product.name} added - bulk price applied`,
     );
   }
+
+  const palette = categoryPalette(product.category_id);
 
   return (
     <motion.article
@@ -106,9 +110,16 @@ export function ProductCard({
       transition={{ delay: Math.min(index * 0.05, 0.3), duration: 0.55, ease: [0.16, 1, 0.3, 1] }}
       className={cn('group relative', className)}
     >
+      {/*
+        The card carries its trade's colour rather than sitting on white. The
+        wash is pale enough that the photograph and the figure still outrank it;
+        the hue itself is spent only on the icon and the category label, where it
+        does identification work instead of decoration.
+      */}
       <Link
-        href={href ?? `/products/${product.id}`}
-        className="flex h-full flex-col overflow-hidden rounded-md border border-hairline bg-surface-raised shadow-card transition-shadow duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] hover:shadow-lift"
+        href={href ?? `/unsplash/assets/${product.id}`}
+        style={{ backgroundColor: palette.wash, borderColor: palette.edge }}
+        className="flex h-full flex-col overflow-hidden rounded-md border shadow-card transition-shadow duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] hover:shadow-lift"
       >
         <div className="relative">
           <Swatch
@@ -161,7 +172,15 @@ export function ProductCard({
           </p>
 
           <div className="mt-3 flex flex-wrap items-center gap-x-3 gap-y-1 text-[11.5px] text-muted">
-            {categoryName && <span className="truncate">{categoryName}</span>}
+            {categoryName && (
+              <span
+                className="inline-flex min-w-0 items-center gap-1.5 font-medium"
+                style={{ color: palette.hue }}
+              >
+                <CategoryIcon categoryId={product.category_id} size={12} />
+                <span className="truncate">{categoryName}</span>
+              </span>
+            )}
             <span className="inline-flex items-center gap-1">
               <Star size={12} strokeWidth={1.5} className="fill-gold text-gold" />
               <span className="font-mono tabular-nums">{product.rating.toFixed(1)}</span>
@@ -184,7 +203,7 @@ export function ProductCard({
                 filtered to, or the sort order stops matching what is read.
               */}
               {/*
-                The quoted rung says so once, above the grid — every card is in
+                The quoted rung says so once, above the grid - every card is in
                 the same state, so repeating it twelve times is noise that
                 crowds out the figure the card exists to show.
               */}

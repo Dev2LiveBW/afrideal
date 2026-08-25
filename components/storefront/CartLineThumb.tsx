@@ -8,7 +8,7 @@ import type { CartLine } from '@/types';
  *
  * `image_url` is copied onto the line when it is added, so this needs no lookup
  * and works in a client component reading persisted state. A line saved before
- * that field existed — or one for a product with no photography — has nothing
+ * that field existed - or one for a product with no photography - has nothing
  * to show, and falls back to the category glyph on a sunk tile, which is the
  * same fallback the product grid uses.
  */

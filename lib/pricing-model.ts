@@ -1,5 +1,5 @@
 /**
- * The AfriDeal price ladder — one rule, applied to every product.
+ * The AfriDeal price ladder - one rule, applied to every product.
  *
  * AfriDeal buys from a verified supplier and resells to the customer. The
  * customer-facing price is therefore the supplier's cost plus a published
@@ -22,8 +22,8 @@
  * at checkout against the real address rather than smeared across every unit,
  * so a customer collecting from Gaborone is not paying for a Francistown run.
  *
- * The ladder does not vary by account type. Everyone — a first-time visitor, a
- * salon owner, a school procurement officer — is shown the same published
+ * The ladder does not vary by account type. Everyone - a first-time visitor, a
+ * salon owner, a school procurement officer - is shown the same published
  * figures for the same quantity. A price the buyer has to apply for is not a
  * price advantage they can act on, and the whole argument of the catalogue is
  * that the buyer can see the comparison before committing.
@@ -74,7 +74,7 @@ export function requiresQuotation(quantity: number): boolean {
   return quantity >= QUOTATION_THRESHOLD;
 }
 
-/** `1–4`, `5–99`, `100+` — the range as the buyer reads it. */
+/** `1–4`, `5–99`, `100+` - the range as the buyer reads it. */
 export function rungRange(rung: LadderRung): string {
   return `${rung.minimum_quantity}–${rung.maximum_quantity}`;
 }

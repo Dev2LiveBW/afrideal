@@ -70,7 +70,7 @@ export function ProductsBoard({
           {filtered.map((product) => (
             <Link
               key={product.id}
-              href={`/admin/products/${product.id}`}
+              href={`/admin/unsplash/assets/${product.id}`}
               className="group flex flex-col overflow-hidden rounded-md border border-hairline bg-surface-raised shadow-card transition-shadow duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] hover:shadow-lift"
             >
               <div className="relative aspect-[4/3] overflow-hidden">

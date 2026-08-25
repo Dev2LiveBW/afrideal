@@ -25,7 +25,7 @@ export function JobCard({ job }: { job: DecoratedShipment }) {
       return;
     }
 
-    toast.success(`Job accepted — head to ${job.pickup_name}`);
+    toast.success(`Job accepted - head to ${job.pickup_name}`);
     router.refresh();
   }
 

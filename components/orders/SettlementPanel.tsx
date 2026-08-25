@@ -30,7 +30,7 @@ const COPY: Record<
   SETTLED: {
     title: 'Settle this supplier invoice?',
     body: (amount, supplier) =>
-      `BWP ${amount} will be paid to ${supplier}. The payment is issued immediately and cannot be reversed from here — a payment made in error has to be recovered separately.`,
+      `BWP ${amount} will be paid to ${supplier}. The payment is issued immediately and cannot be reversed from here - a payment made in error has to be recovered separately.`,
     label: 'Settle invoice',
   },
   CANCELLED: {

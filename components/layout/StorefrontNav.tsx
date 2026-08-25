@@ -17,7 +17,7 @@ import { cn } from '@/lib/utils';
 /*
  * Two category shortcuts at most, and they go to what the platform sells. This
  * used to point at Building Materials and Agriculture, which between them are
- * four listings — the header was advertising the tail of the catalogue.
+ * four listings - the header was advertising the tail of the catalogue.
  */
 const LINKS = [
   { href: '/browse', label: 'Browse' },
@@ -27,7 +27,7 @@ const LINKS = [
 ];
 
 /**
- * Storefront navigation — a floating pill that detaches from the top and gains
+ * Storefront navigation - a floating pill that detaches from the top and gains
  * a glass ground once the page scrolls under it.
  */
 export function StorefrontNav({ categories = [] }: { categories?: Category[] }) {
@@ -58,9 +58,9 @@ export function StorefrontNav({ categories = [] }: { categories?: Category[] }) 
 
   /*
    * The nav used to switch to white type at the top of the landing page, on the
-   * assumption that the hero sat on a dark ground. It does not — the hero is on
+   * assumption that the hero sat on a dark ground. It does not - the hero is on
    * the warm page surface and the only dark object is the price ladder beside
-   * it — so every control in the header was white on #f5f5f5 until the first
+   * it - so every control in the header was white on #f5f5f5 until the first
    * scroll. Ink throughout: the pill still fades its own background in, which
    * is what the effect was actually for.
    */

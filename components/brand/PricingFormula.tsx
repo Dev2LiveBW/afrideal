@@ -7,8 +7,8 @@ import type { PriceResult } from '@/types';
 /**
  * The pricing formula, drawn.
  *
- * Suppliers and operators both ask the same question — "where did that price
- * come from" — so the answer is laid out as the sum it actually is rather than
+ * Suppliers and operators both ask the same question - "where did that price
+ * come from" - so the answer is laid out as the sum it actually is rather than
  * hidden behind a single figure.
  */
 

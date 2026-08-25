@@ -34,7 +34,7 @@ import type {
  * The JSON store.
  *
  * Every collection is one file under /data. Reads are uncached so a write from
- * one request is visible to the next — which is the whole point of a demo you
+ * one request is visible to the next - which is the whole point of a demo you
  * can drive live in front of a room.
  *
  * Writes go through a per-file promise chain. Node is single-threaded, but an

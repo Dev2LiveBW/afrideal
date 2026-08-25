@@ -12,7 +12,7 @@ const PatchSchema = z.object({
   note: z.string().max(400).optional(),
 });
 
-/** PATCH /api/payables/:id — move one supplier invoice through the state machine. */
+/** PATCH /api/payables/:id - move one supplier invoice through the state machine. */
 export const PATCH = handled(async (request: Request, { params }: { params: { id: string } }) => {
   const { actor, response } = await guard([
     'SUPER_ADMIN',

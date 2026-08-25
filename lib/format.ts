@@ -1,7 +1,7 @@
 /**
  * Money and date formatting.
  *
- * DESIGN.md is explicit: currency renders as `BWP 12,450.00` — code first,
+ * DESIGN.md is explicit: currency renders as `BWP 12,450.00` - code first,
  * space, tabular figures, two decimals always, even on round numbers. Pair
  * every one of these with `font-mono tabular-nums` so columns align.
  */
@@ -20,12 +20,12 @@ export function formatBWP(amount: number): string {
   return bwp(amount);
 }
 
-/** `12,450.00` — when the BWP code is already in the label above. */
+/** `12,450.00` - when the BWP code is already in the label above. */
 export function bwpBare(amount: number): string {
   return pula.format(amount);
 }
 
-/** `BWP 12.4k` — for chart axes and dense stat strips only. */
+/** `BWP 12.4k` - for chart axes and dense stat strips only. */
 export function bwpCompact(amount: number): string {
   if (Math.abs(amount) >= 1_000_000) return `BWP ${(amount / 1_000_000).toFixed(1)}m`;
   if (Math.abs(amount) >= 1_000) return `BWP ${(amount / 1_000).toFixed(1)}k`;

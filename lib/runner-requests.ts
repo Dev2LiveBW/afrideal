@@ -40,7 +40,7 @@ export class RequestTransitionError extends Error {
   ) {
     super(
       `Cannot move a sourcing request from ${from} to ${to}. Allowed from ${from}: ${
-        REQUEST_TRANSITIONS[from]?.join(', ') || 'nothing — this is a final state'
+        REQUEST_TRANSITIONS[from]?.join(', ') || 'nothing - this is a final state'
       }.`,
     );
     this.name = 'RequestTransitionError';

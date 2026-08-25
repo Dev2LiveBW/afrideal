@@ -6,7 +6,7 @@ import type { Role } from '@/types';
 /**
  * Route protection per role.
  *
- * Runs on the Edge runtime, so it reads the JWT only — no filesystem, no
+ * Runs on the Edge runtime, so it reads the JWT only - no filesystem, no
  * database. The claims it needs (`role`) are stamped onto the token by the jwt
  * callback in lib/auth.ts.
  *
@@ -110,6 +110,6 @@ export const config = {
      *    themselves through `guard()` in lib/api.ts and answer with a JSON 401
      *    or 403 that a client can actually read.
      */
-    '/((?!api|_next/static|_next/image|favicon.ico|.*\\.svg$|.*\\.png$).*)',
+    '/((?!api|_next/static|_next/image|favicon.ico|.*\\.svg$|.*\\.png$|.*\\.jpe?g$|.*\\.webp$|.*\\.gif$|.*\\.ico$).*)',
   ],
 };

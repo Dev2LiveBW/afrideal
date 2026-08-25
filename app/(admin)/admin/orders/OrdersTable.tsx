@@ -57,7 +57,7 @@ export function OrdersTable({ rows }: { rows: OrderRow[] }) {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           ids: pending.pendingPayablesIds,
-          status: 'RELEASED',
+          status: 'SETTLED',
           note: `Released from the orders queue for ${pending.order.reference}.`,
         }),
       });
@@ -70,7 +70,7 @@ export function OrdersTable({ rows }: { rows: OrderRow[] }) {
       if (skipped.length === 0) {
         toast.success(`Settled ${moved.length} supplier invoice${moved.length === 1 ? '' : 's'} for ${pending.order.reference}`);
       } else if (moved.length === 0) {
-        toast.error(`Nothing released — ${skipped.length} leg${skipped.length === 1 ? '' : 's'} could not move.`);
+        toast.error(`Nothing released - ${skipped.length} leg${skipped.length === 1 ? '' : 's'} could not move.`);
       } else {
         toast(`Released ${moved.length} of ${moved.length + skipped.length} legs for ${pending.order.reference}. ${skipped.length} could not move.`, { icon: '⚠️' });
       }
@@ -144,7 +144,7 @@ export function OrdersTable({ rows }: { rows: OrderRow[] }) {
                           <span
                             key={leg.id}
                             className="whitespace-nowrap rounded-full bg-ink/[0.05] px-2 py-0.5 text-[10.5px] font-medium text-body"
-                            title={`${leg.supplierName} — ${humanise(leg.status)}`}
+                            title={`${leg.supplierName} - ${humanise(leg.status)}`}
                           >
                             {leg.supplierName} · {humanise(leg.status)}
                           </span>
@@ -165,7 +165,7 @@ export function OrdersTable({ rows }: { rows: OrderRow[] }) {
                           Release
                         </GoldButton>
                       ) : (
-                        <span className="text-[11.5px] text-muted">—</span>
+                        <span className="text-[11.5px] text-muted">-</span>
                       )}
                     </td>
                   </tr>

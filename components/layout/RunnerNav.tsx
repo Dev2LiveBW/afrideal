@@ -10,7 +10,7 @@ import { AfriDealLogo } from '@/components/brand/AfriDealLogo';
 import { cn } from '@/lib/utils';
 
 /**
- * Runner navigation — mobile-first.
+ * Runner navigation - mobile-first.
  *
  * A runner uses this one-handed, in a vehicle, in daylight. So: a fixed bottom
  * bar with large tap targets rather than a sidebar, and nothing that requires

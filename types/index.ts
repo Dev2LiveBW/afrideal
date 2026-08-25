@@ -32,11 +32,11 @@ export interface User {
   status: UserStatus;
   supplier_id?: string;
   runner_id?: string;
-  /** §7 — set on buyers. Decides which pricing tiers they can be quoted. */
+  /** §7 - set on buyers. Decides which pricing tiers they can be quoted. */
   customer_type?: CustomerType;
 }
 
-/** Safe shape — never leaves the server with the password attached. */
+/** Safe shape - never leaves the server with the password attached. */
 export type PublicUser = Omit<User, 'password'>;
 
 // ── Catalogue ────────────────────────────────────────────────────────────────
@@ -127,9 +127,9 @@ export interface Supplier {
   orders_count: number;
   verification_docs: VerificationDoc[];
   categories: string[];
-  /** §11 — manufacturer, wholesaler, distributor and so on. */
+  /** §11 - manufacturer, wholesaler, distributor and so on. */
   supplier_type?: SupplierType;
-  /** §6 — whether AfriDeal or the supplier sets the customer-facing price. */
+  /** §6 - whether AfriDeal or the supplier sets the customer-facing price. */
   commercial_model?: CommercialModel;
 }
 
@@ -227,7 +227,7 @@ export interface SupplierOrder {
   supplier_subtotal: number;
   /** The platform cut on this leg. */
   platform_margin: number;
-  /** Why the engine picked this supplier — surfaced in the admin UI. */
+  /** Why the engine picked this supplier - surfaced in the admin UI. */
   selection_reason: string;
   auto_selected: boolean;
   created_at: string;

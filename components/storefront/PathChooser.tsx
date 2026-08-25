@@ -14,7 +14,7 @@ import type { ProductImage } from '@/types';
  * runner who goes looking when the catalogue does not carry it.
  *
  * Stated as two doors rather than one primary button with a link under it,
- * because they are not a call to action and its afterthought — they are two
+ * because they are not a call to action and its afterthought - they are two
  * genuinely different transactions. One has a price on the screen; the other
  * has a price you are shown before anything is bought. Ranking them would tell
  * a visitor who already knows which one they want that they picked wrong.

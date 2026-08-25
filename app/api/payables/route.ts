@@ -7,7 +7,7 @@ import { EVENTS, audit } from '@/lib/notifications';
 
 export const dynamic = 'force-dynamic';
 
-/** GET /api/payables — the creditors queue, plus its summary strip. */
+/** GET /api/payables - the creditors queue, plus its summary strip. */
 export const GET = handled(async (request: Request) => {
   const { actor, response } = await guard(['SUPER_ADMIN', 'OPERATIONS_ADMIN', 'FINANCE_ADMIN']);
   if (response) return response;
@@ -26,7 +26,7 @@ const BatchSchema = z.object({
 });
 
 /**
- * POST /api/payables — settle or cancel a batch of supplier invoices.
+ * POST /api/payables - settle or cancel a batch of supplier invoices.
  *
  * Partial success is reported rather than hidden: invoices that could not move
  * come back with their reason, so the operator knows exactly what did and did

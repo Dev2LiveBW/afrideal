@@ -6,7 +6,7 @@
     "customer_name": "Kefilwe Dithebe",
     "customer_type": "BUSINESS",
     "product_id": "p012",
-    "product_name": "School Uniform Set — Primary",
+    "product_name": "School Uniform Set - Primary",
     "variant_id": null,
     "requested_quantity": 240,
     "target_price": 300,
@@ -24,7 +24,7 @@
     "customer_name": "Kefilwe Dithebe",
     "customer_type": "BUSINESS",
     "product_id": "p006",
-    "product_name": "Portland Cement 42.5N — 50kg",
+    "product_name": "Portland Cement 42.5N - 50kg",
     "variant_id": null,
     "requested_quantity": 800,
     "target_price": null,
@@ -88,5 +88,23 @@
     "status": "QUOTED",
     "created_at": "2026-08-21T05:24:25.233Z",
     "updated_at": "2026-08-21T05:24:28.962Z"
+  },
+  {
+    "id": "rfq006",
+    "reference": "RFQ-2605",
+    "customer_id": "u007",
+    "customer_name": "Kefilwe Dithebe",
+    "customer_type": "BUSINESS",
+    "product_id": "p001",
+    "product_name": "Shea Butter Deep Treatment 500ml",
+    "variant_id": null,
+    "requested_quantity": 400,
+    "target_price": 120,
+    "delivery_location": "Gaborone",
+    "required_delivery_date": null,
+    "notes": "Verification probe.",
+    "status": "QUOTED",
+    "created_at": "2026-08-21T07:48:35.067Z",
+    "updated_at": "2026-08-21T07:48:38.780Z"
   }
 ]

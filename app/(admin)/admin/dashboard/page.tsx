@@ -201,7 +201,7 @@ export default async function AdminDashboardPage() {
         <div className="grid grid-cols-1 gap-5 lg:grid-cols-3">
           <Panel className="lg:col-span-2">
             <PanelHeader
-              title="GMV trend — last 30 days"
+              title="GMV trend - last 30 days"
               description="Daily platform GMV. Cancelled orders excluded."
               action={
                 <div className="text-right">

@@ -115,7 +115,7 @@ export function SupplierDetailTabs({
                       <tr key={offer.id}>
                         <td>
                           <Link
-                            href={`/admin/products/${offer.product_id}`}
+                            href={`/admin/unsplash/assets/${offer.product_id}`}
                             className="font-medium text-ink transition-colors hover:text-gold-dark"
                           >
                             {product?.emoji} {product?.name ?? offer.product_id}
@@ -186,7 +186,7 @@ export function SupplierDetailTabs({
                             <MoneyText amount={settlement.net} size="sm" tone="forest" />
                           </td>
                           <td className="text-[12px] text-muted">
-                            {settlement.paid_at ? shortDate(settlement.paid_at) : '—'}
+                            {settlement.paid_at ? shortDate(settlement.paid_at) : '-'}
                           </td>
                           <td className="text-right">
                             <StatusBadge status={settlement.status} size="sm" />

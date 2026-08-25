@@ -21,7 +21,7 @@ import type { Category, Product, ProductImage, SupplierOffer } from '@/types';
  * Product grid + "Add product" flow.
  *
  * There is no create-product endpoint in this MVP, so submitting the form
- * never writes anywhere — it simulates the real queue-for-review behaviour
+ * never writes anywhere - it simulates the real queue-for-review behaviour
  * with a delay and an honest toast, and says so again in the dialog body.
  */
 
@@ -76,7 +76,7 @@ export function ProductsClient({ rows, categories }: { rows: Row[]; categories: 
     setSubmitting(true);
     const values = form.getValues();
 
-    // No create-product endpoint exists yet — simulate the review queue.
+    // No create-product endpoint exists yet - simulate the review queue.
     await new Promise((resolve) => setTimeout(resolve, 850));
 
     toast.success(`"${values.name}" submitted for admin review`, {
@@ -181,7 +181,7 @@ export function ProductsClient({ rows, categories }: { rows: Row[]; categories: 
         onConfirm={handleConfirm}
         loading={submitting}
         title="Add a new product"
-        description="New listings are queued for admin review before they go live — this is a preview build, so nothing is created yet."
+        description="New listings are queued for admin review before they go live - this is a preview build, so nothing is created yet."
         confirmLabel="Submit for review"
         tone="gold"
       >
@@ -313,7 +313,7 @@ export function ProductsClient({ rows, categories }: { rows: Row[]; categories: 
 
           <p className="flex items-start gap-1.5 rounded border border-hairline bg-gold-50/60 px-3 py-2 text-[11.5px] leading-4 text-gold-700">
             <PackagePlus size={13} strokeWidth={1.5} className="mt-0.5 shrink-0" />
-            Listing creation is queued for admin review in this preview — nothing goes live automatically.
+            Listing creation is queued for admin review in this preview - nothing goes live automatically.
           </p>
         </form>
       </ConfirmDialog>

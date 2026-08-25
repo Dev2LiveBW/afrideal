@@ -7,6 +7,7 @@ import { Zap } from 'lucide-react';
 import { GoldButton } from '@/components/brand/GoldButton';
 import { MoneyText } from '@/components/brand/MoneyText';
 import { Swatch } from '@/components/storefront/Swatch';
+import { categoryPalette } from '@/lib/category-palette';
 import type { Product, ProductImage } from '@/types';
 
 /**
@@ -111,11 +112,14 @@ export function FlashDealsRail({
           const sold = product.promotion?.stock_sold ?? 0;
           const soldPct = allocated === 0 ? 0 : Math.min(100, (sold / allocated) * 100);
 
+          const palette = categoryPalette(product.category_id);
+
           return (
             <Link
               key={product.id}
-              href={`/products/${product.id}`}
-              className="group w-[220px] shrink-0 overflow-hidden rounded-md border border-hairline bg-surface-raised shadow-card transition-shadow duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] hover:shadow-lift"
+              href={`/unsplash/assets/${product.id}`}
+              style={{ backgroundColor: palette.wash, borderColor: palette.edge }}
+              className="group w-[220px] shrink-0 overflow-hidden rounded-md border shadow-card transition-shadow duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] hover:shadow-lift"
             >
               <div className="relative">
                 <Swatch

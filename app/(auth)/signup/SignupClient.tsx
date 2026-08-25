@@ -23,7 +23,7 @@ import { cn } from '@/lib/utils';
  * only in the browser is a suggestion, not a constraint.
  *
  * Only buyer accounts are created here. Suppliers and runners are verified
- * before they can trade, so those stay a conversation rather than a form — the
+ * before they can trade, so those stay a conversation rather than a form - the
  * panel on the left says so and links accordingly.
  */
 

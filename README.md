@@ -45,9 +45,9 @@ Eight seeded accounts. The login page has a one-click card for each of them, so 
 | thabo@gmail.com | `Customer@2026` | Customer | `/` |
 | kefilwe@gmail.com | `Customer@2026` | Customer | `/` |
 
-Buyers can also open their own account at `/signup`. Registration is deliberately narrow: it creates a `CUSTOMER` on the `RETAIL` tier and nothing else. Supplier and runner accounts carry consequences a form should not be able to grant — a supplier can be routed real orders, a runner can mark a delivery complete — so those stay behind admin creation and verification. The duplicate-email check and the insert share one `mutate` pass, so two simultaneous signups cannot both find an address free.
+Buyers can also open their own account at `/signup`. Registration is deliberately narrow: it creates a `CUSTOMER` on the `RETAIL` tier and nothing else. Supplier and runner accounts carry consequences a form should not be able to grant - a supplier can be routed real orders, a runner can mark a delivery complete - so those stay behind admin creation and verification. The duplicate-email check and the insert share one `mutate` pass, so two simultaneous signups cannot both find an address free.
 
-Passwords sit in plain text in `data/users.json`. That is deliberate for a demo whose main feature is switching roles in one click, and it is the first thing to change before this touches a real user. Hash on write, compare with a constant-time check in `lib/auth.ts` — and in `app/api/auth/register/route.ts`, which writes them. The two changes are the same edit and belong together.
+Passwords sit in plain text in `data/users.json`. That is deliberate for a demo whose main feature is switching roles in one click, and it is the first thing to change before this touches a real user. Hash on write, compare with a constant-time check in `lib/auth.ts` - and in `app/api/auth/register/route.ts`, which writes them. The two changes are the same edit and belong together.
 
 ## What each role can reach
 
@@ -129,7 +129,7 @@ margin 30% on a BWP 250 cost  →  BWP 357.14
 
 ## Pricing is tiered, not universal
 
-A product does not have one price. It has a ladder of bands in `data/customer-prices.json`, resolved by how many units are being taken, and one resolution path runs on every surface — landing, browse, product, cart and checkout — so no two can disagree about the same quantity.
+A product does not have one price. It has a ladder of bands in `data/customer-prices.json`, resolved by how many units are being taken, and one resolution path runs on every surface - landing, browse, product, cart and checkout - so no two can disagree about the same quantity.
 
 This is also the storefront's argument, not just an implementation detail. The landing page opens on one real product at its real rungs, and `/browse?tier=BULK` reprices the whole catalogue at that rung.
 
@@ -141,7 +141,7 @@ HD Lace Frontal 13×4, against a supplier cost of BWP 715:
 | 5–99 | Bulk | BWP 1,030.00 |
 | 100+ | By quotation | RFQ |
 
-**The ladder is not gated by account type.** Everyone — a first-time visitor with no account, a salon owner, a school procurement officer — is shown and charged the same published figure for the same quantity. An earlier version fanned the ladder out into eleven bands across five customer types, with wholesale rungs a shopper could see but not buy at, and that made the catalogue read as a price list you had to qualify for. A price a buyer has to apply for is not a price advantage they can act on, which is the one thing the storefront is there to claim.
+**The ladder is not gated by account type.** Everyone - a first-time visitor with no account, a salon owner, a school procurement officer - is shown and charged the same published figure for the same quantity. An earlier version fanned the ladder out into eleven bands across five customer types, with wholesale rungs a shopper could see but not buy at, and that made the catalogue read as a price list you had to qualify for. A price a buyer has to apply for is not a price advantage they can act on, which is the one thing the storefront is there to claim.
 
 Customer type is still a property of the account (`RETAIL`, `BUSINESS`, `RESELLER`, `INSTITUTIONAL`, `GUEST`) and is still resolved from the session on the server, never from client state. What it governs now is the quotation path above the ladder, where a business or institutional buyer is answered by a person rather than by a price list.
 
@@ -180,7 +180,7 @@ This is deliberately not an `Rfq`. An RFQ prices a catalogue product at a volume
 
 ### Supplier payables (`lib/payables.ts`)
 
-AfriDeal is the merchant of record. The customer buys from AfriDeal and pays AfriDeal through a licensed payment provider; AfriDeal buys the goods from the supplier and owes that supplier an invoice. This ledger tracks those invoices — it is accounts payable, not money held on anyone else's behalf, which is the distinction that keeps the platform out of scope for a Bank of Botswana escrow licence.
+AfriDeal is the merchant of record. The customer buys from AfriDeal and pays AfriDeal through a licensed payment provider; AfriDeal buys the goods from the supplier and owes that supplier an invoice. This ledger tracks those invoices - it is accounts payable, not money held on anyone else's behalf, which is the distinction that keeps the platform out of scope for a Bank of Botswana escrow licence.
 
 ```
 PENDING ──▶ SETTLED     supplier invoice paid
@@ -264,9 +264,9 @@ Route groups in parentheses do not appear in URLs. They exist to give each porta
 
 ## Design
 
-`DESIGN.md` at the repo root governs typography, money formatting, and the split between the two modes, and `PRODUCT.md` records the product truth beneath it — who buys here, what may be claimed, and what the pricing model actually guarantees. Both sit at the root; earlier drafts referenced them one directory up.
+`DESIGN.md` at the repo root governs typography, money formatting, and the split between the two modes, and `PRODUCT.md` records the product truth beneath it - who buys here, what may be claimed, and what the pricing model actually guarantees. Both sit at the root; earlier drafts referenced them one directory up.
 
-The storefront was rebuilt around the price ladder. The client's direction was that buyers should understand their comparison advantage; the mockups expressed that as comparing suppliers on price, which this platform cannot honestly show — supplier quotes are confidential under §5/§23, enforced by the `PublicOffer` type and by three checks in `npm run verify`. The ladder was the comparison that was real and unused, so the landing page now opens on one product at three published prices and the rungs are the way into the catalogue.
+The storefront was rebuilt around the price ladder. The client's direction was that buyers should understand their comparison advantage; the mockups expressed that as comparing suppliers on price, which this platform cannot honestly show - supplier quotes are confidential under §5/§23, enforced by the `PublicOffer` type and by three checks in `npm run verify`. The ladder was the comparison that was real and unused, so the landing page now opens on one product at three published prices and the rungs are the way into the catalogue.
 
 What survives from the Stitch mockups in `../stitch_africart_customer_portal_mvp/` is the catalogue furniture: category tiles, a live-deals rail, a new-arrivals carousel, and on the product page a breadcrumb, thumbnail rail, delivery-estimate card, seller card, Description/Specifications/Reviews tabs and frequently-bought-together. Order tracking takes its account sidebar, icon stepper and runner contact card from the same set. The supplier-discovery rail and the standalone tier explainer were dropped: the ladder says what the explainer said, with real figures.
 
@@ -288,7 +288,7 @@ Every one was looked at before it shipped, which is the part that matters. The f
 - **the hair photography is stock, and should not ship.** These are the flagship SKUs and the pictures are of somebody else's hair. They are placeholders for the client's own product shots, not a substitute for them
 - the earbud query returned Apple AirPods twice, once with the logo reflected in the surface. Selling a generic earbud on a competitor's branded product is a trademark problem, not a taste one, so that query now excludes it
 
-Provenance for every file is in `public/products/CREDITS.json`. `npm run images -- --only p004` refetches a single product when one turns out wrong.
+Provenance for every file is in `public/unsplash/assets/CREDITS.json`. `npm run images -- --only p004` refetches a single product when one turns out wrong.
 
 Images render through `components/storefront/Swatch.tsx`, which falls back to the gradient stand-in for any product without a photo. A partial fetch degrades instead of leaving holes.
 
@@ -304,7 +304,7 @@ Console pages get opacity only, at 160ms, and no entrances at all. An operator m
 
 Everything animates on `transform` and `opacity` so it stays on the compositor. `prefers-reduced-motion` collapses the durations in `globals.css`, and the continuous drift checks it directly and stops.
 
-What it must not do is change the markup. `Float` used to return a bare `<div>` under reduced motion where the animated branch rendered two nested ones, and because the server cannot know the preference it always sent the pair — so every visitor with reduced motion turned on hydrated against the wrong shape and React threw the page away and re-rendered it on the client. The element tree is now identical in both branches and only the durations differ.
+What it must not do is change the markup. `Float` used to return a bare `<div>` under reduced motion where the animated branch rendered two nested ones, and because the server cannot know the preference it always sent the pair - so every visitor with reduced motion turned on hydrated against the wrong shape and React threw the page away and re-rendered it on the client. The element tree is now identical in both branches and only the durations differ.
 
 The palette follows the build brief: black metallic ground, Amber Gold as the primary action colour, Forest Green demoted to verified and released states. Amber means one thing, money in motion but not yet settled, and it is never used for decoration.
 

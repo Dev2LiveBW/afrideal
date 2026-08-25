@@ -41,7 +41,7 @@ export function applyMargin(supplierCost: number, type: MarginType, value: numbe
       return supplierCost * (1 + value / 100);
 
     case 'PERCENTAGE_MARGIN': {
-      // A 100% margin is undefined — the divisor collapses to zero.
+      // A 100% margin is undefined - the divisor collapses to zero.
       if (value >= 100) return supplierCost * 2;
       return supplierCost / (1 - value / 100);
     }
@@ -151,7 +151,7 @@ export function priceLadder(
  * Falls back to the retail ladder when a buyer type has no bands of its own, so
  * a business account never sees an empty price. When the quantity runs past the
  * top published band, `requires_rfq` is set rather than silently quoting the
- * top rung — that is the "100 units and up, ask for a quotation" behaviour.
+ * top rung - that is the "100 units and up, ask for a quotation" behaviour.
  */
 export function resolvePrice(
   bands: CustomerPrice[],

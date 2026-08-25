@@ -8,7 +8,7 @@ import { humanise } from '@/lib/format';
  *
  * Colour carries meaning here, never emphasis. Amber means money owed but not
  * yet settled. Green means settled or verified. A cancelled invoice is slate
- * rather than red — writing one off is a clean outcome, not a failure.
+ * rather than red - writing one off is a clean outcome, not a failure.
  * Suspended and cancelled orders are inert grey and carry no colour weight.
  */
 

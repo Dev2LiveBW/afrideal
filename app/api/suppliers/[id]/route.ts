@@ -20,7 +20,7 @@ const PatchSchema = z.object({
     .optional(),
 });
 
-/** PATCH /api/suppliers/:id — approve, reject, suspend, or rule on one document. */
+/** PATCH /api/suppliers/:id - approve, reject, suspend, or rule on one document. */
 export const PATCH = handled(async (request: Request, { params }: { params: { id: string } }) => {
   const { actor, response } = await guard(['SUPER_ADMIN', 'OPERATIONS_ADMIN']);
   if (response) return response;

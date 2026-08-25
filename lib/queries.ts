@@ -61,7 +61,7 @@ export interface ProductDetail {
   product: Product;
   categoryName: string;
   selection: SelectionResult;
-  /** Every offer including unverified suppliers — admin view only. */
+  /** Every offer including unverified suppliers - admin view only. */
   allSelection: SelectionResult;
 }
 
@@ -204,7 +204,7 @@ export async function getSupplierWorkspace(supplierId: string) {
   };
 }
 
-/** Runner workspace — their jobs, and the open pool they can accept from. */
+/** Runner workspace - their jobs, and the open pool they can accept from. */
 export async function getRunnerWorkspace(runnerId: string) {
   const [runners, shipments, orders, suppliers] = await Promise.all([
     readAll('runners'),
