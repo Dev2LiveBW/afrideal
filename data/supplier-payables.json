@@ -7,22 +7,22 @@
     "amount": 650,
     "status": "SETTLED",
     "gateway": "DPO_PAY",
-    "raised_at": "2026-07-24T07:39:00.000Z",
-    "settled_at": "2026-07-28T13:31:00.000Z",
+    "raised_at": "2026-07-29T07:39:00.000Z",
+    "settled_at": "2026-08-02T13:31:00.000Z",
     "cancelled_at": null,
     "terms_days": 7,
     "history": [
       {
         "from": null,
         "to": "PENDING",
-        "at": "2026-07-24T07:39:00.000Z",
+        "at": "2026-07-29T07:39:00.000Z",
         "actor": "System",
         "note": "Procurement invoice raised against the order."
       },
       {
         "from": "PENDING",
         "to": "SETTLED",
-        "at": "2026-07-28T13:31:00.000Z",
+        "at": "2026-08-02T13:31:00.000Z",
         "actor": "Keabetswe Molapo",
         "note": "Delivery confirmed. Supplier invoice settled."
       }
@@ -36,22 +36,22 @@
     "amount": 138,
     "status": "SETTLED",
     "gateway": "ORANGE_MONEY",
-    "raised_at": "2026-07-27T08:48:00.000Z",
-    "settled_at": "2026-07-31T13:40:00.000Z",
+    "raised_at": "2026-08-01T08:48:00.000Z",
+    "settled_at": "2026-08-05T13:40:00.000Z",
     "cancelled_at": null,
     "terms_days": 7,
     "history": [
       {
         "from": null,
         "to": "PENDING",
-        "at": "2026-07-27T08:48:00.000Z",
+        "at": "2026-08-01T08:48:00.000Z",
         "actor": "System",
         "note": "Procurement invoice raised against the order."
       },
       {
         "from": "PENDING",
         "to": "SETTLED",
-        "at": "2026-07-31T13:40:00.000Z",
+        "at": "2026-08-05T13:40:00.000Z",
         "actor": "Keabetswe Molapo",
         "note": "Delivery confirmed. Supplier invoice settled."
       }
@@ -65,22 +65,22 @@
     "amount": 1523,
     "status": "SETTLED",
     "gateway": "PAYGATE",
-    "raised_at": "2026-08-01T09:23:00.000Z",
-    "settled_at": "2026-08-05T13:15:00.000Z",
+    "raised_at": "2026-08-06T09:23:00.000Z",
+    "settled_at": "2026-08-10T13:15:00.000Z",
     "cancelled_at": null,
     "terms_days": 7,
     "history": [
       {
         "from": null,
         "to": "PENDING",
-        "at": "2026-08-01T09:23:00.000Z",
+        "at": "2026-08-06T09:23:00.000Z",
         "actor": "System",
         "note": "Procurement invoice raised against the order."
       },
       {
         "from": "PENDING",
         "to": "SETTLED",
-        "at": "2026-08-05T13:15:00.000Z",
+        "at": "2026-08-10T13:15:00.000Z",
         "actor": "Keabetswe Molapo",
         "note": "Delivery confirmed. Supplier invoice settled."
       }
@@ -94,22 +94,22 @@
     "amount": 1200,
     "status": "SETTLED",
     "gateway": "DPO_PAY",
-    "raised_at": "2026-08-05T10:15:00.000Z",
-    "settled_at": "2026-08-09T13:07:00.000Z",
+    "raised_at": "2026-08-10T10:15:00.000Z",
+    "settled_at": "2026-08-14T13:07:00.000Z",
     "cancelled_at": null,
     "terms_days": 7,
     "history": [
       {
         "from": null,
         "to": "PENDING",
-        "at": "2026-08-05T10:15:00.000Z",
+        "at": "2026-08-10T10:15:00.000Z",
         "actor": "System",
         "note": "Procurement invoice raised against the order."
       },
       {
         "from": "PENDING",
         "to": "SETTLED",
-        "at": "2026-08-09T13:07:00.000Z",
+        "at": "2026-08-14T13:07:00.000Z",
         "actor": "Keabetswe Molapo",
         "note": "Delivery confirmed. Supplier invoice settled."
       }
@@ -123,7 +123,7 @@
     "amount": 465,
     "status": "PENDING",
     "gateway": "ORANGE_MONEY",
-    "raised_at": "2026-08-14T11:42:00.000Z",
+    "raised_at": "2026-08-19T11:42:00.000Z",
     "settled_at": null,
     "cancelled_at": null,
     "terms_days": 7,
@@ -131,7 +131,7 @@
       {
         "from": null,
         "to": "PENDING",
-        "at": "2026-08-14T11:42:00.000Z",
+        "at": "2026-08-19T11:42:00.000Z",
         "actor": "System",
         "note": "Procurement invoice raised against the order."
       }
@@ -145,7 +145,7 @@
     "amount": 4616,
     "status": "PENDING",
     "gateway": "DPO_PAY",
-    "raised_at": "2026-08-15T12:25:00.000Z",
+    "raised_at": "2026-08-20T12:25:00.000Z",
     "settled_at": null,
     "cancelled_at": null,
     "terms_days": 7,
@@ -153,7 +153,7 @@
       {
         "from": null,
         "to": "PENDING",
-        "at": "2026-08-15T12:25:00.000Z",
+        "at": "2026-08-20T12:25:00.000Z",
         "actor": "System",
         "note": "Procurement invoice raised against the order."
       }
@@ -167,7 +167,7 @@
     "amount": 1439,
     "status": "PENDING",
     "gateway": "PAYGATE",
-    "raised_at": "2026-08-16T13:08:00.000Z",
+    "raised_at": "2026-08-21T13:08:00.000Z",
     "settled_at": null,
     "cancelled_at": null,
     "terms_days": 7,
@@ -175,7 +175,7 @@
       {
         "from": null,
         "to": "PENDING",
-        "at": "2026-08-16T13:08:00.000Z",
+        "at": "2026-08-21T13:08:00.000Z",
         "actor": "System",
         "note": "Procurement invoice raised against the order."
       }
@@ -189,7 +189,7 @@
     "amount": 483,
     "status": "PENDING",
     "gateway": "DPO_PAY",
-    "raised_at": "2026-08-17T14:51:00.000Z",
+    "raised_at": "2026-08-22T14:51:00.000Z",
     "settled_at": null,
     "cancelled_at": null,
     "terms_days": 7,
@@ -197,7 +197,7 @@
       {
         "from": null,
         "to": "PENDING",
-        "at": "2026-08-17T14:51:00.000Z",
+        "at": "2026-08-22T14:51:00.000Z",
         "actor": "System",
         "note": "Procurement invoice raised against the order."
       }
@@ -211,7 +211,7 @@
     "amount": 1476,
     "status": "PENDING",
     "gateway": "ORANGE_MONEY",
-    "raised_at": "2026-08-18T07:34:00.000Z",
+    "raised_at": "2026-08-23T07:34:00.000Z",
     "settled_at": null,
     "cancelled_at": null,
     "terms_days": 7,
@@ -219,7 +219,7 @@
       {
         "from": null,
         "to": "PENDING",
-        "at": "2026-08-18T07:34:00.000Z",
+        "at": "2026-08-23T07:34:00.000Z",
         "actor": "System",
         "note": "Procurement invoice raised against the order."
       }
@@ -233,7 +233,7 @@
     "amount": 924,
     "status": "PENDING",
     "gateway": "PAYGATE",
-    "raised_at": "2026-08-18T08:34:00.000Z",
+    "raised_at": "2026-08-23T08:34:00.000Z",
     "settled_at": null,
     "cancelled_at": null,
     "terms_days": 7,
@@ -241,7 +241,7 @@
       {
         "from": null,
         "to": "PENDING",
-        "at": "2026-08-18T08:34:00.000Z",
+        "at": "2026-08-23T08:34:00.000Z",
         "actor": "System",
         "note": "Procurement invoice raised against the order."
       }
@@ -255,7 +255,7 @@
     "amount": 879,
     "status": "PENDING",
     "gateway": "DPO_PAY",
-    "raised_at": "2026-08-19T09:17:00.000Z",
+    "raised_at": "2026-08-24T09:17:00.000Z",
     "settled_at": null,
     "cancelled_at": null,
     "terms_days": 7,
@@ -263,7 +263,7 @@
       {
         "from": null,
         "to": "PENDING",
-        "at": "2026-08-19T09:17:00.000Z",
+        "at": "2026-08-24T09:17:00.000Z",
         "actor": "System",
         "note": "Procurement invoice raised against the order."
       }
@@ -277,7 +277,7 @@
     "amount": 292,
     "status": "PENDING",
     "gateway": "ORANGE_MONEY",
-    "raised_at": "2026-08-20T10:00:00.000Z",
+    "raised_at": "2026-08-25T10:00:00.000Z",
     "settled_at": null,
     "cancelled_at": null,
     "terms_days": 7,
@@ -285,7 +285,7 @@
       {
         "from": null,
         "to": "PENDING",
-        "at": "2026-08-20T10:00:00.000Z",
+        "at": "2026-08-25T10:00:00.000Z",
         "actor": "System",
         "note": "Procurement invoice raised against the order."
       }
@@ -299,7 +299,7 @@
     "amount": 292,
     "status": "PENDING",
     "gateway": "ORANGE_MONEY",
-    "raised_at": "2026-08-20T10:00:00.000Z",
+    "raised_at": "2026-08-25T10:00:00.000Z",
     "settled_at": null,
     "cancelled_at": null,
     "terms_days": 7,
@@ -307,7 +307,7 @@
       {
         "from": null,
         "to": "PENDING",
-        "at": "2026-08-20T10:00:00.000Z",
+        "at": "2026-08-25T10:00:00.000Z",
         "actor": "System",
         "note": "Procurement invoice raised against the order."
       }
@@ -321,7 +321,7 @@
     "amount": 1758,
     "status": "ON_HOLD",
     "gateway": "PAYGATE",
-    "raised_at": "2026-08-08T11:24:00.000Z",
+    "raised_at": "2026-08-13T11:24:00.000Z",
     "settled_at": null,
     "cancelled_at": null,
     "terms_days": 7,
@@ -329,14 +329,14 @@
       {
         "from": null,
         "to": "PENDING",
-        "at": "2026-08-08T11:24:00.000Z",
+        "at": "2026-08-13T11:24:00.000Z",
         "actor": "System",
         "note": "Procurement invoice raised against the order."
       },
       {
         "from": "PENDING",
         "to": "ON_HOLD",
-        "at": "2026-08-11T09:33:00.000Z",
+        "at": "2026-08-16T09:33:00.000Z",
         "actor": "Thabo Modise",
         "note": "Customer raised a claim. Settlement paused pending review."
       }
@@ -350,7 +350,7 @@
     "amount": 2490,
     "status": "ON_HOLD",
     "gateway": "DPO_PAY",
-    "raised_at": "2026-08-11T12:33:00.000Z",
+    "raised_at": "2026-08-16T12:33:00.000Z",
     "settled_at": null,
     "cancelled_at": null,
     "terms_days": 7,
@@ -358,14 +358,14 @@
       {
         "from": null,
         "to": "PENDING",
-        "at": "2026-08-11T12:33:00.000Z",
+        "at": "2026-08-16T12:33:00.000Z",
         "actor": "System",
         "note": "Procurement invoice raised against the order."
       },
       {
         "from": "PENDING",
         "to": "ON_HOLD",
-        "at": "2026-08-14T09:42:00.000Z",
+        "at": "2026-08-19T09:42:00.000Z",
         "actor": "Kefilwe Dithebe",
         "note": "Customer raised a claim. Settlement paused pending review."
       }
@@ -379,442 +379,24 @@
     "amount": 644,
     "status": "CANCELLED",
     "gateway": "ORANGE_MONEY",
-    "raised_at": "2026-07-30T13:57:00.000Z",
+    "raised_at": "2026-08-04T13:57:00.000Z",
     "settled_at": null,
-    "cancelled_at": "2026-08-03T13:49:00.000Z",
+    "cancelled_at": "2026-08-08T13:49:00.000Z",
     "terms_days": 7,
     "history": [
       {
         "from": null,
         "to": "PENDING",
-        "at": "2026-07-30T13:57:00.000Z",
+        "at": "2026-08-04T13:57:00.000Z",
         "actor": "System",
         "note": "Procurement invoice raised against the order."
       },
       {
         "from": "PENDING",
         "to": "CANCELLED",
-        "at": "2026-08-03T13:49:00.000Z",
+        "at": "2026-08-08T13:49:00.000Z",
         "actor": "Keabetswe Molapo",
         "note": "Order cancelled before dispatch. Nothing owed."
-      }
-    ]
-  },
-  {
-    "id": "pay017",
-    "order_id": "o016",
-    "supplier_order_id": "sup017",
-    "supplier_id": "s001",
-    "amount": 292,
-    "status": "PENDING",
-    "gateway": "ORANGE_MONEY",
-    "raised_at": "2026-08-20T11:01:36.978Z",
-    "settled_at": null,
-    "cancelled_at": null,
-    "terms_days": 7,
-    "history": [
-      {
-        "from": null,
-        "to": "PENDING",
-        "at": "2026-08-20T11:01:36.978Z",
-        "actor": "System",
-        "note": "Procurement invoice raised against the order."
-      }
-    ]
-  },
-  {
-    "id": "pay018",
-    "order_id": "o016",
-    "supplier_order_id": "sup018",
-    "supplier_id": "s004",
-    "amount": 414,
-    "status": "PENDING",
-    "gateway": "ORANGE_MONEY",
-    "raised_at": "2026-08-20T11:01:36.978Z",
-    "settled_at": null,
-    "cancelled_at": null,
-    "terms_days": 7,
-    "history": [
-      {
-        "from": null,
-        "to": "PENDING",
-        "at": "2026-08-20T11:01:36.978Z",
-        "actor": "System",
-        "note": "Procurement invoice raised against the order."
-      }
-    ]
-  },
-  {
-    "id": "pay019",
-    "order_id": "o017",
-    "supplier_order_id": "sup019",
-    "supplier_id": "s001",
-    "amount": 146,
-    "status": "PENDING",
-    "gateway": "DPO_PAY",
-    "raised_at": "2026-08-20T11:01:40.468Z",
-    "settled_at": null,
-    "cancelled_at": null,
-    "terms_days": 7,
-    "history": [
-      {
-        "from": null,
-        "to": "PENDING",
-        "at": "2026-08-20T11:01:40.468Z",
-        "actor": "System",
-        "note": "Procurement invoice raised against the order."
-      }
-    ]
-  },
-  {
-    "id": "pay020",
-    "order_id": "o018",
-    "supplier_order_id": "sup020",
-    "supplier_id": "s001",
-    "amount": 660,
-    "status": "PENDING",
-    "gateway": "DPO_PAY",
-    "raised_at": "2026-08-20T11:01:40.667Z",
-    "settled_at": null,
-    "cancelled_at": null,
-    "terms_days": 7,
-    "history": [
-      {
-        "from": null,
-        "to": "PENDING",
-        "at": "2026-08-20T11:01:40.667Z",
-        "actor": "System",
-        "note": "Procurement invoice raised against the order."
-      }
-    ]
-  },
-  {
-    "id": "pay021",
-    "order_id": "o019",
-    "supplier_order_id": "sup021",
-    "supplier_id": "s001",
-    "amount": 2640,
-    "status": "PENDING",
-    "gateway": "DPO_PAY",
-    "raised_at": "2026-08-20T11:01:40.854Z",
-    "settled_at": null,
-    "cancelled_at": null,
-    "terms_days": 7,
-    "history": [
-      {
-        "from": null,
-        "to": "PENDING",
-        "at": "2026-08-20T11:01:40.854Z",
-        "actor": "System",
-        "note": "Procurement invoice raised against the order."
-      }
-    ]
-  },
-  {
-    "id": "pay022",
-    "order_id": "o020",
-    "supplier_order_id": "sup022",
-    "supplier_id": "s001",
-    "amount": 2640,
-    "status": "PENDING",
-    "gateway": "DPO_PAY",
-    "raised_at": "2026-08-20T11:01:41.048Z",
-    "settled_at": null,
-    "cancelled_at": null,
-    "terms_days": 7,
-    "history": [
-      {
-        "from": null,
-        "to": "PENDING",
-        "at": "2026-08-20T11:01:41.048Z",
-        "actor": "System",
-        "note": "Procurement invoice raised against the order."
-      }
-    ]
-  },
-  {
-    "id": "pay023",
-    "order_id": "o021",
-    "supplier_order_id": "sup023",
-    "supplier_id": "s001",
-    "amount": 292,
-    "status": "PENDING",
-    "gateway": "ORANGE_MONEY",
-    "raised_at": "2026-08-21T05:24:15.405Z",
-    "settled_at": null,
-    "cancelled_at": null,
-    "terms_days": 7,
-    "history": [
-      {
-        "from": null,
-        "to": "PENDING",
-        "at": "2026-08-21T05:24:15.405Z",
-        "actor": "System",
-        "note": "Procurement invoice raised against the order."
-      }
-    ]
-  },
-  {
-    "id": "pay024",
-    "order_id": "o021",
-    "supplier_order_id": "sup024",
-    "supplier_id": "s004",
-    "amount": 414,
-    "status": "PENDING",
-    "gateway": "ORANGE_MONEY",
-    "raised_at": "2026-08-21T05:24:15.405Z",
-    "settled_at": null,
-    "cancelled_at": null,
-    "terms_days": 7,
-    "history": [
-      {
-        "from": null,
-        "to": "PENDING",
-        "at": "2026-08-21T05:24:15.405Z",
-        "actor": "System",
-        "note": "Procurement invoice raised against the order."
-      }
-    ]
-  },
-  {
-    "id": "pay025",
-    "order_id": "o022",
-    "supplier_order_id": "sup025",
-    "supplier_id": "s001",
-    "amount": 146,
-    "status": "PENDING",
-    "gateway": "DPO_PAY",
-    "raised_at": "2026-08-21T05:24:19.429Z",
-    "settled_at": null,
-    "cancelled_at": null,
-    "terms_days": 7,
-    "history": [
-      {
-        "from": null,
-        "to": "PENDING",
-        "at": "2026-08-21T05:24:19.429Z",
-        "actor": "System",
-        "note": "Procurement invoice raised against the order."
-      }
-    ]
-  },
-  {
-    "id": "pay026",
-    "order_id": "o023",
-    "supplier_order_id": "sup026",
-    "supplier_id": "s001",
-    "amount": 660,
-    "status": "PENDING",
-    "gateway": "DPO_PAY",
-    "raised_at": "2026-08-21T05:24:19.613Z",
-    "settled_at": null,
-    "cancelled_at": null,
-    "terms_days": 7,
-    "history": [
-      {
-        "from": null,
-        "to": "PENDING",
-        "at": "2026-08-21T05:24:19.613Z",
-        "actor": "System",
-        "note": "Procurement invoice raised against the order."
-      }
-    ]
-  },
-  {
-    "id": "pay027",
-    "order_id": "o024",
-    "supplier_order_id": "sup027",
-    "supplier_id": "s001",
-    "amount": 2640,
-    "status": "PENDING",
-    "gateway": "DPO_PAY",
-    "raised_at": "2026-08-21T05:24:19.792Z",
-    "settled_at": null,
-    "cancelled_at": null,
-    "terms_days": 7,
-    "history": [
-      {
-        "from": null,
-        "to": "PENDING",
-        "at": "2026-08-21T05:24:19.792Z",
-        "actor": "System",
-        "note": "Procurement invoice raised against the order."
-      }
-    ]
-  },
-  {
-    "id": "pay028",
-    "order_id": "o025",
-    "supplier_order_id": "sup028",
-    "supplier_id": "s001",
-    "amount": 2640,
-    "status": "PENDING",
-    "gateway": "DPO_PAY",
-    "raised_at": "2026-08-21T05:24:20.006Z",
-    "settled_at": null,
-    "cancelled_at": null,
-    "terms_days": 7,
-    "history": [
-      {
-        "from": null,
-        "to": "PENDING",
-        "at": "2026-08-21T05:24:20.006Z",
-        "actor": "System",
-        "note": "Procurement invoice raised against the order."
-      }
-    ]
-  },
-  {
-    "id": "pay029",
-    "order_id": "o026",
-    "supplier_order_id": "sup029",
-    "supplier_id": "s001",
-    "amount": 292,
-    "status": "PENDING",
-    "gateway": "ORANGE_MONEY",
-    "raised_at": "2026-08-21T07:48:25.257Z",
-    "settled_at": null,
-    "cancelled_at": null,
-    "terms_days": 7,
-    "history": [
-      {
-        "from": null,
-        "to": "PENDING",
-        "at": "2026-08-21T07:48:25.257Z",
-        "actor": "System",
-        "note": "Procurement invoice raised against the order."
-      }
-    ]
-  },
-  {
-    "id": "pay030",
-    "order_id": "o026",
-    "supplier_order_id": "sup030",
-    "supplier_id": "s004",
-    "amount": 414,
-    "status": "PENDING",
-    "gateway": "ORANGE_MONEY",
-    "raised_at": "2026-08-21T07:48:25.257Z",
-    "settled_at": null,
-    "cancelled_at": null,
-    "terms_days": 7,
-    "history": [
-      {
-        "from": null,
-        "to": "PENDING",
-        "at": "2026-08-21T07:48:25.257Z",
-        "actor": "System",
-        "note": "Procurement invoice raised against the order."
-      }
-    ]
-  },
-  {
-    "id": "pay031",
-    "order_id": "o027",
-    "supplier_order_id": "sup031",
-    "supplier_id": "s001",
-    "amount": 146,
-    "status": "PENDING",
-    "gateway": "DPO_PAY",
-    "raised_at": "2026-08-21T07:48:29.143Z",
-    "settled_at": null,
-    "cancelled_at": null,
-    "terms_days": 7,
-    "history": [
-      {
-        "from": null,
-        "to": "PENDING",
-        "at": "2026-08-21T07:48:29.143Z",
-        "actor": "System",
-        "note": "Procurement invoice raised against the order."
-      }
-    ]
-  },
-  {
-    "id": "pay032",
-    "order_id": "o028",
-    "supplier_order_id": "sup032",
-    "supplier_id": "s001",
-    "amount": 660,
-    "status": "PENDING",
-    "gateway": "DPO_PAY",
-    "raised_at": "2026-08-21T07:48:29.395Z",
-    "settled_at": null,
-    "cancelled_at": null,
-    "terms_days": 7,
-    "history": [
-      {
-        "from": null,
-        "to": "PENDING",
-        "at": "2026-08-21T07:48:29.395Z",
-        "actor": "System",
-        "note": "Procurement invoice raised against the order."
-      }
-    ]
-  },
-  {
-    "id": "pay033",
-    "order_id": "o029",
-    "supplier_order_id": "sup033",
-    "supplier_id": "s001",
-    "amount": 2640,
-    "status": "PENDING",
-    "gateway": "DPO_PAY",
-    "raised_at": "2026-08-21T07:48:29.706Z",
-    "settled_at": null,
-    "cancelled_at": null,
-    "terms_days": 7,
-    "history": [
-      {
-        "from": null,
-        "to": "PENDING",
-        "at": "2026-08-21T07:48:29.706Z",
-        "actor": "System",
-        "note": "Procurement invoice raised against the order."
-      }
-    ]
-  },
-  {
-    "id": "pay034",
-    "order_id": "o030",
-    "supplier_order_id": "sup034",
-    "supplier_id": "s001",
-    "amount": 2640,
-    "status": "PENDING",
-    "gateway": "DPO_PAY",
-    "raised_at": "2026-08-21T07:48:29.975Z",
-    "settled_at": null,
-    "cancelled_at": null,
-    "terms_days": 7,
-    "history": [
-      {
-        "from": null,
-        "to": "PENDING",
-        "at": "2026-08-21T07:48:29.975Z",
-        "actor": "System",
-        "note": "Procurement invoice raised against the order."
-      }
-    ]
-  },
-  {
-    "id": "pay035",
-    "order_id": "o031",
-    "supplier_order_id": "sup035",
-    "supplier_id": "s001",
-    "amount": 838,
-    "status": "PENDING",
-    "gateway": "DPO_PAY",
-    "raised_at": "2026-08-24T16:00:09.358Z",
-    "settled_at": null,
-    "cancelled_at": null,
-    "terms_days": 7,
-    "history": [
-      {
-        "from": null,
-        "to": "PENDING",
-        "at": "2026-08-24T16:00:09.358Z",
-        "actor": "System",
-        "note": "Procurement invoice raised against the order."
       }
     ]
   }

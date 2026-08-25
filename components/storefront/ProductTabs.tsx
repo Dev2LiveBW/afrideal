@@ -114,7 +114,8 @@ export function ProductTabs({
               <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-ink/90 via-ink/60 to-transparent p-5 pt-12">
                 <p className="text-[15px] font-semibold text-white">Buyer protection</p>
                 <p className="mt-1 text-[12.5px] leading-5 text-white/70">
-                  Your payment is held until you confirm this arrived and is what you ordered.
+                  Nothing is settled to the supplier until you confirm this arrived and is what
+                  you ordered.
                 </p>
               </div>
             </div>

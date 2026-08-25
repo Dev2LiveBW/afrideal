@@ -89,6 +89,12 @@ export default withAuth(
           pathname.startsWith('/signup') ||
           pathname.startsWith('/browse') ||
           pathname.startsWith('/products') ||
+          /*
+           * The explainer is the page a visitor is sent to before they trust
+           * the platform with anything. Asking them to sign in to read how
+           * signing in works is the wrong way round.
+           */
+          pathname.startsWith('/how-it-works') ||
           pathname.startsWith('/cart');
 
         if (isPublic) return true;

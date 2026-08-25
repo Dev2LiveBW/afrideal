@@ -3,13 +3,20 @@ import { cn } from '@/lib/utils';
 /**
  * The AfriDeal logo.
  *
- * Black continent outline + black "Afri" wordmark with metallic gold "Deal".
- * The continent is a thin black outline and the "A" of AfriDeal sits inside/overlaps it.
- * "Afri" is sleek black, "Deal" is rich metallic gold.
+ * Forest continent outline + near-black "Afri" wordmark with metallic gold
+ * "Deal". The continent is a thin outline and the "A" of AfriDeal sits inside
+ * it. The mark carries the green, the wordmark carries the gold, and between
+ * them the lockup states both halves of the palette without a third colour.
+ *
+ * The outline used to be black, which made the mark read as a full stop in
+ * front of the word rather than as the continent the business is named for.
+ * Green is the same green the verified states and the shop path use, so the
+ * logo is inside the system rather than beside it.
  */
 
 export const LOGO_BLACK = '#0A0A0A';
 export const LOGO_GOLD = '#C5902E';
+export const LOGO_GREEN = '#1A5C2A';
 
 /**
  * Africa as a single closed outline, on a 0 0 100 112 field.
@@ -65,7 +72,7 @@ export function AfriDealMark({
   tone?: 'brand' | 'light' | 'gold';
   withLetter?: boolean;
 }) {
-  const colour = tone === 'light' ? '#FFFFFF' : tone === 'gold' ? LOGO_GOLD : LOGO_BLACK;
+  const colour = tone === 'light' ? '#FFFFFF' : tone === 'gold' ? LOGO_GOLD : LOGO_GREEN;
 
   return (
     <svg
@@ -90,17 +97,49 @@ export function AfriDealMark({
   );
 }
 
+/** The line that sits under the wordmark on the full lockup. */
+export function AfriDealTagline({
+  variant = 'light',
+  className,
+}: {
+  variant?: 'dark' | 'light';
+  className?: string;
+}) {
+  const onDark = variant === 'dark';
+
+  return (
+    <p
+      className={cn(
+        'text-[12.5px] font-medium leading-5 tracking-[0.01em]',
+        onDark ? 'text-white/60' : 'text-body',
+        className,
+      )}
+    >
+      Your Digital <span className={onDark ? 'text-gold-light' : 'text-gold-dark'}>Procurement</span>{' '}
+      Marketplace
+    </p>
+  );
+}
+
 export function AfriDealLogo({
   variant = 'dark',
   size = 'md',
   className,
   showMark = true,
+  withTagline = false,
 }: {
   /** `dark` = placed on a dark ground. `light` = placed on a light ground. */
   variant?: 'dark' | 'light';
   size?: 'sm' | 'md' | 'lg';
   className?: string;
   showMark?: boolean;
+  /**
+   * The full lockup, wordmark over strapline. For the places that introduce the
+   * company - the landing hero, a signed-out shell - never for the sticky nav,
+   * where a second line of type would push the pill taller than the controls
+   * inside it.
+   */
+  withTagline?: boolean;
 }) {
   const onDark = variant === 'dark';
 
@@ -110,8 +149,8 @@ export function AfriDealLogo({
     lg: { mark: 46, text: 'text-[33px]', pull: '-ml-[25px]' },
   }[size];
 
-  return (
-    <span className={cn('inline-flex items-center', className)}>
+  const lockup = (
+    <span className="inline-flex items-center">
       {/*
         No letter on the mark here: the wordmark is pulled left so its own "A"
         lands inside the continent outline, exactly matching the logo design.
@@ -138,6 +177,20 @@ export function AfriDealLogo({
           Deal
         </span>
       </span>
+    </span>
+  );
+
+  if (!withTagline) return <span className={cn('inline-flex items-center', className)}>{lockup}</span>;
+
+  return (
+    <span className={cn('inline-flex flex-col items-start gap-1.5', className)}>
+      {lockup}
+      {/*
+        Indented to the wordmark's left edge rather than the mark's, so the
+        strapline hangs off the word it qualifies. The pull is the same value
+        the wordmark uses to nest its A inside the continent.
+      */}
+      <AfriDealTagline variant={variant} className={showMark ? 'pl-[7px]' : undefined} />
     </span>
   );
 }

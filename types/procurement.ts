@@ -20,6 +20,11 @@ export type PricingTier =
   | 'RETAIL'
   | 'BULK'
   | 'WHOLESALE'
+  /* The deepest published rung, 50-99 units. Named with a suffix rather than
+     as a sixth word because it is the same wholesale offer one step further
+     down the ladder, and the storefront labels it "Wholesale+" for exactly
+     that reason. */
+  | 'WHOLESALE_PLUS'
   | 'NEGOTIATED'
   | 'PROMOTIONAL'
   | 'RFQ';

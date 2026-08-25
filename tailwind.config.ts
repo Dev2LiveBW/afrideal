@@ -44,6 +44,38 @@ const config: Config = {
           dark: '#0F3A1B',
           wash: '#E8F1E9',
           ink: '#12331C',
+          /* The closing trust band: forest taken down far enough to hold white
+             body copy at AA without becoming the ink used by the consoles. */
+          deep: '#16351F',
+        },
+        /*
+         * Royal — the wholesale path.
+         *
+         * The hero puts three doors on the page (shop, procure, wholesale) and
+         * two of them were already spoken for by the brand pair. A third door
+         * drawn in gold or forest would have read as a variant of one of the
+         * first two rather than as its own transaction, so wholesale gets a
+         * cool accent that neither of them can be mistaken for.
+         */
+        royal: {
+          DEFAULT: '#4C3F91',
+          light: '#6B5CB8',
+          dark: '#3A2F71',
+          wash: '#F1F0FA',
+          ink: '#2E2557',
+        },
+        /*
+         * Ocean — the bulk rung, and nothing else.
+         *
+         * The published ladder now has four priced rungs and each one needs to
+         * be told apart at a glance on the packages board. Forest, gold and
+         * royal carry three of them; this carries the second.
+         */
+        ocean: {
+          DEFAULT: '#1F5FA8',
+          light: '#3D7AC0',
+          wash: '#EAF1FA',
+          ink: '#123A68',
         },
         // ── Semantic ──────────────────────────────────────────────────
         danger: {

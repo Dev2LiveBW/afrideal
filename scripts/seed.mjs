@@ -52,15 +52,19 @@ const pick = (arr) => arr[Math.floor(rand() * arr.length)];
  * AfriDeal buys from the supplier and resells to the customer, so the customer
  * price is the supplier's cost plus a published markup, decided by quantity:
  *
- *   1 – 4 units     Retail      cost + 60%
- *   5 – 99 units    Bulk        cost + 44%
- *   100 units +     Wholesale   by quotation
+ *   1 – 4 units      Retail       cost + 60%
+ *   5 – 19 units     Bulk         cost + 46%
+ *   20 – 49 units    Wholesale    cost + 32%
+ *   50 – 99 units    Wholesale+   cost + 22%
+ *   100 units +      Custom       by quotation
  *
  * Kept in step with lib/pricing-model.ts, which is what the running app reads.
  * Delivery is quoted separately at checkout rather than smeared across units.
  */
 const RETAIL_MARKUP_PCT = 60;
-const BULK_MARKUP_PCT = 44;
+const BULK_MARKUP_PCT = 46;
+const WHOLESALE_MARKUP_PCT = 32;
+const WHOLESALE_PLUS_MARKUP_PCT = 22;
 const QUOTATION_THRESHOLD = 100;
 
 // ─── Categories ──────────────────────────────────────────────────────────────
@@ -1100,7 +1104,7 @@ const productImages = products.flatMap((product, i) =>
 const PRICED_CUSTOMER_TYPES = ['GUEST', 'RETAIL', 'BUSINESS', 'RESELLER', 'INSTITUTIONAL'];
 
 /**
- * Two published rungs, identical for every account type.
+ * Four published rungs, identical for every account type.
  *
  * The ladder used to fan out into eleven bands across five customer types, with
  * wholesale rungs a shopper could see but not buy at. That made the catalogue
@@ -1108,16 +1112,35 @@ const PRICED_CUSTOMER_TYPES = ['GUEST', 'RETAIL', 'BUSINESS', 'RESELLER', 'INSTI
  * argument the storefront is making. Now the published price depends on one
  * thing the buyer controls — how many units they take — and everything past a
  * hundred units is answered by a quotation instead of a listing.
+ *
+ * Four rather than two, because a single break at five units left a reseller
+ * taking ninety on the same rate as a household taking five, and the catalogue
+ * had nothing to say to the buyer it most wants. These four rungs are the
+ * baseline structure for every product: no product is priced on a different
+ * set of breaks, and no rung is withheld pending an account.
+ *
+ * Floors fall as the rungs do. The thinner the markup, the closer the band sits
+ * to its floor, so each rung is given the floor its own arithmetic can actually
+ * clear against the worst routable supplier cost.
  */
 const TIER_PLAN = PRICED_CUSTOMER_TYPES.flatMap((customer_type) => [
   { customer_type, tier: 'RETAIL', min: 1, max: 4, markup: RETAIL_MARKUP_PCT, floor: 20 },
+  { customer_type, tier: 'BULK', min: 5, max: 19, markup: BULK_MARKUP_PCT, floor: 15 },
   {
     customer_type,
-    tier: 'BULK',
-    min: 5,
+    tier: 'WHOLESALE',
+    min: 20,
+    max: 49,
+    markup: WHOLESALE_MARKUP_PCT,
+    floor: 12,
+  },
+  {
+    customer_type,
+    tier: 'WHOLESALE_PLUS',
+    min: 50,
     max: QUOTATION_THRESHOLD - 1,
-    markup: BULK_MARKUP_PCT,
-    floor: 15,
+    markup: WHOLESALE_PLUS_MARKUP_PCT,
+    floor: 8,
   },
 ]);
 
@@ -1126,8 +1149,9 @@ const TIER_PLAN = PRICED_CUSTOMER_TYPES.flatMap((customer_type) => [
  *
  * With delivery billed separately and one markup across the catalogue, the
  * realised margin no longer depends on how cheap the product is: a 60% markup
- * clears about 35% of the selling price at any cost, and 44% clears about 28%.
- * Both sit clear of their floors, so no category needs an exception any more —
+ * clears about 35% of the selling price at any cost, 46% clears about 29%, 32%
+ * clears about 22% and 22% clears about 15%. Each sits clear of its own floor,
+ * so no category needs an exception any more —
  * the Electronics carve-out this table used to hold existed only because a flat
  * BWP 15 logistics contribution ate an inexpensive line alive.
  */
@@ -1239,7 +1263,8 @@ for (const product of products) {
  * over cost and bulk at 44%, there are only ten points of price between them,
  * so any discount worth the name would have pushed the retail rung underneath
  * the bulk one and inverted the ladder — five units costing more per unit than
- * one. Moving both rungs keeps the shape and keeps the argument.
+ * one. Moving every rung by the same percentage keeps the shape, keeps the
+ * descent strictly monotonic, and keeps the argument.
  */
 const PROMOTIONS = [
   ['p016', 15, 3],
@@ -1249,8 +1274,21 @@ const PROMOTIONS = [
   ['p012', 18, 6],
 ];
 
-/** Promotional margin floor: half the standing retail floor. */
-const PROMO_FLOOR_PCT = 10;
+/**
+ * Promotional margin floor.
+ *
+ * A promotion is applied as one percentage across the whole ladder, so the
+ * rung with the least room decides how deep it may go — and that is now
+ * Wholesale+ at 22% over cost, not retail at 60%. The floor is therefore set to
+ * the deepest rung's own floor rather than to half the retail one: anything
+ * looser would publish a discounted wholesale band underneath the margin the
+ * standing band was held to, which is a loss dressed as a promotion.
+ *
+ * The practical effect is that headline discounts are single-digit. That is the
+ * honest consequence of publishing a 22% rung at all, and it is better than a
+ * 15% banner the bottom of the ladder cannot pay for.
+ */
+const PROMO_FLOOR_PCT = 8;
 
 for (let [productId, discountPct, endsInDays] of PROMOTIONS) {
   const product = products.find((entry) => entry.id === productId);

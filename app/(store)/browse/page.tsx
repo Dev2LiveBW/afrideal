@@ -41,7 +41,7 @@ export default async function BrowsePage({
     )?.id ?? null;
 
   /*
-   * The rung comes off the URL, so the three doors on the landing page land
+   * The rung comes off the URL, so the packages on the landing page land
    * somewhere that actually honours them. An unrecognised value falls back to
    * the default view rather than 404-ing a browse route.
    */
@@ -92,6 +92,7 @@ export default async function BrowsePage({
     label: door.label,
     range: door.range ? `${door.range}` : null,
     byQuotation: door.byQuotation,
+    accent: door.accent,
     // Selecting the active rung again clears it, so the control is also the way
     // back to the default view.
     href: params(tier === door.tier ? null : door.tier),

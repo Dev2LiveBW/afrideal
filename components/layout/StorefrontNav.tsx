@@ -23,6 +23,12 @@ const LINKS = [
   { href: '/browse', label: 'Browse' },
   { href: '/browse?category=hair-weaves-extensions', label: 'Hair & Weaves' },
   { href: '/request-a-runner', label: 'Request a runner' },
+  /*
+   * The instruction manual, in the header rather than buried in the footer. A
+   * marketplace whose whole argument is a published price ladder has to be able
+   * to explain the ladder from any page a visitor happens to land on.
+   */
+  { href: '/how-it-works', label: 'How it works' },
   { href: '/orders', label: 'My orders' },
 ];
 
@@ -321,14 +327,14 @@ export function StorefrontFooter() {
           <div>
             <AfriDealLogo variant="dark" size="md" />
             <p className="measure mt-4 text-[13.5px] leading-6 text-white/55">
-              A procurement marketplace for Botswana and South Africa. Retail and bulk prices are
-              published on every product, suppliers are verified before they can list, and orders
-              are routed on reliability rather than on the lowest cost.
+              A procurement marketplace for Botswana and South Africa. Five published packages
+              price every product from a single unit to ninety-nine, suppliers are verified before
+              they can list, and orders are routed on reliability rather than on the lowest cost.
             </p>
           </div>
 
           {[
-            { heading: 'Marketplace', links: [['Hair, weaves & extensions', '/browse?category=hair-weaves-extensions'], ['Beauty & personal care', '/browse?category=beauty-personal-care'], ['Browse all', '/browse'], ['Request a runner', '/request-a-runner'], ['Your orders', '/orders']] },
+            { heading: 'Marketplace', links: [['Hair, weaves & extensions', '/browse?category=hair-weaves-extensions'], ['Beauty & personal care', '/browse?category=beauty-personal-care'], ['Browse all', '/browse'], ['Request a runner', '/request-a-runner'], ['How it works', '/how-it-works'], ['Your orders', '/orders']] },
             { heading: 'Suppliers', links: [['Become a supplier', '/login'], ['Supplier portal', '/supplier/dashboard'], ['Verification', '/login']] },
             { heading: 'Platform', links: [['Runner portal', '/runner/dashboard'], ['Admin console', '/admin/dashboard'], ['Create an account', '/signup'], ['Sign in', '/login']] },
           ].map((column) => (
@@ -367,7 +373,8 @@ export function StorefrontFooter() {
 
           <div className="mt-5 flex flex-wrap items-center justify-between gap-4">
             <p className="text-[12.5px] text-white/40">
-              © {new Date().getFullYear()} AfriDeal. Gaborone, Botswana.
+              © {new Date().getFullYear()} AfriDeal. Gaborone, Botswana. Proudly connecting
+              Botswana to the world.
             </p>
             <p className="flex items-center gap-2 font-mono text-[10.5px] uppercase tracking-[0.16em] text-white/35">
               <Package size={13} strokeWidth={1.5} />

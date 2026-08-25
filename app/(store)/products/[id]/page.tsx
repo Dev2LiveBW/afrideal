@@ -147,8 +147,9 @@ export default async function ProductPage({ params }: { params: { id: string } }
           <div className="mt-3 flex items-start gap-3 rounded-md border border-hairline bg-gold-50/60 px-4 py-3.5">
             <Lock size={15} strokeWidth={1.5} className="mt-0.5 shrink-0 text-gold-700" />
             <p className="text-[12.5px] leading-5 text-gold-700">
-              Your payment is held by AfriDeal and released to the supplier only once you confirm the
-              order arrived. If it does not, you raise a dispute and the funds stay frozen.
+              You pay AfriDeal, and the supplier is settled only once you confirm the order
+              arrived. If it does not, you raise a dispute and nothing is paid outward until it is
+              resolved.
             </p>
           </div>
         </div>

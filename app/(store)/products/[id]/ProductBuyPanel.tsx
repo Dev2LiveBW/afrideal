@@ -34,7 +34,7 @@ export function ProductBuyPanel({
   primarySupplierId: string;
   /** Carried into the cart line so the basket shows the photo, not the glyph. */
   primaryImage?: ProductImage;
-  /** This product's three rungs, resolved server-side against the account. */
+  /** This product's five packages, resolved server-side against the account. */
   doors?: TierDoor[];
 }) {
   const addToCart = useAfriDealStore((state) => state.addToCart);

@@ -53,7 +53,7 @@ const PROMISES = [
   {
     icon: Wallet,
     title: 'One price list, every quantity',
-    body: 'Retail and bulk prices are published against every product, so you can see what a larger order costs before you place it.',
+    body: 'Five published packages price every product from a single unit upward, so you can see what a larger order costs before you place it.',
   },
   {
     icon: ShieldCheck,

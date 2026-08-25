@@ -6,15 +6,15 @@ import { cn } from '@/lib/utils';
 import type { TierDoor } from '@/lib/tier-doors';
 
 /**
- * The three doors, drawn as a ladder.
+ * The published packages, drawn as a ladder.
  *
- * This is the storefront's thesis object, so it is deliberately not three
- * matching cards in a row. On the landing page the rungs step down and to the
- * right, each one wider than the last, because the argument is a descent: the
- * further you go, the less each unit costs. A row of equal cards would state
- * the tiers; the stagger demonstrates them.
+ * This is the storefront's thesis object, so it is deliberately not a row of
+ * matching cards. On the landing page the rungs step down and to the right,
+ * each one wider than the last, because the argument is a descent: the further
+ * you go, the less each unit costs. A row of equal cards would state the tiers;
+ * the stagger demonstrates them.
  *
- * Two rungs carry a published figure. The third does not - past a hundred
+ * Four rungs carry a published figure. The fifth does not - past a hundred
  * units the price depends on the volume, the delivery point and the lead time,
  * so it is quoted. That rung keeps the same geometry and swaps the number for
  * the action that gets one, which is the honest version of the same offer.
@@ -41,7 +41,13 @@ type Tone = 'dark' | 'light';
  * 1024px does not exist for the reader it was drawn for. The inset is a
  * percentage so the descent scales with whatever column it lands in.
  */
-const RUNG_INSET = ['mr-[7%] sm:mr-[12%]', 'mr-[3.5%] sm:mr-[6%]', 'mr-0'];
+const RUNG_INSET = [
+  'mr-[7%] sm:mr-[12%]',
+  'mr-[5.25%] sm:mr-[9%]',
+  'mr-[3.5%] sm:mr-[6%]',
+  'mr-[1.75%] sm:mr-[3%]',
+  'mr-0',
+];
 
 /**
  * Weight climbs as the price falls.
@@ -53,10 +59,24 @@ const RUNG_INSET = ['mr-[7%] sm:mr-[12%]', 'mr-[3.5%] sm:mr-[6%]', 'mr-0'];
  * and size is carried by depth on the ladder.
  */
 const RUNG_SCALE = [
+  { label: 'text-[14px] sm:text-[15px]', money: 'sm' as const, pad: 'px-5 py-3 sm:py-3.5' },
   { label: 'text-[15px] sm:text-[16px]', money: 'md' as const, pad: 'px-5 py-3.5 sm:py-4' },
+  { label: 'text-[16px] sm:text-[17px]', money: 'md' as const, pad: 'px-5 py-4 sm:py-[1.125rem]' },
   { label: 'text-[16px] sm:text-[18px]', money: 'lg' as const, pad: 'px-5 py-4 sm:py-5' },
   { label: 'text-[18px] sm:text-[21px]', money: 'xl' as const, pad: 'px-5 py-5 sm:py-6' },
 ];
+
+/**
+ * Both geometries are five-step scales sampled across however many rungs the
+ * ladder actually has, so the same component draws a two-rung product panel and
+ * the five-package board without either one being a special case. The top rung
+ * always gets the tightest step and the bottom rung always gets the widest -
+ * the descent is a property of position in the ladder, not of the tier's name.
+ */
+function stepAt<T>(steps: T[], index: number, total: number): T {
+  if (total <= 1) return steps[steps.length - 1];
+  return steps[Math.round((index * (steps.length - 1)) / (total - 1))];
+}
 
 export function PriceLadder({
   doors,
@@ -64,6 +84,7 @@ export function PriceLadder({
   tone = 'dark',
   /** The landing hero staggers; the product column is too narrow to. */
   stagger = true,
+  compact = false,
   onSelect,
   activeTier,
   className,
@@ -73,6 +94,13 @@ export function PriceLadder({
   productName: string;
   tone?: Tone;
   stagger?: boolean;
+  /**
+   * Drop the per-rung sentence and tighten the steps. Five rungs each carrying
+   * a line of explanation is a column tall enough to push the hero photograph
+   * off the screen, and the sentences are stated in full on the packages board
+   * one section further down. The figures are the part the hero needs.
+   */
+  compact?: boolean;
   /** Given, rungs act on the current page instead of navigating to one. */
   onSelect?: (door: TierDoor) => void;
   /** The rung the current quantity is standing on. */
@@ -80,15 +108,21 @@ export function PriceLadder({
   className?: string;
 }) {
   return (
-    <div className={cn(tone === 'dark' ? 'space-y-2.5' : 'space-y-1.5', className)}>
+    <div
+      className={cn(
+        tone === 'dark' ? (compact ? 'space-y-1.5' : 'space-y-2.5') : 'space-y-1.5',
+        className,
+      )}
+    >
       {doors.map((door, index) => (
         <Rung
           key={door.tier}
           door={door}
           productName={productName}
           tone={tone}
-          scale={RUNG_SCALE[index] ?? RUNG_SCALE[0]}
-          inset={stagger ? RUNG_INSET[index] : undefined}
+          compact={compact}
+          scale={stepAt(RUNG_SCALE, index, doors.length)}
+          inset={stagger ? stepAt(RUNG_INSET, index, doors.length) : undefined}
           onSelect={onSelect}
           active={activeTier === door.tier}
         />
@@ -101,6 +135,7 @@ function Rung({
   door,
   productName,
   tone,
+  compact,
   scale,
   inset,
   onSelect,
@@ -109,6 +144,7 @@ function Rung({
   door: TierDoor;
   productName: string;
   tone: Tone;
+  compact?: boolean;
   scale: (typeof RUNG_SCALE)[number];
   inset?: string;
   onSelect?: (door: TierDoor) => void;
@@ -116,7 +152,7 @@ function Rung({
 }) {
   const dark = tone === 'dark';
   const priced = door.unitPrice !== null;
-  const destination = door.byQuotation ? '/browse?tier=WHOLESALE' : door.href;
+  const destination = door.href;
 
   /*
    * A rung that acts is a button; a rung that navigates is a link. The
@@ -156,7 +192,7 @@ function Rung({
         dark
           ? [
               'gap-4 sm:gap-5',
-              scale.pad,
+              compact ? 'px-4 py-2.5 sm:px-5 sm:py-3' : scale.pad,
               'hover:-translate-y-0.5 focus-visible:-translate-y-0.5',
               // Depth, not pallor, separates a listed rung from a quoted one.
               priced
@@ -197,7 +233,7 @@ function Rung({
           )}
         </div>
 
-        {dark && (
+        {dark && !compact && (
           <p className="mt-1 hidden text-[12.5px] leading-5 text-white/55 sm:block">
             {door.blurb}
           </p>

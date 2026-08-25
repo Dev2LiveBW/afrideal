@@ -13,7 +13,7 @@ import { cn } from '@/lib/utils';
  * while the button body stays put - the internal tension is the point.
  */
 
-type Variant = 'gold' | 'ink' | 'ghost' | 'danger' | 'forest';
+type Variant = 'gold' | 'ink' | 'ghost' | 'danger' | 'forest' | 'royal';
 type Size = 'sm' | 'md' | 'lg';
 
 const VARIANTS: Record<Variant, string> = {
@@ -24,6 +24,8 @@ const VARIANTS: Record<Variant, string> = {
   danger:
     'bg-transparent text-danger-ink ring-1 ring-inset ring-danger/30 hover:bg-danger-wash active:bg-danger-wash',
   forest: 'bg-forest text-white hover:bg-forest-light active:bg-forest-dark',
+  // The wholesale door, and only that. Nothing else on the storefront is royal.
+  royal: 'bg-royal text-white hover:bg-royal-light active:bg-royal-dark',
 };
 
 const SIZES: Record<Size, string> = {

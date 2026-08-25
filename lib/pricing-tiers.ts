@@ -98,12 +98,14 @@ export function marginBreakdown(
  * account type is the quotation path above the ladder, where a business or
  * institutional buyer is answered by a person rather than by a price list.
  */
+const PUBLISHED: PricingTier[] = ['RETAIL', 'BULK', 'WHOLESALE', 'WHOLESALE_PLUS'];
+
 export const TIERS_BY_CUSTOMER_TYPE: Record<CustomerType, PricingTier[]> = {
-  GUEST: ['RETAIL', 'BULK', 'PROMOTIONAL'],
-  RETAIL: ['RETAIL', 'BULK', 'PROMOTIONAL', 'RFQ'],
-  BUSINESS: ['RETAIL', 'BULK', 'PROMOTIONAL', 'NEGOTIATED', 'RFQ'],
-  RESELLER: ['RETAIL', 'BULK', 'PROMOTIONAL', 'NEGOTIATED', 'RFQ'],
-  INSTITUTIONAL: ['RETAIL', 'BULK', 'NEGOTIATED', 'RFQ'],
+  GUEST: [...PUBLISHED, 'PROMOTIONAL'],
+  RETAIL: [...PUBLISHED, 'PROMOTIONAL', 'RFQ'],
+  BUSINESS: [...PUBLISHED, 'PROMOTIONAL', 'NEGOTIATED', 'RFQ'],
+  RESELLER: [...PUBLISHED, 'PROMOTIONAL', 'NEGOTIATED', 'RFQ'],
+  INSTITUTIONAL: [...PUBLISHED, 'NEGOTIATED', 'RFQ'],
 };
 
 export function canReachTier(customerType: CustomerType, tier: PricingTier): boolean {
@@ -299,6 +301,7 @@ export const TIER_LABELS: Record<PricingTier, string> = {
   RETAIL: 'Retail',
   BULK: 'Bulk',
   WHOLESALE: 'Wholesale',
+  WHOLESALE_PLUS: 'Wholesale+',
   NEGOTIATED: 'Negotiated',
   PROMOTIONAL: 'Promotional',
   RFQ: 'By quotation',
@@ -308,7 +311,8 @@ export const TIER_LABELS: Record<PricingTier, string> = {
 export const TIER_BLURBS: Record<PricingTier, string> = {
   RETAIL: 'Single units and small orders.',
   BULK: 'Restocking a salon, a shop or a small site.',
-  WHOLESALE: 'Volume orders, priced on quotation.',
+  WHOLESALE: 'Trade quantities for a business that resells.',
+  WHOLESALE_PLUS: 'The deepest published rung, for standing volume.',
   NEGOTIATED: 'Priced under an existing supply agreement.',
   PROMOTIONAL: 'A published price running for a limited period.',
   RFQ: 'Priced on quotation against your volume and delivery point.',

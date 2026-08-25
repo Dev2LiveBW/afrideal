@@ -9,6 +9,7 @@ import { GoldButton } from '@/components/brand/GoldButton';
 import { ProductCard } from '@/components/products/ProductCard';
 import { TierSwitch, type TierSwitchOption } from '@/components/storefront/TierSwitch';
 import { cn } from '@/lib/utils';
+import { QUOTATION_THRESHOLD } from '@/lib/pricing-model';
 import type { DoorTier } from '@/lib/tier-doors';
 import type { Category, Product, ProductImage } from '@/types';
 
@@ -136,7 +137,7 @@ export function BrowseClient({
           <TierSwitch options={tierHrefs} active={tier} />
           <p className="text-[12.5px] leading-5 text-muted">
             {tierIsQuoted
-              ? 'Cards keep their retail figure, because there is no listed wholesale price to show.'
+              ? 'Cards keep their retail figure, because nothing is listed at this quantity.'
               : tier
                 ? `Showing ${activeTierLabel} prices per unit.`
                 : 'Prices shown per unit. Pick a quantity band to re-price the catalogue.'}
@@ -146,13 +147,13 @@ export function BrowseClient({
         {tierIsQuoted && (
           <p className="mt-4 flex flex-wrap items-center gap-x-2 gap-y-1 rounded-md bg-gold/[0.09] px-4 py-3 text-[12.5px] leading-5 text-ink">
             <FileText size={12} strokeWidth={2} aria-hidden="true" className="text-gold-dark" />
-            Orders of 100 units and above are quoted rather than listed, against your volume,
-            delivery point and lead time.
+            Orders of {QUOTATION_THRESHOLD} units and above are quoted rather than listed, against
+            your volume, delivery point and lead time.
             <Link
               href="/browse"
               className="font-medium text-gold-dark underline underline-offset-4"
             >
-              Ask for a quotation
+              Pick a product and request a quotation from its page
             </Link>
           </p>
         )}

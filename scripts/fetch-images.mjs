@@ -127,13 +127,24 @@ const CATEGORY_QUERIES = {
 };
 
 const HERO_QUERIES = {
-  // The hero used to be a logistics warehouse, from when the catalogue was a
-  // general marketplace. Hair and weaves are the business now, and the first
-  // image on the page should say which shop you have walked into.
-  // Lead with the salon rather than a portrait: the portrait queries return the
-  // same photograph already used on the braiding-hair product card, and one
-  // image cannot be both the hero and a tile in the grid beneath it.
-  hero: ['african hair salon braiding', 'hairdresser braiding hair', 'hair salon interior'],
+  /*
+   * The header photograph.
+   *
+   * It has to say "procurement", not "salon". The hero's headline is now find
+   * it / compare it / procure it / get it delivered, and the picture beside it
+   * should show the end of that sentence: someone ordering on a phone with the
+   * parcels stacked behind them. A salon interior illustrated the catalogue's
+   * biggest category and left the other six unexplained.
+   *
+   * Portrait-first queries deliberately, and never a query that overlaps a
+   * product card - one image cannot be both the header and a tile in the grid
+   * beneath it.
+   */
+  hero: [
+    'african woman holding phone parcel boxes',
+    'woman online shopping delivery boxes',
+    'black woman smartphone cardboard boxes warehouse',
+  ],
 };
 
 // ─── Providers ───────────────────────────────────────────────────────────────
