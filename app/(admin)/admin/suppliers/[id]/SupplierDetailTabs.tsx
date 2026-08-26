@@ -116,7 +116,7 @@ export function SupplierDetailTabs({
                         <td>
                           <Link
                             href={`/admin/products/${offer.product_id}`}
-                            className="font-medium text-ink transition-colors hover:text-gold-dark"
+                            className="font-medium text-ink transition-colors hover:text-forest"
                           >
                             {product?.emoji} {product?.name ?? offer.product_id}
                           </Link>
@@ -221,7 +221,7 @@ export function SupplierDetailTabs({
                           <td>
                             <Link
                               href={`/admin/orders/${record.order_id}`}
-                              className="font-mono text-[12.5px] font-medium text-ink transition-colors hover:text-gold-dark"
+                              className="font-mono text-[12.5px] font-medium text-ink transition-colors hover:text-forest"
                             >
                               {record.order_id}
                             </Link>

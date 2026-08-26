@@ -8,7 +8,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { AlertCircle, ShieldCheck, ShoppingBag } from 'lucide-react';
 import { z } from 'zod';
 
-import { GoldButton } from '@/components/brand/GoldButton';
+import { ActionButton } from '@/components/brand/ActionButton';
 import { MoneyText } from '@/components/brand/MoneyText';
 import { EmptyState, Enclosure } from '@/components/brand/Panel';
 import { CartLineThumb } from '@/components/storefront/CartLineThumb';
@@ -161,9 +161,9 @@ export function CheckoutClient({
         description="Your cart is empty. Add something to it and come back."
         action={
           <Link href="/browse">
-            <GoldButton variant="gold" size="md" withArrow>
+            <ActionButton size="md" withArrow>
               Browse the marketplace
-            </GoldButton>
+            </ActionButton>
           </Link>
         }
         className="rounded-md border border-hairline bg-surface-raised"
@@ -282,7 +282,7 @@ export function CheckoutClient({
                     <span
                       className={cn(
                         'flex h-5 w-5 shrink-0 items-center justify-center rounded-full border-2 transition-colors',
-                        active ? 'border-gold bg-gold' : 'border-hairline-strong',
+                        active ? 'border-forest bg-forest' : 'border-hairline-strong',
                       )}
                     >
                       {active && <span className="h-1.5 w-1.5 rounded-full bg-ink" />}
@@ -348,21 +348,20 @@ export function CheckoutClient({
                 <div className="flex items-baseline justify-between border-t border-hairline pt-3">
                   <dt className="font-medium text-ink">Total to pay</dt>
                   <dd>
-                    <MoneyText amount={total} size="lg" tone="gold" />
+                    <MoneyText amount={total} size="lg" tone="ink" />
                   </dd>
                 </div>
               </dl>
 
-              <GoldButton
+              <ActionButton
                 type="submit"
-                variant="gold"
                 size="lg"
                 className="mt-5 w-full"
                 loading={isSubmitting}
                 withArrow
               >
                 Place order
-              </GoldButton>
+              </ActionButton>
             </div>
           </Enclosure>
 

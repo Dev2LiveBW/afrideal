@@ -1,9 +1,8 @@
 import Image from 'next/image';
 import Link from 'next/link';
-import { ArrowRight, BadgeCheck, PackageSearch, Truck } from 'lucide-react';
+import { ArrowRight, BadgeCheck, User, Truck } from "lucide-react";
 
-import { AfriDealTagline } from '@/components/brand/AfriDealLogo';
-import { GoldButton } from '@/components/brand/GoldButton';
+import { ActionButton } from '@/components/brand/ActionButton';
 import { CategoryTiles } from '@/components/storefront/DiscoveryRails';
 import { FlashDealsRail } from '@/components/storefront/FlashDealsRail';
 import { HowItWorks } from '@/components/storefront/HowItWorks';
@@ -129,174 +128,69 @@ export default async function LandingPage() {
         The text column sits on flat warm ground, never on the picture, so every
         line of it clears AA without a scrim doing the work.
       */}
-      <section className="relative isolate overflow-hidden bg-gradient-to-b from-[#FBF7EF] via-surface to-surface">
-        <div className="mx-auto grid max-w-market gap-12 px-6 pb-14 pt-28 sm:pt-32 lg:grid-cols-[minmax(0,1fr)_minmax(0,0.92fr)] lg:items-center lg:gap-16 lg:pb-20 lg:pt-40">
-          {/*
-            `min-w-0` on both columns: a grid item defaults to `min-width:auto`,
-            so the column could not shrink below the headline's min-content
-            width and pushed the page past the viewport on a 375px screen.
-          */}
+      <section className="relative isolate overflow-hidden bg-white">
+        <div className="mx-auto grid max-w-market gap-12 px-6 pb-14 pt-24 sm:pt-28 lg:grid-cols-[minmax(0,1fr)_minmax(0,1fr)] lg:items-center lg:gap-16 lg:pb-16 lg:pt-36">
           <div className="min-w-0">
-            {/*
-              The strapline from the brand lockup, used as the hero's eyebrow
-              rather than repeated as a second logo. The mark is already in the
-              header pill a few pixels above this line; what the lockup adds
-              here is the sentence that says what kind of marketplace it is.
-            */}
-            <AfriDealTagline className="mb-5" />
-
-            <h1 className="font-display text-[34px] font-bold leading-[1.04] tracking-[-0.035em] text-ink sm:text-[54px] lg:text-[60px]">
-              Find it.
-              <br />
-              Compare it.
-              <br />
-              <span className="text-gold-dark">Procure it.</span>
-              <br />
+            <h1 className="font-display text-[38px] font-bold leading-[1.08] tracking-[-0.035em] text-ink sm:text-[54px] lg:text-[64px]">
+              Find it.<br />
+              Compare it.<br />
+              <span className="text-gold-dark">Procure it.</span><br />
               Get it delivered.
             </h1>
 
             <p className="measure mt-6 text-[16px] leading-8 text-body">
-              Buy from verified suppliers at a price that is published before you commit — or send a
-              verified runner to find what the catalogue does not carry, and pay only once you have
-              seen what it costs.
+              Shop from <span className="font-bold text-ink">verified</span> suppliers or let us
+              procure it for you through our <span className="font-bold text-ink">trusted</span> runner and delivery network.
             </p>
 
-            {/*
-              Three chips, one per party the platform vets. They are the
-              condition under which the sentence above is worth anything, so
-              they sit with it rather than in a band further down the page.
-            */}
-            <ul className="mt-8 flex flex-wrap gap-x-6 gap-y-3">
+            <ul className="mt-10 flex flex-wrap gap-x-8 gap-y-8">
               {[
-                { icon: BadgeCheck, label: 'Verified suppliers', tone: 'text-forest' },
-                { icon: PackageSearch, label: 'Verified runners', tone: 'text-gold-dark' },
-                { icon: Truck, label: 'Verified delivery partners', tone: 'text-royal' },
+                { icon: BadgeCheck, label: "Verified\nSuppliers", tone: "text-forest", circle: "bg-forest-wash" },
+                { icon: User, label: "Verified\nRunners", tone: "text-gold-dark", circle: "bg-gold-50" },
+                { icon: Truck, label: "Verified\nDelivery Partners", tone: "text-royal", circle: "bg-royal-wash" },
               ].map((chip) => (
-                <li key={chip.label} className="flex items-center gap-2">
-                  <chip.icon size={16} strokeWidth={1.6} aria-hidden="true" className={chip.tone} />
-                  <span className="text-[13px] font-medium text-ink">{chip.label}</span>
+                <li key={chip.label} className="flex flex-col items-center gap-3">
+                  <div className={`flex h-14 w-14 items-center justify-center rounded-full ${chip.circle}`}>
+                    <chip.icon size={24} strokeWidth={1.5} aria-hidden="true" className={chip.tone} />
+                  </div>
+                  <span className="text-[13px] font-semibold text-ink text-center max-w-[90px] leading-snug whitespace-pre-line">
+                    {chip.label}
+                  </span>
                 </li>
               ))}
             </ul>
-
-            <div className="mt-9 flex flex-wrap items-center gap-x-6 gap-y-3">
-              <Link href="/browse">
-                <GoldButton variant="forest" size="lg" withArrow>
-                  Shop the marketplace
-                </GoldButton>
-              </Link>
-              <Link
-                href="/how-it-works"
-                className="text-[14.5px] font-medium text-ink underline decoration-gold decoration-2 underline-offset-[6px] transition-colors duration-300 hover:text-gold-dark"
-              >
-                How AfriDeal works
-              </Link>
-            </div>
-
-            {/*
-              Deliberately a sentence, not a stat block. The real figures are
-              small - this is a young marketplace - and three big numerals
-              would make a modest catalogue look like a boast rather than a
-              fact.
-            */}
-            <p className="mt-10 border-t border-hairline pt-6 text-[13px] leading-6 text-muted">
-              <span className="font-mono tabular-nums text-ink">{products.length}</span> products
-              from <span className="font-mono tabular-nums text-ink">{verified.length}</span>{' '}
-              verified suppliers in Botswana and South Africa, delivered to your door.
-            </p>
           </div>
 
-          {/*
-            The ladder. Ink and gold against the light page, so the one object
-            carrying the argument is also the one object that reads as an
-            instrument rather than as page furniture.
-
-            It is also the page's only staged entrance. Every section used to
-            arrive on the same fade-up, which is not choreography - it is the
-            same effect fifteen times, and it made the thesis object arrive with
-            no more ceremony than a footer. One moment, on the thing the page is
-            about.
-          */}
-          <div className="relative min-w-0">
-            {/*
-              The frame follows the source's own proportions rather than fighting
-              them. A portrait frame over a 940x529 photograph crops two thirds
-              of the width away and then upscales what is left; 3:2 keeps the
-              picture close to native and lets the subject stay whole. The focal
-              point is set above centre because that is where the face is.
-            */}
-            <div className="relative aspect-[4/3] overflow-hidden rounded-xl bg-surface-sunk shadow-card ring-1 ring-inset ring-hairline sm:aspect-[3/2]">
+          <div className="relative min-w-0 flex justify-center lg:justify-end">
+            <div className="relative w-full max-w-[480px] aspect-[4/5] overflow-hidden rounded-[32px] shadow-2xl ring-1 ring-inset ring-black/5">
               <Image
-                src="/products/hero.jpg"
-                alt="An AfriDeal order arriving at the door"
+                src="/images/home/hero-woman.jpg"
+                alt="AfriDeal trusted sourcing"
                 fill
                 priority
-                sizes="(max-width: 1024px) 100vw, 46vw"
-                className="object-cover object-[50%_28%]"
+                sizes="(max-width: 1024px) 100vw, 50vw"
+                className="object-cover object-top"
               />
             </div>
-
-            {/*
-              The panel is pulled up over the photograph's lower edge and held
-              off the right, so it overlaps the picture rather than replacing
-              it. What stays visible above it is the showroom the instrument is
-              standing on, and losing that collapses the hero's two materials
-              into one.
-            */}
-            {featured && doors.length > 0 && (
-            <Reveal delay={0.1} className="relative z-10 -mt-16 min-w-0">
-              <div className="grain relative overflow-hidden rounded-xl bg-ink p-2 shadow-[0_24px_60px_-16px_rgba(0,0,0,0.55)] ring-1 ring-white/10">
-                <div
-                  aria-hidden="true"
-                  className="pointer-events-none absolute inset-0 bg-[radial-gradient(100%_70%_at_85%_0%,rgba(212,146,10,0.18),transparent_62%)]"
+            
+            {/* Phone Mockup floating over */}
+            <div className="absolute -left-4 sm:-left-8 lg:-left-12 bottom-12 w-[180px] sm:w-[220px] lg:w-[260px] drop-shadow-[0_35px_35px_rgba(0,0,0,0.25)] rounded-[32px] sm:rounded-[40px] border-[8px] sm:border-[10px] border-white bg-white overflow-hidden">
+              <div className="relative aspect-[9/19.5] w-full">
+                <Image
+                  src="/images/home/phone-mockup.jpg"
+                  alt="AfriDeal App"
+                  fill
+                  className="object-cover rounded-[24px] sm:rounded-[30px]"
                 />
-
-                <div className="relative rounded-[calc(2rem-0.5rem)] p-5 sm:p-6">
-                  <div className="flex items-center gap-4">
-                    <Swatch
-                      image={primaryImage.get(featured.id)}
-                      fallback={featured.swatch}
-                      emoji={featured.emoji}
-                      label={featured.name}
-                      className="h-12 w-12 shrink-0 rounded"
-                      glyphClassName="text-[20px]"
-                      zoomOnHover={false}
-                    />
-                    <div className="min-w-0">
-                      <p className="truncate text-[14.5px] font-semibold text-white">
-                        {featured.name}
-                      </p>
-                      <p className="mt-0.5 text-[12px] text-white/60">
-                        {categoryName.get(featured.category_id)} · one product, five packages
-                      </p>
-                    </div>
-                  </div>
-
-                  <div className="mt-5">
-                    <PriceLadder doors={doors} productName={featured.name} compact />
-                  </div>
-
-                  <p className="mt-5 text-[11.5px] leading-5 text-white/55">
-                    Prices are per unit in Pula and applied automatically at checkout. The same five
-                    packages are published on every product in the catalogue.
-                  </p>
-                </div>
               </div>
-            </Reveal>
-            )}
+            </div>
           </div>
         </div>
 
-        {/*
-          The three ways in, closing the hero block rather than opening a
-          section of their own. A visitor who already knows which one they want
-          should not have to scroll past the argument to find the door.
-        */}
-        <div className="mx-auto max-w-market px-6 pb-16 lg:pb-20">
+        <div className="mx-auto max-w-market px-6 pb-20 lg:pb-28 pt-8">
           <PathChooser productCount={products.length} />
         </div>
       </section>
-
       {/* ── What you pay at each quantity ──────────────────────────────── */}
       {featured && doors.length > 0 && (
         <section id="packages" className="border-y border-hairline bg-surface-raised">
@@ -335,7 +229,7 @@ export default async function LandingPage() {
 
                 <Link
                   href="/browse"
-                  className="mt-6 inline-flex items-center gap-1.5 text-[13.5px] font-medium text-gold-dark underline-offset-4 hover:underline"
+                  className="mt-6 inline-flex items-center gap-1.5 text-[13.5px] font-medium text-forest underline-offset-4 hover:underline"
                 >
                   See the whole catalogue
                   <ArrowRight size={13} strokeWidth={1.75} aria-hidden="true" />
@@ -389,9 +283,9 @@ export default async function LandingPage() {
             description="Bundles, frontals, closures, wigs and braiding hair, in the range salons reorder"
             action={
               <Link href="/browse?category=hair-weaves-extensions">
-                <GoldButton variant="ghost" size="sm">
+                <ActionButton variant="ghost" size="sm">
                   See all {flagship.length}
-                </GoldButton>
+                </ActionButton>
               </Link>
             }
           />
@@ -428,7 +322,7 @@ export default async function LandingPage() {
             <div className="min-w-0 lg:justify-self-end">
               <Link
                 href="/how-it-works"
-                className="inline-flex items-center gap-1.5 text-[13.5px] font-medium text-gold-dark underline-offset-4 hover:underline"
+                className="inline-flex items-center gap-1.5 text-[13.5px] font-medium text-forest underline-offset-4 hover:underline"
               >
                 See both flows, step by step
                 <ArrowRight size={13} strokeWidth={1.75} aria-hidden="true" />
@@ -456,7 +350,7 @@ export default async function LandingPage() {
         <div className="grain relative overflow-hidden rounded-xl bg-ink px-8 py-14 text-center sm:px-14">
           <div
             aria-hidden="true"
-            className="pointer-events-none absolute inset-0 bg-[radial-gradient(90%_120%_at_50%_0%,rgba(212,146,10,0.20),transparent_60%)]"
+            className="pointer-events-none absolute inset-0 bg-[radial-gradient(90%_120%_at_50%_0%,rgba(192,138,30,0.20),transparent_60%)]"
           />
           <div className="relative">
             <h2 className="mx-auto max-w-2xl font-display text-[30px] font-bold leading-[1.12] tracking-[-0.025em] text-white sm:text-[38px]">
@@ -469,18 +363,18 @@ export default async function LandingPage() {
             </p>
             <div className="mt-8 flex flex-wrap justify-center gap-3">
               <Link href="/browse?tier=CUSTOM">
-                <GoldButton variant="gold" size="lg" withArrow>
+                <ActionButton variant="gold" size="lg" withArrow>
                   Request a quotation
-                </GoldButton>
+                </ActionButton>
               </Link>
               <Link href="/login">
-                <GoldButton
+                <ActionButton
                   variant="ghost"
                   size="lg"
                   className="text-white ring-white/20 hover:bg-white/[0.08]"
                 >
                   Apply as a supplier
-                </GoldButton>
+                </ActionButton>
               </Link>
             </div>
           </div>

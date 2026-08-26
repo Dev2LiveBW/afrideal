@@ -209,7 +209,7 @@ function Row({
         ) : (
           <>
             <p className="text-[11.5px] leading-4 text-muted">Request a quote</p>
-            <p className="mt-2 inline-flex items-center gap-1.5 rounded bg-surface-raised px-3 py-2 text-[13.5px] font-medium text-ink ring-1 ring-inset ring-hairline-strong transition-colors duration-300 group-hover:bg-ink group-hover:text-white">
+            <p className="mt-2 inline-flex items-center gap-1.5 rounded bg-surface-raised px-3 py-2 text-[13.5px] font-medium text-ink ring-1 ring-inset ring-hairline-strong transition-colors duration-300 group-hover:bg-forest group-hover:text-white group-hover:ring-forest">
               Get a quote
               <ArrowRight
                 size={13}

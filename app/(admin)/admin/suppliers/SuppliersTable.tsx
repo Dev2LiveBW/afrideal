@@ -7,7 +7,7 @@ import { Building2, Star } from 'lucide-react';
 import toast from 'react-hot-toast';
 
 import { ConfirmDialog } from '@/components/brand/ConfirmDialog';
-import { GoldButton } from '@/components/brand/GoldButton';
+import { ActionButton } from '@/components/brand/ActionButton';
 import { MoneyText } from '@/components/brand/MoneyText';
 import { EmptyState } from '@/components/brand/Panel';
 import { StatusBadge } from '@/components/brand/StatusBadge';
@@ -74,7 +74,7 @@ export function SuppliersTable({ suppliers, canDecide }: { suppliers: Supplier[]
             className={cn(
               'shrink-0 whitespace-nowrap rounded-full px-3.5 py-2 text-[12.5px] font-medium transition-colors duration-200',
               filter === tab.id
-                ? 'bg-ink text-white'
+                ? 'bg-forest text-white'
                 : 'bg-surface-raised text-body ring-1 ring-inset ring-hairline-strong hover:bg-ink/[0.04]',
             )}
           >
@@ -116,7 +116,7 @@ export function SuppliersTable({ suppliers, canDecide }: { suppliers: Supplier[]
                           {supplier.initials}
                         </span>
                         <span className="min-w-0">
-                          <span className="block truncate text-[13.5px] font-medium text-ink transition-colors hover:text-gold-dark">
+                          <span className="block truncate text-[13.5px] font-medium text-ink transition-colors hover:text-forest">
                             {supplier.name}
                           </span>
                           <span className="block truncate text-[11px] text-muted">{supplier.products_count} products listed</span>
@@ -145,20 +145,20 @@ export function SuppliersTable({ suppliers, canDecide }: { suppliers: Supplier[]
                     <td className="text-right">
                       {canDecide && supplier.status === 'PENDING' ? (
                         <div className="flex justify-end gap-2">
-                          <GoldButton
+                          <ActionButton
                             size="sm"
                             variant="forest"
                             onClick={() => setPending({ supplier, status: 'VERIFIED' })}
                           >
                             Approve
-                          </GoldButton>
-                          <GoldButton
+                          </ActionButton>
+                          <ActionButton
                             size="sm"
                             variant="danger"
                             onClick={() => setPending({ supplier, status: 'REJECTED' })}
                           >
                             Reject
-                          </GoldButton>
+                          </ActionButton>
                         </div>
                       ) : (
                         <Link

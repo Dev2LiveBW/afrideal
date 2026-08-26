@@ -1,3 +1,4 @@
+import Image from 'next/image';
 import Link from 'next/link';
 import { ArrowRight, Building2, ShoppingCart, Search } from 'lucide-react';
 
@@ -5,24 +6,6 @@ import { cn } from '@/lib/utils';
 
 /**
  * The three ways in.
- *
- * The hero argues that the price is published before you commit. That argument
- * only holds for things the suppliers actually stock and at the quantities the
- * ladder publishes, so the moment it lands the page owes the reader the other
- * two doors as well: the runner who goes looking when the catalogue does not
- * carry it, and the quotation desk for volumes past the published rungs.
- *
- * Stated as three doors rather than one primary button with links under it,
- * because they are not a call to action and its afterthoughts - they are three
- * genuinely different transactions. One has a price on the screen; one has a
- * price you are shown before anything is bought; one is answered by a person.
- * Ranking them would tell a visitor who already knows which one they want that
- * they picked wrong.
- *
- * Each door owns one accent, and the same accent follows that path through the
- * rest of the site: forest for the catalogue, gold for sourcing, royal for
- * wholesale. That is the whole reason a third colour was introduced - three
- * doors drawn in two colours make two of them look like the same offer.
  */
 
 type Accent = 'forest' | 'gold' | 'royal';
@@ -32,19 +15,19 @@ const ACCENTS: Record<
   { card: string; medallion: string; kicker: string; action: string }
 > = {
   forest: {
-    card: 'bg-forest-wash/45 ring-forest/15 hover:ring-forest/30',
+    card: 'bg-white ring-hairline hover:ring-forest/30 shadow-sm',
     medallion: 'bg-forest text-white',
     kicker: 'text-forest',
     action: 'bg-forest text-white group-hover:bg-forest-light',
   },
   gold: {
-    card: 'bg-gold-50/60 ring-gold/20 hover:ring-gold/40',
-    medallion: 'bg-gold text-ink',
+    card: 'bg-white ring-hairline hover:ring-gold/40 shadow-sm',
+    medallion: 'bg-gold text-white', // Usually gold buttons have white or ink text, mockup shows white icon inside orange circle
     kicker: 'text-gold-dark',
-    action: 'bg-gold text-ink group-hover:bg-gold-light',
+    action: 'bg-gold text-white group-hover:bg-gold-light',
   },
   royal: {
-    card: 'bg-royal-wash/60 ring-royal/15 hover:ring-royal/30',
+    card: 'bg-white ring-hairline hover:ring-royal/30 shadow-sm',
     medallion: 'bg-royal text-white',
     kicker: 'text-royal',
     action: 'bg-royal text-white group-hover:bg-royal-light',
@@ -59,40 +42,41 @@ export function PathChooser({
   className?: string;
 }) {
   return (
-    <div className={cn('grid gap-4 md:grid-cols-3 md:gap-5', className)}>
+    <div className={cn('grid gap-4 md:grid-cols-3 md:gap-6', className)}>
       <Door
         accent="forest"
-        icon={<ShoppingCart size={19} strokeWidth={1.6} />}
+        icon={<ShoppingCart size={20} strokeWidth={2} />}
         kicker="Shop"
-        title="From verified suppliers"
+        title="From Verified Suppliers"
         body={
           <>
-            Compare prices across{' '}
-            <span className="font-mono tabular-nums text-ink">{productCount}</span> listings from
-            suppliers we have checked, and buy at the published price.
+            Compare prices from multiple verified suppliers and buy with confidence.
           </>
         }
-        action="Shop now"
+        image="/images/home/shop-items.jpg"
+        action="Shop Now"
         href="/browse"
       />
 
       <Door
         accent="gold"
-        icon={<Search size={19} strokeWidth={1.6} />}
+        icon={<Search size={20} strokeWidth={2} />}
         kicker="Procure"
-        title="We find it for you"
-        body="Can't find it listed? A verified runner sources it, tells you what it costs, and buys it only once you have said yes."
-        action="Request a runner"
+        title="We Find It For You"
+        body="Can't find it listed? Our verified runners will source it, negotiate and procure it for you."
+        image="/images/home/procure-runner.jpg"
+        action="Request a Runner"
         href="/request-a-runner"
       />
 
       <Door
         accent="royal"
-        icon={<Building2 size={19} strokeWidth={1.6} />}
+        icon={<Building2 size={20} strokeWidth={2} />}
         kicker="Wholesale"
-        title="Better prices, bigger value"
-        body="Buy at trade quantities from verified suppliers, on published rungs down to fifty units and by quotation above that."
-        action="Request a wholesale quote"
+        title="Better Prices, Bigger Value"
+        body="Buy in bulk from verified suppliers and grow your business with AfriDeal."
+        image="/images/home/wholesale-pallets.jpg"
+        action="Request Wholesale Quote"
         href="/browse?tier=WHOLESALE"
       />
     </div>
@@ -105,6 +89,7 @@ function Door({
   kicker,
   title,
   body,
+  image,
   action,
   href,
 }: {
@@ -113,6 +98,7 @@ function Door({
   kicker: string;
   title: string;
   body: React.ReactNode;
+  image: string;
   action: string;
   href: string;
 }) {
@@ -122,49 +108,53 @@ function Door({
     <Link
       href={href}
       className={cn(
-        'group flex min-w-0 flex-col rounded-lg p-5 ring-1 ring-inset sm:p-6',
+        'group flex min-w-0 flex-col rounded-2xl p-6 ring-1 ring-inset',
         'transition-[transform,box-shadow] duration-500 ease-[cubic-bezier(0.16,1,0.3,1)]',
-        'hover:-translate-y-0.5 hover:shadow-lift focus-visible:-translate-y-0.5',
+        'hover:-translate-y-1 hover:shadow-lg focus-visible:-translate-y-1',
         tone.card,
       )}
     >
       <div className="flex items-center gap-3">
         <span
           aria-hidden="true"
-          className={cn('flex h-10 w-10 shrink-0 items-center justify-center rounded-full', tone.medallion)}
+          className={cn('flex h-12 w-12 shrink-0 items-center justify-center rounded-full', tone.medallion)}
         >
           {icon}
         </span>
 
         <div className="min-w-0">
-          <p className={cn('font-display text-[15px] font-bold uppercase tracking-[0.08em]', tone.kicker)}>
+          <p className={cn('font-display text-[16px] font-bold uppercase tracking-wide', tone.kicker)}>
             {kicker}
           </p>
-          <p className="mt-0.5 text-[13px] font-medium leading-5 text-ink">{title}</p>
+          <p className="text-[13px] font-semibold leading-5 text-ink">{title}</p>
         </div>
       </div>
 
-      <p className="mt-4 flex-1 text-[13.5px] leading-6 text-body">{body}</p>
+      <p className="mt-4 text-[14px] leading-relaxed text-body">{body}</p>
 
-      {/*
-        The body takes the slack (`flex-1`) so the three actions sit on one
-        baseline however the sentences wrap. The whole panel is the target, so
-        this is a label rather than a nested button - a button inside a link is
-        a second thing to aim at that does the same job.
-      */}
+      <div className="relative mt-6 mb-6 flex-1 w-full aspect-video rounded-lg overflow-hidden bg-surface-sunk">
+        <Image 
+          src={image} 
+          alt={kicker} 
+          fill 
+          sizes="(max-width: 768px) 100vw, 33vw"
+          className="object-cover transition-transform duration-700 ease-out group-hover:scale-105" 
+        />
+      </div>
+
       <p
         className={cn(
-          'mt-6 flex items-center justify-between gap-2 rounded px-4 py-3 text-[13.5px] font-medium',
+          'mt-auto flex items-center justify-center gap-2 rounded-xl px-4 py-3.5 text-[14.5px] font-semibold',
           'transition-colors duration-300',
           tone.action,
         )}
       >
         {action}
         <ArrowRight
-          size={14}
-          strokeWidth={2}
+          size={16}
+          strokeWidth={2.5}
           aria-hidden="true"
-          className="transition-transform duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] group-hover:translate-x-0.5"
+          className="transition-transform duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] group-hover:translate-x-1"
         />
       </p>
     </Link>

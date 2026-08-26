@@ -125,7 +125,7 @@ export default async function AdminSupplierDetailPage({ params }: { params: { id
               <PanelBody className="grid grid-cols-2 gap-4">
                 <div>
                   <p className="text-[11px] text-muted">Lifetime GMV</p>
-                  <MoneyText amount={supplier.total_gmv} size="lg" tone="gold" className="mt-1 block" />
+                  <MoneyText amount={supplier.total_gmv} size="lg" tone="ink" className="mt-1 block" />
                 </div>
                 <div>
                   <p className="text-[11px] text-muted">Orders</p>

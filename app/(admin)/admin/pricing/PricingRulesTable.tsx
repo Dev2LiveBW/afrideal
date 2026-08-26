@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation';
 import { Save } from 'lucide-react';
 import toast from 'react-hot-toast';
 
-import { GoldButton } from '@/components/brand/GoldButton';
+import { ActionButton } from '@/components/brand/ActionButton';
 import { Panel, PanelHeader } from '@/components/brand/Panel';
 import { cn } from '@/lib/utils';
 import type { PricingRule } from '@/types';
@@ -181,7 +181,7 @@ function RuleRow({ initial, canEdit }: { initial: PricingRule; canEdit: boolean 
         </button>
       </td>
       <td className="text-right">
-        <GoldButton
+        <ActionButton
           size="sm"
           variant={dirty ? 'gold' : 'ghost'}
           disabled={!dirty}
@@ -190,7 +190,7 @@ function RuleRow({ initial, canEdit }: { initial: PricingRule; canEdit: boolean 
           onClick={save}
         >
           Save
-        </GoldButton>
+        </ActionButton>
       </td>
     </tr>
   );

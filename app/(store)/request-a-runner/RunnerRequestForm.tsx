@@ -8,7 +8,7 @@ import { z } from 'zod';
 import { AlertCircle } from 'lucide-react';
 import toast from 'react-hot-toast';
 
-import { GoldButton } from '@/components/brand/GoldButton';
+import { ActionButton } from '@/components/brand/ActionButton';
 import { SOURCING_FEE_RATE } from '@/lib/runner-requests';
 import { cn } from '@/lib/utils';
 
@@ -188,9 +188,9 @@ export function RunnerRequestForm({ defaultCity }: { defaultCity?: string }) {
         placeholder="Plot 5412, Extension 12"
       />
 
-      <GoldButton type="submit" variant="gold" size="lg" className="w-full" loading={isSubmitting} withArrow>
+      <ActionButton type="submit" variant="gold" size="lg" className="w-full" loading={isSubmitting} withArrow>
         Send to our runners
-      </GoldButton>
+      </ActionButton>
 
       <p className="text-center text-[12px] leading-5 text-muted">
         Nothing is charged now. A runner accepts the job, finds the item, and sends you the price

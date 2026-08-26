@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react';
 import { AlertTriangle, Clock, MapPin, Navigation, X } from 'lucide-react';
 
-import { GoldButton } from '@/components/brand/GoldButton';
+import { ActionButton } from '@/components/brand/ActionButton';
 import { MoneyText } from '@/components/brand/MoneyText';
 import type { DecoratedShipment } from '../_lib/types';
 
@@ -116,12 +116,12 @@ export function JobAlertModal({
           </div>
 
           <div className="mt-4 flex gap-2.5">
-            <GoldButton variant="ghost" size="lg" className="flex-1" onClick={onDecline} disabled={loading}>
+            <ActionButton variant="ghost" size="lg" className="flex-1" onClick={onDecline} disabled={loading}>
               Decline
-            </GoldButton>
-            <GoldButton variant="forest" size="lg" className="flex-1" onClick={onAccept} loading={loading}>
+            </ActionButton>
+            <ActionButton variant="forest" size="lg" className="flex-1" onClick={onAccept} loading={loading}>
               Accept
-            </GoldButton>
+            </ActionButton>
           </div>
         </div>
       </div>

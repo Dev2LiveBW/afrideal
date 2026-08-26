@@ -50,7 +50,7 @@ export function LadderProof({ rows, className }: { rows: LadderProofRow[]; class
             />
 
             <div className="min-w-0 flex-1">
-              <p className="truncate text-[14px] font-medium text-ink transition-colors group-hover:text-gold-dark">
+              <p className="truncate text-[14px] font-medium text-ink transition-colors group-hover:text-forest">
                 {product.name}
               </p>
 

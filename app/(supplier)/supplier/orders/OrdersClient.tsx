@@ -14,7 +14,7 @@ import {
 import toast from 'react-hot-toast';
 
 import { EmptyState, Panel, PanelBody, PanelHeader } from '@/components/brand/Panel';
-import { GoldButton } from '@/components/brand/GoldButton';
+import { ActionButton } from '@/components/brand/ActionButton';
 import { MoneyText } from '@/components/brand/MoneyText';
 import { StatusBadge } from '@/components/brand/StatusBadge';
 import { SettlementPanel } from '@/components/orders/SettlementPanel';
@@ -143,7 +143,7 @@ export function OrdersClient({
                         {item.variant_label} · qty {item.qty}
                       </p>
                     </div>
-                    <MoneyText amount={item.supplier_cost * item.qty} size="sm" tone="gold" />
+                    <MoneyText amount={item.supplier_cost * item.qty} size="sm" tone="ink" />
                   </li>
                 ))}
               </ul>
@@ -152,7 +152,7 @@ export function OrdersClient({
                 <div className="flex items-center gap-4">
                   <div>
                     <p className="text-[11px] text-muted">Your subtotal</p>
-                    <MoneyText amount={leg.supplier_subtotal} size="md" tone="gold" />
+                    <MoneyText amount={leg.supplier_subtotal} size="md" tone="ink" />
                   </div>
                   <div className="text-[11.5px] text-muted">
                     {qty} unit{qty === 1 ? '' : 's'}
@@ -166,7 +166,7 @@ export function OrdersClient({
                 </div>
 
                 {action ? (
-                  <GoldButton
+                  <ActionButton
                     size="sm"
                     variant="forest"
                     icon={<CheckCircle2 size={14} strokeWidth={1.5} />}
@@ -174,7 +174,7 @@ export function OrdersClient({
                     onClick={() => advance(leg.id, action.status)}
                   >
                     {action.label}
-                  </GoldButton>
+                  </ActionButton>
                 ) : (
                   caption.text && (
                     <p className="flex items-center gap-1.5 text-[12.5px] text-body">

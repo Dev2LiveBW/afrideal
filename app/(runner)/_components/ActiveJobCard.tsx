@@ -6,7 +6,7 @@ import { useRouter } from 'next/navigation';
 import { Camera, CheckCircle2, MapPin, Navigation, PackageCheck, Truck } from 'lucide-react';
 import toast from 'react-hot-toast';
 
-import { GoldButton } from '@/components/brand/GoldButton';
+import { ActionButton } from '@/components/brand/ActionButton';
 import { MoneyText } from '@/components/brand/MoneyText';
 import { cn } from '@/lib/utils';
 import type { ShipmentStatus } from '@/types';
@@ -120,7 +120,7 @@ export function ActiveJobCard({
                     Photo capture placeholder - not wired up in this preview build.
                   </p>
                 </div>
-                <GoldButton
+                <ActionButton
                   className="w-full"
                   size="lg"
                   variant="forest"
@@ -129,7 +129,7 @@ export function ActiveJobCard({
                   onClick={() => advance('DELIVERED')}
                 >
                   Confirm delivered
-                </GoldButton>
+                </ActionButton>
               </div>
             ) : (
               <Link
@@ -141,7 +141,7 @@ export function ActiveJobCard({
               </Link>
             )
           ) : action ? (
-            <GoldButton
+            <ActionButton
               className="w-full"
               size="lg"
               variant="forest"
@@ -150,7 +150,7 @@ export function ActiveJobCard({
               onClick={() => advance(action.next)}
             >
               {action.label}
-            </GoldButton>
+            </ActionButton>
           ) : null}
         </div>
       </div>

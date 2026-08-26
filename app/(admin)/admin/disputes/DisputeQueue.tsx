@@ -8,7 +8,7 @@ import toast from 'react-hot-toast';
 
 import { TabButton } from '@/app/(admin)/admin/_components/TabButton';
 import { ConfirmDialog } from '@/components/brand/ConfirmDialog';
-import { GoldButton } from '@/components/brand/GoldButton';
+import { ActionButton } from '@/components/brand/ActionButton';
 import { MoneyText } from '@/components/brand/MoneyText';
 import { EmptyState, Panel } from '@/components/brand/Panel';
 import { StatusBadge } from '@/components/brand/StatusBadge';
@@ -138,7 +138,7 @@ export function DisputeQueue({ rows, canResolve }: { rows: DisputeRow[]; canReso
                   <div className="flex flex-wrap items-center gap-2">
                     <Link
                       href={`/admin/orders/${row.dispute.order_id}`}
-                      className="font-mono text-[12.5px] font-medium text-ink transition-colors hover:text-gold-dark"
+                      className="font-mono text-[12.5px] font-medium text-ink transition-colors hover:text-forest"
                     >
                       {row.orderReference}
                     </Link>
@@ -151,7 +151,7 @@ export function DisputeQueue({ rows, canResolve }: { rows: DisputeRow[]; canReso
                     {row.dispute.customer_name} vs{' '}
                     <Link
                       href={`/admin/suppliers/${row.dispute.supplier_id}`}
-                      className="text-ink transition-colors hover:text-gold-dark"
+                      className="text-ink transition-colors hover:text-forest"
                     >
                       {row.supplierName}
                     </Link>
@@ -168,16 +168,16 @@ export function DisputeQueue({ rows, canResolve }: { rows: DisputeRow[]; canReso
                   {canResolve && !resolved && (
                     <div className="flex flex-wrap justify-end gap-1.5">
                       {row.dispute.status === 'OPEN' && (
-                        <GoldButton size="sm" variant="ghost" onClick={() => setResolving({ row, status: 'UNDER_REVIEW' })}>
+                        <ActionButton size="sm" variant="ghost" onClick={() => setResolving({ row, status: 'UNDER_REVIEW' })}>
                           Review
-                        </GoldButton>
+                        </ActionButton>
                       )}
-                      <GoldButton size="sm" variant="forest" onClick={() => setResolving({ row, status: 'RESOLVED_SUPPLIER' })}>
+                      <ActionButton size="sm" variant="forest" onClick={() => setResolving({ row, status: 'RESOLVED_SUPPLIER' })}>
                         Favour supplier
-                      </GoldButton>
-                      <GoldButton size="sm" variant="danger" onClick={() => setResolving({ row, status: 'RESOLVED_CUSTOMER' })}>
+                      </ActionButton>
+                      <ActionButton size="sm" variant="danger" onClick={() => setResolving({ row, status: 'RESOLVED_CUSTOMER' })}>
                         Favour customer
-                      </GoldButton>
+                      </ActionButton>
                     </div>
                   )}
                 </div>

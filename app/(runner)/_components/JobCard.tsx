@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation';
 import { MapPin, Navigation, Route } from 'lucide-react';
 import toast from 'react-hot-toast';
 
-import { GoldButton } from '@/components/brand/GoldButton';
+import { ActionButton } from '@/components/brand/ActionButton';
 import { MoneyText } from '@/components/brand/MoneyText';
 import { acceptShipment } from '../_lib/actions';
 import type { DecoratedShipment } from '../_lib/types';
@@ -59,9 +59,9 @@ export function JobCard({ job }: { job: DecoratedShipment }) {
         </div>
       </div>
 
-      <GoldButton className="mt-3.5 w-full" size="lg" loading={saving} onClick={accept}>
+      <ActionButton className="mt-3.5 w-full" size="lg" loading={saving} onClick={accept}>
         Accept job
-      </GoldButton>
+      </ActionButton>
     </div>
   );
 }

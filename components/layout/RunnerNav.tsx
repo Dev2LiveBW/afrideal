@@ -34,7 +34,7 @@ export function RunnerTopbar({ name, avatar }: { name: string; avatar: string })
           <p className="text-[13px] font-medium leading-tight text-white">{name}</p>
           <p className="font-mono text-[10px] uppercase tracking-[0.14em] text-white/40">Runner</p>
         </div>
-        <span className="flex h-9 w-9 items-center justify-center rounded-full bg-gold font-mono text-[12px] font-semibold text-ink">
+        <span className="flex h-9 w-9 items-center justify-center rounded-full bg-forest font-mono text-[12px] font-semibold text-white">
           {avatar}
         </span>
         <button
@@ -65,13 +65,13 @@ export function RunnerTabBar() {
                 href={tab.href}
                 className={cn(
                   'relative flex flex-col items-center gap-1 py-3 transition-colors',
-                  active ? 'text-gold-dark' : 'text-muted',
+                  active ? 'text-forest' : 'text-muted',
                 )}
               >
                 {active && (
                   <motion.span
                     layoutId="runner-tab"
-                    className="absolute inset-x-6 top-0 h-[2px] rounded-full bg-gold"
+                    className="absolute inset-x-6 top-0 h-[2px] rounded-full bg-forest"
                   />
                 )}
                 <Icon size={20} strokeWidth={1.5} />

@@ -41,7 +41,7 @@ export function CategoryTiles({
         </div>
         <Link
           href="/browse"
-          className="inline-flex items-center gap-1.5 text-[13px] font-medium text-gold-dark transition-colors hover:text-ink"
+          className="inline-flex items-center gap-1.5 text-[13px] font-medium text-forest transition-colors hover:text-ink"
         >
           View all
           <ArrowRight size={14} strokeWidth={1.75} />

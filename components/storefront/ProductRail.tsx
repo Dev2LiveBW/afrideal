@@ -181,7 +181,7 @@ export function ProductRail({
                   under the name where the rest of the card's metadata lives.
                 */}
                 <Link href={`/products/${product.id}`}>
-                  <h3 className="line-clamp-2 min-h-[2.4em] text-[13.5px] font-medium leading-5 text-ink transition-colors hover:text-gold-dark">
+                  <h3 className="line-clamp-2 min-h-[2.4em] text-[13.5px] font-medium leading-5 text-ink transition-colors hover:text-forest">
                     {product.name}
                   </h3>
                 </Link>
@@ -198,7 +198,7 @@ export function ProductRail({
 
                 <div className="mt-2.5 flex items-end justify-between gap-2">
                   <div className="min-w-0">
-                    <MoneyText amount={product.price} size="sm" tone="gold" />
+                    <MoneyText amount={product.price} size="sm" tone="ink" />
                     {product.compare_at_price && (
                       <span className="ml-1.5 font-mono text-[11px] tabular-nums text-muted line-through">
                         {product.compare_at_price.toFixed(2)}

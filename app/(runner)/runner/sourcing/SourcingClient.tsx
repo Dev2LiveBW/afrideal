@@ -5,7 +5,7 @@ import { useState } from 'react';
 import { HandCoins, MapPin, PackageSearch, Search, Truck } from 'lucide-react';
 import toast from 'react-hot-toast';
 
-import { GoldButton } from '@/components/brand/GoldButton';
+import { ActionButton } from '@/components/brand/ActionButton';
 import { MoneyText } from '@/components/brand/MoneyText';
 import { EmptyState } from '@/components/brand/Panel';
 import { StatusBadge } from '@/components/brand/StatusBadge';
@@ -209,7 +209,7 @@ function RequestCard({ request, inPool }: { request: RunnerRequest; inPool: bool
           )}
 
           <div className="mt-4 flex flex-wrap gap-2">
-            <GoldButton
+            <ActionButton
               size="sm"
               variant="gold"
               loading={saving}
@@ -223,10 +223,10 @@ function RequestCard({ request, inPool }: { request: RunnerRequest; inPool: bool
               }
             >
               Send for approval
-            </GoldButton>
-            <GoldButton size="sm" variant="ghost" onClick={() => setQuoting(false)}>
+            </ActionButton>
+            <ActionButton size="sm" variant="ghost" onClick={() => setQuoting(false)}>
               Cancel
-            </GoldButton>
+            </ActionButton>
           </div>
         </div>
       )}
@@ -234,7 +234,7 @@ function RequestCard({ request, inPool }: { request: RunnerRequest; inPool: bool
       {/* ── The one move available from where this request stands ────────── */}
       <div className={cn('mt-4 flex flex-wrap gap-2', quoting && 'hidden')}>
         {inPool && request.status === 'REQUESTED' && (
-          <GoldButton
+          <ActionButton
             size="sm"
             variant="gold"
             loading={saving}
@@ -242,11 +242,11 @@ function RequestCard({ request, inPool }: { request: RunnerRequest; inPool: bool
             onClick={() => move('ACCEPTED', {}, 'Job accepted')}
           >
             Take this job
-          </GoldButton>
+          </ActionButton>
         )}
 
         {request.status === 'ACCEPTED' && (
-          <GoldButton
+          <ActionButton
             size="sm"
             variant="ink"
             loading={saving}
@@ -254,18 +254,18 @@ function RequestCard({ request, inPool }: { request: RunnerRequest; inPool: bool
             onClick={() => move('SOURCING', {}, 'Marked as out looking')}
           >
             Start looking
-          </GoldButton>
+          </ActionButton>
         )}
 
         {request.status === 'SOURCING' && (
-          <GoldButton
+          <ActionButton
             size="sm"
             variant="gold"
             icon={<HandCoins size={14} strokeWidth={1.5} />}
             onClick={() => setQuoting(true)}
           >
             I found it
-          </GoldButton>
+          </ActionButton>
         )}
 
         {request.status === 'QUOTED' && (
@@ -273,7 +273,7 @@ function RequestCard({ request, inPool }: { request: RunnerRequest; inPool: bool
         )}
 
         {request.status === 'APPROVED' && (
-          <GoldButton
+          <ActionButton
             size="sm"
             variant="forest"
             loading={saving}
@@ -281,7 +281,7 @@ function RequestCard({ request, inPool }: { request: RunnerRequest; inPool: bool
             onClick={() => move('DELIVERING', {}, 'Marked as on the way')}
           >
             Bought, on the way
-          </GoldButton>
+          </ActionButton>
         )}
 
         {request.status === 'DELIVERING' && (

@@ -9,7 +9,7 @@ import { ChevronRight, LogOut, Menu, Package, ShoppingBag, User, X } from 'lucid
 
 import { AfriDealLogo } from '@/components/brand/AfriDealLogo';
 import { CategoryIcon } from '@/components/storefront/CategoryIcon';
-import { GoldButton } from '@/components/brand/GoldButton';
+import { ActionButton } from '@/components/brand/ActionButton';
 import { cartCount, useAfriDealStore } from '@/store/useAfriDealStore';
 import type { Category } from '@/types';
 import { cn } from '@/lib/utils';
@@ -73,10 +73,22 @@ export function StorefrontNav({ categories = [] }: { categories?: Category[] }) 
 
   return (
     <>
+      {/* 
+        Top mask to hide content scrolling above the pill and to provide a 
+        consistent ground for the backdrop-blur, preventing dark images from 
+        creating muddy smudges in the glass.
+      */}
+      <div 
+        className={cn(
+          "pointer-events-none fixed inset-x-0 top-0 z-30 h-32 bg-gradient-to-b from-surface via-surface/90 to-transparent transition-opacity duration-500",
+          scrolled ? "opacity-100" : "opacity-0"
+        )} 
+      />
+
       <div className="pointer-events-none fixed inset-x-0 top-0 z-40 flex justify-center px-4 pt-4 md:pt-6">
         <motion.nav
           animate={{
-            backgroundColor: scrolled ? 'rgba(255,255,255,0.82)' : 'rgba(255,255,255,0)',
+            backgroundColor: scrolled ? 'rgba(255,255,255,0.95)' : 'rgba(255,255,255,0)',
             borderColor: scrolled ? 'rgba(23,26,24,0.08)' : 'rgba(255,255,255,0)',
           }}
           transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
@@ -126,7 +138,7 @@ export function StorefrontNav({ categories = [] }: { categories?: Category[] }) 
                     initial={{ scale: 0.4, opacity: 0 }}
                     animate={{ scale: [0.4, 1.25, 1], opacity: 1 }}
                     transition={{ duration: 0.42, ease: [0.34, 1.56, 0.64, 1] }}
-                    className="absolute -right-0.5 -top-0.5 flex h-[18px] min-w-[18px] items-center justify-center rounded-full bg-gold px-1 font-mono text-[10px] font-semibold tabular-nums text-ink"
+                    className="absolute -right-0.5 -top-0.5 flex h-[18px] min-w-[18px] items-center justify-center rounded-full bg-forest px-1 font-mono text-[10px] font-semibold tabular-nums text-white"
                   >
                     {count}
                   </motion.span>
@@ -143,7 +155,7 @@ export function StorefrontNav({ categories = [] }: { categories?: Category[] }) 
                     'bg-ink/[0.05] text-ink hover:bg-ink/[0.08]',
                   )}
                 >
-                  <span className="flex h-7 w-7 items-center justify-center rounded-full bg-gold font-mono text-[10.5px] font-semibold text-ink">
+                  <span className="flex h-7 w-7 items-center justify-center rounded-full bg-forest font-mono text-[10.5px] font-semibold text-white">
                     {session.user.avatar}
                   </span>
                   <span className="text-[13px] font-medium">
@@ -166,7 +178,7 @@ export function StorefrontNav({ categories = [] }: { categories?: Category[] }) 
                 Sign in is the quieter of the two: anyone who already has an
                 account knows to look for it, while a first-time visitor needs
                 the account offer put in front of them. So registration takes
-                the gold button and signing in sits beside it as plain text.
+                the solid button and signing in sits beside it as plain text.
               */
               <div className="hidden items-center gap-1 md:flex">
                 <Link
@@ -180,18 +192,14 @@ export function StorefrontNav({ categories = [] }: { categories?: Category[] }) 
                 </Link>
 
                 {/*
-                  Pushed rather than wrapped in a Link: GoldButton always
+                  Pushed rather than wrapped in a Link: ActionButton always
                   renders a <button>, and a button inside an anchor is invalid
                   content. router.push keeps it a client-side navigation, which
                   the previous window.location assignment did not.
                 */}
-                <GoldButton
-                  size="sm"
-                  variant="ink"
-                  onClick={() => router.push('/signup')}
-                >
+                <ActionButton size="sm" onClick={() => router.push('/signup')}>
                   Sign up
-                </GoldButton>
+                </ActionButton>
               </div>
             )}
 
@@ -256,7 +264,7 @@ export function StorefrontNav({ categories = [] }: { categories?: Category[] }) 
                   transition={{ delay: 0.3, duration: 0.45, ease: [0.16, 1, 0.3, 1] }}
                   className="pt-7"
                 >
-                  <p className="font-mono text-eyebrow font-medium uppercase text-white/35">
+                  <p className="font-mono text-eyebrow font-medium uppercase text-white/55">
                     Shop by category
                   </p>
                   <ul className="mt-3">
@@ -269,7 +277,7 @@ export function StorefrontNav({ categories = [] }: { categories?: Category[] }) 
                           <CategoryIcon
                             categoryId={category.id}
                             size={17}
-                            className="shrink-0 text-gold-light/70"
+                            className="shrink-0 text-forest-inverse/70"
                           />
                           <span className="min-w-0 flex-1 truncate">{category.name}</span>
                           <ChevronRight size={15} strokeWidth={1.75} className="shrink-0 text-white/25" />
@@ -287,20 +295,25 @@ export function StorefrontNav({ categories = [] }: { categories?: Category[] }) 
                 className="pt-8"
               >
                 {session?.user ? (
-                  <GoldButton variant="gold" size="lg" className="w-full" onClick={() => signOut({ callbackUrl: '/' })} icon={<LogOut size={16} strokeWidth={1.5} />}>
+                  <ActionButton
+                    variant="ghost"
+                    size="lg"
+                    className="w-full text-white ring-white/25 hover:bg-white/[0.08] hover:ring-white/35"
+                    onClick={() => signOut({ callbackUrl: '/' })}
+                    icon={<LogOut size={16} strokeWidth={1.5} />}
+                  >
                     Sign out
-                  </GoldButton>
+                  </ActionButton>
                 ) : (
                   <div className="space-y-3">
-                    <GoldButton
-                      variant="gold"
+                    <ActionButton
                       size="lg"
                       className="w-full"
                       withArrow
                       onClick={() => router.push('/signup')}
                     >
                       Create an account
-                    </GoldButton>
+                    </ActionButton>
 
                     <Link
                       href="/login"
@@ -321,12 +334,12 @@ export function StorefrontNav({ categories = [] }: { categories?: Category[] }) 
 
 export function StorefrontFooter() {
   return (
-    <footer className="grain relative overflow-hidden bg-ink text-white">
+    <footer className="grain relative overflow-hidden bg-forest-dark text-white">
       <div className="mx-auto max-w-market px-6 py-16">
         <div className="grid gap-10 md:grid-cols-[1.4fr_1fr_1fr_1fr]">
           <div>
-            <AfriDealLogo variant="dark" size="md" />
-            <p className="measure mt-4 text-[13.5px] leading-6 text-white/55">
+            <AfriDealLogo variant="dark" size="md" withTagline />
+            <p className="measure mt-4 text-[13.5px] leading-6 text-white/65">
               A procurement marketplace for Botswana and South Africa. Five published packages
               price every product from a single unit to ninety-nine, suppliers are verified before
               they can list, and orders are routed on reliability rather than on the lowest cost.
@@ -339,7 +352,7 @@ export function StorefrontFooter() {
             { heading: 'Platform', links: [['Runner portal', '/runner/dashboard'], ['Admin console', '/admin/dashboard'], ['Create an account', '/signup'], ['Sign in', '/login']] },
           ].map((column) => (
             <div key={column.heading}>
-              <p className="font-mono text-eyebrow font-medium uppercase text-white/35">
+              <p className="font-mono text-eyebrow font-medium uppercase text-white/55">
                 {column.heading}
               </p>
               <ul className="mt-4 space-y-2.5">
@@ -347,7 +360,7 @@ export function StorefrontFooter() {
                   <li key={label}>
                     <Link
                       href={href}
-                      className="text-[13.5px] text-white/65 transition-colors hover:text-gold-light"
+                      className="text-[13.5px] text-white/65 transition-colors hover:text-forest-inverse"
                     >
                       {label}
                     </Link>
@@ -366,17 +379,17 @@ export function StorefrontFooter() {
           soften this into a reassurance about money being safe with us.
         */}
         <div className="mt-12 border-t border-white/10 pt-6">
-          <p className="text-[12px] leading-5 text-white/45">
+          <p className="text-[12px] leading-5 text-white/60">
             AfriDeal is not a payment provider. Customer payments are processed by licensed payment
             partners, and AfriDeal does not hold funds on behalf of buyers or suppliers.
           </p>
 
           <div className="mt-5 flex flex-wrap items-center justify-between gap-4">
-            <p className="text-[12.5px] text-white/40">
+            <p className="text-[12.5px] text-white/60">
               © {new Date().getFullYear()} AfriDeal. Gaborone, Botswana. Proudly connecting
               Botswana to the world.
             </p>
-            <p className="flex items-center gap-2 font-mono text-[10.5px] uppercase tracking-[0.16em] text-white/35">
+            <p className="flex items-center gap-2 font-mono text-[10.5px] uppercase tracking-[0.16em] text-white/55">
               <Package size={13} strokeWidth={1.5} />
               DPO Pay · Orange Money · PayGate
             </p>

@@ -4,7 +4,7 @@ import { useEffect } from 'react';
 import { RotateCw } from 'lucide-react';
 
 import { AfriDealLogo } from '@/components/brand/AfriDealLogo';
-import { GoldButton } from '@/components/brand/GoldButton';
+import { ActionButton } from '@/components/brand/ActionButton';
 
 export default function ErrorBoundary({
   error,
@@ -35,14 +35,13 @@ export default function ErrorBoundary({
       </code>
 
       <div className="mt-8">
-        <GoldButton
-          variant="gold"
+        <ActionButton
           size="md"
           onClick={reset}
           icon={<RotateCw size={15} strokeWidth={1.5} />}
         >
           Try again
-        </GoldButton>
+        </ActionButton>
       </div>
     </main>
   );

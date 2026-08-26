@@ -75,7 +75,7 @@ export default async function ProductPage({ params }: { params: { id: string } }
     );
 
   return (
-    <div className="mx-auto max-w-market px-6 pb-24 pt-28">
+    <div className="mx-auto max-w-market px-6 pb-24 pt-32">
       <Breadcrumb
         trail={[
           { label: 'Home', href: '/' },

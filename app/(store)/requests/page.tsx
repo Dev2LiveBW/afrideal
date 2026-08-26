@@ -3,7 +3,7 @@ import Link from 'next/link';
 import { redirect } from 'next/navigation';
 import { PackageSearch } from 'lucide-react';
 
-import { GoldButton } from '@/components/brand/GoldButton';
+import { ActionButton } from '@/components/brand/ActionButton';
 import { MoneyText } from '@/components/brand/MoneyText';
 import { EmptyState } from '@/components/brand/Panel';
 import { AccountSidebar } from '@/components/storefront/AccountPanels';
@@ -52,9 +52,9 @@ export default async function RequestsPage() {
             </div>
 
             <Link href="/request-a-runner" className="shrink-0">
-              <GoldButton variant="gold" size="md" withArrow>
+              <ActionButton variant="gold" size="md" withArrow>
                 New request
-              </GoldButton>
+              </ActionButton>
             </Link>
           </div>
 
@@ -65,9 +65,9 @@ export default async function RequestsPage() {
               description="When you ask a runner to find something, it will appear here with its price and progress."
               action={
                 <Link href="/request-a-runner">
-                  <GoldButton variant="gold" size="md" withArrow>
+                  <ActionButton variant="gold" size="md" withArrow>
                     Request a runner
-                  </GoldButton>
+                  </ActionButton>
                 </Link>
               }
               className="mt-8 rounded-md border border-hairline bg-surface-raised"

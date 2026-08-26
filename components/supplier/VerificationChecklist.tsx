@@ -6,7 +6,7 @@ import { Check, FileText, X } from 'lucide-react';
 import toast from 'react-hot-toast';
 
 import { ConfirmDialog } from '@/components/brand/ConfirmDialog';
-import { GoldButton } from '@/components/brand/GoldButton';
+import { ActionButton } from '@/components/brand/ActionButton';
 import { StatusBadge } from '@/components/brand/StatusBadge';
 import { dateTime } from '@/lib/format';
 import { cn } from '@/lib/utils';
@@ -169,23 +169,23 @@ export function VerificationChecklist({
           <div className="flex flex-wrap gap-2">
             {currentStatus === 'PENDING' && (
               <>
-                <GoldButton size="sm" variant="forest" onClick={() => setDecision('VERIFIED')}>
+                <ActionButton size="sm" variant="forest" onClick={() => setDecision('VERIFIED')}>
                   Approve supplier
-                </GoldButton>
-                <GoldButton size="sm" variant="danger" onClick={() => setDecision('REJECTED')}>
+                </ActionButton>
+                <ActionButton size="sm" variant="danger" onClick={() => setDecision('REJECTED')}>
                   Reject application
-                </GoldButton>
+                </ActionButton>
               </>
             )}
             {currentStatus === 'VERIFIED' && (
-              <GoldButton size="sm" variant="danger" onClick={() => setDecision('SUSPENDED')}>
+              <ActionButton size="sm" variant="danger" onClick={() => setDecision('SUSPENDED')}>
                 Suspend supplier
-              </GoldButton>
+              </ActionButton>
             )}
             {(currentStatus === 'SUSPENDED' || currentStatus === 'REJECTED') && (
-              <GoldButton size="sm" variant="forest" onClick={() => setDecision('VERIFIED')}>
+              <ActionButton size="sm" variant="forest" onClick={() => setDecision('VERIFIED')}>
                 {currentStatus === 'SUSPENDED' ? 'Reinstate supplier' : 'Re-approve supplier'}
-              </GoldButton>
+              </ActionButton>
             )}
           </div>
         </div>

@@ -63,13 +63,18 @@
     font-feature-settings: 'tnum' 1;
   }
 
+  /*
+   * Selection and focus are brand surfaces, and both were amber. Amber means
+   * "money in motion" in this system, so having it flash on every text drag and
+   * every tab stop was the fastest way to teach a user that it means nothing.
+   */
   ::selection {
-    background-color: #f0c040;
-    color: #111111;
+    background-color: theme('colors.forest.wash');
+    color: theme('colors.forest.ink');
   }
 
   :focus-visible {
-    outline: 2px solid theme('colors.gold.DEFAULT');
+    outline: 2px solid theme('colors.forest.DEFAULT');
     outline-offset: 2px;
     border-radius: 4px;
   }
@@ -115,13 +120,13 @@
     @apply font-mono text-eyebrow font-medium uppercase text-muted;
   }
 
-  /* Table conventions: gold header rule, alternating body, hairline dividers. */
+  /* Table conventions: forest header rule, alternating body, hairline dividers. */
   .data-table {
     @apply w-full border-collapse text-left text-[13px];
   }
 
   .data-table thead th {
-    @apply whitespace-nowrap border-b border-hairline-strong bg-gold/[0.07] px-4 py-3 font-mono text-eyebrow font-medium uppercase text-gold-dark;
+    @apply whitespace-nowrap border-b border-hairline-strong bg-forest-wash/70 px-4 py-3 font-mono text-eyebrow font-medium uppercase text-forest-ink;
   }
 
   .data-table tbody td {
@@ -137,7 +142,7 @@
   }
 
   .data-table tbody tr:hover {
-    @apply bg-gold/[0.05];
+    @apply bg-forest/[0.05];
   }
 
   /* Skeletons — a moving sheen, never a static grey block. */

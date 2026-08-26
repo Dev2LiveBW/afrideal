@@ -110,7 +110,7 @@ export function CustomerTierBar({ customerType }: { customerType: CustomerType |
         </p>
         <Link
           href="/login"
-          className="text-[12.5px] font-medium text-gold-dark transition-colors hover:text-ink"
+          className="text-[12.5px] font-medium text-forest transition-colors hover:text-ink"
         >
           Apply for a business account →
         </Link>

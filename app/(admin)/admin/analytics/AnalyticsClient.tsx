@@ -139,7 +139,7 @@ export function AnalyticsClient({
                       <td>
                         <Link
                           href={`/admin/suppliers/${supplier.id}`}
-                          className="font-medium text-ink transition-colors hover:text-gold-dark"
+                          className="font-medium text-ink transition-colors hover:text-forest"
                         >
                           {supplier.name}
                         </Link>

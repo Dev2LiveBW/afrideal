@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation';
 import { Save } from 'lucide-react';
 import toast from 'react-hot-toast';
 
-import { GoldButton } from '@/components/brand/GoldButton';
+import { ActionButton } from '@/components/brand/ActionButton';
 
 /** Staff-only note, saved via PATCH /api/orders/:id { action: 'ADD_NOTE' }. */
 export function OrderNotes({ orderId, initialNote }: { orderId: string; initialNote: string }) {
@@ -46,9 +46,9 @@ export function OrderNotes({ orderId, initialNote }: { orderId: string; initialN
       />
       <div className="mt-3 flex items-center justify-between gap-3">
         <p className="text-[11.5px] text-muted">Staff-only. Never shown to the customer or supplier.</p>
-        <GoldButton size="sm" onClick={save} loading={saving} disabled={!dirty} icon={<Save size={14} strokeWidth={1.5} />}>
+        <ActionButton size="sm" onClick={save} loading={saving} disabled={!dirty} icon={<Save size={14} strokeWidth={1.5} />}>
           Save note
-        </GoldButton>
+        </ActionButton>
       </div>
     </div>
   );

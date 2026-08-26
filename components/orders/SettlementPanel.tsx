@@ -6,7 +6,7 @@ import { FileText, HandCoins, RotateCcw, ShieldCheck } from 'lucide-react';
 import toast from 'react-hot-toast';
 
 import { ConfirmDialog } from '@/components/brand/ConfirmDialog';
-import { GoldButton } from '@/components/brand/GoldButton';
+import { ActionButton } from '@/components/brand/ActionButton';
 import { MoneyText } from '@/components/brand/MoneyText';
 import { StatusBadge } from '@/components/brand/StatusBadge';
 import { Enclosure } from '@/components/brand/Panel';
@@ -164,22 +164,22 @@ export function SettlementPanel({
 
           {canAct && open && (
             <div className="mt-5 flex flex-wrap gap-2 border-t border-hairline pt-4">
-              <GoldButton
+              <ActionButton
                 size="sm"
                 variant="forest"
                 icon={<HandCoins size={14} strokeWidth={1.5} />}
                 onClick={() => setAction('SETTLED')}
               >
                 Settle invoice
-              </GoldButton>
-              <GoldButton
+              </ActionButton>
+              <ActionButton
                 size="sm"
                 variant="ghost"
                 icon={<RotateCcw size={14} strokeWidth={1.5} />}
                 onClick={() => setAction('CANCELLED')}
               >
                 Cancel invoice
-              </GoldButton>
+              </ActionButton>
             </div>
           )}
 

@@ -134,7 +134,7 @@ export default async function AdminRunnersPage() {
                   <div className="flex items-center justify-between border-t border-hairline pt-3.5">
                     <div>
                       <p className="text-[11px] text-muted">Earnings MTD</p>
-                      <MoneyText amount={runner.earnings_mtd} size="md" tone="gold" className="mt-0.5 block" />
+                      <MoneyText amount={runner.earnings_mtd} size="md" tone="ink" className="mt-0.5 block" />
                     </div>
                     <div className="text-right">
                       <p className="text-[11px] text-muted">Lifetime</p>

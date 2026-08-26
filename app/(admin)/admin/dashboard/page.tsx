@@ -255,7 +255,7 @@ export default async function AdminDashboardPage() {
                       <td>
                         <Link
                           href={`/admin/orders/${order.id}`}
-                          className="font-mono text-[12.5px] font-medium text-ink transition-colors hover:text-gold-dark"
+                          className="font-mono text-[12.5px] font-medium text-ink transition-colors hover:text-forest"
                         >
                           {order.reference}
                         </Link>

@@ -9,7 +9,7 @@ import { Clock, ClipboardCheck, FileText, Inbox, Send, ShoppingBag } from 'lucid
 import toast from 'react-hot-toast';
 
 import { EmptyState, Panel, PanelBody, PanelHeader } from '@/components/brand/Panel';
-import { GoldButton } from '@/components/brand/GoldButton';
+import { ActionButton } from '@/components/brand/ActionButton';
 import { MoneyText } from '@/components/brand/MoneyText';
 import { relative } from '@/lib/format';
 import { cn } from '@/lib/utils';
@@ -276,9 +276,9 @@ export function QuotesClient({ rows }: { rows: QuoteRow[] }) {
                         </>
                       )}
                     </p>
-                    <GoldButton type="submit" size="sm" icon={<Send size={14} strokeWidth={1.5} />} loading={saving}>
+                    <ActionButton type="submit" size="sm" icon={<Send size={14} strokeWidth={1.5} />} loading={saving}>
                       {selected.kind === 'ORDER' ? 'Send quote & confirm' : 'Send quote'}
-                    </GoldButton>
+                    </ActionButton>
                   </div>
                 </form>
               </PanelBody>

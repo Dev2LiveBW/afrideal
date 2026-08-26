@@ -116,7 +116,7 @@ export default async function OrderTrackingPage({
 
               <Link
                 href="/orders"
-                className="inline-flex shrink-0 items-center gap-1.5 text-[13px] font-medium text-gold-dark transition-colors hover:text-ink"
+                className="inline-flex shrink-0 items-center gap-1.5 text-[13px] font-medium text-forest transition-colors hover:text-ink"
               >
                 <CircleHelp size={14} strokeWidth={1.5} />
                 Need help?
@@ -166,7 +166,7 @@ export default async function OrderTrackingPage({
                     <div className="min-w-0 flex-1">
                       <Link
                         href={`/products/${item.product_id}`}
-                        className="text-[14px] font-medium text-ink transition-colors hover:text-gold-dark"
+                        className="text-[14px] font-medium text-ink transition-colors hover:text-forest"
                       >
                         {item.product_name}
                       </Link>
@@ -216,7 +216,7 @@ export default async function OrderTrackingPage({
                     <div className="flex items-baseline justify-between border-t border-hairline pt-3">
                       <dt className="font-medium text-ink">Total</dt>
                       <dd>
-                        <MoneyText amount={order.total} size="lg" tone="gold" />
+                        <MoneyText amount={order.total} size="lg" tone="ink" />
                       </dd>
                     </div>
                     <div className="flex items-center justify-between pt-1">
@@ -317,7 +317,7 @@ export default async function OrderTrackingPage({
                 </h2>
                 <Link
                   href="/orders"
-                  className="text-[13px] font-medium text-gold-dark transition-colors hover:text-ink"
+                  className="text-[13px] font-medium text-forest transition-colors hover:text-ink"
                 >
                   Order history →
                 </Link>
@@ -340,7 +340,7 @@ export default async function OrderTrackingPage({
                       {entry.reference}
                     </p>
                     <p className="mt-1">
-                      <MoneyText amount={entry.total} size="sm" tone="gold" />
+                      <MoneyText amount={entry.total} size="sm" tone="ink" />
                     </p>
 
                     <div className="mt-3.5">

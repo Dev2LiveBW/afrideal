@@ -54,7 +54,7 @@ export function ProductTabs({
               <motion.span
                 layoutId="product-tab-underline"
                 transition={{ duration: 0.32, ease: [0.16, 1, 0.3, 1] }}
-                className="absolute inset-x-0 -bottom-px h-[2px] rounded-full bg-gold"
+                className="absolute inset-x-0 -bottom-px h-[2px] rounded-full bg-forest"
               />
             )}
           </button>
@@ -180,7 +180,7 @@ export function ProductTabs({
                       </span>
                       <span className="h-1.5 flex-1 overflow-hidden rounded-full bg-ink/[0.07]">
                         <span
-                          className="block h-full rounded-full bg-gold"
+                          className="block h-full rounded-full bg-forest"
                           style={{ width: `${Math.round(weight * 100)}%` }}
                         />
                       </span>

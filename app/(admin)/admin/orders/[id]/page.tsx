@@ -90,7 +90,7 @@ export default async function AdminOrderDetailPage({ params }: { params: { id: s
               </div>
               <div className="border-t border-hairline pt-3 text-[12.5px]">
                 <p className="text-muted">Order total</p>
-                <MoneyText amount={order.total} size="lg" tone="gold" className="mt-0.5 block" />
+                <MoneyText amount={order.total} size="lg" tone="ink" className="mt-0.5 block" />
                 <p className="mt-1 text-[11px] text-muted">
                   Subtotal <span className="font-mono">{order.subtotal.toFixed(2)}</span> + delivery{' '}
                   <span className="font-mono">{order.delivery_fee.toFixed(2)}</span>
@@ -109,7 +109,7 @@ export default async function AdminOrderDetailPage({ params }: { params: { id: s
                     {leg.supplier ? (
                       <Link
                         href={`/admin/suppliers/${leg.supplier.id}`}
-                        className="text-[13.5px] font-medium text-ink transition-colors hover:text-gold-dark"
+                        className="text-[13.5px] font-medium text-ink transition-colors hover:text-forest"
                       >
                         {leg.supplier.name}
                       </Link>
@@ -194,7 +194,7 @@ export default async function AdminOrderDetailPage({ params }: { params: { id: s
                     <td>
                       <Link
                         href={`/admin/products/${item.product_id}`}
-                        className="flex items-center gap-2 font-medium text-ink transition-colors hover:text-gold-dark"
+                        className="flex items-center gap-2 font-medium text-ink transition-colors hover:text-forest"
                       >
                         <Swatch
                           image={primaryImage.get(item.product_id)}
@@ -215,7 +215,7 @@ export default async function AdminOrderDetailPage({ params }: { params: { id: s
                       <MoneyText amount={item.unit_price} size="sm" />
                     </td>
                     <td>
-                      <MoneyText amount={item.line_total} size="sm" tone="gold" />
+                      <MoneyText amount={item.line_total} size="sm" tone="ink" />
                     </td>
                     <td className="text-right text-[12.5px] text-muted">
                       {legs.find((leg) => leg.supplier_id === item.supplier_id)?.supplier?.name ?? item.supplier_id}

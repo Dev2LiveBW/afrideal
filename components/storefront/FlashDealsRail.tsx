@@ -4,7 +4,7 @@ import Link from 'next/link';
 import { useEffect, useState } from 'react';
 import { Zap } from 'lucide-react';
 
-import { GoldButton } from '@/components/brand/GoldButton';
+import { ActionButton } from '@/components/brand/ActionButton';
 import { MoneyText } from '@/components/brand/MoneyText';
 import { Swatch } from '@/components/storefront/Swatch';
 import { categoryPalette } from '@/lib/category-palette';
@@ -95,9 +95,9 @@ export function FlashDealsRail({
           )}
 
           <Link href="/browse">
-            <GoldButton variant="ink" size="sm">
+            <ActionButton variant="ink" size="sm">
               See all
-            </GoldButton>
+            </ActionButton>
           </Link>
         </div>
       </div>
@@ -140,7 +140,7 @@ export function FlashDealsRail({
                 </h3>
 
                 <p className="mt-2">
-                  <MoneyText amount={product.price} size="sm" tone="gold" />
+                  <MoneyText amount={product.price} size="sm" tone="ink" />
                   {product.compare_at_price && (
                     <span className="ml-1.5 font-mono text-[11px] tabular-nums text-muted line-through">
                       {product.compare_at_price.toFixed(2)}

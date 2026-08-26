@@ -2,7 +2,7 @@ import type { Metadata } from 'next';
 import Link from 'next/link';
 import { LogIn, PackageOpen } from 'lucide-react';
 
-import { GoldButton } from '@/components/brand/GoldButton';
+import { ActionButton } from '@/components/brand/ActionButton';
 import { MoneyText } from '@/components/brand/MoneyText';
 import { StatusBadge } from '@/components/brand/StatusBadge';
 import { EmptyState } from '@/components/brand/Panel';
@@ -26,9 +26,9 @@ export default async function OrdersPage() {
           description="Your order history and delivery status, tied to your account."
           action={
             <Link href="/login">
-              <GoldButton variant="gold" size="md" withArrow>
+              <ActionButton size="md" withArrow>
                 Sign in
-              </GoldButton>
+              </ActionButton>
             </Link>
           }
           className="rounded-md border border-hairline bg-surface-raised"
@@ -67,9 +67,9 @@ export default async function OrdersPage() {
           description="When you place an order it will appear here with live tracking and delivery status."
           action={
             <Link href="/browse">
-              <GoldButton variant="gold" size="md" withArrow>
+              <ActionButton size="md" withArrow>
                 Browse the marketplace
-              </GoldButton>
+              </ActionButton>
             </Link>
           }
           className="mt-8 rounded-md border border-hairline bg-surface-raised"
@@ -118,7 +118,7 @@ export default async function OrdersPage() {
                   <StatusBadge status={order.status} />
 
                   <div className="text-right">
-                    <MoneyText amount={order.total} size="md" tone="gold" />
+                    <MoneyText amount={order.total} size="md" tone="ink" />
                   </div>
 
                   <span className="font-mono text-[10px] uppercase tracking-[0.14em] text-muted transition-colors group-hover:text-ink">

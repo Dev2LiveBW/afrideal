@@ -5,7 +5,7 @@ import { useMemo, useState } from 'react';
 import { FileText, PackageSearch, Search, X } from 'lucide-react';
 
 import { EmptyState } from '@/components/brand/Panel';
-import { GoldButton } from '@/components/brand/GoldButton';
+import { ActionButton } from '@/components/brand/ActionButton';
 import { ProductCard } from '@/components/products/ProductCard';
 import { TierSwitch, type TierSwitchOption } from '@/components/storefront/TierSwitch';
 import { cn } from '@/lib/utils';
@@ -168,7 +168,7 @@ export function BrowseClient({
             className={cn(
               'rounded-full px-3.5 py-2 text-[13px] font-medium transition-colors duration-200',
               category === 'all'
-                ? 'bg-ink text-white'
+                ? 'bg-forest text-white'
                 : 'bg-surface-raised text-body ring-1 ring-inset ring-hairline-strong hover:bg-ink/[0.04] hover:text-ink',
             )}
           >
@@ -182,7 +182,7 @@ export function BrowseClient({
               className={cn(
                 'rounded-full px-3.5 py-2 text-[13px] font-medium transition-colors duration-200',
                 category === entry.id
-                  ? 'bg-ink text-white'
+                  ? 'bg-forest text-white'
                   : 'bg-surface-raised text-body ring-1 ring-inset ring-hairline-strong hover:bg-ink/[0.04] hover:text-ink',
               )}
             >
@@ -244,7 +244,7 @@ export function BrowseClient({
           title="Nothing matches that"
           description="Try a broader search, or clear the category filter to see the whole catalogue."
           action={
-            <GoldButton
+            <ActionButton
               variant="ghost"
               size="sm"
               onClick={() => {
@@ -253,7 +253,7 @@ export function BrowseClient({
               }}
             >
               Clear filters
-            </GoldButton>
+            </ActionButton>
           }
           className="rounded-md border border-hairline bg-surface-raised"
         />

@@ -1,7 +1,7 @@
 import Link from 'next/link';
 
 import { AfriDealLogo } from '@/components/brand/AfriDealLogo';
-import { GoldButton } from '@/components/brand/GoldButton';
+import { ActionButton } from '@/components/brand/ActionButton';
 
 export default function NotFound() {
   return (
@@ -19,14 +19,14 @@ export default function NotFound() {
 
       <div className="mt-9 flex flex-wrap items-center justify-center gap-3">
         <Link href="/">
-          <GoldButton variant="gold" size="md" withArrow>
+          <ActionButton size="md" withArrow>
             Back to the marketplace
-          </GoldButton>
+          </ActionButton>
         </Link>
         <Link href="/browse">
-          <GoldButton variant="ghost" size="md" className="text-white ring-white/20 hover:bg-white/10">
+          <ActionButton variant="ghost" size="md" className="text-white ring-white/20 hover:bg-white/10">
             Browse products
-          </GoldButton>
+          </ActionButton>
         </Link>
       </div>
     </main>

@@ -6,7 +6,7 @@ import { CheckCircle2, MessageSquareWarning } from 'lucide-react';
 import toast from 'react-hot-toast';
 
 import { ConfirmDialog } from '@/components/brand/ConfirmDialog';
-import { GoldButton } from '@/components/brand/GoldButton';
+import { ActionButton } from '@/components/brand/ActionButton';
 import { bwp } from '@/lib/format';
 import { cn } from '@/lib/utils';
 
@@ -67,7 +67,7 @@ export function OrderActions({
     <>
       <div className="space-y-2">
         {canConfirm && (
-          <GoldButton
+          <ActionButton
             variant="forest"
             size="md"
             className="w-full"
@@ -75,11 +75,11 @@ export function OrderActions({
             onClick={() => setDialog('confirm')}
           >
             Confirm delivery
-          </GoldButton>
+          </ActionButton>
         )}
 
         {canDispute && (
-          <GoldButton
+          <ActionButton
             variant="ghost"
             size="md"
             className="w-full"
@@ -87,7 +87,7 @@ export function OrderActions({
             onClick={() => setDialog('dispute')}
           >
             Report a problem
-          </GoldButton>
+          </ActionButton>
         )}
       </div>
 

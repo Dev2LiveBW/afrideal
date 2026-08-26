@@ -11,7 +11,7 @@ import { AlertCircle, ArrowRight, CheckCircle2, Loader2, Lock } from 'lucide-rea
 import { z } from 'zod';
 
 import { AfriDealLogo } from '@/components/brand/AfriDealLogo';
-import { GoldButton } from '@/components/brand/GoldButton';
+import { ActionButton } from '@/components/brand/ActionButton';
 import { landingFor } from '@/lib/roles';
 import { cn } from '@/lib/utils';
 
@@ -25,12 +25,12 @@ const Credentials = z.object({
 type CredentialValues = z.infer<typeof Credentials>;
 
 const ROLE_TONE: Record<string, string> = {
-  SUPER_ADMIN: 'bg-gold/15 text-gold-light ring-gold/25',
-  OPERATIONS_ADMIN: 'bg-gold/15 text-gold-light ring-gold/25',
-  FINANCE_ADMIN: 'bg-gold/15 text-gold-light ring-gold/25',
-  SUPPLIER_OWNER: 'bg-forest/25 text-[#8FD69F] ring-forest/30',
-  RUNNER: 'bg-white/10 text-white/75 ring-white/15',
-  CUSTOMER: 'bg-white/10 text-white/75 ring-white/15',
+  SUPER_ADMIN: 'bg-gold-50 text-gold-700 ring-gold/20',
+  OPERATIONS_ADMIN: 'bg-gold-50 text-gold-700 ring-gold/20',
+  FINANCE_ADMIN: 'bg-gold-50 text-gold-700 ring-gold/20',
+  SUPPLIER_OWNER: 'bg-forest-wash text-forest ring-forest/20',
+  RUNNER: 'bg-surface-sunk text-ink ring-hairline',
+  CUSTOMER: 'bg-surface-sunk text-ink ring-hairline',
 };
 
 const ROLE_SHORT: Record<string, string> = {
@@ -110,34 +110,34 @@ export function LoginClient() {
       {/* ── Left: the argument ─────────────────────────────────────────── */}
       <div className="flex flex-col lg:sticky lg:top-16 lg:self-start">
         <Link href="/" className="w-fit">
-          <AfriDealLogo variant="dark" size="md" />
+          <AfriDealLogo variant="light" size="md" />
         </Link>
 
-        <p className="eyebrow mt-14 text-white/35">Sign in</p>
+        <p className="eyebrow mt-14 text-muted">Sign in</p>
 
-        <h1 className="mt-3 font-display text-[34px] font-bold leading-[1.08] tracking-[-0.03em] text-white sm:text-[42px]">
+        <h1 className="mt-3 font-display text-[34px] font-bold leading-[1.08] tracking-[-0.03em] text-ink sm:text-[42px]">
           The price is on
           <br />
           the page already.
         </h1>
 
-        <p className="measure mt-5 text-[15px] leading-7 text-white/55">
+        <p className="measure mt-5 text-[15px] leading-7 text-body">
           AfriDeal publishes what a product costs at one unit and at fifty, so a buyer can compare
           before committing rather than after. Suppliers are verified before they can list, and
           orders route to whoever is most likely to deliver, not to whoever is cheapest.
         </p>
 
-        <dl className="mt-10 grid grid-cols-3 gap-5 border-t border-white/10 pt-7">
+        <dl className="mt-10 grid grid-cols-3 gap-5 border-t border-hairline pt-7">
           {[
             ['5', 'verified suppliers'],
             ['17', 'live products'],
             ['60 / 44%', 'retail / bulk markup'],
           ].map(([value, label]) => (
             <div key={label}>
-              <dt className="font-mono text-[19px] font-semibold tabular-nums text-gold-light">
+              <dt className="font-mono text-[19px] font-semibold tabular-nums text-gold-dark">
                 {value}
               </dt>
-              <dd className="mt-1 text-[12px] leading-4 text-white/45">{label}</dd>
+              <dd className="mt-1 text-[12px] leading-4 text-muted">{label}</dd>
             </div>
           ))}
         </dl>
@@ -145,15 +145,15 @@ export function LoginClient() {
 
       {/* ── Right: the form and the demo cards ─────────────────────────── */}
       <div className="flex flex-col">
-        <div className="rounded-lg border border-white/10 bg-white/[0.035] p-6 backdrop-blur-sm sm:p-7">
+        <div className="rounded-lg border border-hairline bg-white shadow-card p-6  sm:p-7">
           {justRegistered && (
-            <div className="mb-5 flex items-start gap-2.5 rounded border border-forest/40 bg-forest/15 px-3.5 py-3">
+            <div className="mb-5 flex items-start gap-2.5 rounded border border-forest/20 bg-forest-wash px-3.5 py-3">
               <CheckCircle2
                 size={15}
                 strokeWidth={1.5}
-                className="mt-0.5 shrink-0 text-[#8FD69F]"
+                className="mt-0.5 shrink-0 text-forest"
               />
-              <p className="text-[13px] leading-5 text-[#8FD69F]">
+              <p className="text-[13px] leading-5 text-forest">
                 Your account is ready. Sign in with the email and password you just chose.
               </p>
             </div>
@@ -163,7 +163,7 @@ export function LoginClient() {
             <div>
               <label
                 htmlFor="email"
-                className="mb-1.5 block text-[13px] font-medium text-white/80"
+                className="mb-1.5 block text-[13px] font-medium text-ink"
               >
                 Email address
               </label>
@@ -175,21 +175,21 @@ export function LoginClient() {
                 {...register('email')}
                 aria-invalid={errors.email ? 'true' : undefined}
                 className={cn(
-                  'w-full rounded border bg-white/[0.04] px-3.5 py-3 text-[14px] text-white outline-none',
-                  'placeholder:text-white/30 transition-colors duration-200',
-                  'focus:border-gold/60 focus:bg-white/[0.06]',
-                  errors.email ? 'border-danger/60' : 'border-white/12',
+                  'w-full rounded border bg-surface px-3.5 py-3 text-[14px] text-ink outline-none',
+                  'placeholder:text-muted transition-colors duration-200',
+                  'focus:border-gold/60 focus:bg-surface-sunk',
+                  errors.email ? 'border-danger/60' : 'border-hairline',
                 )}
               />
               {errors.email && (
-                <p className="mt-1.5 text-[12px] text-[#F2A9A2]">{errors.email.message}</p>
+                <p className="mt-1.5 text-[12px] text-danger">{errors.email.message}</p>
               )}
             </div>
 
             <div>
               <label
                 htmlFor="password"
-                className="mb-1.5 block text-[13px] font-medium text-white/80"
+                className="mb-1.5 block text-[13px] font-medium text-ink"
               >
                 Password
               </label>
@@ -201,14 +201,14 @@ export function LoginClient() {
                 {...register('password')}
                 aria-invalid={errors.password ? 'true' : undefined}
                 className={cn(
-                  'w-full rounded border bg-white/[0.04] px-3.5 py-3 text-[14px] text-white outline-none',
-                  'placeholder:text-white/30 transition-colors duration-200',
-                  'focus:border-gold/60 focus:bg-white/[0.06]',
-                  errors.password ? 'border-danger/60' : 'border-white/12',
+                  'w-full rounded border bg-surface px-3.5 py-3 text-[14px] text-ink outline-none',
+                  'placeholder:text-muted transition-colors duration-200',
+                  'focus:border-gold/60 focus:bg-surface-sunk',
+                  errors.password ? 'border-danger/60' : 'border-hairline',
                 )}
               />
               {errors.password && (
-                <p className="mt-1.5 text-[12px] text-[#F2A9A2]">{errors.password.message}</p>
+                <p className="mt-1.5 text-[12px] text-danger">{errors.password.message}</p>
               )}
             </div>
 
@@ -218,26 +218,26 @@ export function LoginClient() {
                 animate={{ opacity: 1, y: 0 }}
                 className="flex items-start gap-2.5 rounded border border-danger/30 bg-danger/10 px-3.5 py-3"
               >
-                <AlertCircle size={15} strokeWidth={1.5} className="mt-0.5 shrink-0 text-[#F2A9A2]" />
-                <p className="text-[13px] leading-5 text-[#F2A9A2]">{formError}</p>
+                <AlertCircle size={15} strokeWidth={1.5} className="mt-0.5 shrink-0 text-danger" />
+                <p className="text-[13px] leading-5 text-danger">{formError}</p>
               </motion.div>
             )}
 
-            <GoldButton type="submit" variant="gold" size="lg" className="w-full" loading={busy} withArrow>
+            <ActionButton type="submit" size="lg" className="w-full" loading={busy} withArrow>
               Sign in
-            </GoldButton>
+            </ActionButton>
           </form>
 
-          <p className="mt-4 flex items-center justify-center gap-1.5 text-[12px] text-white/35">
+          <p className="mt-4 flex items-center justify-center gap-1.5 text-[12px] text-muted">
             <Lock size={12} strokeWidth={1.5} />
             Sessions expire after 8 hours
           </p>
 
-          <p className="mt-5 border-t border-white/10 pt-4 text-center text-[13px] text-white/55">
+          <p className="mt-5 border-t border-hairline pt-4 text-center text-[13px] text-body">
             New to AfriDeal?{' '}
             <Link
               href="/signup"
-              className="font-medium text-gold-light underline-offset-4 hover:underline"
+              className="font-medium text-gold-dark underline-offset-4 hover:underline"
             >
               Create an account
             </Link>
@@ -247,16 +247,16 @@ export function LoginClient() {
         {/* ── Demo cards ───────────────────────────────────────────────── */}
         <div className="mt-9">
           <div className="mb-4 flex items-center gap-3">
-            <p className="eyebrow whitespace-nowrap text-white/35">Or sign in as</p>
-            <span className="h-px flex-1 bg-white/10" />
+            <p className="eyebrow whitespace-nowrap text-muted">Or sign in as</p>
+            <span className="h-px flex-1 bg-hairline" />
           </div>
 
           <div className="space-y-5">
             {DEMO_GROUPS.map((group, groupIndex) => (
               <div key={group.heading}>
                 <div className="mb-2 flex items-baseline gap-2">
-                  <p className="text-[12px] font-semibold text-white/70">{group.heading}</p>
-                  <p className="text-[11.5px] text-white/30">{group.caption}</p>
+                  <p className="text-[12px] font-semibold text-ink">{group.heading}</p>
+                  <p className="text-[11.5px] text-muted">{group.caption}</p>
                 </div>
 
                 <div className="grid gap-2 sm:grid-cols-2">
@@ -281,8 +281,8 @@ export function LoginClient() {
                           'transition-all duration-300 ease-[cubic-bezier(0.16,1,0.3,1)]',
                           'disabled:cursor-wait',
                           isPending
-                            ? 'border-gold/50 bg-gold/[0.12]'
-                            : 'border-white/10 bg-white/[0.03] hover:border-white/20 hover:bg-white/[0.06]',
+                            ? 'border-forest/40 bg-forest-wash'
+                            : 'border-hairline bg-white shadow-sm hover:border-hairline-strong hover:bg-surface-sunk',
                           busy && !isPending && 'opacity-40',
                         )}
                       >
@@ -290,10 +290,10 @@ export function LoginClient() {
                           className={cn(
                             'flex h-9 w-9 shrink-0 items-center justify-center rounded-full font-mono text-[11.5px] font-semibold',
                             account.role === 'SUPPLIER_OWNER'
-                              ? 'bg-forest text-white'
+                              ? 'bg-forest-wash text-forest'
                               : account.role === 'CUSTOMER' || account.role === 'RUNNER'
-                                ? 'bg-white/12 text-white'
-                                : 'bg-gold text-ink',
+                                ? 'bg-surface-sunk text-ink'
+                                : 'bg-gold-50 text-gold-700',
                           )}
                         >
                           {account.avatar}
@@ -301,7 +301,7 @@ export function LoginClient() {
 
                         <span className="min-w-0 flex-1">
                           <span className="flex items-center gap-1.5">
-                            <span className="truncate text-[13px] font-medium text-white">
+                            <span className="truncate text-[13px] font-medium text-ink">
                               {account.name}
                             </span>
                           </span>
@@ -314,13 +314,13 @@ export function LoginClient() {
                             >
                               {ROLE_SHORT[account.role]}
                             </span>
-                            <span className="truncate text-[11px] text-white/35">{account.blurb}</span>
+                            <span className="truncate text-[11px] text-muted">{account.blurb}</span>
                           </span>
                         </span>
 
-                        <span className="shrink-0 text-white/25 transition-all duration-300 group-hover:translate-x-0.5 group-hover:text-gold-light">
+                        <span className="shrink-0 text-ink/25 transition-all duration-300 group-hover:translate-x-0.5 group-hover:text-gold-dark">
                           {isPending ? (
-                            <Loader2 size={15} strokeWidth={1.5} className="animate-spin text-gold-light" />
+                            <Loader2 size={15} strokeWidth={1.5} className="animate-spin text-gold-dark" />
                           ) : (
                             <ArrowRight size={15} strokeWidth={1.5} />
                           )}
@@ -333,7 +333,7 @@ export function LoginClient() {
             ))}
           </div>
 
-          <p className="mt-6 text-[11.5px] leading-5 text-white/30">
+          <p className="mt-6 text-[11.5px] leading-5 text-muted">
             Demo accounts. Passwords are stored in plain text in the seed data and are listed in the
             README, which is fine for a demo and is the first thing to change before real users.
           </p>

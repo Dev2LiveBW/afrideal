@@ -90,7 +90,7 @@ export function ProductsBoard({
 
               <div className="flex flex-1 flex-col p-4">
                 <p className="eyebrow">{product.categoryName}</p>
-                <h3 className="mt-1 text-[14.5px] font-semibold leading-5 text-ink transition-colors group-hover:text-gold-dark">
+                <h3 className="mt-1 text-[14.5px] font-semibold leading-5 text-ink transition-colors group-hover:text-forest">
                   {product.name}
                 </h3>
 
@@ -113,7 +113,7 @@ export function ProductsBoard({
                 <div className="mt-3 flex items-end justify-between border-t border-hairline pt-3">
                   <div>
                     <p className="text-[10.5px] text-muted">Sell price</p>
-                    <MoneyText amount={product.price} size="md" tone="gold" />
+                    <MoneyText amount={product.price} size="md" tone="ink" />
                   </div>
                   <span className="font-mono text-[10px] uppercase tracking-[0.14em] text-muted transition-colors group-hover:text-ink">
                     Manage →
@@ -136,7 +136,7 @@ function TabButton({ label, active, onClick }: { label: string; active: boolean;
       className={cn(
         'shrink-0 whitespace-nowrap rounded-full px-3.5 py-2 text-[12.5px] font-medium transition-colors duration-200',
         active
-          ? 'bg-ink text-white'
+          ? 'bg-forest text-white'
           : 'bg-surface-raised text-body ring-1 ring-inset ring-hairline-strong hover:bg-ink/[0.04]',
       )}
     >

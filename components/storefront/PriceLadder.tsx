@@ -202,7 +202,7 @@ function Rung({
           : [
               'px-4 py-3',
               active
-                ? 'bg-gold/[0.14] ring-1 ring-inset ring-gold/35'
+                ? 'bg-forest-wash ring-1 ring-inset ring-forest/30'
                 : priced
                   ? 'bg-ink/[0.035] hover:bg-ink/[0.06]'
                   : 'bg-ink/[0.018] hover:bg-ink/[0.04]',
@@ -254,7 +254,7 @@ function Rung({
               'mt-0.5 font-mono text-[11px] tabular-nums',
               door.savingPerUnit > 0
                 ? dark
-                  ? 'text-[#8FD69F]'
+                  ? 'text-forest-inverse'
                   : 'text-forest'
                 : dark
                   ? 'text-white/50'
@@ -298,7 +298,7 @@ function Rung({
             'transition-[transform,background-color] duration-500 ease-[cubic-bezier(0.16,1,0.3,1)]',
             'group-hover:translate-x-0.5',
             priced
-              ? 'bg-gold text-ink group-hover:bg-gold-light'
+              ? 'bg-forest text-white group-hover:bg-forest-light'
               : 'bg-white/10 text-white/55 group-hover:bg-white/[0.16]',
           )}
         >

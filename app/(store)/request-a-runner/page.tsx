@@ -86,7 +86,7 @@ export default async function RequestARunnerPage() {
             <span className="font-mono tabular-nums text-ink">{online.length}</span> of{' '}
             <span className="font-mono tabular-nums text-ink">{runners.length}</span> runners are
             online right now.{' '}
-            <Link href="/requests" className="text-gold-dark underline underline-offset-4">
+            <Link href="/requests" className="text-forest underline underline-offset-4">
               See your existing requests
             </Link>
             .

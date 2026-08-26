@@ -13,9 +13,15 @@ import { cn } from '@/lib/utils';
 /**
  * The console sidebar, shared by the admin and supplier portals.
  *
- * Admin runs it dark with gold active states; supplier runs it light with
- * forest. Same structure in both so the two portals feel like one product, and
- * so a nav item never moves between them.
+ * Admin runs it dark on Deep Canopy, supplier runs it light on paper. Both mark
+ * the active item in the brand green - inverted to Sage on the dark ground,
+ * where forest itself would sit a shade off the canopy behind it and disappear.
+ * Same structure and the same colour logic in both, so the two portals feel
+ * like one product and a nav item never moves or changes meaning between them.
+ *
+ * The dark tone used to be neutral ink with amber active states, which made the
+ * admin console look like a different company from the storefront and spent the
+ * money-in-motion accent on "you are on this page".
  */
 
 export interface NavItem {
@@ -53,7 +59,7 @@ export function ConsoleSidebar({
       transition={{ duration: 0.34, ease: [0.16, 1, 0.3, 1] }}
       className={cn(
         'sticky top-0 z-30 flex h-screen shrink-0 flex-col',
-        dark ? 'bg-ink text-white' : 'border-r border-hairline bg-surface-raised text-ink',
+        dark ? 'bg-forest-dark text-white' : 'border-r border-hairline bg-surface-raised text-ink',
       )}
     >
       {/* Brand */}
@@ -115,7 +121,7 @@ export function ConsoleSidebar({
                         collapsed && 'justify-center',
                         active
                           ? dark
-                            ? 'bg-gold/[0.16] text-gold-light'
+                            ? 'bg-white/[0.11] text-forest-inverse'
                             : 'bg-forest-wash text-forest'
                           : dark
                             ? 'text-white/60 hover:bg-white/[0.06] hover:text-white'
@@ -128,7 +134,7 @@ export function ConsoleSidebar({
                           layoutId={`rail-${tone}`}
                           className={cn(
                             'absolute left-0 top-1/2 h-5 w-[2px] -translate-y-1/2 rounded-full',
-                            dark ? 'bg-gold' : 'bg-forest',
+                            dark ? 'bg-forest-inverse' : 'bg-forest',
                           )}
                         />
                       )}
@@ -153,7 +159,7 @@ export function ConsoleSidebar({
                         <span
                           className={cn(
                             'ml-auto shrink-0 rounded-full px-1.5 py-0.5 font-mono text-[10px] font-semibold tabular-nums',
-                            dark ? 'bg-gold text-ink' : 'bg-forest text-white',
+                            dark ? 'bg-forest-inverse text-forest-dark' : 'bg-forest text-white',
                           )}
                         >
                           {item.badge}

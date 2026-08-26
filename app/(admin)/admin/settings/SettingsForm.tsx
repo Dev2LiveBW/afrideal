@@ -4,7 +4,7 @@ import { useState } from 'react';
 import { Info, Save } from 'lucide-react';
 import toast from 'react-hot-toast';
 
-import { GoldButton } from '@/components/brand/GoldButton';
+import { ActionButton } from '@/components/brand/ActionButton';
 import { Panel, PanelBody, PanelHeader } from '@/components/brand/Panel';
 import { cn } from '@/lib/utils';
 
@@ -128,9 +128,9 @@ export function SettingsForm({
       </Panel>
 
       <div className="flex justify-end">
-        <GoldButton onClick={save} loading={saving} icon={<Save size={15} strokeWidth={1.5} />}>
+        <ActionButton onClick={save} loading={saving} icon={<Save size={15} strokeWidth={1.5} />}>
           Save changes
-        </GoldButton>
+        </ActionButton>
       </div>
     </div>
   );

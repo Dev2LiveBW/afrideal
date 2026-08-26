@@ -8,7 +8,7 @@ import toast from 'react-hot-toast';
 
 import { TabButton } from '@/app/(admin)/admin/_components/TabButton';
 import { ConfirmDialog } from '@/components/brand/ConfirmDialog';
-import { GoldButton } from '@/components/brand/GoldButton';
+import { ActionButton } from '@/components/brand/ActionButton';
 import { MoneyText } from '@/components/brand/MoneyText';
 import { EmptyState } from '@/components/brand/Panel';
 import { StatusBadge } from '@/components/brand/StatusBadge';
@@ -122,7 +122,7 @@ export function OrdersTable({ rows }: { rows: OrderRow[] }) {
                     <td>
                       <Link
                         href={`/admin/orders/${row.order.id}`}
-                        className="font-mono text-[12.5px] font-medium text-ink transition-colors hover:text-gold-dark"
+                        className="font-mono text-[12.5px] font-medium text-ink transition-colors hover:text-forest"
                       >
                         {row.order.reference}
                       </Link>
@@ -156,14 +156,14 @@ export function OrdersTable({ rows }: { rows: OrderRow[] }) {
                     </td>
                     <td className="text-right">
                       {row.pendingPayablesIds.length > 0 ? (
-                        <GoldButton
+                        <ActionButton
                           size="sm"
                           variant="forest"
                           icon={<Unlock size={13} strokeWidth={1.5} />}
                           onClick={() => setPending(row)}
                         >
                           Release
-                        </GoldButton>
+                        </ActionButton>
                       ) : (
                         <span className="text-[11.5px] text-muted">-</span>
                       )}

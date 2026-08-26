@@ -19,7 +19,7 @@ export function TabButton({
       className={cn(
         'shrink-0 whitespace-nowrap rounded-full px-3.5 py-2 text-[12.5px] font-medium transition-colors duration-200',
         active
-          ? 'bg-ink text-white'
+          ? 'bg-forest text-white'
           : 'bg-surface-raised text-body ring-1 ring-inset ring-hairline-strong hover:bg-ink/[0.04]',
       )}
     >

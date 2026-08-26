@@ -5,7 +5,7 @@ import { useEffect, useState } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
 import { AlertCircle, CheckCircle2, FileText, X } from 'lucide-react';
 
-import { GoldButton } from '@/components/brand/GoldButton';
+import { ActionButton } from '@/components/brand/ActionButton';
 import { cn } from '@/lib/utils';
 import type { CustomerType } from '@/types';
 
@@ -132,9 +132,9 @@ export function RfqModal({
                   We are sourcing {qty.toLocaleString('en-GB')} units across verified suppliers and
                   will come back with a landed price, usually within two working days.
                 </p>
-                <GoldButton variant="gold" size="md" className="mt-6" onClick={onClose}>
+                <ActionButton variant="gold" size="md" className="mt-6" onClick={onClose}>
                   Done
-                </GoldButton>
+                </ActionButton>
               </div>
             ) : (
               <>
@@ -229,12 +229,12 @@ export function RfqModal({
                 </div>
 
                 <div className="flex justify-end gap-2 border-t border-hairline bg-surface px-6 py-4">
-                  <GoldButton variant="ghost" size="sm" onClick={onClose} disabled={saving}>
+                  <ActionButton variant="ghost" size="sm" onClick={onClose} disabled={saving}>
                     Cancel
-                  </GoldButton>
-                  <GoldButton variant="gold" size="sm" onClick={submit} loading={saving}>
+                  </ActionButton>
+                  <ActionButton variant="gold" size="sm" onClick={submit} loading={saving}>
                     Send request
-                  </GoldButton>
+                  </ActionButton>
                 </div>
               </>
             )}

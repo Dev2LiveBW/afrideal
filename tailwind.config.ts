@@ -3,11 +3,31 @@ import type { Config } from 'tailwindcss';
 /**
  * AfriDeal design tokens.
  *
- * Palette follows the build command: black metallic ground, Amber Gold as the
- * primary action colour, Forest Green demoted to "verified / success".
- * Craft rules follow DESIGN.md v1.0: warm neutrals over cool grey, hairline
- * structure, tabular figures on every number that means something, and amber
- * reserved for "money in motion but not yet settled".
+ * Palette per DESIGN.md §2, which this file spent a while contradicting. The
+ * roles, stated once so they stop drifting:
+ *
+ *   Forest Green   the brand, and every affirmative action. Primary buttons,
+ *                  active nav, focus rings, verified badges, confirmed states.
+ *   Deep Canopy    pressed primary, and the console sidebar ground.
+ *   Field Green    hover lift on primary, first chart series.
+ *   Sage Wash      soft fill behind anything verified, selected or settled.
+ *   Pula Amber     the single accent. It means money in motion but not yet
+ *                  settled - pending approval, a quote awaiting an answer, a
+ *                  price a runner has found but nobody has agreed to. It never
+ *                  decorates, because the moment it does it stops meaning that.
+ *   Logo Gold      the mark and the logotype only. Never a fill, never a
+ *                  border, never a background - it is held out of the interface
+ *                  so the mark keeps its charge. It lives in AfriDealLogo.tsx
+ *                  and deliberately has no utility class here.
+ *   Royal / Ocean  one package rung each, and nothing else.
+ *
+ * The implementation used to run amber as the primary action colour with forest
+ * demoted to "success", which put the accent on every button on the platform
+ * and left the brand colour doing nothing. Everything affirmative is forest
+ * now; amber is back to meaning one thing.
+ *
+ * Craft rules also follow DESIGN.md v1.0: warm neutrals over cool grey,
+ * hairline structure, and tabular figures on every number that means something.
  */
 const config: Config = {
   darkMode: 'class',
@@ -28,16 +48,24 @@ const config: Config = {
           600: '#3a3a3a',
           500: '#4d4d4d',
         },
-        // ── Amber Gold: the primary action colour ─────────────────────
+        /*
+         * ── Pula Amber: the single accent ─────────────────────────────
+         *
+         * DEFAULT was #D4920A, which is Logo Gold. Using the logotype's own
+         * colour as an interface fill is what stopped the mark reading as a
+         * mark. #C08A1E is the same hue held at 73% saturation for interface
+         * use, per DESIGN.md; on white it is a fill colour, not a text colour,
+         * and `gold-dark` / `gold-700` carry amber type at AA.
+         */
         gold: {
-          DEFAULT: '#D4920A',
+          DEFAULT: '#C08A1E',
           light: '#f0c040',
           dark: '#8B5E0A',
           50: '#FBF0D8',
           100: '#F6E2B4',
           700: '#7A5709',
         },
-        // ── Forest Green: verified, released, success ─────────────────
+        // ── Forest Green: the brand, and every affirmative action ─────
         forest: {
           DEFAULT: '#1A5C2A',
           light: '#2E7D3F',
@@ -47,6 +75,13 @@ const config: Config = {
           /* The closing trust band: forest taken down far enough to hold white
              body copy at AA without becoming the ink used by the consoles. */
           deep: '#16351F',
+          /*
+           * Primary, inverted for a dark ground. Forest itself is only a shade
+           * off Deep Canopy, so an active nav item drawn in it on the console
+           * sidebar would be invisible; this is the same brand hue lifted until
+           * it clears 8:1 on that ground.
+           */
+          inverse: '#8FD69F',
         },
         /*
          * Royal — the wholesale path.
@@ -136,7 +171,10 @@ const config: Config = {
       boxShadow: {
         card: '0 1px 2px rgba(23,26,24,0.04), 0 8px 24px -12px rgba(23,26,24,0.12)',
         lift: '0 2px 4px rgba(23,26,24,0.05), 0 18px 40px -16px rgba(23,26,24,0.22)',
-        gold: '0 8px 28px -10px rgba(212,146,10,0.55)',
+        /* The primary button's own shadow: forest, thrown down and softened,
+           so the lift reads as the button's weight rather than as a halo. */
+        forest: '0 2px 4px rgba(15,58,27,0.18), 0 10px 28px -12px rgba(15,58,27,0.55)',
+        gold: '0 2px 4px rgba(122,87,9,0.16), 0 10px 28px -12px rgba(192,138,30,0.5)',
       },
       keyframes: {
         'count-in': {

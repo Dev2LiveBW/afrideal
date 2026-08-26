@@ -128,7 +128,7 @@ export default async function AdminSourcingPage() {
                         {request.runner_name ? (
                           <Link
                             href="/admin/runners"
-                            className="transition-colors hover:text-gold-dark"
+                            className="transition-colors hover:text-forest"
                           >
                             {request.runner_name}
                           </Link>

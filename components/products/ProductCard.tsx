@@ -163,7 +163,7 @@ export function ProductCard({
             It is a classification rather than a heading, so it now joins the
             rating and supplier count in the metadata row below the name.
           */}
-          <h3 className="text-[14.5px] font-semibold leading-5 text-ink transition-colors group-hover:text-gold-dark">
+          <h3 className="text-[14.5px] font-semibold leading-5 text-ink transition-colors group-hover:text-forest">
             {product.name}
           </h3>
 

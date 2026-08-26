@@ -2,7 +2,7 @@ import type { Metadata } from 'next';
 import Link from 'next/link';
 import { ArrowRight, MessageCircleQuestion, ShieldCheck } from 'lucide-react';
 
-import { GoldButton } from '@/components/brand/GoldButton';
+import { ActionButton } from '@/components/brand/ActionButton';
 import { HowItWorks } from '@/components/storefront/HowItWorks';
 import { OrderFlows } from '@/components/storefront/OrderFlows';
 import { PackagesBoard } from '@/components/storefront/PackagesBoard';
@@ -65,8 +65,7 @@ export default async function HowItWorksPage() {
         <div className="mx-auto max-w-market px-6 py-16 lg:py-20">
           <div className="grid gap-10 lg:grid-cols-[minmax(0,1.15fr)_minmax(0,0.85fr)] lg:items-center lg:gap-16">
             <div className="min-w-0">
-              <p className="eyebrow">Using AfriDeal</p>
-              <h1 className="mt-4 font-display text-[34px] font-bold leading-[1.06] tracking-[-0.03em] text-ink sm:text-[46px]">
+              <h1 className="font-display text-[34px] font-bold leading-[1.06] tracking-[-0.03em] text-ink sm:text-[46px]">
                 Nothing is paid out
                 <br />
                 <span className="text-forest">until you confirm</span> it arrived.
@@ -215,18 +214,18 @@ export default async function HowItWorksPage() {
 
           <div className="flex flex-wrap gap-3">
             <Link href="/browse">
-              <GoldButton variant="forest" size="md" withArrow>
+              <ActionButton variant="forest" size="md" withArrow>
                 Browse products
-              </GoldButton>
+              </ActionButton>
             </Link>
             <Link href="/request-a-runner">
-              <GoldButton variant="gold" size="md">
+              <ActionButton variant="gold" size="md">
                 Request a runner
-              </GoldButton>
+              </ActionButton>
             </Link>
             <Link
               href="/#packages"
-              className="inline-flex items-center gap-1.5 self-center text-[13.5px] font-medium text-gold-dark underline-offset-4 hover:underline"
+              className="inline-flex items-center gap-1.5 self-center text-[13.5px] font-medium text-forest underline-offset-4 hover:underline"
             >
               See the packages
               <ArrowRight size={13} strokeWidth={1.75} aria-hidden="true" />

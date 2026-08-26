@@ -11,7 +11,7 @@ import { AlertCircle, Check, Lock, ShieldCheck, Truck, Wallet } from 'lucide-rea
 import { z } from 'zod';
 
 import { AfriDealLogo } from '@/components/brand/AfriDealLogo';
-import { GoldButton } from '@/components/brand/GoldButton';
+import { ActionButton } from '@/components/brand/ActionButton';
 import { cn } from '@/lib/utils';
 
 /**
@@ -130,24 +130,24 @@ export function SignupClient() {
       {/* ── Left: what an account is for ───────────────────────────────── */}
       <div className="flex flex-col lg:sticky lg:top-16 lg:self-start">
         <Link href="/" className="w-fit">
-          <AfriDealLogo variant="dark" size="md" />
+          <AfriDealLogo variant="light" size="md" />
         </Link>
 
-        <p className="eyebrow mt-14 text-white/35">Create an account</p>
+        <p className="eyebrow mt-14 text-muted">Create an account</p>
 
-        <h1 className="mt-3 font-display text-[34px] font-bold leading-[1.08] tracking-[-0.03em] text-white sm:text-[42px]">
+        <h1 className="mt-3 font-display text-[34px] font-bold leading-[1.08] tracking-[-0.03em] text-ink sm:text-[42px]">
           Buy from suppliers
           <br />
           you have not met yet.
         </h1>
 
-        <p className="measure mt-5 text-[15px] leading-7 text-white/55">
+        <p className="measure mt-5 text-[15px] leading-7 text-body">
           An AfriDeal account takes a minute and costs nothing. It is what lets you check out, track
           an order, raise a dispute, and ask for a quote on a quantity nobody has published a price
           for.
         </p>
 
-        <ul className="mt-10 space-y-6 border-t border-white/10 pt-8">
+        <ul className="mt-10 space-y-6 border-t border-hairline pt-8">
           {PROMISES.map(({ icon: Icon, title, body }, index) => (
             <motion.li
               key={title}
@@ -156,12 +156,12 @@ export function SignupClient() {
               transition={{ delay: 0.08 + index * 0.07, duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
               className="flex gap-4"
             >
-              <span className="mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-gold/15 text-gold-light">
+              <span className="mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-gold/15 text-gold-dark">
                 <Icon size={15} strokeWidth={1.5} />
               </span>
               <span>
-                <span className="block text-[13.5px] font-semibold text-white">{title}</span>
-                <span className="measure mt-1 block text-[13px] leading-6 text-white/50">
+                <span className="block text-[13.5px] font-semibold text-ink">{title}</span>
+                <span className="measure mt-1 block text-[13px] leading-6 text-ink/50">
                   {body}
                 </span>
               </span>
@@ -169,9 +169,9 @@ export function SignupClient() {
           ))}
         </ul>
 
-        <p className="mt-9 text-[12.5px] leading-6 text-white/35">
+        <p className="mt-9 text-[12.5px] leading-6 text-muted">
           Selling instead of buying?{' '}
-          <Link href="/login" className="text-gold-light underline-offset-4 hover:underline">
+          <Link href="/login" className="text-gold-dark underline-offset-4 hover:underline">
             Supplier accounts
           </Link>{' '}
           are verified before they can list, so they are opened with our team rather than from this
@@ -181,7 +181,7 @@ export function SignupClient() {
 
       {/* ── Right: the form ────────────────────────────────────────────── */}
       <div className="flex flex-col">
-        <div className="rounded-lg border border-white/10 bg-white/[0.035] p-6 backdrop-blur-sm sm:p-7">
+        <div className="rounded-lg border border-hairline bg-white shadow-card p-6  sm:p-7">
           <form onSubmit={onSubmit} className="space-y-4" noValidate>
             <Field
               id="name"
@@ -226,7 +226,7 @@ export function SignupClient() {
                       key={check.label}
                       className={cn(
                         'flex items-center gap-1.5 text-[11.5px] transition-colors duration-200',
-                        check.met ? 'text-[#8FD69F]' : 'text-white/35',
+                        check.met ? 'text-forest' : 'text-muted',
                       )}
                     >
                       <Check
@@ -260,41 +260,40 @@ export function SignupClient() {
                 <AlertCircle
                   size={15}
                   strokeWidth={1.5}
-                  className="mt-0.5 shrink-0 text-[#F2A9A2]"
+                  className="mt-0.5 shrink-0 text-danger"
                 />
-                <p className="text-[13px] leading-5 text-[#F2A9A2]">{formError}</p>
+                <p className="text-[13px] leading-5 text-danger">{formError}</p>
               </motion.div>
             )}
 
-            <GoldButton
+            <ActionButton
               type="submit"
-              variant="gold"
               size="lg"
               className="w-full"
               loading={isSubmitting}
               withArrow
             >
               Create account
-            </GoldButton>
+            </ActionButton>
           </form>
 
-          <p className="mt-4 flex items-center justify-center gap-1.5 text-[12px] text-white/35">
+          <p className="mt-4 flex items-center justify-center gap-1.5 text-[12px] text-muted">
             <Lock size={12} strokeWidth={1.5} />
             Sessions expire after 8 hours
           </p>
         </div>
 
-        <div className="mt-7 rounded-lg border border-white/10 bg-white/[0.02] px-5 py-4">
-          <p className="text-[13px] text-white/55">
+        <div className="mt-7 rounded-lg border border-hairline bg-surface-sunk px-5 py-4">
+          <p className="text-[13px] text-body">
             Already have an account?{' '}
             <Link
               href="/login"
-              className="font-medium text-gold-light underline-offset-4 hover:underline"
+              className="font-medium text-gold-dark underline-offset-4 hover:underline"
             >
               Sign in instead
             </Link>
           </p>
-          <p className="mt-1.5 text-[12px] leading-5 text-white/30">
+          <p className="mt-1.5 text-[12px] leading-5 text-muted">
             The sign-in page also carries the eight demo accounts, if you are here to look around
             rather than to buy.
           </p>
@@ -318,7 +317,7 @@ const Field = forwardRef<
 >(function Field({ id, label, error, ...props }, ref) {
   return (
     <div>
-      <label htmlFor={id} className="mb-1.5 block text-[13px] font-medium text-white/80">
+      <label htmlFor={id} className="mb-1.5 block text-[13px] font-medium text-ink">
         {label}
       </label>
       <input
@@ -328,14 +327,14 @@ const Field = forwardRef<
         aria-describedby={error ? `${id}-error` : undefined}
         {...props}
         className={cn(
-          'w-full rounded border bg-white/[0.04] px-3.5 py-3 text-[14px] text-white outline-none',
-          'placeholder:text-white/30 transition-colors duration-200',
-          'focus:border-gold/60 focus:bg-white/[0.06]',
-          error ? 'border-danger/60' : 'border-white/12',
+          'w-full rounded border bg-surface px-3.5 py-3 text-[14px] text-ink outline-none',
+          'placeholder:text-muted transition-colors duration-200',
+          'focus:border-gold/60 focus:bg-surface-sunk',
+          error ? 'border-danger/60' : 'border-hairline',
         )}
       />
       {error && (
-        <p id={`${id}-error`} className="mt-1.5 text-[12px] text-[#F2A9A2]">
+        <p id={`${id}-error`} className="mt-1.5 text-[12px] text-danger">
           {error}
         </p>
       )}

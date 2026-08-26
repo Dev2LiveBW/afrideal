@@ -8,7 +8,7 @@ import toast from 'react-hot-toast';
 
 import { TabButton } from '@/app/(admin)/admin/_components/TabButton';
 import { ConfirmDialog } from '@/components/brand/ConfirmDialog';
-import { GoldButton } from '@/components/brand/GoldButton';
+import { ActionButton } from '@/components/brand/ActionButton';
 import { MoneyText } from '@/components/brand/MoneyText';
 import { EmptyState } from '@/components/brand/Panel';
 import { StatusBadge } from '@/components/brand/StatusBadge';
@@ -136,12 +136,12 @@ export function PayablesQueue({ rows }: { rows: PayableRow[] }) {
         {selected.size > 0 && (
           <div className="flex items-center gap-2 rounded-full bg-ink/[0.05] py-1.5 pl-4 pr-1.5">
             <span className="text-[12.5px] font-medium text-ink">{selected.size} selected</span>
-            <GoldButton size="sm" variant="forest" onClick={() => setAction('SETTLED')}>
+            <ActionButton size="sm" variant="forest" onClick={() => setAction('SETTLED')}>
               Settle
-            </GoldButton>
-            <GoldButton size="sm" variant="danger" onClick={() => setAction('CANCELLED')}>
+            </ActionButton>
+            <ActionButton size="sm" variant="danger" onClick={() => setAction('CANCELLED')}>
               Cancel
-            </GoldButton>
+            </ActionButton>
           </div>
         )}
       </div>
@@ -197,7 +197,7 @@ export function PayablesQueue({ rows }: { rows: PayableRow[] }) {
                       <td>
                         <Link
                           href={`/admin/orders/${row.record.order_id}`}
-                          className="font-mono text-[12.5px] font-medium text-ink transition-colors hover:text-gold-dark"
+                          className="font-mono text-[12.5px] font-medium text-ink transition-colors hover:text-forest"
                         >
                           {row.orderReference}
                         </Link>
@@ -205,7 +205,7 @@ export function PayablesQueue({ rows }: { rows: PayableRow[] }) {
                       <td>
                         <Link
                           href={`/admin/suppliers/${row.record.supplier_id}`}
-                          className="text-[13px] text-ink transition-colors hover:text-gold-dark"
+                          className="text-[13px] text-ink transition-colors hover:text-forest"
                         >
                           {row.supplierName}
                         </Link>

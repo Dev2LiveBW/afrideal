@@ -9,7 +9,7 @@ import toast from 'react-hot-toast';
 
 import { ConfirmDialog } from '@/components/brand/ConfirmDialog';
 import { EmptyState } from '@/components/brand/Panel';
-import { GoldButton } from '@/components/brand/GoldButton';
+import { ActionButton } from '@/components/brand/ActionButton';
 import { MoneyText } from '@/components/brand/MoneyText';
 import { StatusBadge } from '@/components/brand/StatusBadge';
 import { Swatch } from '@/components/storefront/Swatch';
@@ -90,9 +90,9 @@ export function ProductsClient({ rows, categories }: { rows: Row[]; categories: 
   }
 
   const addButton = (
-    <GoldButton size="sm" icon={<Plus size={14} strokeWidth={1.5} />} onClick={() => setDialogOpen(true)}>
+    <ActionButton size="sm" icon={<Plus size={14} strokeWidth={1.5} />} onClick={() => setDialogOpen(true)}>
       Add product
-    </GoldButton>
+    </ActionButton>
   );
 
   return (
@@ -155,7 +155,7 @@ export function ProductsClient({ rows, categories }: { rows: Row[]; categories: 
                 </div>
                 <div className="bg-surface-raised p-3.5">
                   <p className="text-[10.5px] uppercase tracking-[0.08em] text-muted">Your unit cost</p>
-                  <MoneyText amount={offer.supplier_cost} size="sm" tone="gold" className="mt-1 block" />
+                  <MoneyText amount={offer.supplier_cost} size="sm" tone="ink" className="mt-1 block" />
                 </div>
                 <div className="bg-surface-raised p-3.5">
                   <p className="text-[10.5px] uppercase tracking-[0.08em] text-muted">AfriDeal price</p>

@@ -6,24 +6,49 @@ import { ArrowUpRight, Loader2 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 /**
- * The primary CTA.
+ * The action button.
+ *
+ * `forest` is the default because forest is what an affirmative action looks
+ * like in this system. It used to default to amber, which meant the accent
+ * reserved for money-in-motion was sitting on every confirm, submit and
+ * checkout button on the platform - and a colour that appears on every button
+ * is not an accent, it is the background.
+ *
+ * Choose the variant by what the action does, never by what will stand out:
+ *
+ *   forest   affirmative and primary. Buy, confirm, submit, approve, continue.
+ *   gold     the action is about money that has not settled yet - request a
+ *            quotation, approve a runner's price, release a payment.
+ *   ink      a neutral primary on a surface where forest would be a second
+ *            brand moment competing with one already on screen.
+ *   ghost    secondary, beside a primary.
+ *   danger   destructive or a refusal.
+ *   royal    the wholesale path, and nothing else.
  *
  * When it carries a directional arrow, the arrow lives inside its own circle
  * flush against the right padding. On hover the circle translates up and right
  * while the button body stays put - the internal tension is the point.
  */
 
-type Variant = 'gold' | 'ink' | 'ghost' | 'danger' | 'forest' | 'royal';
+type Variant = 'forest' | 'gold' | 'ink' | 'ghost' | 'danger' | 'royal';
 type Size = 'sm' | 'md' | 'lg';
 
 const VARIANTS: Record<Variant, string> = {
-  gold: 'bg-gradient-to-b from-gold-light to-gold text-ink shadow-gold hover:from-[#f5cc5c] hover:to-[#e0a11c] active:from-gold active:to-gold-dark',
+  /*
+   * A shallow top-down gradient rather than a flat fill: it gives the button a
+   * lit upper edge and a grounded lower one, which is what makes a solid shape
+   * read as a physical control instead of a coloured rectangle. Hover lifts to
+   * Field Green, press drops to Deep Canopy - the two states DESIGN.md already
+   * names, so the button is not inventing its own greens.
+   */
+  forest:
+    'bg-gradient-to-b from-forest-light to-forest text-white shadow-forest hover:from-[#3a8f4c] hover:to-forest-light active:from-forest active:to-forest-dark active:shadow-none',
+  gold: 'bg-gradient-to-b from-[#d9a232] to-gold text-ink shadow-gold hover:from-[#e2ae42] hover:to-[#cf972a] active:from-gold active:to-gold-dark active:shadow-none',
   ink: 'bg-ink text-white hover:bg-ink-800 active:bg-ink-900',
   ghost:
-    'bg-transparent text-ink ring-1 ring-inset ring-hairline-strong hover:bg-ink/[0.04] active:bg-ink/[0.07]',
+    'bg-transparent text-ink ring-1 ring-inset ring-hairline-strong hover:bg-forest/[0.06] hover:ring-forest/25 active:bg-forest/[0.09]',
   danger:
     'bg-transparent text-danger-ink ring-1 ring-inset ring-danger/30 hover:bg-danger-wash active:bg-danger-wash',
-  forest: 'bg-forest text-white hover:bg-forest-light active:bg-forest-dark',
   // The wholesale door, and only that. Nothing else on the storefront is royal.
   royal: 'bg-royal text-white hover:bg-royal-light active:bg-royal-dark',
 };
@@ -40,7 +65,7 @@ const CIRCLE: Record<Size, string> = {
   lg: 'h-8 w-8 -mr-3.5',
 };
 
-export interface GoldButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
+export interface ActionButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
   variant?: Variant;
   size?: Size;
   /** Renders the nested circular arrow at the trailing edge. */
@@ -49,9 +74,9 @@ export interface GoldButtonProps extends React.ButtonHTMLAttributes<HTMLButtonEl
   icon?: React.ReactNode;
 }
 
-export const GoldButton = forwardRef<HTMLButtonElement, GoldButtonProps>(function GoldButton(
+export const ActionButton = forwardRef<HTMLButtonElement, ActionButtonProps>(function ActionButton(
   {
-    variant = 'gold',
+    variant = 'forest',
     size = 'md',
     withArrow = false,
     loading = false,
@@ -91,7 +116,9 @@ export const GoldButton = forwardRef<HTMLButtonElement, GoldButtonProps>(functio
             'flex shrink-0 items-center justify-center rounded-full',
             'transition-transform duration-300 ease-[cubic-bezier(0.16,1,0.3,1)]',
             'group-hover:translate-x-[1px] group-hover:-translate-y-[1px] group-hover:scale-105',
-            variant === 'gold' ? 'bg-ink/[0.14]' : 'bg-white/[0.14]',
+            // The circle tints from the button's own foreground, so it stays
+            // legible on an amber face without being a second colour.
+            variant === 'gold' ? 'bg-ink/[0.14]' : 'bg-white/[0.16]',
             CIRCLE[size],
           )}
         >

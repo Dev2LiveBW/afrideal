@@ -2,7 +2,7 @@ import type { Metadata } from 'next';
 import Link from 'next/link';
 import { LogIn } from 'lucide-react';
 
-import { GoldButton } from '@/components/brand/GoldButton';
+import { ActionButton } from '@/components/brand/ActionButton';
 import { EmptyState } from '@/components/brand/Panel';
 import { auth } from '@/lib/auth';
 import { readAll } from '@/lib/db';
@@ -24,9 +24,9 @@ export default async function CheckoutPage() {
           description="Checkout needs an account so the order, the invoice and the delivery can be tied to you. Your cart is saved and will still be here."
           action={
             <Link href="/login">
-              <GoldButton variant="gold" size="md" withArrow>
+              <ActionButton size="md" withArrow>
                 Sign in
-              </GoldButton>
+              </ActionButton>
             </Link>
           }
           className="rounded-md border border-hairline bg-surface-raised"
