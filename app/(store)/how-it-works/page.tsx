@@ -115,7 +115,7 @@ export default async function HowItWorksPage() {
           are trying to buy.
         </p>
 
-        <PathChooser productCount={products.length} className="mt-8" />
+        <PathChooser className="mt-8" />
       </section>
 
       {/* ── The two flows ──────────────────────────────────────────────── */}

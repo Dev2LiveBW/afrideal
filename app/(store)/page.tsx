@@ -8,6 +8,9 @@ import { FlashDealsRail } from '@/components/storefront/FlashDealsRail';
 import { HowItWorks } from '@/components/storefront/HowItWorks';
 import { LadderProof, type LadderProofRow } from '@/components/storefront/LadderProof';
 import { PackagesBoard } from '@/components/storefront/PackagesBoard';
+import { MockupCategories } from '@/components/storefront/MockupCategories';
+import { StatsBanner, PromoCards, TrustPaymentStrip } from '@/components/storefront/HomePromoSections';
+import { MockupHero } from '@/components/storefront/MockupHero';
 import { PathChooser } from '@/components/storefront/PathChooser';
 import { PriceLadder } from '@/components/storefront/PriceLadder';
 import { ProductRail } from '@/components/storefront/ProductRail';
@@ -128,69 +131,34 @@ export default async function LandingPage() {
         The text column sits on flat warm ground, never on the picture, so every
         line of it clears AA without a scrim doing the work.
       */}
-      <section className="relative isolate overflow-hidden bg-white">
-        <div className="mx-auto grid max-w-market gap-12 px-6 pb-14 pt-24 sm:pt-28 lg:grid-cols-[minmax(0,1fr)_minmax(0,1fr)] lg:items-center lg:gap-16 lg:pb-16 lg:pt-36">
-          <div className="min-w-0">
-            <h1 className="font-display text-[38px] font-bold leading-[1.08] tracking-[-0.035em] text-ink sm:text-[54px] lg:text-[64px]">
-              Find it.<br />
-              Compare it.<br />
-              <span className="text-gold-dark">Procure it.</span><br />
-              Get it delivered.
-            </h1>
+      
+      <MockupHero />
 
-            <p className="measure mt-6 text-[16px] leading-8 text-body">
-              Shop from <span className="font-bold text-ink">verified</span> suppliers or let us
-              procure it for you through our <span className="font-bold text-ink">trusted</span> runner and delivery network.
-            </p>
-
-            <ul className="mt-10 flex flex-wrap gap-x-8 gap-y-8">
-              {[
-                { icon: BadgeCheck, label: "Verified\nSuppliers", tone: "text-forest", circle: "bg-forest-wash" },
-                { icon: User, label: "Verified\nRunners", tone: "text-gold-dark", circle: "bg-gold-50" },
-                { icon: Truck, label: "Verified\nDelivery Partners", tone: "text-royal", circle: "bg-royal-wash" },
-              ].map((chip) => (
-                <li key={chip.label} className="flex flex-col items-center gap-3">
-                  <div className={`flex h-14 w-14 items-center justify-center rounded-full ${chip.circle}`}>
-                    <chip.icon size={24} strokeWidth={1.5} aria-hidden="true" className={chip.tone} />
-                  </div>
-                  <span className="text-[13px] font-semibold text-ink text-center max-w-[90px] leading-snug whitespace-pre-line">
-                    {chip.label}
-                  </span>
-                </li>
-              ))}
-            </ul>
-          </div>
-
-          <div className="relative min-w-0 flex justify-center lg:justify-end">
-            <div className="relative w-full max-w-[480px] aspect-[4/5] overflow-hidden rounded-[32px] shadow-2xl ring-1 ring-inset ring-black/5">
-              <Image
-                src="/images/home/hero-woman.jpg"
-                alt="AfriDeal trusted sourcing"
-                fill
-                priority
-                sizes="(max-width: 1024px) 100vw, 50vw"
-                className="object-cover object-top"
-              />
+      {/* Choose how to buy + Popular categories */}
+      <section className="bg-white py-8">
+        <div className="mx-auto max-w-[1400px] px-4">
+          <div className="grid gap-10 lg:grid-cols-[1fr_1fr] lg:gap-12">
+            <div>
+              <h2 className="mb-5 text-[20px] font-bold text-gray-900">Choose how you want to buy</h2>
+              <PathChooser />
             </div>
-            
-            {/* Phone Mockup floating over */}
-            <div className="absolute -left-4 sm:-left-8 lg:-left-12 bottom-12 w-[180px] sm:w-[220px] lg:w-[260px] drop-shadow-[0_35px_35px_rgba(0,0,0,0.25)] rounded-[32px] sm:rounded-[40px] border-[8px] sm:border-[10px] border-white bg-white overflow-hidden">
-              <div className="relative aspect-[9/19.5] w-full">
-                <Image
-                  src="/images/home/phone-mockup.jpg"
-                  alt="AfriDeal App"
-                  fill
-                  className="object-cover rounded-[24px] sm:rounded-[30px]"
-                />
+            <div>
+              <div className="mb-5 flex items-center justify-between">
+                <h2 className="text-[20px] font-bold text-gray-900">Popular categories</h2>
+                <Link href="/browse" className="flex items-center gap-1 text-[13px] font-bold text-[#E67E22] hover:underline">View all &#8594;</Link>
               </div>
+              <MockupCategories />
             </div>
           </div>
-        </div>
-
-        <div className="mx-auto max-w-market px-6 pb-20 lg:pb-28 pt-8">
-          <PathChooser productCount={products.length} />
         </div>
       </section>
+
+      <StatsBanner />
+
+      <PromoCards />
+
+      <TrustPaymentStrip />
+
       {/* ── What you pay at each quantity ──────────────────────────────── */}
       {featured && doors.length > 0 && (
         <section id="packages" className="border-y border-hairline bg-surface-raised">
