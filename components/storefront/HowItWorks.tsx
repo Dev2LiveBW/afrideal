@@ -51,9 +51,9 @@ const STEPS = [
 ] as const;
 
 const TONES = {
-  forest: 'bg-forest-wash text-forest ring-forest/20',
-  gold: 'bg-gold-50 text-gold-700 ring-gold/25',
-  royal: 'bg-royal-wash text-royal ring-royal/20',
+  forest: 'bg-[#E67E22]-wash text-forest ring-forest/20',
+  gold: 'bg-orange-50 text-[#E67E22] ring-[#E67E22]/20',
+  royal: 'bg-purple-50 text-purple-600 ring-purple-600/20',
 } as const;
 
 export function HowItWorks({ className }: { className?: string }) {

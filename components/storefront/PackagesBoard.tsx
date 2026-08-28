@@ -50,35 +50,35 @@ const ACCENTS: Record<
   { card: string; medallion: string; range: string; badge: string; panel: string }
 > = {
   forest: {
-    card: 'bg-forest-wash/50 ring-forest/20 hover:ring-forest/35',
+    card: 'bg-white ring-gray-200 hover:ring-[#E67E22]/50 shadow-sm hover:shadow-md',
     medallion: 'bg-forest text-white',
     range: 'text-forest',
     badge: 'bg-forest-wash text-forest-ink ring-forest/20',
     panel: 'bg-forest-wash/70',
   },
   ocean: {
-    card: 'bg-ocean-wash/50 ring-ocean/20 hover:ring-ocean/35',
+    card: 'bg-white ring-gray-200 hover:ring-[#E67E22]/50 shadow-sm hover:shadow-md',
     medallion: 'bg-ocean text-white',
     range: 'text-ocean',
     badge: 'bg-ocean-wash text-ocean-ink ring-ocean/20',
     panel: 'bg-ocean-wash/70',
   },
   gold: {
-    card: 'bg-gold-50/60 ring-gold/25 hover:ring-gold/45',
+    card: 'bg-white ring-[#E67E22]/30 hover:ring-[#E67E22] shadow-sm hover:shadow-md',
     medallion: 'bg-gold text-ink',
     range: 'text-gold-dark',
     badge: 'bg-gold-50 text-gold-700 ring-gold/25',
     panel: 'bg-gold-50/80',
   },
   royal: {
-    card: 'bg-royal-wash/60 ring-royal/20 hover:ring-royal/35',
+    card: 'bg-white ring-gray-200 hover:ring-[#E67E22]/50 shadow-sm hover:shadow-md',
     medallion: 'bg-royal text-white',
     range: 'text-royal',
     badge: 'bg-royal-wash text-royal-ink ring-royal/20',
     panel: 'bg-royal-wash/80',
   },
   ink: {
-    card: 'bg-surface-raised ring-hairline hover:ring-hairline-strong',
+    card: 'bg-white ring-gray-200 hover:ring-[#E67E22]/50 shadow-sm hover:shadow-md',
     medallion: 'bg-ink text-white',
     range: 'text-ink',
     badge: 'bg-ink/[0.06] text-ink ring-hairline-strong',
@@ -141,7 +141,7 @@ function Row({
           : `Shop ${door.label.toLowerCase()} - ${door.range} units of ${productName}`
       }
       className={cn(
-        'group flex flex-col gap-4 rounded-lg p-4 ring-1 ring-inset sm:flex-row sm:items-center sm:gap-6 sm:p-5',
+        'group flex flex-col gap-4 rounded-2xl p-4 ring-1 ring-inset sm:flex-row sm:items-center sm:gap-6 sm:p-5',
         'transition-[transform,box-shadow] duration-500 ease-[cubic-bezier(0.16,1,0.3,1)]',
         'hover:-translate-y-0.5 hover:shadow-lift focus-visible:-translate-y-0.5',
         accent.card,
@@ -169,7 +169,7 @@ function Row({
             reader compare the chips instead of the packages.
           */}
           {yours ? (
-            <Badge className="bg-forest text-white ring-forest/30">Your tier</Badge>
+            <Badge className="bg-[#E67E22] text-white ring-[#E67E22]/30">Your tier</Badge>
           ) : (
             door.badge && <Badge className={accent.badge}>{door.badge}</Badge>
           )}

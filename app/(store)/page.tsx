@@ -161,7 +161,7 @@ export default async function LandingPage() {
 
       {/* ── What you pay at each quantity ──────────────────────────────── */}
       {featured && doors.length > 0 && (
-        <section id="packages" className="border-y border-hairline bg-surface-raised">
+        <section id="packages" className="py-4">
           <div className="mx-auto max-w-market px-6 py-20 lg:py-24">
             <div className="grid gap-10 lg:grid-cols-[minmax(0,0.72fr)_minmax(0,1.28fr)] lg:gap-20">
               <div className="min-w-0 lg:sticky lg:top-28 lg:self-start">
@@ -273,7 +273,7 @@ export default async function LandingPage() {
       )}
 
       {/* ── How the order actually runs ────────────────────────────────── */}
-      <section id="how-it-works" className="mt-24 border-y border-hairline bg-surface-raised">
+      <section id="how-it-works" className="mt-24 py-4">
         <div className="mx-auto max-w-market px-6 py-20 lg:py-24">
           <div className="grid gap-8 lg:grid-cols-[minmax(0,0.8fr)_minmax(0,1.2fr)] lg:items-end lg:gap-20">
             <div className="min-w-0">
@@ -315,7 +315,7 @@ export default async function LandingPage() {
 
       {/* ── Trade enquiries ────────────────────────────────────────────── */}
       <section className="mx-auto max-w-market px-6 pb-24 pt-20">
-        <div className="grain relative overflow-hidden rounded-xl bg-ink px-8 py-14 text-center sm:px-14">
+        <div className="grain relative overflow-hidden rounded-xl bg-[#111111] px-8 py-14 text-center sm:px-14">
           <div
             aria-hidden="true"
             className="pointer-events-none absolute inset-0 bg-[radial-gradient(90%_120%_at_50%_0%,rgba(192,138,30,0.20),transparent_60%)]"
@@ -331,7 +331,7 @@ export default async function LandingPage() {
             </p>
             <div className="mt-8 flex flex-wrap justify-center gap-3">
               <Link href="/browse?tier=CUSTOM">
-                <ActionButton variant="gold" size="lg" withArrow>
+                <ActionButton variant="primary" size="lg" withArrow>
                   Request a quotation
                 </ActionButton>
               </Link>

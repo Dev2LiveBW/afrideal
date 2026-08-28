@@ -50,7 +50,7 @@ export function LadderProof({ rows, className }: { rows: LadderProofRow[]; class
             />
 
             <div className="min-w-0 flex-1">
-              <p className="truncate text-[14px] font-medium text-ink transition-colors group-hover:text-forest">
+              <p className="truncate text-[14px] font-medium text-ink transition-colors group-hover:text-[#E67E22]">
                 {product.name}
               </p>
 
@@ -61,7 +61,7 @@ export function LadderProof({ rows, className }: { rows: LadderProofRow[]; class
                 */}
                 <span className="relative hidden h-1 w-full max-w-[220px] overflow-hidden rounded-full bg-ink/[0.07] sm:block">
                   <span
-                    className="absolute inset-y-0 left-0 rounded-full bg-forest"
+                    className="absolute inset-y-0 left-0 rounded-full bg-[#27AE60]"
                     style={{ width: `${deepest === 0 ? 0 : (pct / deepest) * 100}%` }}
                   />
                 </span>
@@ -72,7 +72,7 @@ export function LadderProof({ rows, className }: { rows: LadderProofRow[]; class
                   is hidden at that width anyway, so there is nothing for it to
                   stay level with.
                 */}
-                <span className="font-mono text-[11.5px] tabular-nums text-forest sm:whitespace-nowrap">
+                <span className="font-mono text-[11.5px] tabular-nums text-[#27AE60] sm:whitespace-nowrap">
                   −{pct.toFixed(0)}% at {lowestRange}
                 </span>
               </div>

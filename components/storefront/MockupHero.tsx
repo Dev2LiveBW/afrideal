@@ -44,7 +44,7 @@ export function MockupHero() {
             
             {/* Phone Image */}
             <div className="absolute right-0 bottom-0 top-0 w-[45%] opacity-90 sm:opacity-100 mix-blend-screen overflow-hidden z-0">
-               <Image src="/images/home/phone-mockup.jpg" alt="App preview" fill className="object-cover object-left" />
+               <Image src="https://images.unsplash.com/photo-1511140973288-19bf21d7e771?auto=format&fit=crop&q=80" alt="App preview" fill className="object-cover object-left" />
             </div>
             {/* Gradient mask to fade image into black on the left */}
             <div className="absolute inset-y-0 right-0 w-[60%] bg-gradient-to-r from-[#111111] via-[#111111]/80 to-transparent pointer-events-none z-0"></div>
@@ -78,7 +78,7 @@ export function MockupHero() {
             
             {/* Runner Image */}
             <div className="absolute -right-8 -bottom-0 w-[60%] h-[80%] z-0">
-               <Image src="/images/home/procure-runner.jpg" alt="Runner" fill className="object-contain object-bottom" />
+               <Image src="https://images.unsplash.com/photo-1594379251350-44f9905492df?auto=format&fit=crop&q=80" alt="Runner" fill className="object-contain object-bottom" />
             </div>
             
             <Link href="/request-a-runner" className="relative z-10 flex h-14 w-full sm:w-[80%] items-center justify-center gap-2 rounded-xl bg-[#E67E22] px-8 text-[16px] font-bold text-white hover:bg-[#D35400] transition-colors mt-auto">
