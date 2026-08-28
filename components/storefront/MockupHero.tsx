@@ -78,7 +78,7 @@ export function MockupHero() {
             
             {/* Runner Image */}
             <div className="absolute -right-12 -bottom-10 w-[70%] h-[90%] z-0 mix-blend-multiply opacity-90">
-               <Image src="https://images.unsplash.com/photo-1644251966613-170a26996adb?auto=format&fit=crop&q=80" alt="Runner" fill className="object-contain object-bottom" />
+               <Image src="/images/hero/runner.jpg" alt="Runner" fill className="object-contain object-bottom" />
             </div>
             
             <Link href="/request-a-runner" className="relative z-10 flex h-14 w-full sm:w-[80%] items-center justify-center gap-2 rounded-xl bg-[#E67E22] px-8 text-[16px] font-bold text-white hover:bg-[#D35400] transition-colors mt-auto">
