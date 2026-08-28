@@ -13,6 +13,7 @@ const nextConfig = {
     cpus: 1,
   },
   images: {
+    unoptimized: true,
     remotePatterns: [
       { protocol: 'https', hostname: 'images.unsplash.com' },
     ],
