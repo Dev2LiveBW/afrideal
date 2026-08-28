@@ -32,11 +32,11 @@ export function CategoryTiles({
 }) {
   return (
     <section>
-      <div className="mb-5 flex flex-wrap items-end justify-between gap-4">
+      <div className="mb-8 flex flex-wrap items-end justify-between gap-4">
         <div>
-          <h2 className="font-display text-headline-md font-semibold text-ink">Shop by category</h2>
-          <p className="mt-1 text-[13.5px] text-body">
-            Ranked by what the platform actually sells, hair first
+          <h2 className="font-display text-headline-md font-semibold text-ink">Popular Categories</h2>
+          <p className="mt-1 text-[14px] text-body">
+            Shop by category, carefully curated for you
           </p>
         </div>
         <Link
@@ -48,7 +48,7 @@ export function CategoryTiles({
         </Link>
       </div>
 
-      <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-6">
+      <div className="no-scrollbar -mx-4 flex snap-x snap-mandatory gap-6 overflow-x-auto px-4 pb-4 md:mx-0 md:grid md:grid-cols-3 lg:grid-cols-6 md:gap-8 md:px-0 md:overflow-visible md:snap-none">
         {categories.map((category, index) => {
           const palette = categoryPalette(category.id);
           const count = products.filter((product) => product.category_id === category.id).length;
@@ -56,71 +56,54 @@ export function CategoryTiles({
           return (
             <motion.div
               key={category.id}
-              initial={{ opacity: 0, y: 14 }}
-              whileInView={{ opacity: 1, y: 0 }}
+              initial={{ opacity: 0, scale: 0.9, y: 10 }}
+              whileInView={{ opacity: 1, scale: 1, y: 0 }}
               viewport={{ once: true, margin: '-40px' }}
-              /* 45ms apart: enough to read as a sweep across the row, short
-                 enough that the last tile is not still arriving. */
-              transition={{ delay: index * 0.045, duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
+              transition={{ delay: index * 0.05, duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
+              className="group flex w-[110px] shrink-0 snap-start flex-col items-center text-center md:w-auto"
             >
-            <Link
-              href={`/browse?category=${category.slug}`}
-              style={{ backgroundColor: palette.wash, borderColor: palette.edge }}
-              className="group block overflow-hidden rounded-md border transition-all duration-400 ease-[cubic-bezier(0.16,1,0.3,1)] hover:-translate-y-0.5 hover:shadow-lift"
-            >
-              <div
-                className="relative aspect-[4/3] overflow-hidden"
-                style={{ backgroundColor: palette.hue }}
-              >
-                {/*
-                  Photograph when `npm run images` has fetched one, colour field
-                  underneath either way so a missing file degrades to something
-                  deliberate rather than a white hole in the grid.
-                */}
-                <Image
-                  src={`/products/${category.id}.jpg`}
-                  alt=""
-                  fill
-                  sizes="(max-width: 640px) 45vw, (max-width: 1024px) 30vw, 220px"
-                  loading="lazy"
-                  className="object-cover transition-transform duration-700 ease-[cubic-bezier(0.16,1,0.3,1)] group-hover:scale-105"
-                />
-                {/*
-                  A scrim rather than a glyph. The tile used to carry the
-                  category emoji in the corner, which was a placeholder for
-                  artwork that now exists; keeping it would put a second,
-                  cruder icon on top of the photograph.
-                */}
-                <span
-                  aria-hidden="true"
-                  className="pointer-events-none absolute inset-x-0 bottom-0 h-1/2 bg-gradient-to-t from-ink/35 to-transparent opacity-0 transition-opacity duration-500 group-hover:opacity-100"
-                />
-              </div>
+              <Link href={`/browse?category=${category.slug}`} className="flex flex-col items-center outline-none">
+                <div
+                  style={{ backgroundColor: palette.wash }}
+                  className="relative flex h-[100px] w-[100px] items-center justify-center rounded-full p-[3px] transition-transform duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] group-hover:scale-105 group-hover:shadow-lg group-focus-visible:ring-2 group-focus-visible:ring-forest group-focus-visible:ring-offset-2 md:h-[130px] md:w-[130px]"
+                >
+                  <div 
+                    className="relative flex h-full w-full items-center justify-center overflow-hidden rounded-full border-2 border-white bg-white shadow-sm"
+                  >
+                    <Image
+                      src={`/products/${category.id}.jpg`}
+                      alt=""
+                      fill
+                      sizes="130px"
+                      loading="lazy"
+                      className="object-cover transition-transform duration-700 ease-[cubic-bezier(0.16,1,0.3,1)] group-hover:scale-110"
+                    />
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent opacity-0 transition-opacity duration-300 group-hover:opacity-100" />
+                    
+                    {/* Floating Icon Badge */}
+                    <div 
+                      className="absolute bottom-2 flex h-8 w-8 items-center justify-center rounded-full border-2 border-white shadow-md transition-transform duration-300 group-hover:-translate-y-1 md:bottom-3"
+                      style={{ backgroundColor: palette.hue }}
+                    >
+                      <CategoryIcon categoryId={category.id} size={14} className="text-white" />
+                    </div>
+                  </div>
+                </div>
 
-              <div className="flex items-start gap-2 px-3 py-2.5">
-                <CategoryIcon
-                  categoryId={category.id}
-                  size={15}
-                  className="mt-px shrink-0"
-                  style={{ color: palette.hue }}
-                />
-                <div className="min-w-0">
-                  <p className="truncate text-[13px] font-medium text-ink">{category.name}</p>
-                  <p className="font-mono text-[10.5px] tabular-nums text-muted">
-                    {count} {count === 1 ? 'listing' : 'listings'}
+                <div className="mt-4">
+                  <p className="text-[14px] font-semibold text-ink transition-colors group-hover:text-forest">{category.name}</p>
+                  <p className="mt-0.5 text-[12px] text-muted">
+                    {count} {count === 1 ? 'item' : 'items'}
                   </p>
                 </div>
-              </div>
-            </Link>
+              </Link>
             </motion.div>
           );
         })}
       </div>
     </section>
   );
-}
-
-export function SupplierRail({
+}export function SupplierRail({
   suppliers,
   city = 'Gaborone',
 }: {

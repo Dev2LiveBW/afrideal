@@ -1,11 +1,11 @@
 import Image from 'next/image';
 import Link from 'next/link';
-import { ArrowRight, BadgeCheck, ShoppingBag, Truck, ShieldCheck, Users, RefreshCw, Headphones, Tag, CheckCircle2 } from 'lucide-react';
+import { ArrowRight, BadgeCheck, ShoppingBag, Truck, ShieldCheck, Users, RefreshCw, Headphones, Tag, CheckCircle2, Sparkles, Star, Briefcase, Palette } from 'lucide-react';
 import { ActionButton } from '@/components/brand/ActionButton';
 
 export function MockupHero() {
   return (
-    <section className="bg-surface-raised pt-6 pb-12">
+    <section className="${badge.bg}-raised pt-6 pb-12">
       <div className="mx-auto max-w-market px-6">
         
         {/* Two Big Cards */}
@@ -43,8 +43,8 @@ export function MockupHero() {
             </div>
             
             {/* Phone Image */}
-            <div className="absolute right-0 bottom-0 top-0 w-[45%] opacity-90 sm:opacity-100 mix-blend-screen overflow-hidden z-0">
-               <Image src="https://images.unsplash.com/photo-1511140973288-19bf21d7e771?auto=format&fit=crop&q=80" alt="App preview" fill className="object-cover object-left" />
+            <div className="absolute -right-10 bottom-0 top-0 w-[55%] opacity-100 mix-blend-screen overflow-hidden z-0">
+               <Image src="https://images.unsplash.com/photo-1589567325985-fd5f1bc73ce4?auto=format&fit=crop&q=80" alt="App preview" fill className="object-cover object-left" />
             </div>
             {/* Gradient mask to fade image into black on the left */}
             <div className="absolute inset-y-0 right-0 w-[60%] bg-gradient-to-r from-[#111111] via-[#111111]/80 to-transparent pointer-events-none z-0"></div>
@@ -77,8 +77,8 @@ export function MockupHero() {
             </div>
             
             {/* Runner Image */}
-            <div className="absolute -right-8 -bottom-0 w-[60%] h-[80%] z-0">
-               <Image src="https://images.unsplash.com/photo-1594379251350-44f9905492df?auto=format&fit=crop&q=80" alt="Runner" fill className="object-contain object-bottom" />
+            <div className="absolute -right-12 -bottom-10 w-[70%] h-[90%] z-0 mix-blend-multiply opacity-90">
+               <Image src="https://images.unsplash.com/photo-1644251966613-170a26996adb?auto=format&fit=crop&q=80" alt="Runner" fill className="object-contain object-bottom" />
             </div>
             
             <Link href="/request-a-runner" className="relative z-10 flex h-14 w-full sm:w-[80%] items-center justify-center gap-2 rounded-xl bg-[#E67E22] px-8 text-[16px] font-bold text-white hover:bg-[#D35400] transition-colors mt-auto">
@@ -92,15 +92,15 @@ export function MockupHero() {
         {/* 6 Badges Strip */}
         <div className="mt-8 grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4 border-b border-hairline pb-8">
           {[
-            { icon: Tag, title: 'Best Prices', sub: 'Compare & save', color: 'text-gold' },
-            { icon: ShieldCheck, title: 'Verified Suppliers', sub: 'Trusted & reliable', color: 'text-[#27AE60]' },
-            { icon: Truck, title: 'Fast Delivery', sub: 'Across Botswana', color: 'text-blue-500' },
-            { icon: Users, title: 'Verified Partners', sub: 'Background checked', color: 'text-purple-500' },
-            { icon: RefreshCw, title: 'Easy Returns', sub: 'Hassle-free refunds', color: 'text-[#E67E22]' },
-            { icon: Headphones, title: '24/7 Support', sub: "We're here to help", color: 'text-[#27AE60]' },
+            { icon: Sparkles, title: 'New Arrivals', sub: 'Latest trends', color: 'text-[#E67E22]', bg: 'bg-[#E67E22]/10' },
+            { icon: Star, title: 'Top Rated', sub: 'Best sellers', color: 'text-[#27AE60]', bg: 'bg-[#27AE60]/10' },
+            { icon: Briefcase, title: 'Become a Supplier', sub: 'Sell with us', color: 'text-[#7C3AED]', bg: 'bg-[#7C3AED]/10' },
+            { icon: Palette, title: 'Color Application', sub: 'Custom styles', color: 'text-blue-500', bg: 'bg-blue-500/10' },
+            { icon: Tag, title: 'Best Prices', sub: 'Compare & save', color: 'text-rose-500', bg: 'bg-rose-500/10' },
+            { icon: Truck, title: 'Fast Delivery', sub: 'Nationwide', color: 'text-teal-500', bg: 'bg-teal-500/10' },
           ].map((badge, i) => (
             <div key={i} className="flex flex-col items-center text-center gap-2">
-              <div className="flex h-12 w-12 items-center justify-center rounded-full bg-surface">
+              <div className="flex h-12 w-12 items-center justify-center rounded-full ${badge.bg}">
                 <badge.icon size={22} className={badge.color} />
               </div>
               <div>
