@@ -34,8 +34,7 @@ type Variant = 'forest' | 'gold' | 'ink' | 'ghost' | 'danger' | 'royal' | 'prima
 type Size = 'sm' | 'md' | 'lg';
 
 const VARIANTS: Record<Variant, string> = {
-  primary:
-    'bg-[#E67E22] text-white ring-[#E67E22]/20 hover:bg-[#D35400] focus-visible:ring-[#D35400]',
+
   /*
    * A shallow top-down gradient rather than a flat fill: it gives the button a
    * lit upper edge and a grounded lower one, which is what makes a solid shape
