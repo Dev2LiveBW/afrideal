@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { useEffect, useState } from 'react';
-import { Zap } from 'lucide-react';
+import { Zap, Flame } from 'lucide-react';
 
 import { ActionButton } from '@/components/brand/ActionButton';
 import { MoneyText } from '@/components/brand/MoneyText';
@@ -115,52 +115,70 @@ export function FlashDealsRail({
           const palette = categoryPalette(product.category_id);
 
           return (
-            <Link
+            <article
               key={product.id}
-              href={`/products/${product.id}`}
-              /* Clean white theme */
-              className="group w-[220px] shrink-0 overflow-hidden rounded-2xl border border-gray-100 bg-white shadow-sm transition-shadow duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] hover:shadow-md"
+              className="group relative shrink-0 snap-start flex flex-col items-center text-center outline-none w-[180px]"
             >
-              <div className="relative">
-                <Swatch
-                  image={primary}
-                  fallback={product.swatch}
-                  emoji={product.emoji}
-                  className="aspect-[5/4]"
-                  label={product.name}
-                />
-                <span className="absolute left-2.5 top-2.5 rounded-full bg-danger px-2 py-0.5 font-mono text-[10px] font-semibold text-white">
-                  -{product.promotion?.discount_pct}%
-                </span>
-              </div>
-
-              <div className="p-3.5">
-                <h3 className="line-clamp-2 min-h-[2.4em] text-[13px] font-medium leading-5 text-ink">
-                  {product.name}
-                </h3>
-
-                <p className="mt-2">
-                  <MoneyText amount={product.price} size="sm" tone="ink" />
-                  {product.compare_at_price && (
-                    <span className="ml-1.5 font-mono text-[11px] tabular-nums text-muted line-through">
-                      {product.compare_at_price.toFixed(2)}
+              <Link href={`/products/${product.id}`} className="block relative outline-none">
+                <div 
+                  className="relative flex h-[160px] w-[160px] items-center justify-center rounded-full p-[4px] transition-transform duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] group-hover:scale-105 group-hover:shadow-lg bg-gold-50"
+                >
+                  <div className="relative flex h-full w-full items-center justify-center overflow-hidden rounded-full border-[3px] border-white bg-white shadow-sm">
+                    <Swatch
+                      image={primary}
+                      fallback={product.swatch}
+                      emoji={product.emoji}
+                      className="absolute inset-0 h-full w-full rounded-full"
+                      label={product.name}
+                    />
+                    
+                    <div className="absolute inset-0 bg-gold/5 opacity-0 transition-opacity duration-300 group-hover:opacity-100" />
+                  </div>
+                  
+                  {product.promotion && (
+                    <span 
+                      className="absolute -right-2 top-2 flex h-11 w-11 flex-col items-center justify-center rounded-full border-2 border-white bg-danger font-mono text-[10px] font-bold leading-tight text-white shadow-md transition-transform duration-300 group-hover:scale-110 md:-right-0 md:top-4"
+                    >
+                      <span>SAVE</span>
+                      <span>{product.promotion.discount_pct}%</span>
                     </span>
                   )}
-                </p>
+                </div>
+              </Link>
 
-                <div className="mt-3">
-                  <span className="block h-1.5 overflow-hidden rounded-full bg-ink/[0.08]">
+              <div className="mt-5 flex w-full flex-col items-center px-2">
+                <div className="flex items-center justify-center gap-1 text-[11px] font-bold text-danger mb-1.5 uppercase tracking-wide">
+                  <Flame size={12} className="fill-danger" /> 
+                  {sold} claimed
+                </div>
+                
+                <Link href={`/products/${product.id}`} className="block">
+                  <h3 className="line-clamp-2 text-[14px] font-medium leading-tight text-ink transition-colors group-hover:text-gold">
+                    {product.name}
+                  </h3>
+                </Link>
+
+                <div className="mt-2.5 flex flex-col items-center gap-1.5">
+                  <div className="flex items-center gap-2">
+                    <MoneyText amount={product.price} size="md" tone="ink" />
+                    {product.compare_at_price && (
+                      <span className="font-mono text-[12px] tabular-nums text-muted line-through">
+                        {product.compare_at_price.toFixed(2)}
+                      </span>
+                    )}
+                  </div>
+                </div>
+
+                <div className="mt-3 w-full">
+                  <span className="block h-1.5 w-full overflow-hidden rounded-full bg-ink/[0.08]">
                     <span
                       className="block h-full rounded-full bg-gradient-to-r from-gold to-gold-light"
                       style={{ width: `${soldPct}%` }}
                     />
                   </span>
-                  <p className="mt-1.5 font-mono text-[10.5px] tabular-nums text-muted">
-                    {sold} sold of {allocated}
-                  </p>
                 </div>
               </div>
-            </Link>
+            </article>
           );
         })}
       </div>
