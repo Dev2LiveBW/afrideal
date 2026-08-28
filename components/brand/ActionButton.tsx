@@ -30,10 +30,12 @@ import { cn } from '@/lib/utils';
  * while the button body stays put - the internal tension is the point.
  */
 
-type Variant = 'forest' | 'gold' | 'ink' | 'ghost' | 'danger' | 'royal';
+type Variant = 'forest' | 'gold' | 'ink' | 'ghost' | 'danger' | 'royal' | 'primary';
 type Size = 'sm' | 'md' | 'lg';
 
 const VARIANTS: Record<Variant, string> = {
+  primary:
+    'bg-[#E67E22] text-white ring-[#E67E22]/20 hover:bg-[#D35400] focus-visible:ring-[#D35400]',
   /*
    * A shallow top-down gradient rather than a flat fill: it gives the button a
    * lit upper edge and a grounded lower one, which is what makes a solid shape
@@ -51,6 +53,7 @@ const VARIANTS: Record<Variant, string> = {
     'bg-transparent text-danger-ink ring-1 ring-inset ring-danger/30 hover:bg-danger-wash active:bg-danger-wash',
   // The wholesale door, and only that. Nothing else on the storefront is royal.
   royal: 'bg-royal text-white hover:bg-royal-light active:bg-royal-dark',
+  primary: 'bg-[#E67E22] text-white shadow-[#E67E22] hover:bg-[#D35400] active:bg-[#D35400] active:shadow-none',
 };
 
 const SIZES: Record<Size, string> = {
