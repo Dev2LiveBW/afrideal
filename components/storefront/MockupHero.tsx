@@ -44,10 +44,10 @@ export function MockupHero() {
             
             {/* Phone Image */}
             <div 
-              className="absolute -right-10 bottom-0 top-0 w-[85%] z-0"
-              style={{ maskImage: 'radial-gradient(ellipse at 50% 50%, black 50%, transparent 85%)', WebkitMaskImage: 'radial-gradient(ellipse at 50% 50%, black 50%, transparent 85%)' }}
+              className="absolute right-0 bottom-0 top-0 w-[95%] z-0 pointer-events-none"
+              style={{ maskImage: 'linear-gradient(to right, transparent 0%, black 45%)', WebkitMaskImage: 'linear-gradient(to right, transparent 0%, black 45%)' }}
             >
-               <Image src="/images/hero/mockup.jpg" alt="App preview" fill className="object-cover object-center opacity-90" />
+               <Image src="/images/hero/mockup.jpg" alt="App preview" fill className="object-cover object-right" />
             </div>
             {/* Gradient mask to fade image into black on the left for text readability */}
             <div className="absolute inset-y-0 right-0 w-[100%] bg-gradient-to-r from-[#0e0701] via-[#0e0701]/40 to-transparent pointer-events-none z-0"></div>
@@ -80,8 +80,8 @@ export function MockupHero() {
             </div>
             
             {/* Runner Image */}
-            <div className="absolute -right-12 -bottom-10 w-[70%] h-[90%] z-0 ">
-               <Image src="/images/hero/runner.jpg" alt="Runner" fill className="object-contain object-bottom" />
+            <div className="absolute right-0 bottom-0 w-[95%] h-[100%] z-0 pointer-events-none">
+               <Image src="/images/hero/runner.jpg" alt="Runner" fill className="object-contain object-right-bottom" />
             </div>
             
             <Link href="/request-a-runner" className="relative z-10 flex h-14 w-full sm:w-[80%] items-center justify-center gap-2 rounded-xl bg-[#E67E22] px-8 text-[16px] font-bold text-white hover:bg-[#D35400] transition-colors mt-auto">
