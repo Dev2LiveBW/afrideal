@@ -43,11 +43,14 @@ export function MockupHero() {
             </div>
             
             {/* Phone Image */}
-            <div className="absolute -right-10 bottom-0 top-0 w-[55%] opacity-100  overflow-hidden z-0">
-               <Image src="/images/hero/mockup.jpg" alt="App preview" fill className="object-contain object-right" />
+            <div 
+              className="absolute -right-10 bottom-0 top-0 w-[85%] z-0"
+              style={{ maskImage: 'radial-gradient(ellipse at 50% 50%, black 50%, transparent 85%)', WebkitMaskImage: 'radial-gradient(ellipse at 50% 50%, black 50%, transparent 85%)' }}
+            >
+               <Image src="/images/hero/mockup.jpg" alt="App preview" fill className="object-cover object-center opacity-90" />
             </div>
-            {/* Gradient mask to fade image into black on the left */}
-            <div className="absolute inset-y-0 right-0 w-[60%] bg-gradient-to-r from-[#0e0701] via-[#0e0701]/80 to-transparent pointer-events-none z-0"></div>
+            {/* Gradient mask to fade image into black on the left for text readability */}
+            <div className="absolute inset-y-0 right-0 w-[100%] bg-gradient-to-r from-[#0e0701] via-[#0e0701]/40 to-transparent pointer-events-none z-0"></div>
           </div>
 
           {/* Right Card: Runner Service */}
