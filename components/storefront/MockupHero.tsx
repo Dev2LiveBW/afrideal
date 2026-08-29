@@ -30,7 +30,7 @@ export function MockupHero() {
               <ul className="space-y-2.5 mb-8">
                 {['Best prices', 'Verified suppliers', 'Secure payments', 'Fast delivery'].map(item => (
                   <li key={item} className="flex items-center gap-2.5 text-[14px] font-medium text-white/90">
-                    <CheckCircle2 size={18} className="text-gold fill-gold text-[#111111]" />
+                    <CheckCircle2 size={18} className="text-[#0e0701] fill-[#E67E22]" />
                     {item}
                   </li>
                 ))}
@@ -80,7 +80,7 @@ export function MockupHero() {
             </div>
             
             {/* Runner Image */}
-            <div className="absolute right-0 bottom-0 w-[95%] h-[100%] z-0 pointer-events-none">
+            <div className="absolute -right-12 bottom-0 w-[80%] h-[95%] z-0 pointer-events-none">
                <Image src="/images/hero/runner.jpg" alt="Runner" fill className="object-contain object-right-bottom" />
             </div>
             
