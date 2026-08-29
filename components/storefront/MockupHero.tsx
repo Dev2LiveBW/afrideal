@@ -51,7 +51,7 @@ export function MockupHero() {
           </div>
 
           {/* Right Card: Runner Service */}
-          <div className="relative overflow-hidden rounded-[24px] bg-[#FFF6EE] p-8 sm:p-10 shadow-lg min-h-[460px] flex flex-col justify-between isolate">
+          <div className="relative overflow-hidden rounded-[24px] bg-[#F6EDE4] p-8 sm:p-10 shadow-lg min-h-[460px] flex flex-col justify-between isolate">
             <div className="relative z-10 max-w-[280px] sm:max-w-[300px]">
               <div className="inline-flex items-center gap-1.5 rounded-md bg-orange-100 px-3 py-1 mb-6">
                 <Truck size={14} className="text-[#D35400]" />
@@ -77,7 +77,7 @@ export function MockupHero() {
             </div>
             
             {/* Runner Image */}
-            <div className="absolute -right-12 -bottom-10 w-[70%] h-[90%] z-0 mix-blend-multiply opacity-90">
+            <div className="absolute -right-12 -bottom-10 w-[70%] h-[90%] z-0 ">
                <Image src="/images/hero/runner.jpg" alt="Runner" fill className="object-contain object-bottom" />
             </div>
             
