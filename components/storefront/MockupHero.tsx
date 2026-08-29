@@ -12,7 +12,7 @@ export function MockupHero() {
         <div className="grid lg:grid-cols-2 gap-6">
           
           {/* Left Card: Marketplace */}
-          <div className="relative overflow-hidden rounded-[24px] bg-[#111111] text-white p-8 sm:p-10 shadow-lg min-h-[460px] flex flex-col justify-between isolate">
+          <div className="relative overflow-hidden rounded-[24px] bg-[#0e0701] text-white p-8 sm:p-10 shadow-lg min-h-[460px] flex flex-col justify-between isolate">
             <div className="relative z-10 max-w-[280px] sm:max-w-[320px]">
               <div className="inline-flex items-center gap-1.5 rounded-md border border-white/20 bg-white/10 px-3 py-1 mb-6">
                 <ShoppingBag size={14} className="text-white/80" />
@@ -43,11 +43,11 @@ export function MockupHero() {
             </div>
             
             {/* Phone Image */}
-            <div className="absolute -right-10 bottom-0 top-0 w-[55%] opacity-100 mix-blend-screen overflow-hidden z-0">
-               <Image src="https://images.unsplash.com/photo-1589567325985-fd5f1bc73ce4?auto=format&fit=crop&q=80" alt="App preview" fill className="object-cover object-left" />
+            <div className="absolute -right-10 bottom-0 top-0 w-[55%] opacity-100  overflow-hidden z-0">
+               <Image src="/images/hero/mockup.jpg" alt="App preview" fill className="object-contain object-right" />
             </div>
             {/* Gradient mask to fade image into black on the left */}
-            <div className="absolute inset-y-0 right-0 w-[60%] bg-gradient-to-r from-[#111111] via-[#111111]/80 to-transparent pointer-events-none z-0"></div>
+            <div className="absolute inset-y-0 right-0 w-[60%] bg-gradient-to-r from-[#0e0701] via-[#0e0701]/80 to-transparent pointer-events-none z-0"></div>
           </div>
 
           {/* Right Card: Runner Service */}
