@@ -1,4 +1,8 @@
-import { StorefrontFooter, StorefrontNav } from '@/components/layout/StorefrontNav';
+import {
+  MobileTabBar,
+  StorefrontFooter,
+  StorefrontNav,
+} from '@/components/layout/StorefrontNav';
 import { readAll } from '@/lib/db';
 
 export default async function StoreLayout({ children }: { children: React.ReactNode }) {
@@ -19,6 +23,17 @@ export default async function StoreLayout({ children }: { children: React.ReactN
       */}
       <main className="flex-1">{children}</main>
       <StorefrontFooter />
+
+      {/*
+        The tab bar floats over the page on phones, so the foot of every screen
+        reserves its height plus the home indicator. The space is given back
+        from `md` up, where the bar is not rendered at all.
+      */}
+      <div
+        aria-hidden="true"
+        className="h-[calc(64px+env(safe-area-inset-bottom))] shrink-0 md:hidden"
+      />
+      <MobileTabBar />
     </div>
   );
 }

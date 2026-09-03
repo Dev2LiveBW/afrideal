@@ -41,6 +41,14 @@ export const viewport: Viewport = {
   themeColor: '#111111',
   width: 'device-width',
   initialScale: 1,
+  /*
+   * The storefront pins a tab bar to the bottom of the viewport, so the page
+   * has to run under the home indicator and pad itself back out with
+   * `env(safe-area-inset-bottom)`. That inset only reports a real value under
+   * `viewport-fit=cover`; without this line it is zero and the bar sits under
+   * the indicator on every notched phone.
+   */
+  viewportFit: 'cover',
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {

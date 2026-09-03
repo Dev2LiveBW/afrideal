@@ -5,7 +5,8 @@ import { useRef, useState } from 'react';
 import { ChevronLeft, ChevronRight, Heart, Plus } from 'lucide-react';
 import toast from 'react-hot-toast';
 
-import { MoneyText } from '@/components/brand/MoneyText';
+import { PriceTag } from '@/components/brand/MoneyText';
+import { pulaTag } from '@/lib/format';
 import { CategoryIcon } from '@/components/storefront/CategoryIcon';
 import { Swatch, photoUrl } from '@/components/storefront/Swatch';
 import { useAfriDealStore } from '@/store/useAfriDealStore';
@@ -179,10 +180,10 @@ export function ProductRail({
 
                 <div className="mt-2.5 flex flex-col items-center gap-1.5">
                   <div className="flex items-center gap-2">
-                    <MoneyText amount={product.price} size="md" tone="ink" />
+                    <PriceTag amount={product.price} size="md" tone="ink" />
                     {product.compare_at_price && (
-                      <span className="font-mono text-[12px] tabular-nums text-muted line-through">
-                        {product.compare_at_price.toFixed(2)}
+                      <span className="text-[12.5px] tabular-nums text-muted line-through">
+                        {pulaTag(product.compare_at_price)}
                       </span>
                     )}
                   </div>

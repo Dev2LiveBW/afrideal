@@ -5,7 +5,8 @@ import { useEffect, useState } from 'react';
 import { Zap, Flame } from 'lucide-react';
 
 import { ActionButton } from '@/components/brand/ActionButton';
-import { MoneyText } from '@/components/brand/MoneyText';
+import { PriceTag } from '@/components/brand/MoneyText';
+import { pulaTag } from '@/lib/format';
 import { Swatch } from '@/components/storefront/Swatch';
 import { categoryPalette } from '@/lib/category-palette';
 import type { Product, ProductImage } from '@/types';
@@ -160,10 +161,10 @@ export function FlashDealsRail({
 
                 <div className="mt-2.5 flex flex-col items-center gap-1.5">
                   <div className="flex items-center gap-2">
-                    <MoneyText amount={product.price} size="md" tone="ink" />
+                    <PriceTag amount={product.price} size="md" tone="ink" />
                     {product.compare_at_price && (
                       <span className="font-mono text-[12px] tabular-nums text-muted line-through">
-                        {product.compare_at_price.toFixed(2)}
+                        {pulaTag(product.compare_at_price)}
                       </span>
                     )}
                   </div>

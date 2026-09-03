@@ -6,7 +6,8 @@ import { motion } from 'framer-motion';
 import { Heart, Plus, ShieldCheck, Star } from 'lucide-react';
 import toast from 'react-hot-toast';
 
-import { MoneyText } from '@/components/brand/MoneyText';
+import { PriceTag } from '@/components/brand/MoneyText';
+import { pulaTag } from '@/lib/format';
 import { CategoryIcon } from '@/components/storefront/CategoryIcon';
 import { Swatch, photoUrl } from '@/components/storefront/Swatch';
 import { useAfriDealStore } from '@/store/useAfriDealStore';
@@ -210,21 +211,21 @@ export function ProductCard({
               <p className="text-[10.5px] text-muted">
                 {showingTier ? (tierByQuotation ? 'On quotation' : 'Your price') : 'From'}
               </p>
-              <MoneyText
+              <PriceTag
                 amount={showingTier ? tierPrice! : product.price}
                 size="md"
                 tone={tierByQuotation ? 'muted' : 'gold'}
               />
               {showingTier ? (
                 tierPrice! < product.price && (
-                  <span className="ml-1.5 font-mono text-[11px] tabular-nums text-muted line-through">
-                    {product.price.toFixed(2)}
+                  <span className="ml-1.5 text-[11.5px] tabular-nums text-muted line-through">
+                    {pulaTag(product.price)}
                   </span>
                 )
               ) : (
                 product.compare_at_price && (
-                  <span className="ml-1.5 font-mono text-[11px] tabular-nums text-muted line-through">
-                    {product.compare_at_price.toFixed(2)}
+                  <span className="ml-1.5 text-[11.5px] tabular-nums text-muted line-through">
+                    {pulaTag(product.compare_at_price)}
                   </span>
                 )
               )}

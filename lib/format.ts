@@ -26,6 +26,22 @@ export function bwpBare(amount: number): string {
 }
 
 /** `BWP 12.4k` - for chart axes and dense stat strips only. */
+/**
+ * `P399`, `P1,299.50` — the shelf price tag.
+ *
+ * `BWP 399.00` is right for receipts, escrow legs and every console column,
+ * where amounts have to line up under one another. It is wrong on a phone
+ * shelf: the marketplace mockups price a wig at P399, and four extra glyphs on
+ * every tag across a scrolling grid is what pushes a product card onto a second
+ * line. Thebe still print when a price actually carries them.
+ */
+export function pulaTag(amount: number): string {
+  return `P${amount.toLocaleString('en-BW', {
+    minimumFractionDigits: Number.isInteger(amount) ? 0 : 2,
+    maximumFractionDigits: 2,
+  })}`;
+}
+
 export function bwpCompact(amount: number): string {
   if (Math.abs(amount) >= 1_000_000) return `BWP ${(amount / 1_000_000).toFixed(1)}m`;
   if (Math.abs(amount) >= 1_000) return `BWP ${(amount / 1_000).toFixed(1)}k`;

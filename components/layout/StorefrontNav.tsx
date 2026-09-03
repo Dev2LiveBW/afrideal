@@ -2,17 +2,126 @@
 
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useSession, signOut } from 'next-auth/react';
 import { AnimatePresence, motion } from 'framer-motion';
-import { ChevronDown, ChevronRight, LogOut, MapPin, Menu, Package, Search, ShoppingCart, X } from 'lucide-react';
+import {
+  ArrowLeftRight,
+  ChevronDown,
+  ChevronRight,
+  Grid2x2,
+  Home,
+  LogOut,
+  MapPin,
+  Menu,
+  Package,
+  Search,
+  ShoppingCart,
+  User,
+  X,
+} from 'lucide-react';
 
 import { AfriDealLogo } from '@/components/brand/AfriDealLogo';
 import { CategoryIcon } from '@/components/storefront/CategoryIcon';
 import { ActionButton } from '@/components/brand/ActionButton';
-import { cartCount, useAfriDealStore } from '@/store/useAfriDealStore';
+import { DELIVERY_CITIES, cartCount, useAfriDealStore } from '@/store/useAfriDealStore';
 import type { Category } from '@/types';
 import { cn } from '@/lib/utils';
+
+/**
+ * Where to deliver.
+ *
+ * Was a label with a chevron that did nothing. The chevron promised a control,
+ * so this is the control: ten cities, persisted, and read only after hydration
+ * because a persisted value differs from what the server rendered and React
+ * would otherwise flag the mismatch on first paint.
+ */
+function DeliverToPicker() {
+  const deliverTo = useAfriDealStore((state) => state.deliverTo);
+  const setDeliverTo = useAfriDealStore((state) => state.setDeliverTo);
+
+  const [open, setOpen] = useState(false);
+  const [mounted, setMounted] = useState(false);
+  const boxRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => setMounted(true), []);
+
+  useEffect(() => {
+    if (!open) return;
+
+    const onClick = (event: MouseEvent) => {
+      if (!boxRef.current?.contains(event.target as Node)) setOpen(false);
+    };
+    const onKey = (event: KeyboardEvent) => event.key === 'Escape' && setOpen(false);
+
+    document.addEventListener('mousedown', onClick);
+    document.addEventListener('keydown', onKey);
+    return () => {
+      document.removeEventListener('mousedown', onClick);
+      document.removeEventListener('keydown', onKey);
+    };
+  }, [open]);
+
+  const city = mounted ? deliverTo : 'Gaborone';
+
+  return (
+    <div ref={boxRef} className="relative">
+      <button
+        type="button"
+        onClick={() => setOpen((value) => !value)}
+        aria-expanded={open}
+        aria-haspopup="listbox"
+        className="flex items-center gap-1.5 text-[12px] text-gray-600 hover:text-gray-900"
+      >
+        <MapPin size={13} className="text-[#E67E22]" />
+        <span>
+          Deliver to: <span className="font-semibold text-gray-900">{city}, Botswana</span>
+        </span>
+        <ChevronDown
+          size={13}
+          className={cn('text-gray-400 transition-transform', open && 'rotate-180')}
+        />
+      </button>
+
+      <AnimatePresence>
+        {open && (
+          <motion.ul
+            role="listbox"
+            initial={{ opacity: 0, y: -6 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -6 }}
+            transition={{ duration: 0.18, ease: [0.16, 1, 0.3, 1] }}
+            className="absolute left-0 top-[calc(100%+6px)] z-50 max-h-64 w-56 overflow-y-auto rounded-xl border border-gray-200 bg-white py-1 shadow-lg"
+          >
+            {DELIVERY_CITIES.map((option) => (
+              <li key={option}>
+                <button
+                  type="button"
+                  role="option"
+                  aria-selected={option === city}
+                  onClick={() => {
+                    setDeliverTo(option);
+                    setOpen(false);
+                  }}
+                  className={cn(
+                    'flex w-full items-center gap-2 px-3.5 py-2.5 text-left text-[13px] transition-colors hover:bg-gray-50',
+                    option === city ? 'font-semibold text-gray-900' : 'text-gray-600',
+                  )}
+                >
+                  <MapPin
+                    size={13}
+                    className={option === city ? 'text-[#E67E22]' : 'text-gray-300'}
+                  />
+                  {option}
+                </button>
+              </li>
+            ))}
+          </motion.ul>
+        )}
+      </AnimatePresence>
+    </div>
+  );
+}
 
 export function StorefrontNav({ categories = [] }: { categories?: Category[] }) {
   const pathname = usePathname();
@@ -23,9 +132,25 @@ export function StorefrontNav({ categories = [] }: { categories?: Category[] }) 
 
   const [menuOpen, setMenuOpen] = useState(false);
   const [mounted, setMounted] = useState(false);
+  const [compact, setCompact] = useState(false);
 
   useEffect(() => setMounted(true), []);
   useEffect(() => setMenuOpen(false), [pathname]);
+
+  /**
+   * The delivery row folds away once the shopper is past the fold.
+   *
+   * Both rows pinned cost 190px of an 844px phone screen — nearly a quarter of
+   * the viewport spent on chrome the shopper has already used. Search stays,
+   * because search is what a marketplace header is for; the delivery row goes,
+   * and comes straight back at the top of the page.
+   */
+  useEffect(() => {
+    const onScroll = () => setCompact(window.scrollY > 120);
+    onScroll();
+    window.addEventListener('scroll', onScroll, { passive: true });
+    return () => window.removeEventListener('scroll', onScroll);
+  }, []);
 
   const count = mounted ? cartCount(cart) : 0;
 
@@ -42,10 +167,17 @@ export function StorefrontNav({ categories = [] }: { categories?: Category[] }) 
             <Search size={16} className="absolute left-3.5 text-gray-400 pointer-events-none" />
             <input
               type="search"
-              placeholder="Search products, brands or categories\u2026"
-              className="h-10 w-full rounded-full border border-gray-200 bg-gray-50 pl-10 pr-28 text-[14px] text-gray-700 outline-none focus:border-[#E67E22] focus:bg-white focus:ring-2 focus:ring-[#E67E22]/20"
+              placeholder="Search products, brands or categories…"
+              className="h-10 w-full rounded-full border border-gray-200 bg-gray-50 pl-10 pr-4 text-[14px] text-gray-700 outline-none focus:border-[#E67E22] focus:bg-white focus:ring-2 focus:ring-[#E67E22]/20 sm:pr-28"
             />
-            <button className="absolute right-1 flex h-8 items-center rounded-full bg-[#E67E22] px-4 text-[13px] font-bold text-white hover:bg-[#D35400] transition-colors">
+            {/*
+              The button reserved 112px of the field at every width. On a 390px
+              phone that left about one character visible between the icon and
+              the button, so the field could not show what had been typed into
+              it. Below `sm` the magnifier and the placeholder carry the
+              affordance and the whole width goes to the text.
+            */}
+            <button className="absolute right-1 hidden h-8 items-center rounded-full bg-[#E67E22] px-4 text-[13px] font-bold text-white transition-colors hover:bg-[#D35400] sm:flex">
               Search
             </button>
           </div>
@@ -98,15 +230,21 @@ export function StorefrontNav({ categories = [] }: { categories?: Category[] }) 
         </div>
 
         {/* Row 2: Location | Track order */}
-        <div className="border-t border-gray-100 bg-white">
+        <div
+          className={cn(
+            'border-t border-gray-100 bg-white transition-[max-height,opacity] duration-300 ease-[cubic-bezier(0.16,1,0.3,1)]',
+            /*
+             * Clipped only while collapsing — that is what hides the row. Left
+             * clipped when open it would also cut off the delivery dropdown,
+             * which escapes this box by design.
+             */
+            compact ? 'max-h-0 overflow-hidden border-t-0 opacity-0' : 'max-h-16 opacity-100',
+          )}
+        >
           <div className="mx-auto flex max-w-[1400px] items-center justify-between px-4 py-1.5">
-            <button className="flex items-center gap-1.5 text-[12px] text-gray-600 hover:text-gray-900">
-              <MapPin size={13} className="text-[#E67E22]" />
-              <span>Deliver to: <span className="font-semibold text-gray-900">Gaborone, Botswana</span></span>
-              <ChevronDown size={13} className="text-gray-400" />
-            </button>
+            <DeliverToPicker />
             <Link href="/orders" className="text-[12px] font-medium text-[#E67E22] hover:underline">
-              Track order \u2192
+              Track order →
             </Link>
           </div>
         </div>
@@ -192,6 +330,65 @@ export function StorefrontNav({ categories = [] }: { categories?: Category[] }) 
         )}
       </AnimatePresence>
     </>
+  );
+}
+
+/**
+ * The thumb rail.
+ *
+ * Five destinations pinned to the bottom of the viewport on phones and tablets,
+ * gone from `md` up where the header carries the same links. Padded for the
+ * home indicator through `env(safe-area-inset-bottom)`, which is why the root
+ * viewport export declares `viewport-fit=cover`.
+ *
+ * "Compare" points at the ladder rather than a filtered grid: comparing on this
+ * marketplace means comparing what a thing costs at one, ten or fifty units,
+ * and that is the page which answers it.
+ */
+const TABS = [
+  { href: '/', label: 'Home', icon: Home },
+  { href: '/browse', label: 'Categories', icon: Grid2x2 },
+  { href: '/how-it-works', label: 'Compare', icon: ArrowLeftRight },
+  { href: '/orders', label: 'Orders', icon: Package },
+  { href: '/login', label: 'Account', icon: User },
+];
+
+export function MobileTabBar() {
+  const pathname = usePathname();
+  const { data: session } = useSession();
+
+  return (
+    <nav
+      aria-label="Primary"
+      className="fixed inset-x-0 bottom-0 z-40 border-t border-gray-200 bg-white/95 pb-[env(safe-area-inset-bottom)] backdrop-blur-md md:hidden"
+    >
+      <ul className="mx-auto flex max-w-[1400px]">
+        {TABS.map((tab) => {
+          // Signed in, the account tab is the buyer's own area rather than the
+          // sign-in screen they have already been through.
+          const href = tab.href === '/login' && session?.user ? '/orders' : tab.href;
+          const active = pathname === tab.href;
+
+          return (
+            <li key={tab.label} className="flex-1">
+              <Link
+                href={href}
+                aria-current={active ? 'page' : undefined}
+                className={cn(
+                  'flex flex-col items-center gap-1 py-2.5 transition-colors',
+                  active ? 'text-[#E67E22]' : 'text-gray-400 hover:text-gray-700',
+                )}
+              >
+                <tab.icon size={20} strokeWidth={active ? 2 : 1.75} />
+                <span className={cn('text-[10.5px] leading-3', active && 'font-semibold')}>
+                  {tab.label}
+                </span>
+              </Link>
+            </li>
+          );
+        })}
+      </ul>
+    </nav>
   );
 }
 

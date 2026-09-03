@@ -17,6 +17,15 @@ interface AfriDealState {
 
   // ── UI ────────────────────────────────────────────────────────────────
   sidebarCollapsed: boolean;
+
+  /**
+   * Where the shopper wants things delivered.
+   *
+   * Safe to persist, unlike anything commercial: it changes which suppliers
+   * read as local and what the header says, never what a buyer is charged.
+   */
+  deliverTo: string;
+  setDeliverTo: (city: string) => void;
   toggleSidebar: () => void;
 }
 
@@ -37,6 +46,9 @@ export const useAfriDealStore = create<AfriDealState>()(
     (set) => ({
       cart: [],
       cartPulse: 0,
+      deliverTo: 'Gaborone',
+
+      setDeliverTo: (city) => set({ deliverTo: city }),
 
       addToCart: (line) =>
         set((state) => {
@@ -80,10 +92,25 @@ export const useAfriDealStore = create<AfriDealState>()(
       partialize: (state) => ({
         cart: state.cart,
         sidebarCollapsed: state.sidebarCollapsed,
+        deliverTo: state.deliverTo,
       }),
     },
   ),
 );
+
+/** Cities AfriDeal delivers into today, in order of volume. */
+export const DELIVERY_CITIES = [
+  'Gaborone',
+  'Francistown',
+  'Molepolole',
+  'Maun',
+  'Serowe',
+  'Selebi-Phikwe',
+  'Kanye',
+  'Lobatse',
+  'Palapye',
+  'Mahalapye',
+];
 
 export const cartCount = (cart: CartLine[]) => cart.reduce((sum, line) => sum + line.qty, 0);
 export const cartSubtotal = (cart: CartLine[]) =>
