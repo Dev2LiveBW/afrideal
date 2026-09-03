@@ -15,11 +15,19 @@
 /** §7 — drives which pricing tiers a buyer can reach. */
 export type CustomerType = 'RETAIL' | 'BUSINESS' | 'RESELLER' | 'INSTITUTIONAL' | 'GUEST';
 
-/** §14 — the tier a price band belongs to. */
+/**
+ * §14 — the tier a price band belongs to.
+ *
+ * The five quantity rungs (RETAIL → BULK → WHOLESALE → WHOLESALE_PLUS → RFQ)
+ * are the published ladder in /data/price-ladder.json. NEGOTIATED and
+ * PROMOTIONAL sit outside it: one is agreed per account, the other is a
+ * time-boxed override of whichever rung the buyer was standing on.
+ */
 export type PricingTier =
   | 'RETAIL'
   | 'BULK'
   | 'WHOLESALE'
+  | 'WHOLESALE_PLUS'
   | 'NEGOTIATED'
   | 'PROMOTIONAL'
   | 'RFQ';
@@ -153,6 +161,50 @@ export interface RfqResponse {
   notes: string;
   status: RfqResponseStatus;
   created_at: string;
+}
+
+/**
+ * A runner request — the second way to buy.
+ *
+ * The marketplace answers "who sells this?". This answers "nobody lists it, go
+ * and find it": a verified runner sources the item, inspects it, negotiates and
+ * buys on the customer's behalf. It is deliberately not an Rfq — an RFQ prices
+ * a listed product at a quantity, this one names something that may not be in
+ * the catalogue at all — and deliberately not an Order, because there is
+ * nothing to charge until the runner reports back what it will actually cost.
+ *
+ * The lifecycle mirrors the escrow rule the marketplace runs on: money is
+ * committed at APPROVED and released at CONFIRMED, never before.
+ */
+export type RunnerRequestStatus =
+  | 'REQUESTED'
+  | 'ACCEPTED'
+  | 'SOURCING'
+  | 'APPROVED'
+  | 'DELIVERING'
+  | 'CONFIRMED'
+  | 'CANCELLED';
+
+export interface RunnerRequest {
+  id: string;
+  reference: string;
+  customer_id: string;
+  customer_name: string;
+  /** What the customer is after, in their own words. */
+  title: string;
+  details: string;
+  category_id: string | null;
+  quantity: number;
+  /** What they are willing to spend per unit, in Pula. Null when open. */
+  budget_per_unit: number | null;
+  delivery_location: string;
+  needed_by: string | null;
+  /** Errand rather than goods — a collection, a queue, a payment. */
+  is_personal_task: boolean;
+  status: RunnerRequestStatus;
+  runner_id: string | null;
+  created_at: string;
+  updated_at: string;
 }
 
 /** §19 — raised when a supplier cost rise pushes a live price under its floor. */

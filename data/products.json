@@ -54,7 +54,7 @@
     "rating": 4.8,
     "review_count": 214,
     "featured": true,
-    "created_at": "2026-04-21T08:00:00.000Z",
+    "created_at": "2026-05-06T10:00:00.000Z",
     "brand_id": "b001",
     "product_type": "PHYSICAL",
     "country_of_origin": "ZA"
@@ -94,42 +94,42 @@
         "id": "p002v1",
         "label": "Natural Black 1B",
         "sku": "BRD-26-1B",
-        "price": 108
+        "price": 111
       },
       {
         "id": "p002v2",
         "label": "Dark Brown 2",
         "sku": "BRD-26-2",
-        "price": 108
+        "price": 111
       },
       {
         "id": "p002v3",
         "label": "Burgundy 99J",
         "sku": "BRD-26-99J",
-        "price": 114
+        "price": 117
       },
       {
         "id": "p002v4",
         "label": "Honey Blonde 27",
         "sku": "BRD-26-27",
-        "price": 116
+        "price": 119
       }
     ],
-    "price": 108,
+    "price": 111,
     "status": "ACTIVE",
     "rating": 4.6,
     "review_count": 388,
     "featured": true,
-    "created_at": "2026-04-27T08:18:00.000Z",
+    "created_at": "2026-05-12T10:18:00.000Z",
     "brand_id": "b001",
     "product_type": "PHYSICAL",
     "country_of_origin": "ZA",
     "compare_at_price": 121,
     "promotion": {
-      "discount_pct": 11,
-      "ends_at": "2026-08-22T15:00:00.000Z",
-      "stock_allocated": 57,
-      "stock_sold": 13
+      "discount_pct": 8,
+      "ends_at": "2026-09-06T17:00:00.000Z",
+      "stock_allocated": 96,
+      "stock_sold": 30
     }
   },
   {
@@ -181,7 +181,7 @@
     "rating": 4.5,
     "review_count": 156,
     "featured": false,
-    "created_at": "2026-05-03T08:36:00.000Z",
+    "created_at": "2026-05-18T10:36:00.000Z",
     "brand_id": "b001",
     "product_type": "PHYSICAL",
     "country_of_origin": "ZA"
@@ -245,7 +245,7 @@
     "rating": 4.4,
     "review_count": 92,
     "featured": true,
-    "created_at": "2026-05-09T08:54:00.000Z",
+    "created_at": "2026-05-24T10:54:00.000Z",
     "brand_id": "b002",
     "product_type": "PHYSICAL",
     "country_of_origin": "ZA"
@@ -303,7 +303,7 @@
     "rating": 4.2,
     "review_count": 141,
     "featured": false,
-    "created_at": "2026-05-15T08:12:00.000Z",
+    "created_at": "2026-05-30T10:12:00.000Z",
     "brand_id": "b002",
     "product_type": "PHYSICAL",
     "country_of_origin": "ZA"
@@ -363,7 +363,7 @@
     "rating": 4.9,
     "review_count": 67,
     "featured": true,
-    "created_at": "2026-05-21T08:30:00.000Z",
+    "created_at": "2026-06-05T10:30:00.000Z",
     "brand_id": "b003",
     "product_type": "PHYSICAL",
     "country_of_origin": "BW"
@@ -427,7 +427,7 @@
     "rating": 4.7,
     "review_count": 44,
     "featured": false,
-    "created_at": "2026-05-27T08:48:00.000Z",
+    "created_at": "2026-06-11T10:48:00.000Z",
     "brand_id": "b003",
     "product_type": "PHYSICAL",
     "country_of_origin": "BW"
@@ -467,30 +467,30 @@
         "id": "p008v1",
         "label": "Single bag",
         "sku": "MZE-125-1",
-        "price": 143
+        "price": 141
       },
       {
         "id": "p008v2",
         "label": "Bale of 4",
         "sku": "MZE-125-4",
-        "price": 143
+        "price": 141
       }
     ],
-    "price": 143,
+    "price": 141,
     "status": "ACTIVE",
     "rating": 4.6,
     "review_count": 302,
     "featured": true,
-    "created_at": "2026-06-02T08:06:00.000Z",
+    "created_at": "2026-06-17T10:06:00.000Z",
     "brand_id": "b004",
     "product_type": "PHYSICAL",
     "country_of_origin": "BW",
     "compare_at_price": 154,
     "promotion": {
-      "discount_pct": 7,
-      "ends_at": "2026-08-21T15:00:00.000Z",
-      "stock_allocated": 89,
-      "stock_sold": 27
+      "discount_pct": 8,
+      "ends_at": "2026-09-05T17:00:00.000Z",
+      "stock_allocated": 96,
+      "stock_sold": 30
     }
   },
   {
@@ -546,7 +546,7 @@
     "rating": 4.8,
     "review_count": 38,
     "featured": false,
-    "created_at": "2026-06-08T08:24:00.000Z",
+    "created_at": "2026-06-23T10:24:00.000Z",
     "brand_id": "b004",
     "product_type": "PHYSICAL",
     "country_of_origin": "BW"
@@ -604,7 +604,7 @@
     "rating": 4.3,
     "review_count": 89,
     "featured": false,
-    "created_at": "2026-06-14T08:42:00.000Z",
+    "created_at": "2026-06-29T10:42:00.000Z",
     "brand_id": "b005",
     "product_type": "PHYSICAL",
     "country_of_origin": "ZA"
@@ -668,7 +668,7 @@
     "rating": 4.5,
     "review_count": 73,
     "featured": false,
-    "created_at": "2026-06-20T08:00:00.000Z",
+    "created_at": "2026-07-05T10:00:00.000Z",
     "brand_id": "b006",
     "product_type": "PHYSICAL",
     "country_of_origin": "ZA"
@@ -708,36 +708,36 @@
         "id": "p012v1",
         "label": "Age 5–7",
         "sku": "UNI-PRI-57",
-        "price": 238
+        "price": 241
       },
       {
         "id": "p012v2",
         "label": "Age 8–10",
         "sku": "UNI-PRI-810",
-        "price": 258
+        "price": 262
       },
       {
         "id": "p012v3",
         "label": "Age 11–13",
         "sku": "UNI-PRI-1113",
-        "price": 277
+        "price": 281
       }
     ],
-    "price": 238,
+    "price": 241,
     "status": "ACTIVE",
     "rating": 4.4,
     "review_count": 218,
     "featured": true,
-    "created_at": "2026-06-26T08:18:00.000Z",
+    "created_at": "2026-07-11T10:18:00.000Z",
     "brand_id": "b006",
     "product_type": "PHYSICAL",
     "country_of_origin": "ZA",
     "compare_at_price": 263,
     "promotion": {
-      "discount_pct": 10,
-      "ends_at": "2026-08-25T15:00:00.000Z",
-      "stock_allocated": 50,
-      "stock_sold": 10
+      "discount_pct": 8,
+      "ends_at": "2026-09-09T17:00:00.000Z",
+      "stock_allocated": 96,
+      "stock_sold": 30
     }
   }
 ]

@@ -88,7 +88,18 @@ export default withAuth(
           pathname.startsWith('/login') ||
           pathname.startsWith('/browse') ||
           pathname.startsWith('/products') ||
-          pathname.startsWith('/cart');
+          pathname.startsWith('/cart') ||
+          /*
+           * The three explainer surfaces are the top of the funnel. Bouncing an
+           * anonymous visitor off the page that tells them what the platform
+           * does, or what a thing costs at fifty units, asks for an account
+           * before giving them a reason to want one. The runner form is public
+           * for the same reason and asks for the account at submit, where it
+           * actually needs one.
+           */
+          pathname.startsWith('/pricing') ||
+          pathname.startsWith('/how-it-works') ||
+          pathname.startsWith('/request-a-runner');
 
         if (isPublic) return true;
 

@@ -4,7 +4,7 @@ import { FileText, TrendingDown } from 'lucide-react';
 
 import { MoneyText } from '@/components/brand/MoneyText';
 import { GoldButton } from '@/components/brand/GoldButton';
-import { TIER_LABELS, bandRange, priceLadder, resolvePrice } from '@/lib/pricing-tiers';
+import { TIER_LABELS, bandRange, effectivePriceLadder, resolvePrice } from '@/lib/pricing-tiers';
 import { cn } from '@/lib/utils';
 import type { CustomerPrice, CustomerType, Product } from '@/types';
 
@@ -35,7 +35,7 @@ export function TieredPriceCalculator({
   onQuantityChange: (qty: number) => void;
   onRequestRfq: (qty: number) => void;
 }) {
-  const ladder = priceLadder(bands, product.id, customerType);
+  const ladder = effectivePriceLadder(bands, product, customerType);
   const resolved = resolvePrice(bands, product, quantity, customerType);
 
   if (ladder.length <= 1) return null;

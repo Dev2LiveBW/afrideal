@@ -6,7 +6,8 @@ import { motion } from 'framer-motion';
 import { Heart, Plus, ShieldCheck, Star } from 'lucide-react';
 import toast from 'react-hot-toast';
 
-import { MoneyText } from '@/components/brand/MoneyText';
+import { PriceTag } from '@/components/brand/MoneyText';
+import { pulaTag } from '@/lib/format';
 import { Swatch } from '@/components/storefront/Swatch';
 import { useAfriDealStore } from '@/store/useAfriDealStore';
 import { cn } from '@/lib/utils';
@@ -151,10 +152,10 @@ export function ProductCard({
           <div className="mt-3 flex items-end justify-between gap-2 border-t border-hairline pt-3">
             <div className="min-w-0">
               <p className="text-[10.5px] text-muted">From</p>
-              <MoneyText amount={product.price} size="md" tone="gold" />
+              <PriceTag amount={product.price} size="md" tone="gold" />
               {product.compare_at_price && (
-                <span className="ml-1.5 font-mono text-[11px] tabular-nums text-muted line-through">
-                  {product.compare_at_price.toFixed(2)}
+                <span className="ml-1.5 text-[11.5px] tabular-nums text-muted line-through">
+                  {pulaTag(product.compare_at_price)}
                 </span>
               )}
             </div>

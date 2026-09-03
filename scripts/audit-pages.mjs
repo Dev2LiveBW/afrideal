@@ -116,8 +116,21 @@ function section(title) {
 section('Public (signed out)');
 {
   const jar = makeJar();
-  await auditPage(jar, '/', ['Africa', 'marketplace', 'verified suppliers'], '/');
+  await auditPage(jar, '/', ['Compare. Buy.', 'marketplace', 'Verified suppliers'], '/');
   await auditPage(jar, '/browse', ['Marketplace', 'Sort'], '/browse');
+  await auditPage(jar, '/pricing', ['who is buying', 'Wholesale+', 'Example price'], '/pricing');
+  await auditPage(
+    jar,
+    '/how-it-works',
+    ['stays protected', 'Runner requests', 'Marketplace orders'],
+    '/how-it-works',
+  );
+  await auditPage(
+    jar,
+    '/request-a-runner',
+    ['runners will source it', 'What are you looking for'],
+    '/request-a-runner',
+  );
   await auditPage(jar, '/products/p001', ['Shea Butter', 'Who can supply this'], '/products/p001');
   await auditPage(jar, '/products/p006', ['Portland Cement', 'Specification'], '/products/p006');
   await auditPage(jar, '/login', ['Sign in', 'Thabo Modise', 'Kagiso Sithole'], '/login');

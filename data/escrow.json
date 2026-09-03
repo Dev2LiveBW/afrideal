@@ -7,22 +7,22 @@
     "amount": 819,
     "status": "RELEASED",
     "gateway": "DPO_PAY",
-    "held_at": "2026-07-23T07:39:00.000Z",
-    "released_at": "2026-07-27T13:31:00.000Z",
+    "held_at": "2026-08-07T09:39:00.000Z",
+    "released_at": "2026-08-11T15:31:00.000Z",
     "refunded_at": null,
     "hold_window_days": 7,
     "history": [
       {
         "from": null,
         "to": "HELD",
-        "at": "2026-07-23T07:39:00.000Z",
+        "at": "2026-08-07T09:39:00.000Z",
         "actor": "System",
         "note": "Payment confirmed — funds held."
       },
       {
         "from": "HELD",
         "to": "RELEASED",
-        "at": "2026-07-27T13:31:00.000Z",
+        "at": "2026-08-11T15:31:00.000Z",
         "actor": "Keabetswe Molapo",
         "note": "Delivery confirmed by customer."
       }
@@ -36,22 +36,22 @@
     "amount": 134,
     "status": "RELEASED",
     "gateway": "ORANGE_MONEY",
-    "held_at": "2026-07-26T08:48:00.000Z",
-    "released_at": "2026-07-30T13:40:00.000Z",
+    "held_at": "2026-08-10T10:48:00.000Z",
+    "released_at": "2026-08-14T15:40:00.000Z",
     "refunded_at": null,
     "hold_window_days": 7,
     "history": [
       {
         "from": null,
         "to": "HELD",
-        "at": "2026-07-26T08:48:00.000Z",
+        "at": "2026-08-10T10:48:00.000Z",
         "actor": "System",
         "note": "Payment confirmed — funds held."
       },
       {
         "from": "HELD",
         "to": "RELEASED",
-        "at": "2026-07-30T13:40:00.000Z",
+        "at": "2026-08-14T15:40:00.000Z",
         "actor": "Keabetswe Molapo",
         "note": "Delivery confirmed by customer."
       }
@@ -65,22 +65,22 @@
     "amount": 1120,
     "status": "RELEASED",
     "gateway": "PAYGATE",
-    "held_at": "2026-07-31T09:23:00.000Z",
-    "released_at": "2026-08-04T13:15:00.000Z",
+    "held_at": "2026-08-15T11:23:00.000Z",
+    "released_at": "2026-08-19T15:15:00.000Z",
     "refunded_at": null,
     "hold_window_days": 7,
     "history": [
       {
         "from": null,
         "to": "HELD",
-        "at": "2026-07-31T09:23:00.000Z",
+        "at": "2026-08-15T11:23:00.000Z",
         "actor": "System",
         "note": "Payment confirmed — funds held."
       },
       {
         "from": "HELD",
         "to": "RELEASED",
-        "at": "2026-08-04T13:15:00.000Z",
+        "at": "2026-08-19T15:15:00.000Z",
         "actor": "Keabetswe Molapo",
         "note": "Delivery confirmed by customer."
       }
@@ -94,22 +94,22 @@
     "amount": 1166,
     "status": "RELEASED",
     "gateway": "DPO_PAY",
-    "held_at": "2026-08-04T10:15:00.000Z",
-    "released_at": "2026-08-08T13:07:00.000Z",
+    "held_at": "2026-08-19T12:15:00.000Z",
+    "released_at": "2026-08-23T15:07:00.000Z",
     "refunded_at": null,
     "hold_window_days": 7,
     "history": [
       {
         "from": null,
         "to": "HELD",
-        "at": "2026-08-04T10:15:00.000Z",
+        "at": "2026-08-19T12:15:00.000Z",
         "actor": "System",
         "note": "Payment confirmed — funds held."
       },
       {
         "from": "HELD",
         "to": "RELEASED",
-        "at": "2026-08-08T13:07:00.000Z",
+        "at": "2026-08-23T15:07:00.000Z",
         "actor": "Keabetswe Molapo",
         "note": "Delivery confirmed by customer."
       }
@@ -123,7 +123,7 @@
     "amount": 605,
     "status": "HELD",
     "gateway": "ORANGE_MONEY",
-    "held_at": "2026-08-13T11:42:00.000Z",
+    "held_at": "2026-08-28T13:42:00.000Z",
     "released_at": null,
     "refunded_at": null,
     "hold_window_days": 7,
@@ -131,7 +131,7 @@
       {
         "from": null,
         "to": "HELD",
-        "at": "2026-08-13T11:42:00.000Z",
+        "at": "2026-08-28T13:42:00.000Z",
         "actor": "System",
         "note": "Payment confirmed — funds held."
       }
@@ -145,7 +145,7 @@
     "amount": 4272,
     "status": "HELD",
     "gateway": "DPO_PAY",
-    "held_at": "2026-08-14T12:25:00.000Z",
+    "held_at": "2026-08-29T14:25:00.000Z",
     "released_at": null,
     "refunded_at": null,
     "hold_window_days": 7,
@@ -153,7 +153,7 @@
       {
         "from": null,
         "to": "HELD",
-        "at": "2026-08-14T12:25:00.000Z",
+        "at": "2026-08-29T14:25:00.000Z",
         "actor": "System",
         "note": "Payment confirmed — funds held."
       }
@@ -167,7 +167,7 @@
     "amount": 1525,
     "status": "HELD",
     "gateway": "PAYGATE",
-    "held_at": "2026-08-15T13:08:00.000Z",
+    "held_at": "2026-08-30T15:08:00.000Z",
     "released_at": null,
     "refunded_at": null,
     "hold_window_days": 7,
@@ -175,7 +175,7 @@
       {
         "from": null,
         "to": "HELD",
-        "at": "2026-08-15T13:08:00.000Z",
+        "at": "2026-08-30T15:08:00.000Z",
         "actor": "System",
         "note": "Payment confirmed — funds held."
       }
@@ -189,7 +189,7 @@
     "amount": 616,
     "status": "HELD",
     "gateway": "DPO_PAY",
-    "held_at": "2026-08-16T14:51:00.000Z",
+    "held_at": "2026-08-31T16:51:00.000Z",
     "released_at": null,
     "refunded_at": null,
     "hold_window_days": 7,
@@ -197,7 +197,7 @@
       {
         "from": null,
         "to": "HELD",
-        "at": "2026-08-16T14:51:00.000Z",
+        "at": "2026-08-31T16:51:00.000Z",
         "actor": "System",
         "note": "Payment confirmed — funds held."
       }
@@ -211,7 +211,7 @@
     "amount": 1364,
     "status": "HELD",
     "gateway": "ORANGE_MONEY",
-    "held_at": "2026-08-17T07:34:00.000Z",
+    "held_at": "2026-09-01T09:34:00.000Z",
     "released_at": null,
     "refunded_at": null,
     "hold_window_days": 7,
@@ -219,7 +219,7 @@
       {
         "from": null,
         "to": "HELD",
-        "at": "2026-08-17T07:34:00.000Z",
+        "at": "2026-09-01T09:34:00.000Z",
         "actor": "System",
         "note": "Payment confirmed — funds held."
       }
@@ -233,7 +233,7 @@
     "amount": 924,
     "status": "HELD",
     "gateway": "PAYGATE",
-    "held_at": "2026-08-17T08:34:00.000Z",
+    "held_at": "2026-09-01T10:34:00.000Z",
     "released_at": null,
     "refunded_at": null,
     "hold_window_days": 7,
@@ -241,7 +241,7 @@
       {
         "from": null,
         "to": "HELD",
-        "at": "2026-08-17T08:34:00.000Z",
+        "at": "2026-09-01T10:34:00.000Z",
         "actor": "System",
         "note": "Payment confirmed — funds held."
       }
@@ -255,7 +255,7 @@
     "amount": 644,
     "status": "HELD",
     "gateway": "DPO_PAY",
-    "held_at": "2026-08-18T09:17:00.000Z",
+    "held_at": "2026-09-02T11:17:00.000Z",
     "released_at": null,
     "refunded_at": null,
     "hold_window_days": 7,
@@ -263,7 +263,7 @@
       {
         "from": null,
         "to": "HELD",
-        "at": "2026-08-18T09:17:00.000Z",
+        "at": "2026-09-02T11:17:00.000Z",
         "actor": "System",
         "note": "Payment confirmed — funds held."
       }
@@ -277,7 +277,7 @@
     "amount": 275,
     "status": "HELD",
     "gateway": "ORANGE_MONEY",
-    "held_at": "2026-08-19T10:00:00.000Z",
+    "held_at": "2026-09-03T12:00:00.000Z",
     "released_at": null,
     "refunded_at": null,
     "hold_window_days": 7,
@@ -285,7 +285,7 @@
       {
         "from": null,
         "to": "HELD",
-        "at": "2026-08-19T10:00:00.000Z",
+        "at": "2026-09-03T12:00:00.000Z",
         "actor": "System",
         "note": "Payment confirmed — funds held."
       }
@@ -299,7 +299,7 @@
     "amount": 364,
     "status": "HELD",
     "gateway": "ORANGE_MONEY",
-    "held_at": "2026-08-19T10:00:00.000Z",
+    "held_at": "2026-09-03T12:00:00.000Z",
     "released_at": null,
     "refunded_at": null,
     "hold_window_days": 7,
@@ -307,7 +307,7 @@
       {
         "from": null,
         "to": "HELD",
-        "at": "2026-08-19T10:00:00.000Z",
+        "at": "2026-09-03T12:00:00.000Z",
         "actor": "System",
         "note": "Payment confirmed — funds held."
       }
@@ -321,7 +321,7 @@
     "amount": 1288,
     "status": "DISPUTED",
     "gateway": "PAYGATE",
-    "held_at": "2026-08-07T11:24:00.000Z",
+    "held_at": "2026-08-22T13:24:00.000Z",
     "released_at": null,
     "refunded_at": null,
     "hold_window_days": 7,
@@ -329,14 +329,14 @@
       {
         "from": null,
         "to": "HELD",
-        "at": "2026-08-07T11:24:00.000Z",
+        "at": "2026-08-22T13:24:00.000Z",
         "actor": "System",
         "note": "Payment confirmed — funds held."
       },
       {
         "from": "HELD",
         "to": "DISPUTED",
-        "at": "2026-08-10T09:33:00.000Z",
+        "at": "2026-08-25T11:33:00.000Z",
         "actor": "Thabo Modise",
         "note": "Customer raised a dispute."
       }
@@ -350,7 +350,7 @@
     "amount": 2238,
     "status": "DISPUTED",
     "gateway": "DPO_PAY",
-    "held_at": "2026-08-10T12:33:00.000Z",
+    "held_at": "2026-08-25T14:33:00.000Z",
     "released_at": null,
     "refunded_at": null,
     "hold_window_days": 7,
@@ -358,14 +358,14 @@
       {
         "from": null,
         "to": "HELD",
-        "at": "2026-08-10T12:33:00.000Z",
+        "at": "2026-08-25T14:33:00.000Z",
         "actor": "System",
         "note": "Payment confirmed — funds held."
       },
       {
         "from": "HELD",
         "to": "DISPUTED",
-        "at": "2026-08-13T09:42:00.000Z",
+        "at": "2026-08-28T11:42:00.000Z",
         "actor": "Kefilwe Dithebe",
         "note": "Customer raised a dispute."
       }
@@ -379,22 +379,22 @@
     "amount": 476,
     "status": "REFUNDED",
     "gateway": "ORANGE_MONEY",
-    "held_at": "2026-07-29T13:57:00.000Z",
+    "held_at": "2026-08-13T15:57:00.000Z",
     "released_at": null,
-    "refunded_at": "2026-08-02T13:49:00.000Z",
+    "refunded_at": "2026-08-17T15:49:00.000Z",
     "hold_window_days": 7,
     "history": [
       {
         "from": null,
         "to": "HELD",
-        "at": "2026-07-29T13:57:00.000Z",
+        "at": "2026-08-13T15:57:00.000Z",
         "actor": "System",
         "note": "Payment confirmed — funds held."
       },
       {
         "from": "HELD",
         "to": "REFUNDED",
-        "at": "2026-08-02T13:49:00.000Z",
+        "at": "2026-08-17T15:49:00.000Z",
         "actor": "Keabetswe Molapo",
         "note": "Order cancelled before dispatch."
       }

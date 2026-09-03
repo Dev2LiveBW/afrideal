@@ -120,21 +120,56 @@ margin 30% on a BWP 250 cost  →  BWP 357.14
 
 A product does not have one price. It has a ladder of bands in `data/customer-prices.json`, resolved by who is buying and how many, and the same resolution runs on the product page and at checkout so the two cannot disagree.
 
-Shea Butter Deep Treatment, as a verified business account:
+The ladder itself — rungs, step-downs and margin floors — lives in `data/price-ladder.json`. `lib/price-ladder.ts` imports that file and `scripts/seed.mjs` reads it, so the ladder the storefront explains at `/pricing` and the bands checkout charges come from one place and cannot drift apart.
 
-| Quantity | Tier | Unit price |
+| Quantity | Tier | Off retail | Margin floor |
+|---|---|---|---|
+| 1–4 | Retail | — | 20% |
+| 5–19 | Bulk | 8.5% | 15% |
+| 20–49 | Wholesale | 17.5% | 10% |
+| 50–99 | Wholesale+ | 23.5% | 8% |
+| 100+ | By quotation | quoted | 6% |
+
+Shea Butter Deep Treatment, priced two ways:
+
+| Quantity | Retail account | Business account |
 |---|---|---|
-| 1–4 | Retail | BWP 182.00 |
-| 5–19 | Bulk | BWP 161.00 |
-| 20–49 | Wholesale | BWP 149.00 |
-| 50–99 | Wholesale | BWP 142.00 |
-| 100+ | By quotation | RFQ |
+| 1–4 | P182 | P182 |
+| 5–19 | P167 | P161 |
+| 20–49 | P150 | P145 |
+| 50–99 | P139 | P134 |
+| 100+ | RFQ | RFQ |
 
-The same product as a retail consumer tops out at the bulk band: they can still buy 20 units, they simply do not reach the wholesale rate a registered business gets at the same quantity.
+A verified trade account stacks a further discount on every rung from Bulk up — Business 3%, Reseller 5%, Institutional 6% — and never at retail, because the discount is earned by the volume, not the letterhead. Sign in as Thabo for retail and Kefilwe for business to see it.
+
+**The margin floor overrides the ladder.** A category that cannot fund the published step-down lands on its floor instead of selling under cost recovery: Electronics runs at a 12% markup, so 23.5% off retail would put it below what the order costs to fulfil. Two rungs quoting the same price there is the floor working, not a bug — publishing a discount the category cannot fund is a promise broken at checkout.
+
+A product with no authored bands is priced off the ladder from its own retail price rather than charged retail at every quantity, so obeying the ladder is a property of the system rather than a promise about data entry.
 
 Customer type is a property of the account (`RETAIL`, `BUSINESS`, `RESELLER`, `INSTITUTIONAL`, `GUEST`) and is resolved from the session on the server. It is deliberately not held in client state, because a tier a visitor can set in localStorage is a wholesale price anyone can award themselves. Sign in as Thabo for retail and Kefilwe for business to see the same product priced two ways.
 
 Bands are generated from the margin rules rather than typed in, so every rung is a real margin calculation. Reseeding checks that no band falls below its tier's floor and that prices never rise as quantity increases.
+
+### Two ways to buy
+
+The storefront opens on exactly two entry points, because the platform has exactly two:
+
+1. **Shop the marketplace** — buy what verified suppliers have listed.
+2. **Request a runner** (`/request-a-runner`) — name what nobody lists and have a verified runner source, inspect, negotiate and buy it.
+
+Both run on the same settlement rule, spelled out at `/how-it-works` and in a section on the home page: nothing is paid out until the buyer confirms. Marketplace orders move `PAID → FULFILLING → DELIVERING → CONFIRMED`. Runner requests move `REQUESTED → ACCEPTED → SOURCING → APPROVED → DELIVERING → CONFIRMED` — the extra APPROVED step is the whole difference, because a runner cannot know the price until they have found the thing, so the buyer approves it before any money is committed.
+
+Runner requests are intake only today: `POST /api/runner-requests` records the request into `data/runner-requests.json` and notifies every online runner plus operations. Accepting, sourcing, approving and the escrow leg behind them are not built yet.
+
+### The storefront is designed for a phone
+
+Every customer-facing screen is laid out at `390px` first and scales up. Nothing is a desktop layout with a mobile fallback.
+
+- The header keeps logo, cart and menu pinned; search and the delivery bar fold away past `120px` of scroll and return at the top of the page. Pinned, all three rows cost a quarter of an 844px viewport.
+- Search and the delivery picker appear on shelf routes only (`/` and `/browse`). The picked city persists — it is a UI preference, and unlike customer type it changes nothing commercial.
+- A five-tab bar (Home, Categories, Compare, Orders, Account) is fixed to the bottom below `1024px`, padded with `env(safe-area-inset-bottom)`, which is why the root viewport export sets `viewportFit: 'cover'`.
+- Shelf prices render as `P399`; receipts, escrow legs and console columns keep `BWP 399.00`. `PriceTag` and `MoneyText` are separate components so nothing that settles money can pick up the short form by accident.
+- `/pricing`, `/how-it-works` and `/request-a-runner` are public. Bouncing an anonymous visitor off the page that explains the platform asks for an account before giving them a reason to want one.
 
 ### Supplier costs are confidential
 
@@ -194,7 +229,7 @@ npm run verify   # another
 - an illegal escrow transition is refused with a 409
 - supplier isolation in both directions, plus role guards on four endpoints
 - a full checkout with its supplier split and escrow legs balancing to the subtotal
-- the tier ladder: prices fall as quantity rises, a retail account cannot reach wholesale, and 100+ is routed to a quotation
+- the tier ladder: prices fall as quantity rises, a retail account pays more than a trade account at the same quantity, and 100+ is routed to a quotation
 - `supplier_cost` never appears in a storefront response, while the admin API still returns it
 - the RFQ round trip, including that one supplier cannot read a competitor's quote
 - runner availability, supplier approval, and the APR revenue-share arithmetic
@@ -218,9 +253,10 @@ afrideal/
 │   └── api/                  route handlers, mutations only
 ├── components/
 │   ├── brand/                logo, badges, buttons, money, panels
+│   ├── pricing/              the published price ladder, explained
 │   ├── procurement/          tier ladder, supplier comparison, RFQ, margin alerts
 │   ├── products/  orders/  charts/  layout/  supplier/
-├── data/                     24 JSON collections
+├── data/                     25 JSON collections, plus price-ladder.json
 ├── lib/                      db, auth, api, queries, the engines, format
 ├── scripts/                  seed.mjs, verify.mjs
 ├── store/                    Zustand cart

@@ -1,3 +1,4 @@
+import { ladderFor } from '@/lib/price-ladder';
 import type {
   CustomerPrice,
   CustomerType,
@@ -91,16 +92,33 @@ export function marginBreakdown(
 /**
  * Which tiers a buyer may be quoted.
  *
- * A retail consumer is never shown wholesale pricing, and a reseller is never
- * forced to buy at retail. Guests see retail only, which is what makes the
- * catalogue browsable without an account.
+ * The five quantity rungs are published to everyone, guests included: the
+ * ladder is the offer, and hiding it would make the catalogue impossible to
+ * shop honestly. What an account type changes is the discount stacked on top of
+ * each rung (see ACCOUNT_DISCOUNTS) and whether NEGOTIATED terms are reachable
+ * at all, which they are not without a verified trade account.
  */
 export const TIERS_BY_CUSTOMER_TYPE: Record<CustomerType, PricingTier[]> = {
-  GUEST: ['RETAIL', 'PROMOTIONAL'],
-  RETAIL: ['RETAIL', 'BULK', 'PROMOTIONAL'],
-  BUSINESS: ['RETAIL', 'BULK', 'WHOLESALE', 'PROMOTIONAL', 'NEGOTIATED'],
-  RESELLER: ['BULK', 'WHOLESALE', 'PROMOTIONAL', 'NEGOTIATED'],
-  INSTITUTIONAL: ['BULK', 'WHOLESALE', 'NEGOTIATED', 'RFQ'],
+  GUEST: ['RETAIL', 'BULK', 'WHOLESALE', 'WHOLESALE_PLUS', 'PROMOTIONAL', 'RFQ'],
+  RETAIL: ['RETAIL', 'BULK', 'WHOLESALE', 'WHOLESALE_PLUS', 'PROMOTIONAL', 'RFQ'],
+  BUSINESS: [
+    'RETAIL',
+    'BULK',
+    'WHOLESALE',
+    'WHOLESALE_PLUS',
+    'PROMOTIONAL',
+    'NEGOTIATED',
+    'RFQ',
+  ],
+  RESELLER: ['RETAIL', 'BULK', 'WHOLESALE', 'WHOLESALE_PLUS', 'PROMOTIONAL', 'NEGOTIATED', 'RFQ'],
+  INSTITUTIONAL: [
+    'RETAIL',
+    'BULK',
+    'WHOLESALE',
+    'WHOLESALE_PLUS',
+    'NEGOTIATED',
+    'RFQ',
+  ],
 };
 
 export function canReachTier(customerType: CustomerType, tier: PricingTier): boolean {
@@ -143,6 +161,67 @@ export function priceLadder(
 }
 
 /**
+ * The ladder a product would have if nobody had authored bands for it.
+ *
+ * Derived from the product's own retail price through the published ladder in
+ * /data/price-ladder.json, so a newly listed product is never quoted a flat
+ * price at every quantity while an operator gets around to pricing it. This is
+ * what makes "every product obeys the ladder" a property of the system rather
+ * than a promise about data entry.
+ *
+ * These rows are computed, never written — they carry a `derived:` id so
+ * nothing downstream mistakes one for a stored band.
+ */
+export function derivedLadder(
+  product: Product,
+  customerType: CustomerType = 'RETAIL',
+  now: Date = new Date(),
+): CustomerPrice[] {
+  const effectiveFrom = new Date(Math.min(new Date(product.created_at).getTime(), now.getTime()));
+
+  return ladderFor(product.price, customerType)
+    .filter((step) => canReachTier(customerType, step.rung.tier))
+    .map((step) => ({
+      id: `derived-${product.id}-${step.rung.tier.toLowerCase()}`,
+      product_id: product.id,
+      variant_id: null,
+      supplier_offer_id: null,
+      customer_type: customerType,
+      pricing_tier: step.rung.tier,
+      minimum_quantity: step.rung.min_quantity,
+      maximum_quantity: step.rung.max_quantity,
+      unit_price: step.unit_price,
+      currency: 'BWP' as const,
+      pricing_method: 'PERCENTAGE_MARKUP' as const,
+      effective_from: effectiveFrom.toISOString(),
+      effective_to: null,
+      status: 'ACTIVE' as const,
+    }));
+}
+
+/**
+ * The ladder to render for a product: its authored bands where they exist, the
+ * derived ladder where they do not. Every caller that shows a customer a set of
+ * rungs should go through this rather than reading bands directly, so the
+ * storefront and checkout can never disagree about how many rungs there are.
+ */
+export function effectivePriceLadder(
+  bands: CustomerPrice[],
+  product: Product,
+  customerType: CustomerType = 'RETAIL',
+  variantId: string | null = null,
+  now: Date = new Date(),
+): CustomerPrice[] {
+  const authored = priceLadder(bands, product.id, customerType, variantId, now);
+  if (authored.length > 1) return authored;
+
+  const retail = customerType === 'RETAIL' ? [] : priceLadder(bands, product.id, 'RETAIL', variantId, now);
+  if (retail.length > 1) return retail;
+
+  return derivedLadder(product, customerType, now);
+}
+
+/**
  * Resolve the price for a specific quantity.
  *
  * Falls back to the retail ladder when a buyer type has no bands of its own, so
@@ -160,7 +239,10 @@ export function resolvePrice(
 ): TieredPriceResult {
   const ladder = priceLadder(bands, product.id, customerType, variantId, now);
   const fallback = customerType === 'RETAIL' ? [] : priceLadder(bands, product.id, 'RETAIL', variantId, now);
-  const usable = ladder.length > 0 ? ladder : fallback;
+  const authored = ladder.length > 0 ? ladder : fallback;
+  // Nothing authored for this product yet — price it off the published ladder
+  // rather than charging retail at every quantity.
+  const usable = authored.length > 0 ? authored : derivedLadder(product, customerType, now);
 
   const retailBase =
     usable.find((band) => band.minimum_quantity <= 1)?.unit_price ?? product.price;
@@ -296,6 +378,7 @@ export const TIER_LABELS: Record<PricingTier, string> = {
   RETAIL: 'Retail',
   BULK: 'Bulk',
   WHOLESALE: 'Wholesale',
+  WHOLESALE_PLUS: 'Wholesale+',
   NEGOTIATED: 'Negotiated',
   PROMOTIONAL: 'Promotional',
   RFQ: 'By quotation',

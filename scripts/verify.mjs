@@ -546,8 +546,15 @@ section('13. Tiered pricing — the ladder is real, not hard-coded');
     }),
   });
   const retailUnit20 = retail20.body?.items?.[0]?.unit_price;
+  /*
+   * The quantity rungs are published to everyone — a consumer buying 20 units
+   * reaches the wholesale band like anyone else. What a verified trade account
+   * buys is a further step down on top of it, so the same rung costs a retail
+   * account more. That gap is the thing worth asserting; a retail account
+   * locked out of the rung entirely was the older, blunter rule.
+   */
   check(
-    'a retail account does not reach wholesale pricing',
+    'a retail account pays more than a business account at the same quantity',
     retailUnit20 > unit20,
     `retail ${retailUnit20} vs business ${unit20}`,
   );

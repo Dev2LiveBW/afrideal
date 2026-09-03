@@ -45,6 +45,18 @@ const config: Config = {
           wash: '#E8F1E9',
           ink: '#12331C',
         },
+        // ── Ladder accents: one colour per pricing rung, so a tier reads
+        //    the same on the pricing page, the product page and the console.
+        royal: {
+          DEFAULT: '#2563AB',
+          wash: '#E9F0FA',
+          ink: '#194371',
+        },
+        plum: {
+          DEFAULT: '#6D4AA6',
+          wash: '#F1EBFB',
+          ink: '#3D2A66',
+        },
         // ── Semantic ──────────────────────────────────────────────────
         danger: {
           DEFAULT: '#C0392B',

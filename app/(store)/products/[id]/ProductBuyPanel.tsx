@@ -6,7 +6,7 @@ import { FileText, Minus, PackageX, Plus, ShoppingBag } from 'lucide-react';
 import toast from 'react-hot-toast';
 
 import { GoldButton } from '@/components/brand/GoldButton';
-import { MoneyText } from '@/components/brand/MoneyText';
+import { MoneyText, PriceTag } from '@/components/brand/MoneyText';
 import { VariantSelector } from '@/components/products/VariantSelector';
 import { RfqModal } from '@/components/procurement/RfqModal';
 import { TieredPriceCalculator } from '@/components/procurement/TieredPriceCalculator';
@@ -78,7 +78,7 @@ export function ProductBuyPanel({
                 </span>
               )}
             </p>
-            <MoneyText amount={unitPrice} size="xl" tone="gold" />
+            <PriceTag amount={unitPrice} size="xl" tone="gold" />
           </div>
 
           {!inStock && (

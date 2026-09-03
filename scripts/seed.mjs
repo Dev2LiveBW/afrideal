@@ -870,76 +870,108 @@ const productImages = products.flatMap((product, i) =>
 // ─── §14–§20 pricing ladder ──────────────────────────────────────────────────
 
 /**
- * The ladder, expressed as a factor on the category markup rather than as a
- * flat discount. A wholesale buyer is not getting "15% off retail"; they are
- * getting a thinner margin applied to the same supplier cost, which is what
- * actually happens and what keeps §19 margin floors meaningful.
+ * The published ladder is data, not code.
+ *
+ * /data/price-ladder.json is read here and imported by lib/price-ladder.ts, so
+ * the rungs the storefront explains — 1–4 retail, 5–19 bulk, 20–49 wholesale,
+ * 50–99 wholesale+, 100+ by quotation — and the bands checkout actually charges
+ * come out of one file. Change a step-down there and both move on the next
+ * seed, with nothing to keep in step by hand.
  */
-const TIER_PLAN = [
-  { customer_type: 'GUEST', tier: 'RETAIL', min: 1, max: 4, factor: 1.0, floor: 20 },
-  { customer_type: 'RETAIL', tier: 'RETAIL', min: 1, max: 4, factor: 1.0, floor: 20 },
-  { customer_type: 'RETAIL', tier: 'BULK', min: 5, max: 19, factor: 0.72, floor: 15 },
-  // A consumer buying 20 units should still be able to buy them. They get
-  // volume pricing, just not the wholesale rate a verified business reaches at
-  // the same quantity. Only past 99 does anyone need a quotation.
-  { customer_type: 'RETAIL', tier: 'BULK', min: 20, max: 99, factor: 0.66, floor: 15 },
-  { customer_type: 'BUSINESS', tier: 'RETAIL', min: 1, max: 4, factor: 1.0, floor: 20 },
-  { customer_type: 'BUSINESS', tier: 'BULK', min: 5, max: 19, factor: 0.72, floor: 15 },
-  { customer_type: 'BUSINESS', tier: 'WHOLESALE', min: 20, max: 49, factor: 0.55, floor: 10 },
-  { customer_type: 'BUSINESS', tier: 'WHOLESALE', min: 50, max: 99, factor: 0.45, floor: 8 },
-  { customer_type: 'RESELLER', tier: 'BULK', min: 5, max: 19, factor: 0.68, floor: 15 },
-  { customer_type: 'RESELLER', tier: 'WHOLESALE', min: 20, max: 49, factor: 0.52, floor: 10 },
-  { customer_type: 'RESELLER', tier: 'WHOLESALE', min: 50, max: 99, factor: 0.42, floor: 8 },
-  { customer_type: 'INSTITUTIONAL', tier: 'WHOLESALE', min: 20, max: 99, factor: 0.5, floor: 10 },
-  { customer_type: 'INSTITUTIONAL', tier: 'RFQ', min: 100, max: null, factor: 0.38, floor: 8 },
-];
+const ladderConfig = JSON.parse(await fs.readFile(path.join(DATA_DIR, 'price-ladder.json'), 'utf8'));
+
+const LADDER_RUNGS = ladderConfig.rungs;
+const ACCOUNT_DISCOUNTS = ladderConfig.account_discounts;
+const FLOOR_OVERRIDES = ladderConfig.floor_overrides;
+const LADDER_CUSTOMER_TYPES = Object.keys(ACCOUNT_DISCOUNTS);
 
 /**
- * §19 — margin floors are per category, not global.
- *
- * The default floors assume a category that can carry them. Electronics cannot:
- * the brief sets a 12% markup there, and 12% over cost cannot yield a 20%
- * margin on the selling price once logistics and gateway costs come out. Those
- * two rules are in direct conflict, so the floor is the one that gives — thin
- * margins are the normal condition of consumer electronics, not a fault.
- *
- * Without this every Electronics band would sit permanently under its floor and
- * the alert queue would be noise an operator learns to ignore.
+ * §7 — a trade account's discount stacks on the rung's own step-down, but never
+ * at retail: buying one unit costs the same whoever you are. The discount is
+ * earned by the volume, not by the letterhead.
  */
-const FLOOR_OVERRIDES = {
-  c2: { RETAIL: 10, BULK: 8, WHOLESALE: 6, RFQ: 4 },
+const stepDownPct = (rung, customerType) =>
+  rung.discount_pct === 0
+    ? 0
+    : Math.min(rung.discount_pct + (ACCOUNT_DISCOUNTS[customerType] ?? 0), 60);
+
+const floorPctFor = (categoryId, rung) =>
+  FLOOR_OVERRIDES[categoryId]?.[rung.tier] ?? rung.minimum_margin_pct;
+
+/** The retail rung: supplier cost, category markup, logistics, gateway. */
+const retailPriceFor = (cost, base) =>
+  Math.ceil(cost * (1 + base.markup_value / 100) + base.logistics_cost + cost * base.gateway_rate);
+
+/**
+ * §19 — the cheapest a rung may go without breaching its margin floor.
+ *
+ * The ladder proposes and the floor disposes. A thin-margin category cannot
+ * carry the full published step-down: Electronics runs at a 12% markup, so 23.5%
+ * off retail would sell it under cost recovery. Those rungs land on their floor
+ * instead, which is why two rungs occasionally quote the same price there. The
+ * alternative — publishing a discount the category cannot fund — is a promise
+ * broken at checkout.
+ */
+const floorPriceFor = (cost, base, floorPct) =>
+  Math.ceil((cost + base.logistics_cost + cost * base.gateway_rate) / (1 - floorPct / 100));
+
+/** The worst cost AfriDeal might actually pay for a product, which is what the
+ *  customer-facing price has to survive. */
+const worstCostFor = (productId) =>
+  Math.max(...supplierOffers.filter((offer) => offer.product_id === productId).map((o) => o.supplier_cost));
+
+/** A category's middle product, used to express its rules at a realistic cost. */
+const representativeCost = (categoryId) => {
+  const costs = products
+    .filter((product) => product.category_id === categoryId)
+    .map((product) => worstCostFor(product.id))
+    .sort((a, b) => a - b);
+  return costs[Math.floor(costs.length / 2)] ?? 100;
 };
 
-// §16/§17 — one configurable rule per category and tier reached.
+/** One rung's price for one product and buyer type. */
+const rungPriceFor = (retailPrice, cost, base, rung, customerType, categoryId) =>
+  Math.max(
+    Math.round(retailPrice * (1 - stepDownPct(rung, customerType) / 100)),
+    floorPriceFor(cost, base, floorPctFor(categoryId, rung)),
+  );
+
+// §16/§17 — one configurable rule per category, buyer type and rung.
 const marginRules = [];
-const seenRule = new Set();
 
 for (const category of categories) {
   const base = ruleFor(category.id);
-  const overrides = FLOOR_OVERRIDES[category.id];
+  const cost = representativeCost(category.id);
+  const retail = retailPriceFor(cost, base);
 
-  for (const plan of TIER_PLAN) {
-    const key = `${category.id}|${plan.customer_type}|${plan.tier}`;
-    if (seenRule.has(key)) continue;
-    seenRule.add(key);
+  for (const customerType of LADDER_CUSTOMER_TYPES) {
+    for (const rung of LADDER_RUNGS) {
+      const price = rungPriceFor(retail, cost, base, rung, customerType, category.id);
 
-    const floor = overrides?.[plan.tier] ?? plan.floor;
+      /*
+       * The markup this rung implies at a representative cost, rather than a
+       * number typed next to it. An operator reading the rules table sees the
+       * markup that actually produced the band, and §18 stays honest: this is
+       * markup over cost, not margin over price.
+       */
+      const impliedMarkup = ((price - base.logistics_cost - cost * base.gateway_rate) / cost - 1) * 100;
 
-    marginRules.push({
-      id: `mr${String(marginRules.length + 1).padStart(3, '0')}`,
-      category_id: category.id,
-      category_name: category.name,
-      customer_type: plan.customer_type,
-      pricing_tier: plan.tier,
-      margin_type: 'PERCENTAGE_MARKUP',
-      margin_value: Math.round(base.markup_value * plan.factor * 10) / 10,
-      fixed_component: 0,
-      logistics_cost: base.logistics_cost,
-      gateway_rate: base.gateway_rate,
-      minimum_margin_pct: floor,
-      commercial_model: 'AFRIDEAL_MANAGED',
-      active: true,
-    });
+      marginRules.push({
+        id: `mr${String(marginRules.length + 1).padStart(3, '0')}`,
+        category_id: category.id,
+        category_name: category.name,
+        customer_type: customerType,
+        pricing_tier: rung.tier,
+        margin_type: 'PERCENTAGE_MARKUP',
+        margin_value: Math.round(impliedMarkup * 10) / 10,
+        fixed_component: 0,
+        logistics_cost: base.logistics_cost,
+        gateway_rate: base.gateway_rate,
+        minimum_margin_pct: floorPctFor(category.id, rung),
+        commercial_model: 'AFRIDEAL_MANAGED',
+        active: true,
+      });
+    }
   }
 }
 
@@ -951,7 +983,8 @@ for (const category of categories) {
  */
 for (const category of categories) {
   const base = ruleFor(category.id);
-  const retailFloor = FLOOR_OVERRIDES[category.id]?.RETAIL ?? 20;
+  const retailRung = LADDER_RUNGS[0];
+  const retailFloor = floorPctFor(category.id, retailRung);
 
   for (const customerType of ['GUEST', 'RETAIL', 'BUSINESS']) {
     marginRules.push({
@@ -972,38 +1005,35 @@ for (const category of categories) {
   }
 }
 
-// §14 — the customer-facing bands themselves.
+// §14 — the customer-facing bands themselves. Every product carries the whole
+// ladder for every buyer type, so no shopper ever meets a quantity the
+// catalogue has no price for.
 const customerPrices = [];
 
 for (const product of products) {
   const base = ruleFor(product.category_id);
-  const costs = supplierOffers
-    .filter((offer) => offer.product_id === product.id)
-    .map((offer) => offer.supplier_cost);
-  const worstCost = Math.max(...costs);
+  const worstCost = worstCostFor(product.id);
+  const retailPrice = retailPriceFor(worstCost, base);
 
-  for (const plan of TIER_PLAN) {
-    const markup = base.markup_value * plan.factor;
-    const unitPrice = Math.ceil(
-      worstCost * (1 + markup / 100) + base.logistics_cost + worstCost * base.gateway_rate,
-    );
-
-    customerPrices.push({
-      id: `cp${String(customerPrices.length + 1).padStart(4, '0')}`,
-      product_id: product.id,
-      variant_id: null,
-      supplier_offer_id: null,
-      customer_type: plan.customer_type,
-      pricing_tier: plan.tier,
-      minimum_quantity: plan.min,
-      maximum_quantity: plan.max,
-      unit_price: unitPrice,
-      currency: 'BWP',
-      pricing_method: 'PERCENTAGE_MARKUP',
-      effective_from: product.created_at,
-      effective_to: null,
-      status: 'ACTIVE',
-    });
+  for (const customerType of LADDER_CUSTOMER_TYPES) {
+    for (const rung of LADDER_RUNGS) {
+      customerPrices.push({
+        id: `cp${String(customerPrices.length + 1).padStart(4, '0')}`,
+        product_id: product.id,
+        variant_id: null,
+        supplier_offer_id: null,
+        customer_type: customerType,
+        pricing_tier: rung.tier,
+        minimum_quantity: rung.min_quantity,
+        maximum_quantity: rung.max_quantity,
+        unit_price: rungPriceFor(retailPrice, worstCost, base, rung, customerType, product.category_id),
+        currency: 'BWP',
+        pricing_method: 'PERCENTAGE_MARKUP',
+        effective_from: product.created_at,
+        effective_to: null,
+        status: 'ACTIVE',
+      });
+    }
   }
 }
 
@@ -1185,6 +1215,10 @@ const files = {
   escrow,
   disputes,
   runners,
+  // Runner requests start empty: they are customer intent, not seed data, and
+  // a demo that opens with strangers' errands already in the queue is telling
+  // a story about traffic it does not have.
+  'runner-requests': [],
   shipments,
   settlements,
   'audit-log': auditLog,

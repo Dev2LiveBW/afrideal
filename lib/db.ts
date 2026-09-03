@@ -20,6 +20,7 @@ import type {
   Rfq,
   RfqResponse,
   Runner,
+  RunnerRequest,
   Settlement,
   Shipment,
   Supplier,
@@ -58,6 +59,7 @@ export interface Schema {
   escrow: EscrowRecord;
   disputes: Dispute;
   runners: Runner;
+  'runner-requests': RunnerRequest;
   shipments: Shipment;
   settlements: Settlement;
   'audit-log': AuditEntry;

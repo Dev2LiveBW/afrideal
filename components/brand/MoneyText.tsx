@@ -1,4 +1,4 @@
-import { bwp, bwpBare } from '@/lib/format';
+import { bwp, bwpBare, pulaTag } from '@/lib/format';
 import { cn } from '@/lib/utils';
 
 /**
@@ -8,6 +8,53 @@ import { cn } from '@/lib/utils';
  * anyone hand-tuning widths, and two decimals always — including on round
  * numbers, because `BWP 1,200` next to `BWP 1,199.50` reads as a typo.
  */
+
+/**
+ * The storefront shelf tag: `P399`, sized for a phone.
+ *
+ * Deliberately a different component from MoneyText rather than a prop on it,
+ * so nothing that settles money — a receipt, an escrow leg, a payout — can pick
+ * up the shortened form by accident.
+ */
+export function PriceTag({
+  amount,
+  size = 'md',
+  tone = 'ink',
+  className,
+}: {
+  amount: number;
+  size?: 'sm' | 'md' | 'lg' | 'xl';
+  tone?: 'ink' | 'gold' | 'forest' | 'white' | 'muted';
+  className?: string;
+}) {
+  const sizes = {
+    sm: 'text-[14px]',
+    md: 'text-[17px]',
+    lg: 'text-[22px] tracking-[-0.01em]',
+    xl: 'text-[30px] leading-9 tracking-[-0.02em]',
+  };
+
+  const tones = {
+    ink: 'text-ink',
+    gold: 'text-gold-dark',
+    forest: 'text-forest',
+    white: 'text-white',
+    muted: 'text-body',
+  };
+
+  return (
+    <span
+      className={cn(
+        'font-display font-bold tabular-nums',
+        sizes[size],
+        tones[tone],
+        className,
+      )}
+    >
+      {pulaTag(amount)}
+    </span>
+  );
+}
 
 export function MoneyText({
   amount,

@@ -31,16 +31,18 @@ export function BrowseClient({
   images,
   initialCategory,
   initialQuery,
+  initialSort = 'featured',
 }: {
   categories: Category[];
   products: BrowseProduct[];
   images: ProductImage[];
   initialCategory: string;
   initialQuery: string;
+  initialSort?: Sort;
 }) {
   const [category, setCategory] = useState(initialCategory);
   const [query, setQuery] = useState(initialQuery);
-  const [sort, setSort] = useState<Sort>('featured');
+  const [sort, setSort] = useState<Sort>(initialSort);
 
   const visible = useMemo(() => {
     const needle = query.trim().toLowerCase();
