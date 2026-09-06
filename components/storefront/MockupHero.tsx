@@ -18,7 +18,7 @@ export function MockupHero() {
         <div className="grid grid-cols-2 gap-2.5 sm:gap-6">
           
           {/* Left Card: Marketplace */}
-          <div className="relative isolate flex min-h-[330px] flex-col justify-between overflow-hidden rounded-[16px] bg-[#0e0701] p-3.5 text-white shadow-lg sm:min-h-[420px] sm:rounded-[24px] sm:p-8 lg:min-h-[460px] lg:p-10">
+          <div className="relative isolate flex min-h-[310px] flex-col justify-between overflow-hidden rounded-[16px] bg-[#0e0701] p-3 text-white shadow-lg sm:min-h-[420px] sm:rounded-[24px] sm:p-8 lg:min-h-[460px] lg:p-10">
             <div className="relative z-10 max-w-full sm:max-w-[280px] lg:max-w-[320px]">
               <div className="mb-2.5 inline-flex items-center gap-1 rounded-md border border-white/20 bg-white/10 px-1.5 py-0.5 sm:mb-6 sm:gap-1.5 sm:px-3 sm:py-1">
                 <ShoppingBag className="h-2.5 w-2.5 text-white/80 sm:h-3.5 sm:w-3.5" />
@@ -58,17 +58,30 @@ export function MockupHero() {
               than being cropped to fit.
             */}
             <div
-              className="pointer-events-none absolute bottom-0 right-0 z-0 h-[30%] w-[70%] sm:h-[60%] sm:w-[80%] lg:h-[85%] lg:w-[95%]"
+              className="pointer-events-none absolute bottom-0 right-0 z-0 h-[62%] w-full sm:h-[80%] sm:w-[92%] lg:h-[85%] lg:w-[95%]"
               style={{ maskImage: 'linear-gradient(to right, transparent 0%, black 45%)', WebkitMaskImage: 'linear-gradient(to right, transparent 0%, black 45%)' }}
             >
-               <Image src="/images/hero/mockup.jpg" alt="App preview" fill className="object-contain object-right-bottom" />
+               {/*
+                 Contained, a 4:3 photograph in a 179px-wide card paints at most
+                 179×134 whatever the box height — so on a phone it could only
+                 ever be half the share of the card it holds on desktop. Below
+                 `sm` it covers the card instead and crops, which is the only
+                 way a landscape frame fills a portrait one. The scrims below
+                 carry the copy over it.
+               */}
+               <Image
+                 src="/images/hero/mockup.jpg"
+                 alt="App preview"
+                 fill
+                 className="object-contain object-bottom sm:object-right-bottom"
+               />
             </div>
             {/* Gradient mask to fade image into black on the left for text readability */}
-            <div className="absolute inset-y-0 right-0 w-[100%] bg-gradient-to-r from-[#0e0701] via-[#0e0701]/40 to-transparent pointer-events-none z-0"></div>
+            <div className="pointer-events-none absolute inset-0 z-0 bg-gradient-to-r from-[#0e0701] via-[#0e0701]/45 to-transparent"></div>
           </div>
 
           {/* Right Card: Runner Service */}
-          <div className="relative isolate flex min-h-[330px] flex-col justify-between overflow-hidden rounded-[16px] bg-[#F6EDE4] p-3.5 shadow-lg sm:min-h-[420px] sm:rounded-[24px] sm:p-8 lg:p-10">
+          <div className="relative isolate flex min-h-[310px] flex-col justify-between overflow-hidden rounded-[16px] bg-[#F6EDE4] p-3 shadow-lg sm:min-h-[420px] sm:rounded-[24px] sm:p-8 lg:p-10">
             <div className="relative z-10 max-w-full sm:max-w-[280px] lg:max-w-[300px]">
               <div className="mb-2.5 inline-flex items-center gap-1 rounded-md bg-orange-100 px-1.5 py-0.5 sm:mb-6 sm:gap-1.5 sm:px-3 sm:py-1">
                 <Truck className="h-2.5 w-2.5 text-[#D35400] sm:h-3.5 sm:w-3.5" />
@@ -100,7 +113,7 @@ export function MockupHero() {
               on a phone where 48px is a sixth of the image. Anchored inside the
               card instead, and scaled by percentage so he shrinks with it.
             */}
-            <div className="pointer-events-none absolute bottom-0 right-0 z-0 h-[34%] w-[76%] sm:h-[65%] sm:w-[70%] lg:h-[95%] lg:w-[80%]">
+            <div className="pointer-events-none absolute bottom-0 right-0 z-0 h-[66%] w-[96%] sm:h-[88%] sm:w-[78%] lg:h-[95%] lg:w-[80%]">
                <Image
                  src="/images/hero/runner.jpg"
                  alt="Runner"
@@ -108,6 +121,7 @@ export function MockupHero() {
                  className="object-contain object-right-bottom mix-blend-multiply"
                />
             </div>
+            <div className="pointer-events-none absolute inset-y-0 left-0 z-0 w-[70%] bg-gradient-to-r from-[#F6EDE4] via-[#F6EDE4]/70 to-transparent sm:w-[60%]" />
             
             <Link href="/request-a-runner" className="relative z-10 mt-auto flex h-8 w-full items-center justify-center gap-1 rounded-lg bg-[#E67E22] px-2 text-[10px] font-bold text-white transition-colors hover:bg-[#D35400] sm:h-14 sm:gap-2 sm:rounded-xl sm:px-8 sm:text-[16px] lg:w-[80%]">
               Request a runner
