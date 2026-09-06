@@ -5,20 +5,37 @@ import { Users, Package, ShieldCheck, Truck, CreditCard, MapPin } from 'lucide-r
 export function StatsBanner() {
   return (
     <div className="mx-auto max-w-[1400px] px-4 py-6">
-      <div className="flex flex-wrap items-center justify-around gap-6 rounded-2xl bg-[#111111] px-8 py-6">
+      {/*
+        Four across at every width, never wrapping.
+        `flex-wrap` broke this into three ragged rows on a 390px phone — the
+        four figures are one claim about the marketplace, and a claim split
+        across three lines stops reading as one. A fixed four-column grid
+        cannot wrap, so the sizes inside do the yielding instead: the icon,
+        both type sizes and the container padding all step down, and each cell
+        stacks its icon above its text below `sm` to buy horizontal room.
+      */}
+      <div className="grid grid-cols-4 gap-1.5 rounded-2xl bg-[#111111] px-2.5 py-4 sm:gap-6 sm:px-8 sm:py-6">
         {[
           { icon: Users, stat: '100+', label: 'Verified Suppliers' },
           { icon: Package, stat: '10,000+', label: 'Products' },
           { icon: ShieldCheck, stat: 'Secure', label: 'Payments' },
           { icon: Truck, stat: 'Fast', label: 'Reliable Delivery' },
         ].map((item, i) => (
-          <div key={i} className="flex items-center gap-3">
-            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-[#E67E22]/10">
-              <item.icon size={20} className="text-[#E67E22]" />
+          <div
+            key={i}
+            className="flex min-w-0 flex-col items-center gap-1.5 text-center sm:flex-row sm:items-center sm:gap-3 sm:text-left"
+          >
+            <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-[#E67E22]/10 sm:h-10 sm:w-10">
+              {/* Sized by class, not the `size` prop, so it can respond. */}
+              <item.icon className="h-4 w-4 text-[#E67E22] sm:h-5 sm:w-5" />
             </div>
-            <div>
-              <p className="text-[22px] font-bold leading-none text-white">{item.stat}</p>
-              <p className="text-[12px] text-white/60">{item.label}</p>
+            <div className="min-w-0">
+              <p className="text-[14px] font-bold leading-none text-white sm:text-[22px]">
+                {item.stat}
+              </p>
+              <p className="mt-1 text-[9.5px] leading-tight text-white/60 sm:mt-0.5 sm:text-[12px]">
+                {item.label}
+              </p>
             </div>
           </div>
         ))}

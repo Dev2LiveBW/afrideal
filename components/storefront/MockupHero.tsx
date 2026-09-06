@@ -43,11 +43,19 @@ export function MockupHero() {
             </div>
             
             {/* Phone Image */}
-            <div 
-              className="absolute right-0 bottom-0 top-0 w-[95%] z-0 pointer-events-none"
+            {/*
+              `object-cover` in a full-height box cropped a 4:3 photograph into
+              a tall narrow window, which threw away most of the composition —
+              on a phone it showed cardboard and no phone. Contained and
+              anchored bottom-right, the whole frame survives at every width;
+              the box is a percentage of the card so it shrinks with it rather
+              than being cropped to fit.
+            */}
+            <div
+              className="absolute bottom-0 right-0 z-0 h-[55%] w-[72%] pointer-events-none sm:h-[65%] sm:w-[80%] lg:h-[85%] lg:w-[95%]"
               style={{ maskImage: 'linear-gradient(to right, transparent 0%, black 45%)', WebkitMaskImage: 'linear-gradient(to right, transparent 0%, black 45%)' }}
             >
-               <Image src="/images/hero/mockup.jpg" alt="App preview" fill className="object-cover object-right" />
+               <Image src="/images/hero/mockup.jpg" alt="App preview" fill className="object-contain object-right-bottom" />
             </div>
             {/* Gradient mask to fade image into black on the left for text readability */}
             <div className="absolute inset-y-0 right-0 w-[100%] bg-gradient-to-r from-[#0e0701] via-[#0e0701]/40 to-transparent pointer-events-none z-0"></div>
@@ -80,7 +88,13 @@ export function MockupHero() {
             </div>
             
             {/* Runner Image */}
-            <div className="absolute -right-12 bottom-0 w-[80%] h-[95%] z-0 pointer-events-none">
+            {/*
+              `-right-12` pushed 48px of the runner past the card, and the card
+              clips — so a fixed slice of him was cut off at every width, worst
+              on a phone where 48px is a sixth of the image. Anchored inside the
+              card instead, and scaled by percentage so he shrinks with it.
+            */}
+            <div className="absolute bottom-0 right-0 z-0 h-[55%] w-[62%] pointer-events-none sm:h-[70%] sm:w-[70%] lg:h-[95%] lg:w-[80%]">
                <Image src="/images/hero/runner.jpg" alt="Runner" fill className="object-contain object-right-bottom" />
             </div>
             
