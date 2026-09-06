@@ -1,20 +1,15 @@
-import Image from 'next/image';
 import Link from 'next/link';
-import { ArrowRight, BadgeCheck, User, Truck } from "lucide-react";
+import { ArrowRight, BadgeCheck } from 'lucide-react';
 
 import { ActionButton } from '@/components/brand/ActionButton';
 import { CategoryTiles } from '@/components/storefront/DiscoveryRails';
-import { FlashDealsRail } from '@/components/storefront/FlashDealsRail';
-import { HowItWorks } from '@/components/storefront/HowItWorks';
 import { LadderProof, type LadderProofRow } from '@/components/storefront/LadderProof';
 import { PackagesBoard } from '@/components/storefront/PackagesBoard';
 import { MockupCategories } from '@/components/storefront/MockupCategories';
 import { StatsBanner, PromoCards, TrustPaymentStrip } from '@/components/storefront/HomePromoSections';
 import { MockupHero } from '@/components/storefront/MockupHero';
 import { PathChooser } from '@/components/storefront/PathChooser';
-import { PriceLadder } from '@/components/storefront/PriceLadder';
 import { ProductRail } from '@/components/storefront/ProductRail';
-import { Swatch } from '@/components/storefront/Swatch';
 import { TrustStrip } from '@/components/storefront/TrustStrip';
 import { auth } from '@/lib/auth';
 import { readAll } from '@/lib/db';
@@ -22,8 +17,6 @@ import { MARKUP_PCT, QUOTATION_THRESHOLD, deepestSavingPct } from '@/lib/pricing
 import { getCatalogue } from '@/lib/queries';
 import { rankOffers } from '@/lib/supplier-selection';
 import { doorForQuantity, ladderSpread, tierDoors } from '@/lib/tier-doors';
-
-import { Reveal } from '@/app/(store)/_components/Reveal';
 
 export const dynamic = 'force-dynamic';
 
@@ -68,7 +61,6 @@ export default async function LandingPage() {
   });
 
   const flagship = products.filter((product) => product.category_id === FLAGSHIP_CATEGORY);
-  const onPromotion = products.filter((product) => product.promotion).map(decorate);
 
   const spreads = products
     .map((product) => ({ product, spread: ladderSpread(bands, product) }))
@@ -263,43 +255,6 @@ export default async function LandingPage() {
       {/* ── Categories ─────────────────────────────────────────────────── */}
       <section className="mx-auto max-w-market px-6 pt-20">
         <CategoryTiles categories={categories} products={products} />
-      </section>
-
-      {/* ── Live deals ─────────────────────────────────────────────────── */}
-      {onPromotion.length > 0 && (
-        <section className="mx-auto max-w-market px-6 pt-20">
-          <FlashDealsRail products={onPromotion} images={images} />
-        </section>
-      )}
-
-      {/* ── How the order actually runs ────────────────────────────────── */}
-      <section id="how-it-works" className="mt-24 py-4">
-        <div className="mx-auto max-w-market px-6 py-20 lg:py-24">
-          <div className="grid gap-8 lg:grid-cols-[minmax(0,0.8fr)_minmax(0,1.2fr)] lg:items-end lg:gap-20">
-            <div className="min-w-0">
-              <h2 className="font-display text-headline-lg font-semibold leading-tight text-ink">
-                How it works
-              </h2>
-              <p className="measure mt-4 text-[14.5px] leading-7 text-body">
-                You are buying from AfriDeal, not from the supplier. We are the merchant on your
-                order rather than an introduction service, so you get one invoice and one number to
-                call — and if the order goes wrong it is ours to fix.
-              </p>
-            </div>
-
-            <div className="min-w-0 lg:justify-self-end">
-              <Link
-                href="/how-it-works"
-                className="inline-flex items-center gap-1.5 text-[13.5px] font-medium text-forest underline-offset-4 hover:underline"
-              >
-                See both flows, step by step
-                <ArrowRight size={13} strokeWidth={1.75} aria-hidden="true" />
-              </Link>
-            </div>
-          </div>
-
-          <HowItWorks className="mt-14" />
-        </div>
       </section>
 
       {/*
