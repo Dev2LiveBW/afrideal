@@ -6,39 +6,45 @@ import { ActionButton } from '@/components/brand/ActionButton';
 export function MockupHero() {
   return (
     <section className="${badge.bg}-raised pt-6 pb-12">
-      <div className="mx-auto max-w-market px-6">
+      <div className="mx-auto max-w-market px-3 sm:px-6">
         
-        {/* Two Big Cards */}
-        <div className="grid lg:grid-cols-2 gap-6">
+        {/*
+          Two cards, one row, at every width — the two ways into the platform
+          are a choice, and a choice reads as one when both options are in
+          view together. On a 390px phone that leaves roughly 179px a card, so
+          everything inside scales with it: padding, both type ramps, the
+          bullet icons, the CTA and the photographs.
+        */}
+        <div className="grid grid-cols-2 gap-2.5 sm:gap-6">
           
           {/* Left Card: Marketplace */}
-          <div className="relative overflow-hidden rounded-[24px] bg-[#0e0701] text-white p-8 sm:p-10 shadow-lg min-h-[460px] flex flex-col justify-between isolate">
-            <div className="relative z-10 max-w-[280px] sm:max-w-[320px]">
-              <div className="inline-flex items-center gap-1.5 rounded-md border border-white/20 bg-white/10 px-3 py-1 mb-6">
-                <ShoppingBag size={14} className="text-white/80" />
-                <span className="text-[11px] font-bold tracking-wider text-white/90">SHOP THE MARKETPLACE</span>
+          <div className="relative isolate flex min-h-[330px] flex-col justify-between overflow-hidden rounded-[16px] bg-[#0e0701] p-3.5 text-white shadow-lg sm:min-h-[420px] sm:rounded-[24px] sm:p-8 lg:min-h-[460px] lg:p-10">
+            <div className="relative z-10 max-w-full sm:max-w-[280px] lg:max-w-[320px]">
+              <div className="mb-2.5 inline-flex items-center gap-1 rounded-md border border-white/20 bg-white/10 px-1.5 py-0.5 sm:mb-6 sm:gap-1.5 sm:px-3 sm:py-1">
+                <ShoppingBag className="h-2.5 w-2.5 text-white/80 sm:h-3.5 sm:w-3.5" />
+                <span className="text-[7.5px] font-bold leading-tight tracking-wider text-white/90 sm:text-[11px]">SHOP THE MARKETPLACE</span>
               </div>
               
-              <h1 className="font-display text-[40px] leading-[1.1] font-bold mb-4">
+              <h1 className="mb-2 font-display text-[19px] font-bold leading-[1.1] sm:mb-4 sm:text-[32px] lg:text-[40px]">
                 Compare. Buy.<br/>Save more.
               </h1>
               
-              <p className="text-[14px] text-white/70 leading-relaxed mb-6">
+              <p className="mb-2.5 text-[9.5px] leading-snug text-white/70 sm:mb-6 sm:text-[14px] sm:leading-relaxed">
                 Compare prices from trusted local and international suppliers. Retail, bulk or wholesale - you choose.
               </p>
               
-              <ul className="space-y-2.5 mb-8">
+              <ul className="mb-3 space-y-1 sm:mb-8 sm:space-y-2.5">
                 {['Best prices', 'Verified suppliers', 'Secure payments', 'Fast delivery'].map(item => (
-                  <li key={item} className="flex items-center gap-2.5 text-[14px] font-medium text-white/90">
-                    <CheckCircle2 size={18} className="text-[#0e0701] fill-[#E67E22]" />
+                  <li key={item} className="flex items-center gap-1.5 text-[9.5px] font-medium text-white/90 sm:gap-2.5 sm:text-[14px]">
+                    <CheckCircle2 className="h-3 w-3 shrink-0 fill-[#E67E22] text-[#0e0701] sm:h-[18px] sm:w-[18px]" />
                     {item}
                   </li>
                 ))}
               </ul>
               
-              <Link href="/browse" className="inline-flex h-12 items-center justify-center gap-2 rounded-full bg-gold px-8 text-[15px] font-bold text-black hover:bg-gold-light transition-colors">
+              <Link href="/browse" className="inline-flex h-8 items-center justify-center gap-1 rounded-full bg-gold px-3 text-[10px] font-bold text-black transition-colors hover:bg-gold-light sm:h-12 sm:gap-2 sm:px-8 sm:text-[15px]">
                 Browse products
-                <ArrowRight size={18} />
+                <ArrowRight className="h-3 w-3 shrink-0 sm:h-[18px] sm:w-[18px]" />
               </Link>
             </div>
             
@@ -52,7 +58,7 @@ export function MockupHero() {
               than being cropped to fit.
             */}
             <div
-              className="absolute bottom-0 right-0 z-0 h-[55%] w-[72%] pointer-events-none sm:h-[65%] sm:w-[80%] lg:h-[85%] lg:w-[95%]"
+              className="pointer-events-none absolute bottom-0 right-0 z-0 h-[30%] w-[70%] sm:h-[60%] sm:w-[80%] lg:h-[85%] lg:w-[95%]"
               style={{ maskImage: 'linear-gradient(to right, transparent 0%, black 45%)', WebkitMaskImage: 'linear-gradient(to right, transparent 0%, black 45%)' }}
             >
                <Image src="/images/hero/mockup.jpg" alt="App preview" fill className="object-contain object-right-bottom" />
@@ -62,25 +68,25 @@ export function MockupHero() {
           </div>
 
           {/* Right Card: Runner Service */}
-          <div className="relative overflow-hidden rounded-[24px] bg-[#F6EDE4] p-8 sm:p-10 shadow-lg min-h-[460px] flex flex-col justify-between isolate">
-            <div className="relative z-10 max-w-[280px] sm:max-w-[300px]">
-              <div className="inline-flex items-center gap-1.5 rounded-md bg-orange-100 px-3 py-1 mb-6">
-                <Truck size={14} className="text-[#D35400]" />
-                <span className="text-[11px] font-bold tracking-wider text-[#D35400]">RUNNER SERVICE</span>
+          <div className="relative isolate flex min-h-[330px] flex-col justify-between overflow-hidden rounded-[16px] bg-[#F6EDE4] p-3.5 shadow-lg sm:min-h-[420px] sm:rounded-[24px] sm:p-8 lg:p-10">
+            <div className="relative z-10 max-w-full sm:max-w-[280px] lg:max-w-[300px]">
+              <div className="mb-2.5 inline-flex items-center gap-1 rounded-md bg-orange-100 px-1.5 py-0.5 sm:mb-6 sm:gap-1.5 sm:px-3 sm:py-1">
+                <Truck className="h-2.5 w-2.5 text-[#D35400] sm:h-3.5 sm:w-3.5" />
+                <span className="text-[7.5px] font-bold leading-tight tracking-wider text-[#D35400] sm:text-[11px]">RUNNER SERVICE</span>
               </div>
               
-              <h1 className="font-display text-[40px] leading-[1.1] font-bold text-ink mb-2">
+              <h1 className="mb-1.5 font-display text-[19px] font-bold leading-[1.1] text-ink sm:mb-2 sm:text-[32px] lg:text-[40px]">
                 Can&apos;t find it listed?
               </h1>
               
-              <p className="text-[20px] font-semibold text-[#D35400] leading-snug mb-6">
+              <p className="mb-2.5 text-[11px] font-semibold leading-snug text-[#D35400] sm:mb-6 sm:text-[16px] lg:text-[20px]">
                 Our verified runners will source it for you.
               </p>
               
-              <ul className="space-y-3 mb-8">
+              <ul className="mb-3 space-y-1 sm:mb-8 sm:space-y-3">
                 {['Find anything', 'Inspect & negotiate', 'Buy on your behalf', 'Personal tasks'].map(item => (
-                  <li key={item} className="flex items-center gap-2.5 text-[15px] font-medium text-ink">
-                    <CheckCircle2 size={20} className="text-[#27AE60]" />
+                  <li key={item} className="flex items-center gap-1.5 text-[9.5px] font-medium text-ink sm:gap-2.5 sm:text-[15px]">
+                    <CheckCircle2 className="h-3 w-3 shrink-0 text-[#27AE60] sm:h-5 sm:w-5" />
                     {item}
                   </li>
                 ))}
@@ -94,13 +100,18 @@ export function MockupHero() {
               on a phone where 48px is a sixth of the image. Anchored inside the
               card instead, and scaled by percentage so he shrinks with it.
             */}
-            <div className="absolute bottom-0 right-0 z-0 h-[55%] w-[62%] pointer-events-none sm:h-[70%] sm:w-[70%] lg:h-[95%] lg:w-[80%]">
-               <Image src="/images/hero/runner.jpg" alt="Runner" fill className="object-contain object-right-bottom" />
+            <div className="pointer-events-none absolute bottom-0 right-0 z-0 h-[34%] w-[76%] sm:h-[65%] sm:w-[70%] lg:h-[95%] lg:w-[80%]">
+               <Image
+                 src="/images/hero/runner.jpg"
+                 alt="Runner"
+                 fill
+                 className="object-contain object-right-bottom mix-blend-multiply"
+               />
             </div>
             
-            <Link href="/request-a-runner" className="relative z-10 flex h-14 w-full sm:w-[80%] items-center justify-center gap-2 rounded-xl bg-[#E67E22] px-8 text-[16px] font-bold text-white hover:bg-[#D35400] transition-colors mt-auto">
+            <Link href="/request-a-runner" className="relative z-10 mt-auto flex h-8 w-full items-center justify-center gap-1 rounded-lg bg-[#E67E22] px-2 text-[10px] font-bold text-white transition-colors hover:bg-[#D35400] sm:h-14 sm:gap-2 sm:rounded-xl sm:px-8 sm:text-[16px] lg:w-[80%]">
               Request a runner
-              <ArrowRight size={18} />
+              <ArrowRight className="h-3 w-3 shrink-0 sm:h-[18px] sm:w-[18px]" />
             </Link>
           </div>
 
