@@ -5,7 +5,8 @@ import {
   Bike,
   Building2,
   LayoutDashboard,
-  Lock,
+  FileText,
+  PackageSearch,
   Package,
   Settings as SettingsIcon,
   ShoppingCart,
@@ -76,10 +77,16 @@ export default async function AdminLayout({ children }: { children: React.ReactN
       heading: 'Money',
       items: [
         {
-          href: '/admin/escrow',
-          label: 'Escrow',
-          icon: <Lock size={16} strokeWidth={1.5} />,
-          badge: badges.heldEscrow,
+          href: '/admin/payables',
+          label: 'Supplier payables',
+          icon: <FileText size={16} strokeWidth={1.5} />,
+          badge: badges.pendingPayables,
+        },
+        {
+          href: '/admin/sourcing',
+          label: 'Sourcing',
+          icon: <PackageSearch size={16} strokeWidth={1.5} />,
+          badge: badges.unclaimedSourcing,
         },
         {
           href: '/admin/disputes',

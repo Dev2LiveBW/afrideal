@@ -14,7 +14,12 @@
 
 @layer base {
   :root {
-    --font-satoshi: 'Satoshi', var(--font-geist-sans), ui-sans-serif, sans-serif;
+    /*
+     * Satoshi is injected by next/font/local in the root layout, which owns
+     * this variable and its fallback chain. It used to be redefined here with
+     * Geist as the fallback — the body face standing in for the display face,
+     * which is the one substitution this system cannot absorb.
+     */
 
     /* Motion. Exponential ease-out — mass that settles, never a linear slide. */
     --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
@@ -58,13 +63,18 @@
     font-feature-settings: 'tnum' 1;
   }
 
+  /*
+   * Selection and focus are brand surfaces, and both were amber. Amber means
+   * "money in motion" in this system, so having it flash on every text drag and
+   * every tab stop was the fastest way to teach a user that it means nothing.
+   */
   ::selection {
-    background-color: #f0c040;
-    color: #111111;
+    background-color: theme('colors.forest.wash');
+    color: theme('colors.forest.ink');
   }
 
   :focus-visible {
-    outline: 2px solid theme('colors.gold.DEFAULT');
+    outline: 2px solid theme('colors.forest.DEFAULT');
     outline-offset: 2px;
     border-radius: 4px;
   }
@@ -85,7 +95,7 @@
   /*
    * The nested enclosure. An outer tray with a hairline ring holding an inner
    * core with a mathematically smaller radius, so the curves stay concentric.
-   * Reserved for surfaces that matter — stat clusters, escrow controls, the
+   * Reserved for surfaces that matter — stat clusters, settlement controls, the
    * checkout summary. Never on anything that repeats more than eight times.
    */
   .enclosure {
@@ -110,13 +120,13 @@
     @apply font-mono text-eyebrow font-medium uppercase text-muted;
   }
 
-  /* Table conventions: gold header rule, alternating body, hairline dividers. */
+  /* Table conventions: forest header rule, alternating body, hairline dividers. */
   .data-table {
     @apply w-full border-collapse text-left text-[13px];
   }
 
   .data-table thead th {
-    @apply whitespace-nowrap border-b border-hairline-strong bg-gold/[0.07] px-4 py-3 font-mono text-eyebrow font-medium uppercase text-gold-dark;
+    @apply whitespace-nowrap border-b border-hairline-strong bg-forest-wash/70 px-4 py-3 font-mono text-eyebrow font-medium uppercase text-forest-ink;
   }
 
   .data-table tbody td {
@@ -132,7 +142,7 @@
   }
 
   .data-table tbody tr:hover {
-    @apply bg-gold/[0.05];
+    @apply bg-forest/[0.05];
   }
 
   /* Skeletons — a moving sheen, never a static grey block. */

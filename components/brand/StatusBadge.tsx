@@ -6,10 +6,10 @@ import { humanise } from '@/lib/format';
 /**
  * One badge for every status in the system.
  *
- * Colour carries meaning here, never emphasis. Amber means money in motion but
- * not yet settled. Green means settled or verified. Refunded is deliberately
- * slate rather than red — a refund is a clean outcome, not a failure. Suspended
- * and cancelled are inert grey and carry no colour weight at all.
+ * Colour carries meaning here, never emphasis. Amber means money owed but not
+ * yet settled. Green means settled or verified. A cancelled invoice is slate
+ * rather than red - writing one off is a clean outcome, not a failure.
+ * Suspended and cancelled orders are inert grey and carry no colour weight.
  */
 
 type Tone = 'amber' | 'green' | 'slate' | 'red' | 'inert' | 'ink';
@@ -32,10 +32,20 @@ const STATUS_TONES: Record<string, Tone> = {
   DISPUTED: 'red',
   CANCELLED: 'inert',
 
-  // Escrow
-  HELD: 'amber',
-  RELEASED: 'green',
-  REFUNDED: 'slate',
+  // Supplier payables
+  SETTLED: 'green',
+  ON_HOLD: 'red',
+
+  // Runner sourcing requests. Amber the whole way through the middle, because
+  // every one of those states is the same fact from the buyer's side: someone
+  // is working on it and the money has not moved.
+  REQUESTED: 'amber',
+  ACCEPTED: 'amber',
+  SOURCING: 'amber',
+  QUOTED: 'amber',
+  DELIVERING: 'ink',
+  // APPROVED and CONFIRMED are already mapped below and mean the same thing
+  // here, so they are not repeated.
 
   // Suppliers
   VERIFIED: 'green',

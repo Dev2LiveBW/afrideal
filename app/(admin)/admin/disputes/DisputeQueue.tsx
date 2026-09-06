@@ -8,7 +8,7 @@ import toast from 'react-hot-toast';
 
 import { TabButton } from '@/app/(admin)/admin/_components/TabButton';
 import { ConfirmDialog } from '@/components/brand/ConfirmDialog';
-import { GoldButton } from '@/components/brand/GoldButton';
+import { ActionButton } from '@/components/brand/ActionButton';
 import { MoneyText } from '@/components/brand/MoneyText';
 import { EmptyState, Panel } from '@/components/brand/Panel';
 import { StatusBadge } from '@/components/brand/StatusBadge';
@@ -20,7 +20,7 @@ export interface DisputeRow {
   dispute: Dispute;
   orderReference: string;
   supplierName: string;
-  escrowAmount: number;
+  payableAmount: number;
 }
 
 type Filter = 'ALL' | 'OPEN' | 'UNDER_REVIEW' | 'RESOLVED';
@@ -77,8 +77,8 @@ export function DisputeQueue({ rows, canResolve }: { rows: DisputeRow[]; canReso
         resolving.status === 'UNDER_REVIEW'
           ? `${resolving.row.orderReference} moved to under review`
           : resolving.status === 'RESOLVED_CUSTOMER'
-            ? "Resolved in the customer's favour — escrow refunded"
-            : "Resolved in the supplier's favour — escrow released",
+            ? "Resolved in the customer's favour - customer refunded"
+            : "Resolved in the supplier's favour - supplier invoice settled",
       );
       close();
       router.refresh();
@@ -128,7 +128,7 @@ export function DisputeQueue({ rows, canResolve }: { rows: DisputeRow[]; canReso
                         resolved ? 'text-muted' : daysLeft < 0 ? 'text-danger-ink' : 'text-ink',
                       )}
                     >
-                      {resolved ? '—' : daysLeft < 0 ? `${Math.abs(daysLeft)}d over` : `${daysLeft}d`}
+                      {resolved ? '-' : daysLeft < 0 ? `${Math.abs(daysLeft)}d over` : `${daysLeft}d`}
                     </p>
                     <p className="text-[10.5px] text-muted">{resolved ? 'closed' : 'SLA remaining'}</p>
                   </div>
@@ -138,7 +138,7 @@ export function DisputeQueue({ rows, canResolve }: { rows: DisputeRow[]; canReso
                   <div className="flex flex-wrap items-center gap-2">
                     <Link
                       href={`/admin/orders/${row.dispute.order_id}`}
-                      className="font-mono text-[12.5px] font-medium text-ink transition-colors hover:text-gold-dark"
+                      className="font-mono text-[12.5px] font-medium text-ink transition-colors hover:text-forest"
                     >
                       {row.orderReference}
                     </Link>
@@ -151,7 +151,7 @@ export function DisputeQueue({ rows, canResolve }: { rows: DisputeRow[]; canReso
                     {row.dispute.customer_name} vs{' '}
                     <Link
                       href={`/admin/suppliers/${row.dispute.supplier_id}`}
-                      className="text-ink transition-colors hover:text-gold-dark"
+                      className="text-ink transition-colors hover:text-forest"
                     >
                       {row.supplierName}
                     </Link>
@@ -164,20 +164,20 @@ export function DisputeQueue({ rows, canResolve }: { rows: DisputeRow[]; canReso
                 </div>
 
                 <div className="flex shrink-0 flex-col items-end gap-2">
-                  <MoneyText amount={row.escrowAmount} size="md" tone={resolved ? 'muted' : 'gold'} />
+                  <MoneyText amount={row.payableAmount} size="md" tone={resolved ? 'muted' : 'gold'} />
                   {canResolve && !resolved && (
                     <div className="flex flex-wrap justify-end gap-1.5">
                       {row.dispute.status === 'OPEN' && (
-                        <GoldButton size="sm" variant="ghost" onClick={() => setResolving({ row, status: 'UNDER_REVIEW' })}>
+                        <ActionButton size="sm" variant="ghost" onClick={() => setResolving({ row, status: 'UNDER_REVIEW' })}>
                           Review
-                        </GoldButton>
+                        </ActionButton>
                       )}
-                      <GoldButton size="sm" variant="forest" onClick={() => setResolving({ row, status: 'RESOLVED_SUPPLIER' })}>
+                      <ActionButton size="sm" variant="forest" onClick={() => setResolving({ row, status: 'RESOLVED_SUPPLIER' })}>
                         Favour supplier
-                      </GoldButton>
-                      <GoldButton size="sm" variant="danger" onClick={() => setResolving({ row, status: 'RESOLVED_CUSTOMER' })}>
+                      </ActionButton>
+                      <ActionButton size="sm" variant="danger" onClick={() => setResolving({ row, status: 'RESOLVED_CUSTOMER' })}>
                         Favour customer
-                      </GoldButton>
+                      </ActionButton>
                     </div>
                   )}
                 </div>
@@ -206,9 +206,9 @@ export function DisputeQueue({ rows, canResolve }: { rows: DisputeRow[]; canReso
           resolving?.status === 'UNDER_REVIEW'
             ? 'Marks the dispute as actively being investigated. No funds move yet.'
             : resolving?.status === 'RESOLVED_CUSTOMER'
-              ? `The held escrow will be refunded to ${resolving.row.dispute.customer_name} and the order will be marked cancelled. This cannot be undone from here.`
+              ? `${resolving.row.dispute.customer_name} will be refunded, the supplier invoice on this leg will be cancelled, and the order will be marked cancelled. This cannot be undone from here.`
               : resolving?.status === 'RESOLVED_SUPPLIER'
-                ? `The held escrow will be released to ${resolving.row.supplierName} and the order will be marked delivered. This cannot be undone from here.`
+                ? `The supplier invoice will be settled with ${resolving.row.supplierName} and the order will be marked delivered. This cannot be undone from here.`
                 : ''
         }
         confirmLabel={resolving?.status === 'UNDER_REVIEW' ? 'Mark under review' : 'Resolve dispute'}
@@ -217,7 +217,7 @@ export function DisputeQueue({ rows, canResolve }: { rows: DisputeRow[]; canReso
           <textarea
             value={note}
             onChange={(event) => setNote(event.target.value)}
-            placeholder="Resolution note (optional) — what tipped the decision…"
+            placeholder="Resolution note (optional) - what tipped the decision…"
             rows={3}
             className="w-full rounded border border-hairline-strong bg-surface px-3 py-2 text-[13px] text-ink outline-none focus:border-gold"
           />

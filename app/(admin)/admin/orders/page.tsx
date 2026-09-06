@@ -9,12 +9,12 @@ import { OrdersTable, type OrderRow } from './OrdersTable';
 export const dynamic = 'force-dynamic';
 
 export default async function AdminOrdersPage() {
-  const [session, orders, items, legs, escrowRecords, suppliers] = await Promise.all([
+  const [session, orders, items, legs, payableRecords, suppliers] = await Promise.all([
     auth(),
     readAll('orders'),
     readAll('order-items'),
     readAll('supplier-orders'),
-    readAll('escrow'),
+    readAll('supplier-payables'),
     readAll('suppliers'),
   ]);
 
@@ -30,7 +30,7 @@ export default async function AdminOrdersPage() {
     .sort((a, b) => b.placed_at.localeCompare(a.placed_at))
     .map((order) => {
       const orderLegs = legs.filter((leg) => leg.order_id === order.id);
-      const heldEscrow = escrowRecords.filter((record) => record.order_id === order.id && record.status === 'HELD');
+      const pendingPayables = payableRecords.filter((record) => record.order_id === order.id && record.status === 'PENDING');
 
       return {
         order,
@@ -40,8 +40,8 @@ export default async function AdminOrdersPage() {
           supplierName: supplierName.get(leg.supplier_id) ?? leg.supplier_id,
           status: leg.status,
         })),
-        heldEscrowIds: heldEscrow.map((record) => record.id),
-        heldEscrowTotal: heldEscrow.reduce((sum, record) => sum + record.amount, 0),
+        pendingPayablesIds: pendingPayables.map((record) => record.id),
+        pendingPayablesTotal: pendingPayables.reduce((sum, record) => sum + record.amount, 0),
       };
     });
 

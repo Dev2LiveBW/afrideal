@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 
-import { Swatch } from '@/components/storefront/Swatch';
+import { Swatch, isPhoto } from '@/components/storefront/Swatch';
 import { cn } from '@/lib/utils';
 import type { Product, ProductImage } from '@/types';
 
@@ -65,9 +65,16 @@ export function ProductGallery({
           label={product.name}
         />
 
+        {/*
+          The caption used to read "illustrative, photography pending", which
+          was true when every slot held a gradient and is a lie now that real
+          photographs are vendored in. It names the view, and only admits to
+          standing in when the slot actually is a swatch.
+        */}
         {active && (
           <p className="mt-2 text-center font-mono text-[10px] uppercase tracking-[0.16em] text-muted">
-            {ROLE_LABELS[active.image_type] ?? 'View'} · illustrative, photography pending
+            {ROLE_LABELS[active.image_type] ?? 'View'}
+            {!isPhoto(active.image_url) && ' · placeholder'}
           </p>
         )}
       </div>

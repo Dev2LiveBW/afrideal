@@ -9,22 +9,29 @@ import toast from 'react-hot-toast';
 
 import { ConfirmDialog } from '@/components/brand/ConfirmDialog';
 import { EmptyState } from '@/components/brand/Panel';
-import { GoldButton } from '@/components/brand/GoldButton';
+import { ActionButton } from '@/components/brand/ActionButton';
 import { MoneyText } from '@/components/brand/MoneyText';
 import { StatusBadge } from '@/components/brand/StatusBadge';
+import { Swatch } from '@/components/storefront/Swatch';
 import { cn } from '@/lib/utils';
 import { shortDate } from '@/lib/format';
-import type { Category, Product, SupplierOffer } from '@/types';
+import type { Category, Product, ProductImage, SupplierOffer } from '@/types';
 
 /**
  * Product grid + "Add product" flow.
  *
  * There is no create-product endpoint in this MVP, so submitting the form
- * never writes anywhere — it simulates the real queue-for-review behaviour
+ * never writes anywhere - it simulates the real queue-for-review behaviour
  * with a delay and an honest toast, and says so again in the dialog body.
  */
 
-type Row = { offer: SupplierOffer; product: Product; category: Category | null };
+type Row = {
+  offer: SupplierOffer;
+  product: Product;
+  category: Category | null;
+  /** Primary row from `product-images`; a gradient when there is no photo. */
+  image?: ProductImage;
+};
 
 const schema = z.object({
   name: z.string().min(3, 'Enter a product name of at least 3 characters.'),
@@ -69,7 +76,7 @@ export function ProductsClient({ rows, categories }: { rows: Row[]; categories: 
     setSubmitting(true);
     const values = form.getValues();
 
-    // No create-product endpoint exists yet — simulate the review queue.
+    // No create-product endpoint exists yet - simulate the review queue.
     await new Promise((resolve) => setTimeout(resolve, 850));
 
     toast.success(`"${values.name}" submitted for admin review`, {
@@ -83,9 +90,9 @@ export function ProductsClient({ rows, categories }: { rows: Row[]; categories: 
   }
 
   const addButton = (
-    <GoldButton size="sm" icon={<Plus size={14} strokeWidth={1.5} />} onClick={() => setDialogOpen(true)}>
+    <ActionButton size="sm" icon={<Plus size={14} strokeWidth={1.5} />} onClick={() => setDialogOpen(true)}>
       Add product
-    </GoldButton>
+    </ActionButton>
   );
 
   return (
@@ -107,15 +114,21 @@ export function ProductsClient({ rows, categories }: { rows: Row[]; categories: 
         />
       ) : (
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-3">
-          {rows.map(({ offer, product, category }) => (
+          {rows.map(({ offer, product, category, image }) => (
             <article
               key={offer.id}
               className="flex flex-col overflow-hidden rounded-md border border-hairline bg-surface-raised shadow-card"
             >
               <div className="flex items-start gap-3 border-b border-hairline p-4">
-                <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-ink/[0.05] text-[19px]">
-                  {product.emoji}
-                </span>
+                <Swatch
+                  image={image}
+                  fallback={product.swatch}
+                  emoji={product.emoji}
+                  label={product.name}
+                  className="h-10 w-10 shrink-0 rounded-full"
+                  glyphClassName="text-[19px]"
+                  zoomOnHover={false}
+                />
                 <div className="min-w-0 flex-1">
                   <p className="truncate text-[14px] font-semibold text-ink">{product.name}</p>
                   <p className="mt-0.5 truncate text-[11.5px] text-muted">
@@ -142,7 +155,7 @@ export function ProductsClient({ rows, categories }: { rows: Row[]; categories: 
                 </div>
                 <div className="bg-surface-raised p-3.5">
                   <p className="text-[10.5px] uppercase tracking-[0.08em] text-muted">Your unit cost</p>
-                  <MoneyText amount={offer.supplier_cost} size="sm" tone="gold" className="mt-1 block" />
+                  <MoneyText amount={offer.supplier_cost} size="sm" tone="ink" className="mt-1 block" />
                 </div>
                 <div className="bg-surface-raised p-3.5">
                   <p className="text-[10.5px] uppercase tracking-[0.08em] text-muted">AfriDeal price</p>
@@ -168,7 +181,7 @@ export function ProductsClient({ rows, categories }: { rows: Row[]; categories: 
         onConfirm={handleConfirm}
         loading={submitting}
         title="Add a new product"
-        description="New listings are queued for admin review before they go live — this is a preview build, so nothing is created yet."
+        description="New listings are queued for admin review before they go live - this is a preview build, so nothing is created yet."
         confirmLabel="Submit for review"
         tone="gold"
       >
@@ -300,7 +313,7 @@ export function ProductsClient({ rows, categories }: { rows: Row[]; categories: 
 
           <p className="flex items-start gap-1.5 rounded border border-hairline bg-gold-50/60 px-3 py-2 text-[11.5px] leading-4 text-gold-700">
             <PackagePlus size={13} strokeWidth={1.5} className="mt-0.5 shrink-0" />
-            Listing creation is queued for admin review in this preview — nothing goes live automatically.
+            Listing creation is queued for admin review in this preview - nothing goes live automatically.
           </p>
         </form>
       </ConfirmDialog>

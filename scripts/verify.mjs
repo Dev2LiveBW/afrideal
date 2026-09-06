@@ -5,7 +5,7 @@
  *   npm run verify       # in another
  *
  * This drives the real HTTP API, so it exercises the actual pricing engine,
- * selection engine and escrow state machine rather than a copy of their rules.
+ * selection engine and payable state machine rather than a copy of their rules.
  * Anything it asserts is a claim that has been checked, not assumed.
  */
 
@@ -134,17 +134,25 @@ section('3. Pricing engine — margins are arithmetically correct');
   check('returns a result', r != null);
 
   if (r) {
-    check('markup is 80% of cost', r.markup === 80, `got ${r.markup}`);
-    check('logistics is 15', r.logistics_cost === 15, `got ${r.logistics_cost}`);
-    check('gateway is 2.5% of cost', r.gateway_cost === 2.5, `got ${r.gateway_cost}`);
+    check('markup is 60% of cost', r.markup === 60, `got ${r.markup}`);
     check(
-      'price = ceil(100 + 80 + 15 + 2.5) = 198',
-      r.recommended_price === 198,
+      'no per-unit logistics is folded into the price',
+      r.logistics_cost === 0,
+      `got ${r.logistics_cost}`,
+    );
+    check(
+      'gateway is 2.5% of the selling price',
+      r.gateway_cost === 4,
+      `got ${r.gateway_cost}`,
+    );
+    check(
+      'price = ceil(100 x 1.60) = 160',
+      r.recommended_price === 160,
       `got ${r.recommended_price}`,
     );
     check(
       'margin_pct is margin over selling price',
-      Math.abs(r.margin_pct - (80 / 198) * 100) < 0.001,
+      Math.abs(r.margin_pct - ((160 - 100 - 4) / 160) * 100) < 0.001,
       `got ${r.margin_pct}`,
     );
   }
@@ -165,7 +173,7 @@ section('4. Catalogue — no product sells below cost');
   const products = (await json(jar, '/api/products')).body ?? [];
   const offers = (await json(jar, '/api/supplier-offers')).body ?? [];
 
-  check('12 products seeded', products.length === 12, `got ${products.length}`);
+  check('17 products seeded', products.length === 17, `got ${products.length}`);
 
   let violations = 0;
   for (const product of products) {
@@ -207,35 +215,35 @@ section('5. Selection engine — composite score, not cheapest');
   }
 }
 
-// ── 6. Escrow state machine rejects illegal moves ────────────────────────────
+// ── 6. Payable state machine rejects illegal moves ───────────────────────────
 
-section('6. Escrow — the state machine holds');
+section('6. Supplier payables — the state machine holds');
 {
   const { jar } = sessions['ops@afrideal.co.bw'];
-  const { body } = await json(jar, '/api/escrow');
+  const { body } = await json(jar, '/api/payables');
   const records = body?.records ?? [];
 
-  check('escrow queue loads', records.length > 0, `got ${records.length}`);
+  check('payables queue loads', records.length > 0, `got ${records.length}`);
 
-  const released = records.find((r) => r.status === 'RELEASED');
-  if (released) {
-    const attempt = await json(jar, `/api/escrow/${released.id}`, {
+  const settled = records.find((r) => r.status === 'SETTLED');
+  if (settled) {
+    const attempt = await json(jar, `/api/payables/${settled.id}`, {
       method: 'PATCH',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ status: 'RELEASED', note: 'verification probe' }),
+      body: JSON.stringify({ status: 'SETTLED', note: 'verification probe' }),
     });
     check(
-      'RELEASED → RELEASED is refused with 409',
+      'SETTLED → SETTLED is refused with 409',
       attempt.status === 409,
       `got ${attempt.status}`,
     );
   } else {
-    check('a RELEASED record exists to test against', false, 'none found');
+    check('a SETTLED invoice exists to test against', false, 'none found');
   }
 
   const summary = body?.summary;
-  check('summary reports held total', typeof summary?.totalHeld === 'number');
-  check('summary reports average hold days', typeof summary?.avgHoldDays === 'number');
+  check('summary reports the outstanding total', typeof summary?.totalPending === 'number');
+  check('summary reports average days to settle', typeof summary?.avgDaysToSettle === 'number');
 }
 
 // ── 7. Supplier data isolation ───────────────────────────────────────────────
@@ -298,8 +306,8 @@ section('8. Role guards');
   const analytics = await json(customer, '/api/analytics');
   check('customer cannot read analytics', analytics.status === 403, `got ${analytics.status}`);
 
-  const escrowQueue = await json(customer, '/api/escrow');
-  check('customer cannot read the escrow queue', escrowQueue.status === 403, `got ${escrowQueue.status}`);
+  const payablesQueue = await json(customer, '/api/payables');
+  check('customer cannot read the payables queue', payablesQueue.status === 403, `got ${payablesQueue.status}`);
 
   const supplierPatch = await json(runner, '/api/suppliers/s006', {
     method: 'PATCH',
@@ -348,19 +356,19 @@ section('9. Checkout — the order split engine');
       `got ${result.supplier_orders?.length}`,
     );
     check(
-      'one escrow record per supplier order',
-      result.escrow?.length === result.supplier_orders?.length,
-      `${result.escrow?.length} escrow vs ${result.supplier_orders?.length} legs`,
+      'one supplier invoice per supplier order',
+      result.payables?.length === result.supplier_orders?.length,
+      `${result.payables?.length} invoices vs ${result.supplier_orders?.length} legs`,
     );
-    check('every escrow leg starts HELD', result.escrow?.every((e) => e.status === 'HELD'));
+    check('every supplier invoice starts PENDING', result.payables?.every((e) => e.status === 'PENDING'));
 
     const lineSum = result.items.reduce((s, i) => s + i.line_total, 0);
     check('subtotal equals the sum of its lines', result.order.subtotal === lineSum,
       `${result.order.subtotal} vs ${lineSum}`);
     check('total = subtotal + delivery', result.order.total === result.order.subtotal + result.order.delivery_fee);
 
-    const escrowSum = result.escrow.reduce((s, e) => s + e.amount, 0);
-    check('escrow legs sum to the order subtotal', escrowSum === lineSum, `${escrowSum} vs ${lineSum}`);
+    const payableSum = result.payables.reduce((s, e) => s + e.amount, 0);
+    check('supplier invoices sum to the order subtotal', payableSum === lineSum, `${payableSum} vs ${lineSum}`);
 
     check('emits the three documented events', result.events?.length === 3, JSON.stringify(result.events));
     check('order belongs to the buyer', result.order.customer_id === session.user.id);
@@ -505,7 +513,7 @@ section('13. Tiered pricing — the ladder is real, not hard-coded');
   const unit1 = order1.body?.items?.[0]?.unit_price;
   check('qty 1 is charged the retail band', unit1 === p001?.price, `${unit1} vs ${p001?.price}`);
 
-  // Bulk band, 5–19.
+  // Bulk band, 5–99.
   const order5 = await json(business, '/api/orders', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
@@ -520,7 +528,11 @@ section('13. Tiered pricing — the ladder is real, not hard-coded');
   check('qty 5 drops to the bulk band', unit5 < unit1, `${unit5} vs ${unit1}`);
   check('bulk line total uses the bulk unit price', order5.body?.items?.[0]?.line_total === unit5 * 5);
 
-  // Wholesale band, 20–49. Business accounts reach this; retail ones do not.
+  /*
+   * The bulk band runs the whole way to 99 now, so a larger quantity inside it
+   * is priced identically rather than dropping again. That is the point of
+   * collapsing the ladder to two published rungs: one break, not four.
+   */
   const order20 = await json(business, '/api/orders', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
@@ -532,9 +544,13 @@ section('13. Tiered pricing — the ladder is real, not hard-coded');
     }),
   });
   const unit20 = order20.body?.items?.[0]?.unit_price;
-  check('qty 20 drops again to wholesale', unit20 < unit5, `${unit20} vs ${unit5}`);
+  check('qty 20 stays on the same bulk band', unit20 === unit5, `${unit20} vs ${unit5}`);
 
-  // §7 — a retail account must NOT get the wholesale rung at the same quantity.
+  /*
+   * The published ladder is not gated by account type. A retail shopper taking
+   * twenty units pays exactly what a business account pays for twenty units —
+   * which is the whole claim the storefront makes, so it is worth asserting.
+   */
   const retail20 = await json(retail, '/api/orders', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
@@ -547,12 +563,24 @@ section('13. Tiered pricing — the ladder is real, not hard-coded');
   });
   const retailUnit20 = retail20.body?.items?.[0]?.unit_price;
   check(
-    'a retail account does not reach wholesale pricing',
-    retailUnit20 > unit20,
+    'a retail account is quoted the same published bulk price',
+    retailUnit20 === unit20,
     `retail ${retailUnit20} vs business ${unit20}`,
   );
 
-  // §20 — past the top band the answer is a quotation, not a guessed price.
+  /*
+   * And the markups themselves are the published ones: 60% over cost at retail
+   * quantities, 44% from five units up. Checked against the band the API
+   * actually charged rather than against the seed, so a drift between the
+   * pricing model and the data shows up here.
+   */
+  check(
+    'the bulk rung is 10% under the retail rung',
+    Math.abs(unit5 / unit1 - 1.44 / 1.6) < 0.02,
+    `${unit5} / ${unit1} = ${(unit5 / unit1).toFixed(4)}`,
+  );
+
+  // Past the top band the answer is a quotation, not a guessed price.
   const order100 = await json(business, '/api/orders', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
@@ -673,6 +701,131 @@ section('15. RFQ — quotation requests');
     });
     check('a runner cannot triage an RFQ', denied.status === 403, `got ${denied.status}`);
   }
+}
+
+// ── 16. Runner sourcing — the second path, end to end ────────────────────────
+
+section('16. Runner sourcing — request to delivery');
+{
+  const customer = sessions['thabo@gmail.com'].jar;
+  const runner = sessions['runner@afrideal.co.bw'].jar;
+  const otherRunner = sessions['kefilwe@gmail.com'].jar;
+
+  const created = await json(customer, '/api/runner-requests', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      item: 'Verification probe — bulk hair dryer',
+      detail: 'Raised by the verification suite.',
+      quantity: 3,
+      budget_per_unit: 900,
+      delivery_city: 'Gaborone',
+      delivery_address: 'Plot 5412, Extension 12',
+    }),
+  });
+
+  check('a buyer can raise a sourcing request', created.status === 201, `got ${created.status}`);
+  const request = created.body;
+
+  if (request?.id) {
+    check('it starts in the pool', request.status === 'REQUESTED', request.status);
+    check('no price exists before a runner has looked', request.quote === null);
+
+    // A buyer cannot declare that the goods were found on a runner's behalf.
+    const forged = await json(customer, `/api/runner-requests/${request.id}`, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ status: 'QUOTED', unit_price: 10 }),
+    });
+    check('a buyer cannot quote their own request', forged.status === 403, `got ${forged.status}`);
+
+    // Nor can they skip to approving a price that was never given.
+    const skipped = await json(customer, `/api/runner-requests/${request.id}`, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ status: 'APPROVED' }),
+    });
+    check('approving before a quote exists is refused', skipped.status === 409, `got ${skipped.status}`);
+
+    const accepted = await json(runner, `/api/runner-requests/${request.id}`, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ status: 'ACCEPTED' }),
+    });
+    check('a runner can take it from the pool', accepted.status === 200, `got ${accepted.status}`);
+    check('accepting stamps the runner on it', accepted.body?.runner_id != null);
+
+    // A customer account is not a runner and cannot take a job at all.
+    const poached = await json(otherRunner, `/api/runner-requests/${request.id}`, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ status: 'SOURCING' }),
+    });
+    check('another account cannot work the job', poached.status === 403, `got ${poached.status}`);
+
+    await json(runner, `/api/runner-requests/${request.id}`, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ status: 'SOURCING' }),
+    });
+
+    const missingPrice = await json(runner, `/api/runner-requests/${request.id}`, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ status: 'QUOTED' }),
+    });
+    check('quoting without a figure is refused', missingPrice.status === 422, `got ${missingPrice.status}`);
+
+    const quoted = await json(runner, `/api/runner-requests/${request.id}`, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ status: 'QUOTED', unit_price: 850, condition: 'New' }),
+    });
+    check('a runner can send back a price', quoted.status === 200, `got ${quoted.status}`);
+
+    const quote = quoted.body?.quote;
+    if (quote) {
+      const goods = 850 * 3;
+      const fee = Math.ceil(goods * 0.12);
+      check('the sourcing fee is 12% of the goods', quote.service_fee === fee, `${quote.service_fee} vs ${fee}`);
+      check('the total is goods plus fee', quote.total === goods + fee, `${quote.total} vs ${goods + fee}`);
+    }
+
+    const approved = await json(customer, `/api/runner-requests/${request.id}`, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ status: 'APPROVED' }),
+    });
+    check('the buyer approves the price', approved.status === 200, `got ${approved.status}`);
+
+    await json(runner, `/api/runner-requests/${request.id}`, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ status: 'DELIVERING' }),
+    });
+
+    const confirmed = await json(customer, `/api/runner-requests/${request.id}`, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ status: 'CONFIRMED' }),
+    });
+    check('the buyer confirms delivery', confirmed.status === 200, `got ${confirmed.status}`);
+
+    const reopened = await json(customer, `/api/runner-requests/${request.id}`, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ status: 'CANCELLED' }),
+    });
+    check('a confirmed request cannot be reopened', reopened.status === 409, `got ${reopened.status}`);
+  }
+
+  // Scoping: a buyer's list is their own, and a runner sees the pool.
+  const mine = await json(customer, '/api/runner-requests');
+  const allMine = (mine.body ?? []).every((entry) => entry.customer_name === 'Thabo Modise');
+  check('a buyer only reads their own requests', allMine, `${mine.body?.length} rows`);
+
+  const runnerView = await json(runner, '/api/runner-requests');
+  check('a runner reads the pool and their own', Array.isArray(runnerView.body));
 }
 
 // ── Report ───────────────────────────────────────────────────────────────────

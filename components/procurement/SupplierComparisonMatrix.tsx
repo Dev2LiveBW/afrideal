@@ -8,13 +8,13 @@ import type { PublicOffer } from '@/lib/queries';
  *
  * Two rules govern what appears here.
  *
- * §5 — supplier acquisition costs are confidential. This component only ever
+ * §5 - supplier acquisition costs are confidential. This component only ever
  * receives `PublicOffer`, which has no `supplier_cost` field to leak. That is
  * enforced by the type, not by remembering not to render it, because a server
  * component serialises whatever it passes down into the page payload whether or
  * not anything displays it.
  *
- * §23 — transparent procurement is a commercial decision AfriDeal makes per
+ * §23 - transparent procurement is a commercial decision AfriDeal makes per
  * supplier agreement, never a control a shopper can toggle. If that mode ships,
  * it arrives as server-resolved props on a separate B2B surface.
  *

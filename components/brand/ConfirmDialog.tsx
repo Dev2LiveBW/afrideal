@@ -4,7 +4,7 @@ import { useEffect, useRef } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
 import { AlertTriangle, X } from 'lucide-react';
 
-import { GoldButton } from '@/components/brand/GoldButton';
+import { ActionButton } from '@/components/brand/ActionButton';
 import { cn } from '@/lib/utils';
 
 /**
@@ -114,17 +114,17 @@ export function ConfirmDialog({
             </div>
 
             <div className="flex justify-end gap-2 border-t border-hairline bg-surface px-6 py-4">
-              <GoldButton variant="ghost" size="sm" onClick={onClose} disabled={loading}>
+              <ActionButton variant="ghost" size="sm" onClick={onClose} disabled={loading}>
                 {cancelLabel}
-              </GoldButton>
-              <GoldButton
+              </ActionButton>
+              <ActionButton
                 variant={tone === 'danger' ? 'danger' : tone === 'forest' ? 'forest' : 'gold'}
                 size="sm"
                 onClick={onConfirm}
                 loading={loading}
               >
                 {confirmLabel}
-              </GoldButton>
+              </ActionButton>
             </div>
           </motion.div>
         </div>

@@ -35,7 +35,7 @@ export function VariantSelector({
                 'group flex min-w-[128px] flex-col items-start rounded px-3.5 py-2.5 text-left',
                 'ring-1 ring-inset transition-all duration-250 ease-[cubic-bezier(0.16,1,0.3,1)]',
                 active
-                  ? 'bg-ink text-white ring-ink'
+                  ? 'bg-forest text-white ring-forest'
                   : 'bg-surface-raised text-ink ring-hairline-strong hover:bg-ink/[0.03] hover:ring-ink/25',
               )}
             >

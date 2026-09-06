@@ -5,12 +5,12 @@ import type { getSupplierWorkspace } from '@/lib/queries';
  * The supplier quote inbox.
  *
  * There is no `quotes` collection in /data. A quote request in this MVP is
- * modelled as a supplier order sitting in AWAITING_CONFIRMATION — responding
+ * modelled as a supplier order sitting in AWAITING_CONFIRMATION - responding
  * to one and confirming it are the same action. Two illustrative direct-RFQ
  * rows are layered on top, built from products this supplier already lists,
  * so the inbox reads like a real one. Those rows are flagged `kind: 'RFQ'`
  * and carry no `supplierOrderId`, so nothing about "sending a quote" on them
- * can write to a real record — full RFQ capture is Phase 2.
+ * can write to a real record - full RFQ capture is Phase 2.
  */
 
 type Workspace = Awaited<ReturnType<typeof getSupplierWorkspace>>;

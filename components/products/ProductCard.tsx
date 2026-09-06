@@ -6,9 +6,12 @@ import { motion } from 'framer-motion';
 import { Heart, Plus, ShieldCheck, Star } from 'lucide-react';
 import toast from 'react-hot-toast';
 
-import { MoneyText } from '@/components/brand/MoneyText';
-import { Swatch } from '@/components/storefront/Swatch';
+import { PriceTag } from '@/components/brand/MoneyText';
+import { pulaTag } from '@/lib/format';
+import { CategoryIcon } from '@/components/storefront/CategoryIcon';
+import { Swatch, photoUrl } from '@/components/storefront/Swatch';
 import { useAfriDealStore } from '@/store/useAfriDealStore';
+import { categoryPalette } from '@/lib/category-palette';
 import { cn } from '@/lib/utils';
 import type { Product, ProductImage } from '@/types';
 
@@ -28,6 +31,10 @@ export function ProductCard({
   image,
   categoryName,
   primarySupplierId,
+  tierPrice,
+  tierSavingPct,
+  tierByQuotation,
+  tierMinQty,
   className,
 }: {
   product: Product;
@@ -37,15 +44,24 @@ export function ProductCard({
   image?: ProductImage;
   categoryName?: string;
   primarySupplierId?: string;
+  /** Published price at the rung the catalogue is filtered to, when there is one. */
+  tierPrice?: number | null;
+  tierSavingPct?: number;
+  /** The rung is real but this account cannot buy at it yet. */
+  tierByQuotation?: boolean;
+  /** Smallest quantity that actually earns the rung price shown on this card. */
+  tierMinQty?: number;
   className?: string;
 }) {
   const addToCart = useAfriDealStore((state) => state.addToCart);
   const [saved, setSaved] = useState(false);
 
+  const showingTier = tierPrice !== null && tierPrice !== undefined;
+
   function toggleSave(event: React.MouseEvent) {
     event.preventDefault();
     setSaved((value) => {
-      toast[value ? 'success' : 'success'](
+      toast.success(
         value ? `Removed ${product.name} from your list` : `Saved ${product.name} for later`,
       );
       return !value;
@@ -57,6 +73,15 @@ export function ProductCard({
     const variant = product.variants[0];
     if (!variant) return;
 
+    /*
+     * On a tier-filtered grid the card is quoting a band price, so adding a
+     * single unit would land the buyer in a cart showing the list price they
+     * were not offered. Quick-add takes the quantity that actually earns the
+     * figure on the card. The quoted rung is excluded: there is no published
+     * that price at any quantity.
+     */
+    const qty = showingTier && !tierByQuotation && tierMinQty ? Math.max(1, tierMinQty) : 1;
+
     addToCart({
       product_id: product.id,
       variant_id: variant.id,
@@ -64,12 +89,19 @@ export function ProductCard({
       variant_label: variant.label,
       emoji: product.emoji,
       unit_price: variant.price,
-      qty: 1,
+      qty,
       supplier_id: primarySupplierId ?? '',
+      image_url: photoUrl(image),
     });
 
-    toast.success(`${product.name} added to cart`);
+    toast.success(
+      qty === 1
+        ? `${product.name} added to cart`
+        : `${qty} × ${product.name} added - bulk price applied`,
+    );
   }
+
+  const palette = categoryPalette(product.category_id);
 
   return (
     <motion.article
@@ -79,9 +111,16 @@ export function ProductCard({
       transition={{ delay: Math.min(index * 0.05, 0.3), duration: 0.55, ease: [0.16, 1, 0.3, 1] }}
       className={cn('group relative', className)}
     >
+      {/*
+        The card carries its trade's colour rather than sitting on white. The
+        wash is pale enough that the photograph and the figure still outrank it;
+        the hue itself is spent only on the icon and the category label, where it
+        does identification work instead of decoration.
+      */}
       <Link
         href={href ?? `/products/${product.id}`}
-        className="flex h-full flex-col overflow-hidden rounded-md border border-hairline bg-surface-raised shadow-card transition-shadow duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] hover:shadow-lift"
+        style={{ backgroundColor: palette.wash, borderColor: palette.edge }}
+        className="flex h-full flex-col overflow-hidden rounded-md border shadow-card transition-shadow duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] hover:shadow-lift"
       >
         <div className="relative">
           <Swatch
@@ -120,13 +159,12 @@ export function ProductCard({
         </div>
 
         <div className="flex flex-1 flex-col p-4">
-          {categoryName && (
-            <p className="mb-1 font-mono text-[9.5px] uppercase tracking-[0.16em] text-muted">
-              {categoryName}
-            </p>
-          )}
-
-          <h3 className="text-[14.5px] font-semibold leading-5 text-ink transition-colors group-hover:text-gold-dark">
+          {/*
+            The category used to sit above the name as a mono uppercase kicker.
+            It is a classification rather than a heading, so it now joins the
+            rating and supplier count in the metadata row below the name.
+          */}
+          <h3 className="text-[14.5px] font-semibold leading-5 text-ink transition-colors group-hover:text-forest">
             {product.name}
           </h3>
 
@@ -134,7 +172,16 @@ export function ProductCard({
             {product.short_description}
           </p>
 
-          <div className="mt-3 flex items-center gap-3 text-[11.5px] text-muted">
+          <div className="mt-3 flex flex-wrap items-center gap-x-3 gap-y-1 text-[11.5px] text-muted">
+            {categoryName && (
+              <span
+                className="inline-flex min-w-0 items-center gap-1.5 font-medium"
+                style={{ color: palette.hue }}
+              >
+                <CategoryIcon categoryId={product.category_id} size={12} />
+                <span className="truncate">{categoryName}</span>
+              </span>
+            )}
             <span className="inline-flex items-center gap-1">
               <Star size={12} strokeWidth={1.5} className="fill-gold text-gold" />
               <span className="font-mono tabular-nums">{product.rating.toFixed(1)}</span>
@@ -150,11 +197,41 @@ export function ProductCard({
 
           <div className="mt-3 flex items-end justify-between gap-2 border-t border-hairline pt-3">
             <div className="min-w-0">
-              <p className="text-[10.5px] text-muted">From</p>
-              <MoneyText amount={product.price} size="md" tone="gold" />
-              {product.compare_at_price && (
-                <span className="ml-1.5 font-mono text-[11px] tabular-nums text-muted line-through">
-                  {product.compare_at_price.toFixed(2)}
+              {/*
+                When the catalogue is priced at a rung, that price is the one on
+                the card and the list price sits struck through beside it. The
+                card must never show a cheaper headline than the grid was
+                filtered to, or the sort order stops matching what is read.
+              */}
+              {/*
+                The quoted rung says so once, above the grid - every card is in
+                the same state, so repeating it twelve times is noise that
+                crowds out the figure the card exists to show.
+              */}
+              <p className="text-[10.5px] text-muted">
+                {showingTier ? (tierByQuotation ? 'On quotation' : 'Your price') : 'From'}
+              </p>
+              <PriceTag
+                amount={showingTier ? tierPrice! : product.price}
+                size="md"
+                tone={tierByQuotation ? 'muted' : 'gold'}
+              />
+              {showingTier ? (
+                tierPrice! < product.price && (
+                  <span className="ml-1.5 text-[11.5px] tabular-nums text-muted line-through">
+                    {pulaTag(product.price)}
+                  </span>
+                )
+              ) : (
+                product.compare_at_price && (
+                  <span className="ml-1.5 text-[11.5px] tabular-nums text-muted line-through">
+                    {pulaTag(product.compare_at_price)}
+                  </span>
+                )
+              )}
+              {showingTier && (tierSavingPct ?? 0) > 0 && (
+                <span className="ml-1.5 font-mono text-[11px] tabular-nums text-forest">
+                  −{Math.round(tierSavingPct!)}%
                 </span>
               )}
             </div>

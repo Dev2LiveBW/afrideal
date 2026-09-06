@@ -5,14 +5,17 @@ import { useState } from 'react';
 import { FileText, Minus, PackageX, Plus, ShoppingBag } from 'lucide-react';
 import toast from 'react-hot-toast';
 
-import { GoldButton } from '@/components/brand/GoldButton';
+import { ActionButton } from '@/components/brand/ActionButton';
 import { MoneyText } from '@/components/brand/MoneyText';
 import { VariantSelector } from '@/components/products/VariantSelector';
 import { RfqModal } from '@/components/procurement/RfqModal';
 import { TieredPriceCalculator } from '@/components/procurement/TieredPriceCalculator';
 import { TIER_LABELS, resolvePrice } from '@/lib/pricing-tiers';
 import { useAfriDealStore } from '@/store/useAfriDealStore';
-import type { CustomerPrice, CustomerType, Product } from '@/types';
+import { PriceLadder } from '@/components/storefront/PriceLadder';
+import { photoUrl } from '@/components/storefront/Swatch';
+import type { TierDoor } from '@/lib/tier-doors';
+import type { CustomerPrice, CustomerType, Product, ProductImage } from '@/types';
 
 export function ProductBuyPanel({
   product,
@@ -20,6 +23,8 @@ export function ProductBuyPanel({
   customerType,
   inStock,
   primarySupplierId,
+  primaryImage,
+  doors,
 }: {
   product: Product;
   bands: CustomerPrice[];
@@ -27,6 +32,10 @@ export function ProductBuyPanel({
   customerType: CustomerType;
   inStock: boolean;
   primarySupplierId: string;
+  /** Carried into the cart line so the basket shows the photo, not the glyph. */
+  primaryImage?: ProductImage;
+  /** This product's five packages, resolved server-side against the account. */
+  doors?: TierDoor[];
 }) {
   const addToCart = useAfriDealStore((state) => state.addToCart);
 
@@ -58,6 +67,7 @@ export function ProductBuyPanel({
       unit_price: unitPrice,
       qty,
       supplier_id: primarySupplierId,
+      image_url: photoUrl(primaryImage),
     });
 
     toast.success(
@@ -73,12 +83,12 @@ export function ProductBuyPanel({
             <p className="text-[11.5px] text-muted">
               Price per unit
               {resolved.tier !== 'RETAIL' && (
-                <span className="ml-1.5 text-gold-dark">
+                <span className="ml-1.5 text-forest">
                   · {TIER_LABELS[resolved.tier]}
                 </span>
               )}
             </p>
-            <MoneyText amount={unitPrice} size="xl" tone="gold" />
+            <MoneyText amount={unitPrice} size="xl" tone="ink" />
           </div>
 
           {!inStock && (
@@ -97,6 +107,33 @@ export function ProductBuyPanel({
             label="Option"
             className="mt-6"
           />
+        )}
+
+        {/*
+          The ladder, beside the control it drives. On the landing page a rung
+          is a way into the catalogue; here it is a quantity, so tapping "Bulk"
+          sets this product to that band rather than navigating away from the
+          product the buyer is already looking at.
+        */}
+        {doors && doors.length > 1 && (
+          <div className="mt-6">
+            <div className="mb-2.5 flex items-baseline justify-between gap-3">
+              <p className="text-[13px] font-semibold text-ink">Price by quantity</p>
+              <span className="font-mono text-[11px] tabular-nums text-muted">per unit</span>
+            </div>
+
+            <PriceLadder
+              doors={doors}
+              productName={product.name}
+              tone="light"
+              stagger={false}
+              activeTier={resolved.tier}
+              onSelect={(door) => {
+                const band = door.range ? Number.parseInt(door.range, 10) : NaN;
+                if (Number.isFinite(band)) setQty(Math.max(1, band));
+              }}
+            />
+          </div>
         )}
 
         <div className="mt-6">
@@ -139,8 +176,7 @@ export function ProductBuyPanel({
         </div>
 
         <div className="mt-6 space-y-2.5">
-          <GoldButton
-            variant="gold"
+          <ActionButton
             size="lg"
             className="w-full"
             onClick={add}
@@ -148,10 +184,10 @@ export function ProductBuyPanel({
             icon={<ShoppingBag size={16} strokeWidth={1.5} />}
           >
             {resolved.requires_rfq ? 'Quotation required' : 'Add to cart'}
-          </GoldButton>
+          </ActionButton>
 
           {resolved.requires_rfq ? (
-            <GoldButton
+            <ActionButton
               variant="ghost"
               size="md"
               className="w-full"
@@ -159,12 +195,12 @@ export function ProductBuyPanel({
               onClick={() => setRfqOpen(true)}
             >
               Request a quotation
-            </GoldButton>
+            </ActionButton>
           ) : (
             <Link href="/cart" className="block">
-              <GoldButton variant="ghost" size="md" className="w-full">
+              <ActionButton variant="ghost" size="md" className="w-full">
                 View cart
-              </GoldButton>
+              </ActionButton>
             </Link>
           )}
         </div>

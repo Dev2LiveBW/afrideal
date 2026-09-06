@@ -23,7 +23,7 @@ const HAPPY_PATH = [
   { code: 'COLLECTED', label: 'Collected' },
   { code: 'IN_TRANSIT', label: 'In transit' },
   { code: 'DELIVERED', label: 'Delivered' },
-  { code: 'RELEASED', label: 'Escrow released' },
+  { code: 'SETTLED', label: 'Supplier settled' },
 ] as const;
 
 export function OrderTimeline({

@@ -7,7 +7,7 @@ import { calculatePrice, getPricingRule } from '@/lib/pricing-engine';
 
 export const dynamic = 'force-dynamic';
 
-/** GET /api/pricing — every rule. */
+/** GET /api/pricing - every rule. */
 export const GET = handled(async () => ok(await readAll('pricing-rules')));
 
 const CalcSchema = z.object({
@@ -15,7 +15,7 @@ const CalcSchema = z.object({
   category_id: z.string(),
 });
 
-/** POST /api/pricing — the live calculator on /admin/pricing. */
+/** POST /api/pricing - the live calculator on /admin/pricing. */
 export const POST = handled(async (request: Request) => {
   const parsed = CalcSchema.safeParse(await request.json());
   if (!parsed.success) return fail(parsed.error.issues[0]?.message ?? 'Invalid input.', 422);
@@ -36,7 +36,7 @@ const RuleSchema = z.object({
   active: z.boolean().optional(),
 });
 
-/** PATCH /api/pricing — edit a category rule inline. */
+/** PATCH /api/pricing - edit a category rule inline. */
 export const PATCH = handled(async (request: Request) => {
   const { actor, response } = await guard(['SUPER_ADMIN', 'FINANCE_ADMIN']);
   if (response) return response;

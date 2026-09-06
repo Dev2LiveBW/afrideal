@@ -9,14 +9,14 @@ import { Clock, ClipboardCheck, FileText, Inbox, Send, ShoppingBag } from 'lucid
 import toast from 'react-hot-toast';
 
 import { EmptyState, Panel, PanelBody, PanelHeader } from '@/components/brand/Panel';
-import { GoldButton } from '@/components/brand/GoldButton';
+import { ActionButton } from '@/components/brand/ActionButton';
 import { MoneyText } from '@/components/brand/MoneyText';
 import { relative } from '@/lib/format';
 import { cn } from '@/lib/utils';
 import { slaChip, type QuoteRow } from '../../_lib/quotes';
 
 /**
- * Quote inbox — split panel.
+ * Quote inbox - split panel.
  *
  * Left: every request, sorted by urgency. Right: a response form for
  * whichever is selected. Only `kind: 'ORDER'` rows have a real supplier
@@ -81,11 +81,11 @@ export function QuotesClient({ rows }: { rows: QuoteRow[] }) {
         }
 
         toast.success(
-          selected.orderRef ? `Quote sent — order ${selected.orderRef} confirmed` : 'Quote sent — order confirmed',
+          selected.orderRef ? `Quote sent - order ${selected.orderRef} confirmed` : 'Quote sent - order confirmed',
         );
         router.refresh();
       } else {
-        // Synthetic RFQ row — nothing real to write to yet.
+        // Synthetic RFQ row - nothing real to write to yet.
         await new Promise((resolve) => setTimeout(resolve, 550));
         toast('Quote captured for this preview. Full RFQ persistence lands in Phase 2.', { icon: '📋' });
       }
@@ -116,7 +116,7 @@ export function QuotesClient({ rows }: { rows: QuoteRow[] }) {
         {realCount} request{realCount === 1 ? '' : 's'} below {realCount === 1 ? 'comes' : 'come'} from live orders
         awaiting your confirmation.
         {syntheticCount > 0 &&
-          ` ${syntheticCount} ${syntheticCount === 1 ? 'is an' : 'are'} illustrative direct ${syntheticCount === 1 ? 'enquiry' : 'enquiries'} — full RFQ capture is a Phase 2 feature.`}
+          ` ${syntheticCount} ${syntheticCount === 1 ? 'is an' : 'are'} illustrative direct ${syntheticCount === 1 ? 'enquiry' : 'enquiries'} - full RFQ capture is a Phase 2 feature.`}
       </p>
 
       <div className="grid gap-6 lg:grid-cols-[380px_1fr] lg:items-start">
@@ -255,7 +255,7 @@ export function QuotesClient({ rows }: { rows: QuoteRow[] }) {
                       <textarea
                         id={`${formId}-notes`}
                         rows={3}
-                        placeholder="Anything the buyer should know — packaging, substitutions, part-shipment…"
+                        placeholder="Anything the buyer should know - packaging, substitutions, part-shipment…"
                         className="w-full resize-none rounded-md border border-hairline-strong bg-surface px-3 py-2 text-[13.5px] text-ink outline-none transition-colors placeholder:text-muted focus:border-gold focus:ring-2 focus:ring-gold/20"
                         {...form.register('notes')}
                       />
@@ -272,13 +272,13 @@ export function QuotesClient({ rows }: { rows: QuoteRow[] }) {
                       ) : (
                         <>
                           <FileText size={13} strokeWidth={1.5} />
-                          Illustrative request — sending won&apos;t be saved anywhere (Phase 2).
+                          Illustrative request - sending won&apos;t be saved anywhere (Phase 2).
                         </>
                       )}
                     </p>
-                    <GoldButton type="submit" size="sm" icon={<Send size={14} strokeWidth={1.5} />} loading={saving}>
+                    <ActionButton type="submit" size="sm" icon={<Send size={14} strokeWidth={1.5} />} loading={saving}>
                       {selected.kind === 'ORDER' ? 'Send quote & confirm' : 'Send quote'}
-                    </GoldButton>
+                    </ActionButton>
                   </div>
                 </form>
               </PanelBody>

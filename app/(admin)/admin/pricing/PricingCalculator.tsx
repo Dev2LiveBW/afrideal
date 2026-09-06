@@ -4,13 +4,13 @@ import { useState } from 'react';
 import { Calculator } from 'lucide-react';
 import toast from 'react-hot-toast';
 
-import { GoldButton } from '@/components/brand/GoldButton';
+import { ActionButton } from '@/components/brand/ActionButton';
 import { Panel, PanelBody, PanelHeader } from '@/components/brand/Panel';
 import { PricingFormula } from '@/components/brand/PricingFormula';
 import type { PriceResult, PricingRule } from '@/types';
 
 /**
- * The live pricing calculator. Doubles as the "formula at a glance" panel —
+ * The live pricing calculator. Doubles as the "formula at a glance" panel -
  * it opens already computed against a sample cost so the shape of the
  * formula is visible before anyone touches an input, then genuinely
  * recalculates against the real API on every category or cost change.
@@ -109,14 +109,14 @@ export function PricingCalculator({
             </select>
           </div>
 
-          <GoldButton
+          <ActionButton
             size="md"
             onClick={calculate}
             loading={loading}
             icon={<Calculator size={15} strokeWidth={1.5} />}
           >
             Calculate
-          </GoldButton>
+          </ActionButton>
 
           {error && <p className="text-[12.5px] text-danger-ink">{error}</p>}
         </div>

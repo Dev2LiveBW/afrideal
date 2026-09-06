@@ -5,7 +5,7 @@ import { RunnerTabBar, RunnerTopbar } from '@/components/layout/RunnerNav';
 import { auth } from '@/lib/auth';
 
 /**
- * Runner Portal shell — mobile-first.
+ * Runner Portal shell - mobile-first.
  *
  * A runner uses this one-handed, in a vehicle, in daylight: a fixed top bar,
  * a single centred column capped at `max-w-lg`, and a fixed bottom tab bar.

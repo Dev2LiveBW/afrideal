@@ -30,7 +30,7 @@ export default async function AdminPricingPage() {
   const defaultRule = rules.find((rule) => rule.active) ?? rules[0] ?? null;
   const defaultResult = defaultRule ? calculatePrice(SAMPLE_COST, defaultRule) : null;
 
-  // §19 — computed live from the current bands and supplier costs, so the queue
+  // §19 - computed live from the current bands and supplier costs, so the queue
   // reflects the data an operator is actually looking at.
   const alerts = findMarginAlerts(bands, offers, products, marginRules);
 

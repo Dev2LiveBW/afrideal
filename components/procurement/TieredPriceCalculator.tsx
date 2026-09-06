@@ -3,7 +3,7 @@
 import { FileText, TrendingDown } from 'lucide-react';
 
 import { MoneyText } from '@/components/brand/MoneyText';
-import { GoldButton } from '@/components/brand/GoldButton';
+import { ActionButton } from '@/components/brand/ActionButton';
 import { TIER_LABELS, bandRange, priceLadder, resolvePrice } from '@/lib/pricing-tiers';
 import { cn } from '@/lib/utils';
 import type { CustomerPrice, CustomerType, Product } from '@/types';
@@ -130,7 +130,7 @@ export function TieredPriceCalculator({
             quotation. We source the volume across verified suppliers and come back with a landed
             price, usually within two working days.
           </p>
-          <GoldButton
+          <ActionButton
             variant="gold"
             size="sm"
             className="mt-3"
@@ -138,7 +138,7 @@ export function TieredPriceCalculator({
             onClick={() => onRequestRfq(quantity)}
           >
             Request a quotation
-          </GoldButton>
+          </ActionButton>
         </div>
       )}
     </div>

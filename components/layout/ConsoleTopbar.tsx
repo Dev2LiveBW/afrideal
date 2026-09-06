@@ -64,7 +64,7 @@ export function ConsoleTopbar({
         >
           <Bell size={15} strokeWidth={1.5} />
           {unread > 0 && (
-            <span className="absolute -right-0.5 -top-0.5 flex h-4 min-w-4 items-center justify-center rounded-full bg-gold px-1 font-mono text-[9.5px] font-semibold tabular-nums text-ink">
+            <span className="absolute -right-0.5 -top-0.5 flex h-4 min-w-4 items-center justify-center rounded-full bg-forest px-1 font-mono text-[9.5px] font-semibold tabular-nums text-white">
               {unread}
             </span>
           )}
@@ -94,7 +94,7 @@ export function ConsoleTopbar({
                         key={notification.id}
                         className={cn(
                           'border-b border-hairline px-4 py-3 last:border-0',
-                          !notification.read && 'bg-gold/[0.045]',
+                          !notification.read && 'bg-forest-wash/50',
                         )}
                       >
                         <p className="text-[13px] font-medium text-ink">{notification.title}</p>

@@ -12,7 +12,7 @@ export const dynamic = 'force-dynamic';
  *
  * A quotation request is what happens when a buyer wants a quantity nobody has
  * published a band for. It is deliberately a separate flow from checkout: no
- * money moves, no escrow opens, and suppliers are asked rather than routed.
+ * money moves, no invoice is raised, and suppliers are asked rather than routed.
  */
 
 const CreateSchema = z.object({
@@ -49,7 +49,7 @@ export const GET = handled(async (request: Request) => {
   if (status) visible = visible.filter((rfq) => rfq.status === status);
 
   /**
-   * §5 — supplier quotes are confidential. A customer sees that responses
+   * §5 - supplier quotes are confidential. A customer sees that responses
    * exist and what the best landed price would be, never each supplier's
    * individual number. A supplier sees only their own. Staff see everything.
    */
@@ -140,7 +140,7 @@ export const POST = handled(async (request: Request) => {
     await notify({
       userId: owner.id,
       title: 'Quotation requested',
-      body: `${rfq.reference} — ${rfq.requested_quantity} units of ${product.name} to ${rfq.delivery_location}.`,
+      body: `${rfq.reference} - ${rfq.requested_quantity} units of ${product.name} to ${rfq.delivery_location}.`,
       kind: 'ORDER',
     });
   }
@@ -150,7 +150,7 @@ export const POST = handled(async (request: Request) => {
     await notify({
       userId: member.id,
       title: 'New RFQ to source',
-      body: `${rfq.reference} from ${actor.name} — ${rfq.requested_quantity} units of ${product.name}.`,
+      body: `${rfq.reference} from ${actor.name} - ${rfq.requested_quantity} units of ${product.name}.`,
       kind: 'ORDER',
     });
   }
@@ -161,7 +161,7 @@ export const POST = handled(async (request: Request) => {
     action: 'RFQ_SUBMITTED',
     entity: 'rfq',
     entityId: rfq.id,
-    detail: `${rfq.reference} — ${rfq.requested_quantity} × ${product.name}, ${eligible.length} supplier(s) invited.`,
+    detail: `${rfq.reference} - ${rfq.requested_quantity} × ${product.name}, ${eligible.length} supplier(s) invited.`,
   });
 
   return ok({ rfq, invited: eligible.length }, { status: 201 });

@@ -12,19 +12,24 @@
 // questions, four different tables.
 // ═════════════════════════════════════════════════════════════════════════════
 
-/** §7 — drives which pricing tiers a buyer can reach. */
+/** §7 - drives which pricing tiers a buyer can reach. */
 export type CustomerType = 'RETAIL' | 'BUSINESS' | 'RESELLER' | 'INSTITUTIONAL' | 'GUEST';
 
-/** §14 — the tier a price band belongs to. */
+/** §14 - the tier a price band belongs to. */
 export type PricingTier =
   | 'RETAIL'
   | 'BULK'
   | 'WHOLESALE'
+  /* The deepest published rung, 50-99 units. Named with a suffix rather than
+     as a sixth word because it is the same wholesale offer one step further
+     down the ladder, and the storefront labels it "Wholesale+" for exactly
+     that reason. */
+  | 'WHOLESALE_PLUS'
   | 'NEGOTIATED'
   | 'PROMOTIONAL'
   | 'RFQ';
 
-/** §11 — what kind of business the supplier is. */
+/** §11 - what kind of business the supplier is. */
 export type SupplierType =
   | 'MANUFACTURER'
   | 'WHOLESALER'
@@ -34,7 +39,7 @@ export type SupplierType =
   | 'BRAND'
   | 'AGENT';
 
-/** §12 — a supplier company may have several users, each scoped to that supplier. */
+/** §12 - a supplier company may have several users, each scoped to that supplier. */
 export type SupplierUserRole =
   | 'SUPPLIER_OWNER'
   | 'SUPPLIER_ADMIN'
@@ -51,7 +56,7 @@ export interface SupplierUser {
 }
 
 /**
- * §17 — how AfriDeal takes its cut.
+ * §17 - how AfriDeal takes its cut.
  *
  * PERCENTAGE_MARKUP and PERCENTAGE_MARGIN are different arithmetic on the same
  * number, and the difference is not cosmetic: 30% markup on a BWP 250 cost is
@@ -65,17 +70,17 @@ export type MarginType =
   | 'HYBRID'
   | 'COMMISSION';
 
-/** §6 — who sets the customer-facing price. */
+/** §6 - who sets the customer-facing price. */
 export type CommercialModel = 'AFRIDEAL_MANAGED' | 'SUPPLIER_LED';
 
-/** §8/§26 — brands exist so product matching has something to match on. */
+/** §8/§26 - brands exist so product matching has something to match on. */
 export interface Brand {
   id: string;
   name: string;
   slug: string;
 }
 
-/** §10 — one image library per product, shared by every supplier offering it. */
+/** §10 - one image library per product, shared by every supplier offering it. */
 export interface ProductImage {
   id: string;
   product_id: string;
@@ -89,7 +94,7 @@ export interface ProductImage {
 }
 
 /**
- * §14 — what a customer actually pays.
+ * §14 - what a customer actually pays.
  *
  * Bands resolve on (customer_type, quantity). A row with a null
  * `supplier_offer_id` is a platform-wide price under Model A; a row naming an
@@ -104,7 +109,7 @@ export interface CustomerPrice {
   customer_type: CustomerType;
   pricing_tier: PricingTier;
   minimum_quantity: number;
-  /** null means no upper bound — the top band. */
+  /** null means no upper bound - the top band. */
   maximum_quantity: number | null;
   unit_price: number;
   currency: 'BWP';
@@ -114,7 +119,7 @@ export interface CustomerPrice {
   status: 'ACTIVE' | 'SCHEDULED' | 'EXPIRED';
 }
 
-/** §21 — a buyer asking for a price on a quantity nobody has listed. */
+/** §21 - a buyer asking for a price on a quantity nobody has listed. */
 export type RfqStatus = 'SUBMITTED' | 'SOURCING' | 'QUOTED' | 'ACCEPTED' | 'DECLINED' | 'EXPIRED';
 
 export interface Rfq {
@@ -155,7 +160,7 @@ export interface RfqResponse {
   created_at: string;
 }
 
-/** §19 — raised when a supplier cost rise pushes a live price under its floor. */
+/** §19 - raised when a supplier cost rise pushes a live price under its floor. */
 export interface MarginAlert {
   product_id: string;
   product_name: string;
@@ -183,7 +188,7 @@ export interface TieredPriceResult {
   band: CustomerPrice | null;
 }
 
-/** §18 — markup and margin reported separately, never conflated. */
+/** §18 - markup and margin reported separately, never conflated. */
 export interface MarginBreakdown {
   supplier_cost: number;
   selling_price: number;
@@ -197,7 +202,7 @@ export interface MarginBreakdown {
   markup_pct: number;
 }
 
-/** §16/§17 — a configurable rule, replacing the markup-only version. */
+/** §16/§17 - a configurable rule, replacing the markup-only version. */
 export interface MarginRule {
   id: string;
   category_id: string;
@@ -211,8 +216,74 @@ export interface MarginRule {
   fixed_component: number;
   logistics_cost: number;
   gateway_rate: number;
-  /** §19 — the floor this tier may not fall below. */
+  /** §19 - the floor this tier may not fall below. */
   minimum_margin_pct: number;
   commercial_model: CommercialModel;
   active: boolean;
+}
+
+// ═════════════════════════════════════════════════════════════════════════════
+// Runner sourcing requests.
+//
+// The second way onto the platform. The marketplace answers "I know what I
+// want and you list it"; this answers "I know what I want and nobody lists
+// it". A verified runner takes the request, finds the item, sends back what it
+// costs and what condition it is in, and buys it once the customer approves.
+//
+// It is deliberately not an Rfq. An Rfq prices a catalogue product AfriDeal
+// already sells at a volume above the published ladder; a sourcing request has
+// no product_id at all, because the whole point is that the thing is not in the
+// catalogue yet.
+// ═════════════════════════════════════════════════════════════════════════════
+
+export type RunnerRequestStatus =
+  | 'REQUESTED'
+  | 'ACCEPTED'
+  | 'SOURCING'
+  | 'QUOTED'
+  | 'APPROVED'
+  | 'DELIVERING'
+  | 'CONFIRMED'
+  | 'CANCELLED';
+
+export interface RunnerRequestEvent {
+  status: RunnerRequestStatus;
+  label: string;
+  at: string;
+  actor: string;
+  note?: string;
+}
+
+export interface RunnerRequest {
+  id: string;
+  reference: string;
+  customer_id: string;
+  customer_name: string;
+  /** What the buyer is looking for, in their own words. */
+  item: string;
+  detail: string;
+  quantity: number;
+  /** What they hope to pay per unit, in Pula. Null when they would rather be told. */
+  budget_per_unit: number | null;
+  delivery_city: string;
+  delivery_address: string;
+  needed_by: string | null;
+  status: RunnerRequestStatus;
+  runner_id: string | null;
+  runner_name: string | null;
+  /**
+   * What the runner found. Set at QUOTED and never before, because a price the
+   * runner has not yet confirmed with a seller is a guess.
+   */
+  quote: {
+    unit_price: number;
+    service_fee: number;
+    total: number;
+    found_at: string;
+    condition: string;
+    note: string;
+  } | null;
+  created_at: string;
+  updated_at: string;
+  timeline: RunnerRequestEvent[];
 }

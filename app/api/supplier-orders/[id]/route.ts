@@ -12,7 +12,7 @@ const PatchSchema = z.object({
   status: z
     .enum(['CONFIRMED', 'PREPARING', 'READY_FOR_COLLECTION', 'COLLECTED', 'DELIVERED', 'CANCELLED'])
     .optional(),
-  /** Admin override — reassign this leg to a different supplier. */
+  /** Admin override - reassign this leg to a different supplier. */
   supplier_id: z.string().optional(),
 });
 
@@ -78,9 +78,9 @@ export const PATCH = handled(async (request: Request, { params }: { params: { id
       selection_reason: `Manually routed to ${target.name} by ${actor.name}.`,
     });
 
-    // The escrow leg follows the supplier it belongs to.
-    const escrowLeg = (await readAll('escrow')).find((record) => record.supplier_order_id === params.id);
-    if (escrowLeg) await update('escrow', escrowLeg.id, { supplier_id: target.id });
+    // The supplier invoice follows the supplier it belongs to.
+    const invoice = (await readAll('supplier-payables')).find((record) => record.supplier_order_id === params.id);
+    if (invoice) await update('supplier-payables', invoice.id, { supplier_id: target.id });
 
     for (const item of items) {
       await update('order-items', item.id, { supplier_id: target.id });

@@ -96,7 +96,7 @@ export function auth() {
   return getServerSession(authOptions);
 }
 
-/** Session, or throw — for API routes that must have a signed-in user. */
+/** Session, or throw - for API routes that must have a signed-in user. */
 export async function requireSession() {
   const session = await auth();
   if (!session?.user) throw new Error('UNAUTHENTICATED');

@@ -1,104 +1,194 @@
 'use client';
 
 import Link from 'next/link';
-import { usePathname } from 'next/navigation';
-import { useEffect, useState } from 'react';
+import { usePathname, useRouter } from 'next/navigation';
+import { useEffect, useRef, useState } from 'react';
 import { useSession, signOut } from 'next-auth/react';
 import { AnimatePresence, motion } from 'framer-motion';
-import { LogOut, Menu, Package, ShoppingBag, User, X } from 'lucide-react';
+import {
+  ArrowLeftRight,
+  ChevronDown,
+  ChevronRight,
+  Grid2x2,
+  Home,
+  LogOut,
+  MapPin,
+  Menu,
+  Package,
+  Search,
+  ShoppingCart,
+  User,
+  X,
+} from 'lucide-react';
 
 import { AfriDealLogo } from '@/components/brand/AfriDealLogo';
-import { GoldButton } from '@/components/brand/GoldButton';
-import { cartCount, useAfriDealStore } from '@/store/useAfriDealStore';
+import { CategoryIcon } from '@/components/storefront/CategoryIcon';
+import { ActionButton } from '@/components/brand/ActionButton';
+import { DELIVERY_CITIES, cartCount, useAfriDealStore } from '@/store/useAfriDealStore';
+import type { Category } from '@/types';
 import { cn } from '@/lib/utils';
 
-const LINKS = [
-  { href: '/browse', label: 'Browse' },
-  { href: '/browse?category=c3', label: 'Building' },
-  { href: '/browse?category=c4', label: 'Agriculture' },
-  { href: '/orders', label: 'My orders' },
-];
-
 /**
- * Storefront navigation — a floating pill that detaches from the top and gains
- * a glass ground once the page scrolls under it.
+ * Where to deliver.
+ *
+ * Was a label with a chevron that did nothing. The chevron promised a control,
+ * so this is the control: ten cities, persisted, and read only after hydration
+ * because a persisted value differs from what the server rendered and React
+ * would otherwise flag the mismatch on first paint.
  */
-export function StorefrontNav() {
+function DeliverToPicker() {
+  const deliverTo = useAfriDealStore((state) => state.deliverTo);
+  const setDeliverTo = useAfriDealStore((state) => state.setDeliverTo);
+
+  const [open, setOpen] = useState(false);
+  const [mounted, setMounted] = useState(false);
+  const boxRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => setMounted(true), []);
+
+  useEffect(() => {
+    if (!open) return;
+
+    const onClick = (event: MouseEvent) => {
+      if (!boxRef.current?.contains(event.target as Node)) setOpen(false);
+    };
+    const onKey = (event: KeyboardEvent) => event.key === 'Escape' && setOpen(false);
+
+    document.addEventListener('mousedown', onClick);
+    document.addEventListener('keydown', onKey);
+    return () => {
+      document.removeEventListener('mousedown', onClick);
+      document.removeEventListener('keydown', onKey);
+    };
+  }, [open]);
+
+  const city = mounted ? deliverTo : 'Gaborone';
+
+  return (
+    <div ref={boxRef} className="relative">
+      <button
+        type="button"
+        onClick={() => setOpen((value) => !value)}
+        aria-expanded={open}
+        aria-haspopup="listbox"
+        className="flex items-center gap-1.5 text-[12px] text-gray-600 hover:text-gray-900"
+      >
+        <MapPin size={13} className="text-[#E67E22]" />
+        <span>
+          Deliver to: <span className="font-semibold text-gray-900">{city}, Botswana</span>
+        </span>
+        <ChevronDown
+          size={13}
+          className={cn('text-gray-400 transition-transform', open && 'rotate-180')}
+        />
+      </button>
+
+      <AnimatePresence>
+        {open && (
+          <motion.ul
+            role="listbox"
+            initial={{ opacity: 0, y: -6 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -6 }}
+            transition={{ duration: 0.18, ease: [0.16, 1, 0.3, 1] }}
+            className="absolute left-0 top-[calc(100%+6px)] z-50 max-h-64 w-56 overflow-y-auto rounded-xl border border-gray-200 bg-white py-1 shadow-lg"
+          >
+            {DELIVERY_CITIES.map((option) => (
+              <li key={option}>
+                <button
+                  type="button"
+                  role="option"
+                  aria-selected={option === city}
+                  onClick={() => {
+                    setDeliverTo(option);
+                    setOpen(false);
+                  }}
+                  className={cn(
+                    'flex w-full items-center gap-2 px-3.5 py-2.5 text-left text-[13px] transition-colors hover:bg-gray-50',
+                    option === city ? 'font-semibold text-gray-900' : 'text-gray-600',
+                  )}
+                >
+                  <MapPin
+                    size={13}
+                    className={option === city ? 'text-[#E67E22]' : 'text-gray-300'}
+                  />
+                  {option}
+                </button>
+              </li>
+            ))}
+          </motion.ul>
+        )}
+      </AnimatePresence>
+    </div>
+  );
+}
+
+export function StorefrontNav({ categories = [] }: { categories?: Category[] }) {
   const pathname = usePathname();
+  const router = useRouter();
   const { data: session } = useSession();
   const cart = useAfriDealStore((state) => state.cart);
   const pulse = useAfriDealStore((state) => state.cartPulse);
 
-  const [scrolled, setScrolled] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
   const [mounted, setMounted] = useState(false);
+  const [compact, setCompact] = useState(false);
 
-  // Cart state is persisted, so read it only after hydration to avoid a
-  // server/client count mismatch on first paint.
   useEffect(() => setMounted(true), []);
+  useEffect(() => setMenuOpen(false), [pathname]);
 
+  /**
+   * The delivery row folds away once the shopper is past the fold.
+   *
+   * Both rows pinned cost 190px of an 844px phone screen — nearly a quarter of
+   * the viewport spent on chrome the shopper has already used. Search stays,
+   * because search is what a marketplace header is for; the delivery row goes,
+   * and comes straight back at the top of the page.
+   */
   useEffect(() => {
-    const onScroll = () => setScrolled(window.scrollY > 12);
+    const onScroll = () => setCompact(window.scrollY > 120);
     onScroll();
     window.addEventListener('scroll', onScroll, { passive: true });
     return () => window.removeEventListener('scroll', onScroll);
   }, []);
 
-  useEffect(() => setMenuOpen(false), [pathname]);
-
   const count = mounted ? cartCount(cart) : 0;
-  const onDarkHero = pathname === '/' && !scrolled;
 
   return (
     <>
-      <div className="pointer-events-none fixed inset-x-0 top-0 z-40 flex justify-center px-4 pt-4 md:pt-6">
-        <motion.nav
-          animate={{
-            backgroundColor: scrolled ? 'rgba(255,255,255,0.82)' : 'rgba(255,255,255,0)',
-            borderColor: scrolled ? 'rgba(23,26,24,0.08)' : 'rgba(255,255,255,0)',
-          }}
-          transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
-          className={cn(
-            'pointer-events-auto flex w-full max-w-market items-center gap-4 rounded-full border px-4 py-2.5 md:px-5',
-            scrolled && 'shadow-card backdrop-blur-xl',
-          )}
-        >
+      <header className="sticky top-0 z-40 bg-white shadow-sm">
+        {/* Row 1: Logo | Search | Controls */}
+        <div className="mx-auto flex max-w-[1400px] items-center gap-3 px-4 py-2.5">
           <Link href="/" className="shrink-0">
-            <AfriDealLogo variant={onDarkHero ? 'dark' : 'light'} size="sm" />
+            <AfriDealLogo variant="light" size="sm" />
           </Link>
 
-          <div className="mx-auto hidden items-center gap-1 md:flex">
-            {LINKS.map((link) => {
-              const active = pathname === link.href.split('?')[0];
-              return (
-                <Link
-                  key={link.href}
-                  href={link.href}
-                  className={cn(
-                    'rounded-full px-3.5 py-2 text-[13.5px] font-medium transition-colors duration-200',
-                    onDarkHero
-                      ? 'text-white/70 hover:bg-white/10 hover:text-white'
-                      : active
-                        ? 'bg-ink/[0.06] text-ink'
-                        : 'text-body hover:bg-ink/[0.04] hover:text-ink',
-                  )}
-                >
-                  {link.label}
-                </Link>
-              );
-            })}
+          <div className="relative flex flex-1 items-center">
+            <Search size={16} className="absolute left-3.5 text-gray-400 pointer-events-none" />
+            <input
+              type="search"
+              placeholder="Search products, brands or categories…"
+              className="h-10 w-full rounded-full border border-gray-200 bg-gray-50 pl-10 pr-4 text-[14px] text-gray-700 outline-none focus:border-[#E67E22] focus:bg-white focus:ring-2 focus:ring-[#E67E22]/20 sm:pr-28"
+            />
+            {/*
+              The button reserved 112px of the field at every width. On a 390px
+              phone that left about one character visible between the icon and
+              the button, so the field could not show what had been typed into
+              it. Below `sm` the magnifier and the placeholder carry the
+              affordance and the whole width goes to the text.
+            */}
+            <button className="absolute right-1 hidden h-8 items-center rounded-full bg-[#E67E22] px-4 text-[13px] font-bold text-white transition-colors hover:bg-[#D35400] sm:flex">
+              Search
+            </button>
           </div>
 
-          <div className="ml-auto flex shrink-0 items-center gap-2 md:ml-0">
+          <div className="flex shrink-0 items-center gap-2">
             <Link
               href="/cart"
               aria-label={`Cart, ${count} item${count === 1 ? '' : 's'}`}
-              className={cn(
-                'relative rounded-full p-2.5 transition-colors',
-                onDarkHero ? 'text-white/80 hover:bg-white/10' : 'text-body hover:bg-ink/[0.05] hover:text-ink',
-              )}
+              className="relative flex h-10 w-10 items-center justify-center rounded-full hover:bg-gray-100 transition-colors"
             >
-              <ShoppingBag size={18} strokeWidth={1.5} />
+              <ShoppingCart size={20} strokeWidth={1.75} className="text-gray-700" />
               <AnimatePresence>
                 {count > 0 && (
                   <motion.span
@@ -106,7 +196,7 @@ export function StorefrontNav() {
                     initial={{ scale: 0.4, opacity: 0 }}
                     animate={{ scale: [0.4, 1.25, 1], opacity: 1 }}
                     transition={{ duration: 0.42, ease: [0.34, 1.56, 0.64, 1] }}
-                    className="absolute -right-0.5 -top-0.5 flex h-[18px] min-w-[18px] items-center justify-center rounded-full bg-gold px-1 font-mono text-[10px] font-semibold tabular-nums text-ink"
+                    className="absolute -right-0.5 -top-0.5 flex h-[18px] min-w-[18px] items-center justify-center rounded-full bg-[#E67E22] px-1 font-mono text-[10px] font-semibold tabular-nums text-white"
                   >
                     {count}
                   </motion.span>
@@ -116,59 +206,51 @@ export function StorefrontNav() {
 
             {session?.user ? (
               <div className="hidden items-center gap-2 md:flex">
-                <Link
-                  href="/orders"
-                  className={cn(
-                    'flex items-center gap-2 rounded-full py-1.5 pl-1.5 pr-3.5 transition-colors',
-                    onDarkHero ? 'bg-white/10 text-white hover:bg-white/15' : 'bg-ink/[0.05] text-ink hover:bg-ink/[0.08]',
-                  )}
-                >
-                  <span className="flex h-7 w-7 items-center justify-center rounded-full bg-gold font-mono text-[10.5px] font-semibold text-ink">
+                <Link href="/orders" className="flex items-center gap-2 rounded-full bg-gray-100 py-1.5 pl-1.5 pr-3.5 hover:bg-gray-200 transition-colors">
+                  <span className="flex h-7 w-7 items-center justify-center rounded-full bg-[#27AE60] font-mono text-[10.5px] font-semibold text-white">
                     {session.user.avatar}
                   </span>
-                  <span className="text-[13px] font-medium">
-                    {session.user.name?.split(' ')[0]}
-                  </span>
+                  <span className="text-[13px] font-medium text-gray-800">{session.user.name?.split(' ')[0]}</span>
                 </Link>
-                <button
-                  onClick={() => signOut({ callbackUrl: '/' })}
-                  aria-label="Sign out"
-                  className={cn(
-                    'rounded-full p-2.5 transition-colors',
-                    onDarkHero ? 'text-white/70 hover:bg-white/10' : 'text-muted hover:bg-ink/[0.05] hover:text-ink',
-                  )}
-                >
+                <button onClick={() => signOut({ callbackUrl: '/' })} aria-label="Sign out" className="rounded-full p-2 text-gray-500 hover:bg-gray-100 hover:text-gray-800 transition-colors">
                   <LogOut size={16} strokeWidth={1.5} />
                 </button>
               </div>
             ) : (
-              <GoldButton
-                size="sm"
-                variant={onDarkHero ? 'gold' : 'ink'}
-                className="hidden md:inline-flex"
-                onClick={() => {
-                  window.location.href = '/login';
-                }}
-              >
-                Sign in
-              </GoldButton>
+              <div className="hidden items-center gap-2 md:flex">
+                <Link href="/login" className="rounded-full px-4 py-2 text-[13px] font-medium text-gray-700 hover:bg-gray-100 transition-colors">Sign in</Link>
+                <button onClick={() => router.push('/signup')} className="rounded-full bg-[#E67E22] px-4 py-2 text-[13px] font-bold text-white hover:bg-[#D35400] transition-colors">Sign up</button>
+              </div>
             )}
 
-            <button
-              onClick={() => setMenuOpen(true)}
-              aria-label="Open menu"
-              className={cn(
-                'rounded-full p-2.5 transition-colors md:hidden',
-                onDarkHero ? 'text-white' : 'text-ink',
-              )}
-            >
-              <Menu size={19} strokeWidth={1.5} />
+            <button onClick={() => setMenuOpen(true)} aria-label="Open menu" className="flex h-10 w-10 items-center justify-center rounded-full hover:bg-gray-100 transition-colors md:hidden">
+              <Menu size={20} strokeWidth={1.75} className="text-gray-700" />
             </button>
           </div>
-        </motion.nav>
-      </div>
+        </div>
 
-      {/* Mobile overlay */}
+        {/* Row 2: Location | Track order */}
+        <div
+          className={cn(
+            'border-t border-gray-100 bg-white transition-[max-height,opacity] duration-300 ease-[cubic-bezier(0.16,1,0.3,1)]',
+            /*
+             * Clipped only while collapsing — that is what hides the row. Left
+             * clipped when open it would also cut off the delivery dropdown,
+             * which escapes this box by design.
+             */
+            compact ? 'max-h-0 overflow-hidden border-t-0 opacity-0' : 'max-h-16 opacity-100',
+          )}
+        >
+          <div className="mx-auto flex max-w-[1400px] items-center justify-between px-4 py-1.5">
+            <DeliverToPicker />
+            <Link href="/orders" className="text-[12px] font-medium text-[#E67E22] hover:underline">
+              Track order →
+            </Link>
+          </div>
+        </div>
+      </header>
+
+      {/* Mobile slide-out menu */}
       <AnimatePresence>
         {menuOpen && (
           <motion.div
@@ -176,7 +258,7 @@ export function StorefrontNav() {
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             transition={{ duration: 0.25 }}
-            className="fixed inset-0 z-50 bg-ink/95 backdrop-blur-xl md:hidden"
+            className="fixed inset-0 z-50 bg-[#111]/95 backdrop-blur-xl md:hidden"
           >
             <div className="flex h-16 items-center justify-between px-5">
               <AfriDealLogo variant="dark" size="sm" />
@@ -185,22 +267,48 @@ export function StorefrontNav() {
               </button>
             </div>
 
-            <nav className="px-6 pt-8">
-              {[...LINKS, { href: '/cart', label: 'Cart' }].map((link, index) => (
+            <nav className="max-h-[calc(100dvh-4rem)] overflow-y-auto px-6 pb-10 pt-6">
+              {[
+                { href: '/browse', label: 'Browse' },
+                { href: '/browse?category=hair-weaves-extensions', label: 'Hair & Weaves' },
+                { href: '/request-a-runner', label: 'Request a runner' },
+                { href: '/how-it-works', label: 'How it works' },
+                { href: '/orders', label: 'My orders' },
+                { href: '/cart', label: 'Cart' },
+              ].map((link, index) => (
                 <motion.div
                   key={link.href}
                   initial={{ opacity: 0, y: 24 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: 0.06 + index * 0.05, duration: 0.45, ease: [0.16, 1, 0.3, 1] }}
                 >
-                  <Link
-                    href={link.href}
-                    className="block border-b border-white/10 py-4 font-display text-[26px] font-semibold text-white"
-                  >
+                  <Link href={link.href} className="block border-b border-white/10 py-3.5 font-display text-[24px] font-semibold text-white">
                     {link.label}
                   </Link>
                 </motion.div>
               ))}
+
+              {categories.length > 0 && (
+                <motion.div
+                  initial={{ opacity: 0, y: 24 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.3, duration: 0.45, ease: [0.16, 1, 0.3, 1] }}
+                  className="pt-7"
+                >
+                  <p className="font-mono text-[11px] font-medium uppercase tracking-widest text-white/55">Shop by category</p>
+                  <ul className="mt-3">
+                    {categories.map((category) => (
+                      <li key={category.id}>
+                        <Link href={`/browse?category=${category.slug}`} className="flex items-center gap-3.5 border-b border-white/[0.07] py-3 text-[15px] text-white/75 hover:text-[#E67E22] transition-colors">
+                          <CategoryIcon categoryId={category.id} size={17} className="shrink-0 text-white/70" />
+                          <span className="min-w-0 flex-1 truncate">{category.name}</span>
+                          <ChevronRight size={15} strokeWidth={1.75} className="shrink-0 text-white/25" />
+                        </Link>
+                      </li>
+                    ))}
+                  </ul>
+                </motion.div>
+              )}
 
               <motion.div
                 initial={{ opacity: 0, y: 24 }}
@@ -209,15 +317,12 @@ export function StorefrontNav() {
                 className="pt-8"
               >
                 {session?.user ? (
-                  <GoldButton variant="gold" size="lg" className="w-full" onClick={() => signOut({ callbackUrl: '/' })} icon={<LogOut size={16} strokeWidth={1.5} />}>
-                    Sign out
-                  </GoldButton>
+                  <button onClick={() => signOut({ callbackUrl: '/' })} className="w-full rounded-full border border-white/25 py-3.5 text-center text-[14px] font-medium text-white hover:bg-white/10 transition-colors">Sign out</button>
                 ) : (
-                  <Link href="/login">
-                    <GoldButton variant="gold" size="lg" className="w-full" withArrow>
-                      Sign in
-                    </GoldButton>
-                  </Link>
+                  <div className="space-y-3">
+                    <button onClick={() => router.push('/signup')} className="w-full rounded-full bg-[#E67E22] py-3.5 text-[14px] font-bold text-white hover:bg-[#D35400] transition-colors">Create an account</button>
+                    <Link href="/login" className="block rounded-full border border-white/15 py-3.5 text-center text-[14px] font-medium text-white hover:bg-white/10 transition-colors">Sign in</Link>
+                  </div>
                 )}
               </motion.div>
             </nav>
@@ -228,52 +333,102 @@ export function StorefrontNav() {
   );
 }
 
+/**
+ * The thumb rail.
+ *
+ * Five destinations pinned to the bottom of the viewport on phones and tablets,
+ * gone from `md` up where the header carries the same links. Padded for the
+ * home indicator through `env(safe-area-inset-bottom)`, which is why the root
+ * viewport export declares `viewport-fit=cover`.
+ *
+ * "Compare" points at the ladder rather than a filtered grid: comparing on this
+ * marketplace means comparing what a thing costs at one, ten or fifty units,
+ * and that is the page which answers it.
+ */
+const TABS = [
+  { href: '/', label: 'Home', icon: Home },
+  { href: '/browse', label: 'Categories', icon: Grid2x2 },
+  { href: '/how-it-works', label: 'Compare', icon: ArrowLeftRight },
+  { href: '/orders', label: 'Orders', icon: Package },
+  { href: '/login', label: 'Account', icon: User },
+];
+
+export function MobileTabBar() {
+  const pathname = usePathname();
+  const { data: session } = useSession();
+
+  return (
+    <nav
+      aria-label="Primary"
+      className="fixed inset-x-0 bottom-0 z-40 border-t border-gray-200 bg-white/95 pb-[env(safe-area-inset-bottom)] backdrop-blur-md md:hidden"
+    >
+      <ul className="mx-auto flex max-w-[1400px]">
+        {TABS.map((tab) => {
+          // Signed in, the account tab is the buyer's own area rather than the
+          // sign-in screen they have already been through.
+          const href = tab.href === '/login' && session?.user ? '/orders' : tab.href;
+          const active = pathname === tab.href;
+
+          return (
+            <li key={tab.label} className="flex-1">
+              <Link
+                href={href}
+                aria-current={active ? 'page' : undefined}
+                className={cn(
+                  'flex flex-col items-center gap-1 py-2.5 transition-colors',
+                  active ? 'text-[#E67E22]' : 'text-gray-400 hover:text-gray-700',
+                )}
+              >
+                <tab.icon size={20} strokeWidth={active ? 2 : 1.75} />
+                <span className={cn('text-[10.5px] leading-3', active && 'font-semibold')}>
+                  {tab.label}
+                </span>
+              </Link>
+            </li>
+          );
+        })}
+      </ul>
+    </nav>
+  );
+}
+
 export function StorefrontFooter() {
   return (
-    <footer className="grain relative overflow-hidden bg-ink text-white">
-      <div className="mx-auto max-w-market px-6 py-16">
+    <footer className="relative overflow-hidden bg-[#1a2e1a] text-white">
+      <div className="mx-auto max-w-[1400px] px-6 py-16">
         <div className="grid gap-10 md:grid-cols-[1.4fr_1fr_1fr_1fr]">
           <div>
-            <AfriDealLogo variant="dark" size="md" />
-            <p className="measure mt-4 text-[13.5px] leading-6 text-white/55">
-              Every order is paid into escrow and held until you confirm delivery. Suppliers are
-              verified before they can list, and routed on reliability rather than the lowest price.
+            <AfriDealLogo variant="dark" size="md" withTagline />
+            <p className="mt-4 max-w-[280px] text-[13.5px] leading-6 text-white/65">
+              A procurement marketplace for Botswana and South Africa. Verified suppliers, published pricing, and runner-assisted sourcing.
             </p>
           </div>
 
           {[
-            { heading: 'Marketplace', links: [['Browse all', '/browse'], ['Building materials', '/browse?category=c3'], ['Agriculture', '/browse?category=c4'], ['Your orders', '/orders']] },
+            { heading: 'Marketplace', links: [['Hair, weaves & extensions', '/browse?category=hair-weaves-extensions'], ['Beauty & personal care', '/browse?category=beauty-personal-care'], ['Browse all', '/browse'], ['Request a runner', '/request-a-runner'], ['How it works', '/how-it-works'], ['Your orders', '/orders']] },
             { heading: 'Suppliers', links: [['Become a supplier', '/login'], ['Supplier portal', '/supplier/dashboard'], ['Verification', '/login']] },
-            { heading: 'Platform', links: [['Runner portal', '/runner/dashboard'], ['Admin console', '/admin/dashboard'], ['Sign in', '/login']] },
+            { heading: 'Platform', links: [['Runner portal', '/runner/dashboard'], ['Admin console', '/admin/dashboard'], ['Create an account', '/signup'], ['Sign in', '/login']] },
           ].map((column) => (
             <div key={column.heading}>
-              <p className="font-mono text-eyebrow font-medium uppercase text-white/35">
-                {column.heading}
-              </p>
+              <p className="font-mono text-[11px] font-medium uppercase tracking-widest text-white/55">{column.heading}</p>
               <ul className="mt-4 space-y-2.5">
                 {column.links.map(([label, href]) => (
-                  <li key={label}>
-                    <Link
-                      href={href}
-                      className="text-[13.5px] text-white/65 transition-colors hover:text-gold-light"
-                    >
-                      {label}
-                    </Link>
-                  </li>
+                  <li key={label}><Link href={href} className="text-[13.5px] text-white/65 hover:text-[#E67E22] transition-colors">{label}</Link></li>
                 ))}
               </ul>
             </div>
           ))}
         </div>
 
-        <div className="mt-12 flex flex-wrap items-center justify-between gap-4 border-t border-white/10 pt-6">
-          <p className="text-[12.5px] text-white/40">
-            © {new Date().getFullYear()} AfriDeal. Gaborone, Botswana.
-          </p>
-          <p className="flex items-center gap-2 font-mono text-[10.5px] uppercase tracking-[0.16em] text-white/35">
-            <Package size={13} strokeWidth={1.5} />
-            Escrow-backed · DPO Pay · Orange Money · PayGate
-          </p>
+        <div className="mt-12 border-t border-white/10 pt-6">
+          <p className="text-[12px] leading-5 text-white/60">AfriDeal is not a payment provider. Customer payments are processed by licensed payment partners.</p>
+          <div className="mt-5 flex flex-wrap items-center justify-between gap-4">
+            <p className="text-[12.5px] text-white/60">\u00a9 {new Date().getFullYear()} AfriDeal. Gaborone, Botswana.</p>
+            <p className="flex items-center gap-2 font-mono text-[10.5px] uppercase tracking-[0.16em] text-white/55">
+              <Package size={13} strokeWidth={1.5} />
+              DPO Pay \u00b7 Orange Money \u00b7 PayGate
+            </p>
+          </div>
         </div>
       </div>
     </footer>

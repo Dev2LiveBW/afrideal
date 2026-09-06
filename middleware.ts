@@ -6,7 +6,7 @@ import type { Role } from '@/types';
 /**
  * Route protection per role.
  *
- * Runs on the Edge runtime, so it reads the JWT only — no filesystem, no
+ * Runs on the Edge runtime, so it reads the JWT only - no filesystem, no
  * database. The claims it needs (`role`) are stamped onto the token by the jwt
  * callback in lib/auth.ts.
  *
@@ -14,7 +14,7 @@ import type { Role } from '@/types';
  * helper is the server-component equivalent for the same rules.
  */
 
-const FINANCE_ALLOWED = ['/admin/analytics', '/admin/escrow', '/admin/settlements'];
+const FINANCE_ALLOWED = ['/admin/analytics', '/admin/payables', '/admin/settlements'];
 const OPS_DENIED = ['/admin/settings', '/admin/finance', '/admin/settlements'];
 
 const LANDING: Record<Role, string> = {
@@ -86,8 +86,15 @@ export default withAuth(
         const isPublic =
           pathname === '/' ||
           pathname.startsWith('/login') ||
+          pathname.startsWith('/signup') ||
           pathname.startsWith('/browse') ||
           pathname.startsWith('/products') ||
+          /*
+           * The explainer is the page a visitor is sent to before they trust
+           * the platform with anything. Asking them to sign in to read how
+           * signing in works is the wrong way round.
+           */
+          pathname.startsWith('/how-it-works') ||
           pathname.startsWith('/cart');
 
         if (isPublic) return true;
@@ -109,6 +116,6 @@ export const config = {
      *    themselves through `guard()` in lib/api.ts and answer with a JSON 401
      *    or 403 that a client can actually read.
      */
-    '/((?!api|_next/static|_next/image|favicon.ico|.*\\.svg$|.*\\.png$).*)',
+    '/((?!api|_next/static|_next/image|favicon.ico|.*\\.svg$|.*\\.png$|.*\\.jpe?g$|.*\\.webp$|.*\\.gif$|.*\\.ico$).*)',
   ],
 };

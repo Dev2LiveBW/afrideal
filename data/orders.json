@@ -5,50 +5,50 @@
     "customer_id": "u006",
     "customer_name": "Thabo Modise",
     "status": "DELIVERED",
-    "subtotal": 819,
+    "subtotal": 650,
     "delivery_fee": 45,
-    "total": 864,
+    "total": 695,
     "payment_method": "DPO_PAY",
     "payment_reference": "DPO-884210",
     "delivery_address": "Plot 5412, Extension 12",
     "delivery_city": "Gaborone",
-    "placed_at": "2026-07-23T07:39:00.000Z",
-    "updated_at": "2026-07-28T13:14:00.000Z",
+    "placed_at": "2026-07-29T07:39:00.000Z",
+    "updated_at": "2026-08-03T13:14:00.000Z",
     "timeline": [
       {
         "status": "PENDING",
         "label": "Order placed",
-        "at": "2026-07-23T07:39:00.000Z"
+        "at": "2026-07-29T07:39:00.000Z"
       },
       {
         "status": "PAID",
-        "label": "Payment confirmed — funds held in escrow",
-        "at": "2026-07-24T08:22:00.000Z"
+        "label": "Payment confirmed",
+        "at": "2026-07-30T08:22:00.000Z"
       },
       {
         "status": "PROCESSING",
         "label": "Supplier confirmed, preparing goods",
-        "at": "2026-07-25T09:05:00.000Z"
+        "at": "2026-07-31T09:05:00.000Z"
       },
       {
         "status": "COLLECTED",
         "label": "Collected by runner",
-        "at": "2026-07-26T10:48:00.000Z"
+        "at": "2026-08-01T10:48:00.000Z"
       },
       {
         "status": "IN_TRANSIT",
         "label": "Out for delivery",
-        "at": "2026-07-26T11:48:00.000Z"
+        "at": "2026-08-01T11:48:00.000Z"
       },
       {
         "status": "DELIVERED",
         "label": "Delivered and confirmed by customer",
-        "at": "2026-07-27T12:31:00.000Z"
+        "at": "2026-08-02T12:31:00.000Z"
       },
       {
-        "status": "RELEASED",
-        "label": "Escrow released to supplier",
-        "at": "2026-07-28T13:14:00.000Z"
+        "status": "SETTLED",
+        "label": "Supplier invoice settled",
+        "at": "2026-08-03T13:14:00.000Z"
       }
     ],
     "internal_notes": ""
@@ -59,50 +59,50 @@
     "customer_id": "u007",
     "customer_name": "Kefilwe Dithebe",
     "status": "DELIVERED",
-    "subtotal": 134,
+    "subtotal": 138,
     "delivery_fee": 45,
-    "total": 179,
+    "total": 183,
     "payment_method": "ORANGE_MONEY",
     "payment_reference": "ORANGE-884247",
     "delivery_address": "Plot 220, Block 6, Broadhurst",
     "delivery_city": "Gaborone",
-    "placed_at": "2026-07-26T08:48:00.000Z",
-    "updated_at": "2026-07-31T13:23:00.000Z",
+    "placed_at": "2026-08-01T08:48:00.000Z",
+    "updated_at": "2026-08-06T13:23:00.000Z",
     "timeline": [
       {
         "status": "PENDING",
         "label": "Order placed",
-        "at": "2026-07-26T07:48:00.000Z"
+        "at": "2026-08-01T07:48:00.000Z"
       },
       {
         "status": "PAID",
-        "label": "Payment confirmed — funds held in escrow",
-        "at": "2026-07-27T08:31:00.000Z"
+        "label": "Payment confirmed",
+        "at": "2026-08-02T08:31:00.000Z"
       },
       {
         "status": "PROCESSING",
         "label": "Supplier confirmed, preparing goods",
-        "at": "2026-07-28T09:14:00.000Z"
+        "at": "2026-08-03T09:14:00.000Z"
       },
       {
         "status": "COLLECTED",
         "label": "Collected by runner",
-        "at": "2026-07-29T10:57:00.000Z"
+        "at": "2026-08-04T10:57:00.000Z"
       },
       {
         "status": "IN_TRANSIT",
         "label": "Out for delivery",
-        "at": "2026-07-29T11:57:00.000Z"
+        "at": "2026-08-04T11:57:00.000Z"
       },
       {
         "status": "DELIVERED",
         "label": "Delivered and confirmed by customer",
-        "at": "2026-07-30T12:40:00.000Z"
+        "at": "2026-08-05T12:40:00.000Z"
       },
       {
-        "status": "RELEASED",
-        "label": "Escrow released to supplier",
-        "at": "2026-07-31T13:23:00.000Z"
+        "status": "SETTLED",
+        "label": "Supplier invoice settled",
+        "at": "2026-08-06T13:23:00.000Z"
       }
     ],
     "internal_notes": ""
@@ -113,50 +113,50 @@
     "customer_id": "u006",
     "customer_name": "Thabo Modise",
     "status": "DELIVERED",
-    "subtotal": 1120,
+    "subtotal": 1523,
     "delivery_fee": 45,
-    "total": 1165,
+    "total": 1568,
     "payment_method": "PAYGATE",
     "payment_reference": "PAYGATE-884284",
     "delivery_address": "Plot 5412, Extension 12",
     "delivery_city": "Gaborone",
-    "placed_at": "2026-07-31T09:23:00.000Z",
-    "updated_at": "2026-08-05T13:58:00.000Z",
+    "placed_at": "2026-08-06T09:23:00.000Z",
+    "updated_at": "2026-08-11T13:58:00.000Z",
     "timeline": [
       {
         "status": "PENDING",
         "label": "Order placed",
-        "at": "2026-07-31T07:23:00.000Z"
+        "at": "2026-08-06T07:23:00.000Z"
       },
       {
         "status": "PAID",
-        "label": "Payment confirmed — funds held in escrow",
-        "at": "2026-08-01T08:06:00.000Z"
+        "label": "Payment confirmed",
+        "at": "2026-08-07T08:06:00.000Z"
       },
       {
         "status": "PROCESSING",
         "label": "Supplier confirmed, preparing goods",
-        "at": "2026-08-02T09:49:00.000Z"
+        "at": "2026-08-08T09:49:00.000Z"
       },
       {
         "status": "COLLECTED",
         "label": "Collected by runner",
-        "at": "2026-08-03T10:32:00.000Z"
+        "at": "2026-08-09T10:32:00.000Z"
       },
       {
         "status": "IN_TRANSIT",
         "label": "Out for delivery",
-        "at": "2026-08-03T11:32:00.000Z"
+        "at": "2026-08-09T11:32:00.000Z"
       },
       {
         "status": "DELIVERED",
         "label": "Delivered and confirmed by customer",
-        "at": "2026-08-04T12:15:00.000Z"
+        "at": "2026-08-10T12:15:00.000Z"
       },
       {
-        "status": "RELEASED",
-        "label": "Escrow released to supplier",
-        "at": "2026-08-05T13:58:00.000Z"
+        "status": "SETTLED",
+        "label": "Supplier invoice settled",
+        "at": "2026-08-11T13:58:00.000Z"
       }
     ],
     "internal_notes": ""
@@ -167,50 +167,50 @@
     "customer_id": "u007",
     "customer_name": "Kefilwe Dithebe",
     "status": "DELIVERED",
-    "subtotal": 1166,
+    "subtotal": 1200,
     "delivery_fee": 45,
-    "total": 1211,
+    "total": 1245,
     "payment_method": "DPO_PAY",
     "payment_reference": "DPO-884321",
     "delivery_address": "Plot 1180, Tati Siding",
     "delivery_city": "Francistown",
-    "placed_at": "2026-08-04T10:15:00.000Z",
-    "updated_at": "2026-08-09T13:50:00.000Z",
+    "placed_at": "2026-08-10T10:15:00.000Z",
+    "updated_at": "2026-08-15T13:50:00.000Z",
     "timeline": [
       {
         "status": "PENDING",
         "label": "Order placed",
-        "at": "2026-08-04T07:15:00.000Z"
+        "at": "2026-08-10T07:15:00.000Z"
       },
       {
         "status": "PAID",
-        "label": "Payment confirmed — funds held in escrow",
-        "at": "2026-08-05T08:58:00.000Z"
+        "label": "Payment confirmed",
+        "at": "2026-08-11T08:58:00.000Z"
       },
       {
         "status": "PROCESSING",
         "label": "Supplier confirmed, preparing goods",
-        "at": "2026-08-06T09:41:00.000Z"
+        "at": "2026-08-12T09:41:00.000Z"
       },
       {
         "status": "COLLECTED",
         "label": "Collected by runner",
-        "at": "2026-08-07T10:24:00.000Z"
+        "at": "2026-08-13T10:24:00.000Z"
       },
       {
         "status": "IN_TRANSIT",
         "label": "Out for delivery",
-        "at": "2026-08-07T11:24:00.000Z"
+        "at": "2026-08-13T11:24:00.000Z"
       },
       {
         "status": "DELIVERED",
         "label": "Delivered and confirmed by customer",
-        "at": "2026-08-08T12:07:00.000Z"
+        "at": "2026-08-14T12:07:00.000Z"
       },
       {
-        "status": "RELEASED",
-        "label": "Escrow released to supplier",
-        "at": "2026-08-09T13:50:00.000Z"
+        "status": "SETTLED",
+        "label": "Supplier invoice settled",
+        "at": "2026-08-15T13:50:00.000Z"
       }
     ],
     "internal_notes": ""
@@ -221,40 +221,40 @@
     "customer_id": "u006",
     "customer_name": "Thabo Modise",
     "status": "IN_TRANSIT",
-    "subtotal": 605,
+    "subtotal": 465,
     "delivery_fee": 45,
-    "total": 650,
+    "total": 510,
     "payment_method": "ORANGE_MONEY",
     "payment_reference": "ORANGE-884358",
     "delivery_address": "Plot 5412, Extension 12",
     "delivery_city": "Gaborone",
-    "placed_at": "2026-08-13T11:42:00.000Z",
-    "updated_at": "2026-08-18T11:17:00.000Z",
+    "placed_at": "2026-08-19T11:42:00.000Z",
+    "updated_at": "2026-08-24T11:17:00.000Z",
     "timeline": [
       {
         "status": "PENDING",
         "label": "Order placed",
-        "at": "2026-08-13T07:42:00.000Z"
+        "at": "2026-08-19T07:42:00.000Z"
       },
       {
         "status": "PAID",
-        "label": "Payment confirmed — funds held in escrow",
-        "at": "2026-08-14T08:25:00.000Z"
+        "label": "Payment confirmed",
+        "at": "2026-08-20T08:25:00.000Z"
       },
       {
         "status": "PROCESSING",
         "label": "Supplier confirmed, preparing goods",
-        "at": "2026-08-16T09:51:00.000Z"
+        "at": "2026-08-22T09:51:00.000Z"
       },
       {
         "status": "COLLECTED",
         "label": "Collected by runner",
-        "at": "2026-08-17T10:34:00.000Z"
+        "at": "2026-08-23T10:34:00.000Z"
       },
       {
         "status": "IN_TRANSIT",
         "label": "Out for delivery",
-        "at": "2026-08-18T11:17:00.000Z"
+        "at": "2026-08-24T11:17:00.000Z"
       }
     ],
     "internal_notes": ""
@@ -265,40 +265,40 @@
     "customer_id": "u007",
     "customer_name": "Kefilwe Dithebe",
     "status": "IN_TRANSIT",
-    "subtotal": 4272,
+    "subtotal": 4616,
     "delivery_fee": 45,
-    "total": 4317,
+    "total": 4661,
     "payment_method": "DPO_PAY",
     "payment_reference": "DPO-884395",
     "delivery_address": "Plot 220, Block 6, Broadhurst",
     "delivery_city": "Gaborone",
-    "placed_at": "2026-08-14T12:25:00.000Z",
-    "updated_at": "2026-08-19T11:00:00.000Z",
+    "placed_at": "2026-08-20T12:25:00.000Z",
+    "updated_at": "2026-08-25T11:00:00.000Z",
     "timeline": [
       {
         "status": "PENDING",
         "label": "Order placed",
-        "at": "2026-08-14T07:25:00.000Z"
+        "at": "2026-08-20T07:25:00.000Z"
       },
       {
         "status": "PAID",
-        "label": "Payment confirmed — funds held in escrow",
-        "at": "2026-08-15T08:08:00.000Z"
+        "label": "Payment confirmed",
+        "at": "2026-08-21T08:08:00.000Z"
       },
       {
         "status": "PROCESSING",
         "label": "Supplier confirmed, preparing goods",
-        "at": "2026-08-17T09:34:00.000Z"
+        "at": "2026-08-23T09:34:00.000Z"
       },
       {
         "status": "COLLECTED",
         "label": "Collected by runner",
-        "at": "2026-08-18T10:17:00.000Z"
+        "at": "2026-08-24T10:17:00.000Z"
       },
       {
         "status": "IN_TRANSIT",
         "label": "Out for delivery",
-        "at": "2026-08-19T11:00:00.000Z"
+        "at": "2026-08-25T11:00:00.000Z"
       }
     ],
     "internal_notes": ""
@@ -309,40 +309,40 @@
     "customer_id": "u006",
     "customer_name": "Thabo Modise",
     "status": "IN_TRANSIT",
-    "subtotal": 1525,
+    "subtotal": 1439,
     "delivery_fee": 45,
-    "total": 1570,
+    "total": 1484,
     "payment_method": "PAYGATE",
     "payment_reference": "PAYGATE-884432",
     "delivery_address": "Plot 88, Peleng Ward",
     "delivery_city": "Lobatse",
-    "placed_at": "2026-08-15T13:08:00.000Z",
-    "updated_at": "2026-08-19T11:00:00.000Z",
+    "placed_at": "2026-08-21T13:08:00.000Z",
+    "updated_at": "2026-08-25T11:00:00.000Z",
     "timeline": [
       {
         "status": "PENDING",
         "label": "Order placed",
-        "at": "2026-08-15T07:08:00.000Z"
+        "at": "2026-08-21T07:08:00.000Z"
       },
       {
         "status": "PAID",
-        "label": "Payment confirmed — funds held in escrow",
-        "at": "2026-08-16T08:51:00.000Z"
+        "label": "Payment confirmed",
+        "at": "2026-08-22T08:51:00.000Z"
       },
       {
         "status": "PROCESSING",
         "label": "Supplier confirmed, preparing goods",
-        "at": "2026-08-17T09:34:00.000Z"
+        "at": "2026-08-23T09:34:00.000Z"
       },
       {
         "status": "COLLECTED",
         "label": "Collected by runner",
-        "at": "2026-08-18T10:17:00.000Z"
+        "at": "2026-08-24T10:17:00.000Z"
       },
       {
         "status": "IN_TRANSIT",
         "label": "Out for delivery",
-        "at": "2026-08-19T11:00:00.000Z"
+        "at": "2026-08-25T11:00:00.000Z"
       }
     ],
     "internal_notes": ""
@@ -353,30 +353,30 @@
     "customer_id": "u007",
     "customer_name": "Kefilwe Dithebe",
     "status": "PROCESSING",
-    "subtotal": 616,
+    "subtotal": 483,
     "delivery_fee": 45,
-    "total": 661,
+    "total": 528,
     "payment_method": "DPO_PAY",
     "payment_reference": "DPO-884469",
     "delivery_address": "Plot 220, Block 6, Broadhurst",
     "delivery_city": "Gaborone",
-    "placed_at": "2026-08-16T14:51:00.000Z",
-    "updated_at": "2026-08-19T09:00:00.000Z",
+    "placed_at": "2026-08-22T14:51:00.000Z",
+    "updated_at": "2026-08-25T09:00:00.000Z",
     "timeline": [
       {
         "status": "PENDING",
         "label": "Order placed",
-        "at": "2026-08-16T07:51:00.000Z"
+        "at": "2026-08-22T07:51:00.000Z"
       },
       {
         "status": "PAID",
-        "label": "Payment confirmed — funds held in escrow",
-        "at": "2026-08-18T08:17:00.000Z"
+        "label": "Payment confirmed",
+        "at": "2026-08-24T08:17:00.000Z"
       },
       {
         "status": "PROCESSING",
         "label": "Supplier confirmed, preparing goods",
-        "at": "2026-08-19T09:00:00.000Z"
+        "at": "2026-08-25T09:00:00.000Z"
       }
     ],
     "internal_notes": ""
@@ -387,30 +387,30 @@
     "customer_id": "u006",
     "customer_name": "Thabo Modise",
     "status": "PROCESSING",
-    "subtotal": 1364,
+    "subtotal": 1476,
     "delivery_fee": 45,
-    "total": 1409,
+    "total": 1521,
     "payment_method": "ORANGE_MONEY",
     "payment_reference": "ORANGE-884506",
     "delivery_address": "Plot 5412, Extension 12",
     "delivery_city": "Gaborone",
-    "placed_at": "2026-08-17T07:34:00.000Z",
-    "updated_at": "2026-08-19T09:00:00.000Z",
+    "placed_at": "2026-08-23T07:34:00.000Z",
+    "updated_at": "2026-08-25T09:00:00.000Z",
     "timeline": [
       {
         "status": "PENDING",
         "label": "Order placed",
-        "at": "2026-08-17T07:34:00.000Z"
+        "at": "2026-08-23T07:34:00.000Z"
       },
       {
         "status": "PAID",
-        "label": "Payment confirmed — funds held in escrow",
-        "at": "2026-08-18T08:17:00.000Z"
+        "label": "Payment confirmed",
+        "at": "2026-08-24T08:17:00.000Z"
       },
       {
         "status": "PROCESSING",
         "label": "Supplier confirmed, preparing goods",
-        "at": "2026-08-19T09:00:00.000Z"
+        "at": "2026-08-25T09:00:00.000Z"
       }
     ],
     "internal_notes": ""
@@ -428,23 +428,23 @@
     "payment_reference": "PAYGATE-884543",
     "delivery_address": "Plot 3301, Boseja Ward",
     "delivery_city": "Maun",
-    "placed_at": "2026-08-17T08:34:00.000Z",
-    "updated_at": "2026-08-19T09:00:00.000Z",
+    "placed_at": "2026-08-23T08:34:00.000Z",
+    "updated_at": "2026-08-25T09:00:00.000Z",
     "timeline": [
       {
         "status": "PENDING",
         "label": "Order placed",
-        "at": "2026-08-17T07:34:00.000Z"
+        "at": "2026-08-23T07:34:00.000Z"
       },
       {
         "status": "PAID",
-        "label": "Payment confirmed — funds held in escrow",
-        "at": "2026-08-18T08:17:00.000Z"
+        "label": "Payment confirmed",
+        "at": "2026-08-24T08:17:00.000Z"
       },
       {
         "status": "PROCESSING",
         "label": "Supplier confirmed, preparing goods",
-        "at": "2026-08-19T09:00:00.000Z"
+        "at": "2026-08-25T09:00:00.000Z"
       }
     ],
     "internal_notes": ""
@@ -455,20 +455,20 @@
     "customer_id": "u006",
     "customer_name": "Thabo Modise",
     "status": "PENDING",
-    "subtotal": 644,
+    "subtotal": 879,
     "delivery_fee": 45,
-    "total": 689,
+    "total": 924,
     "payment_method": "DPO_PAY",
     "payment_reference": "DPO-884580",
     "delivery_address": "Plot 5412, Extension 12",
     "delivery_city": "Gaborone",
-    "placed_at": "2026-08-18T09:17:00.000Z",
-    "updated_at": "2026-08-18T07:17:00.000Z",
+    "placed_at": "2026-08-24T09:17:00.000Z",
+    "updated_at": "2026-08-24T07:17:00.000Z",
     "timeline": [
       {
         "status": "PENDING",
         "label": "Order placed",
-        "at": "2026-08-18T07:17:00.000Z"
+        "at": "2026-08-24T07:17:00.000Z"
       }
     ],
     "internal_notes": ""
@@ -479,20 +479,20 @@
     "customer_id": "u007",
     "customer_name": "Kefilwe Dithebe",
     "status": "PENDING",
-    "subtotal": 639,
+    "subtotal": 584,
     "delivery_fee": 45,
-    "total": 684,
+    "total": 629,
     "payment_method": "ORANGE_MONEY",
     "payment_reference": "ORANGE-884617",
     "delivery_address": "Plot 220, Block 6, Broadhurst",
     "delivery_city": "Gaborone",
-    "placed_at": "2026-08-19T10:00:00.000Z",
-    "updated_at": "2026-08-19T07:00:00.000Z",
+    "placed_at": "2026-08-25T10:00:00.000Z",
+    "updated_at": "2026-08-25T07:00:00.000Z",
     "timeline": [
       {
         "status": "PENDING",
         "label": "Order placed",
-        "at": "2026-08-19T07:00:00.000Z"
+        "at": "2026-08-25T07:00:00.000Z"
       }
     ],
     "internal_notes": ""
@@ -503,40 +503,40 @@
     "customer_id": "u006",
     "customer_name": "Thabo Modise",
     "status": "DISPUTED",
-    "subtotal": 1288,
+    "subtotal": 1758,
     "delivery_fee": 45,
-    "total": 1333,
+    "total": 1803,
     "payment_method": "PAYGATE",
     "payment_reference": "PAYGATE-884654",
     "delivery_address": "Plot 5412, Extension 12",
     "delivery_city": "Gaborone",
-    "placed_at": "2026-08-07T11:24:00.000Z",
-    "updated_at": "2026-08-12T11:59:00.000Z",
+    "placed_at": "2026-08-13T11:24:00.000Z",
+    "updated_at": "2026-08-18T11:59:00.000Z",
     "timeline": [
       {
         "status": "PENDING",
         "label": "Order placed",
-        "at": "2026-08-07T07:24:00.000Z"
+        "at": "2026-08-13T07:24:00.000Z"
       },
       {
         "status": "PAID",
-        "label": "Payment confirmed — funds held in escrow",
-        "at": "2026-08-08T08:07:00.000Z"
+        "label": "Payment confirmed",
+        "at": "2026-08-14T08:07:00.000Z"
       },
       {
         "status": "PROCESSING",
         "label": "Supplier confirmed, preparing goods",
-        "at": "2026-08-10T09:33:00.000Z"
+        "at": "2026-08-16T09:33:00.000Z"
       },
       {
         "status": "IN_TRANSIT",
         "label": "Out for delivery",
-        "at": "2026-08-11T10:16:00.000Z"
+        "at": "2026-08-17T10:16:00.000Z"
       },
       {
         "status": "DISPUTED",
-        "label": "Customer raised a dispute — escrow frozen",
-        "at": "2026-08-12T11:59:00.000Z"
+        "label": "Customer raised a claim — under review",
+        "at": "2026-08-18T11:59:00.000Z"
       }
     ],
     "internal_notes": "Customer contacted support directly before raising the dispute. Evidence photos attached to the claim."
@@ -547,40 +547,40 @@
     "customer_id": "u007",
     "customer_name": "Kefilwe Dithebe",
     "status": "DISPUTED",
-    "subtotal": 2238,
+    "subtotal": 2490,
     "delivery_fee": 45,
-    "total": 2283,
+    "total": 2535,
     "payment_method": "DPO_PAY",
     "payment_reference": "DPO-884691",
     "delivery_address": "Plot 1180, Tati Siding",
     "delivery_city": "Francistown",
-    "placed_at": "2026-08-10T12:33:00.000Z",
-    "updated_at": "2026-08-15T11:08:00.000Z",
+    "placed_at": "2026-08-16T12:33:00.000Z",
+    "updated_at": "2026-08-21T11:08:00.000Z",
     "timeline": [
       {
         "status": "PENDING",
         "label": "Order placed",
-        "at": "2026-08-10T07:33:00.000Z"
+        "at": "2026-08-16T07:33:00.000Z"
       },
       {
         "status": "PAID",
-        "label": "Payment confirmed — funds held in escrow",
-        "at": "2026-08-11T08:16:00.000Z"
+        "label": "Payment confirmed",
+        "at": "2026-08-17T08:16:00.000Z"
       },
       {
         "status": "PROCESSING",
         "label": "Supplier confirmed, preparing goods",
-        "at": "2026-08-13T09:42:00.000Z"
+        "at": "2026-08-19T09:42:00.000Z"
       },
       {
         "status": "IN_TRANSIT",
         "label": "Out for delivery",
-        "at": "2026-08-14T10:25:00.000Z"
+        "at": "2026-08-20T10:25:00.000Z"
       },
       {
         "status": "DISPUTED",
-        "label": "Customer raised a dispute — escrow frozen",
-        "at": "2026-08-15T11:08:00.000Z"
+        "label": "Customer raised a claim — under review",
+        "at": "2026-08-21T11:08:00.000Z"
       }
     ],
     "internal_notes": "Customer contacted support directly before raising the dispute. Evidence photos attached to the claim."
@@ -591,25 +591,25 @@
     "customer_id": "u006",
     "customer_name": "Thabo Modise",
     "status": "CANCELLED",
-    "subtotal": 476,
+    "subtotal": 644,
     "delivery_fee": 45,
-    "total": 521,
+    "total": 689,
     "payment_method": "ORANGE_MONEY",
     "payment_reference": "ORANGE-884728",
     "delivery_address": "Plot 5412, Extension 12",
     "delivery_city": "Gaborone",
-    "placed_at": "2026-07-29T13:57:00.000Z",
-    "updated_at": "2026-08-03T08:32:00.000Z",
+    "placed_at": "2026-08-04T13:57:00.000Z",
+    "updated_at": "2026-08-09T08:32:00.000Z",
     "timeline": [
       {
         "status": "PENDING",
         "label": "Order placed",
-        "at": "2026-07-29T07:57:00.000Z"
+        "at": "2026-08-04T07:57:00.000Z"
       },
       {
         "status": "CANCELLED",
         "label": "Cancelled before payment confirmation",
-        "at": "2026-08-03T08:32:00.000Z"
+        "at": "2026-08-09T08:32:00.000Z"
       }
     ],
     "internal_notes": ""

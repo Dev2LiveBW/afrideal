@@ -11,7 +11,7 @@ import { getNotifications } from '@/lib/queries';
  * Supplier Portal shell.
  *
  * Every page beneath this scopes its own data to `session.user.supplier_id`
- * — this layout only gates access. A supplier who isn't signed in bounces to
+ * - this layout only gates access. A supplier who isn't signed in bounces to
  * /login; a signed-in user with the wrong role bounces home rather than
  * seeing a 404, since the middleware already redirected them here in the
  * first place and a 404 would just be confusing.

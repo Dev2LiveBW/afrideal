@@ -8,7 +8,7 @@ export const dynamic = 'force-dynamic';
 
 const PatchSchema = z.object({ online: z.boolean() });
 
-/** PATCH /api/runners/:id — the online/offline toggle. */
+/** PATCH /api/runners/:id - the online/offline toggle. */
 export const PATCH = handled(async (request: Request, { params }: { params: { id: string } }) => {
   const { actor, response } = await guard(['RUNNER', 'SUPER_ADMIN', 'OPERATIONS_ADMIN']);
   if (response) return response;

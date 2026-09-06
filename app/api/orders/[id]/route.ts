@@ -2,7 +2,7 @@ import { z } from 'zod';
 
 import { fail, guard, handled, ok } from '@/lib/api';
 import { findById, insert, nextId, readAll, update } from '@/lib/db';
-import { applyTransition } from '@/lib/escrow';
+import { applyTransition } from '@/lib/payables';
 import { EVENTS, audit, notify } from '@/lib/notifications';
 import { getOrderDetail } from '@/lib/queries';
 import type { Dispute } from '@/types';
@@ -53,17 +53,17 @@ export const PATCH = handled(async (request: Request, { params }: { params: { id
   if (!isOwner && !isStaff) return fail('Not your order.', 403);
 
   const now = new Date().toISOString();
-  const legs = (await readAll('escrow')).filter((record) => record.order_id === params.id);
+  const legs = (await readAll('supplier-payables')).filter((record) => record.order_id === params.id);
 
   switch (parsed.data.action) {
     // ── Customer confirms receipt → every held leg releases ──────────────
     case 'CONFIRM_DELIVERY': {
       for (const leg of legs) {
-        if (leg.status !== 'HELD') continue;
+        if (leg.status !== 'PENDING') continue;
         await update(
-          'escrow',
+          'supplier-payables',
           leg.id,
-          applyTransition(leg, 'RELEASED', actor.name, 'Customer confirmed delivery.'),
+          applyTransition(leg, 'SETTLED', actor.name, 'Customer confirmed delivery.'),
         );
       }
 
@@ -73,17 +73,17 @@ export const PATCH = handled(async (request: Request, { params }: { params: { id
         timeline: [
           ...order.timeline,
           { status: 'DELIVERED', label: 'Delivery confirmed by customer', at: now, actor: actor.name },
-          { status: 'RELEASED', label: 'Escrow released to supplier', at: now },
+          { status: 'SETTLED', label: 'Supplier invoice settled', at: now },
         ],
       });
 
       await audit({
         actorId: actor.id,
         actorName: actor.name,
-        action: EVENTS.ESCROW_RELEASED,
+        action: EVENTS.PAYABLE_SETTLED,
         entity: 'order',
         entityId: params.id,
-        detail: `${order.reference} confirmed delivered; ${legs.length} escrow leg(s) released.`,
+        detail: `${order.reference} confirmed delivered; ${legs.length} supplier invoice(s) settled.`,
       });
 
       return ok(updated);
@@ -95,21 +95,21 @@ export const PATCH = handled(async (request: Request, { params }: { params: { id
 
       const frozen = [];
       for (const leg of legs) {
-        if (leg.status !== 'HELD') continue;
+        if (leg.status !== 'PENDING') continue;
         await update(
-          'escrow',
+          'supplier-payables',
           leg.id,
-          applyTransition(leg, 'DISPUTED', actor.name, parsed.data.reason),
+          applyTransition(leg, 'ON_HOLD', actor.name, parsed.data.reason),
         );
         frozen.push(leg);
       }
 
-      if (frozen.length === 0) return fail('This order has no funds left in escrow to dispute.', 409);
+      if (frozen.length === 0) return fail('There is nothing left open on this order to claim against.', 409);
 
       const dispute: Dispute = {
         id: await nextId('disputes', 'dp'),
         order_id: params.id,
-        escrow_id: frozen[0].id,
+        payable_id: frozen[0].id,
         customer_id: order.customer_id,
         customer_name: order.customer_name,
         supplier_id: frozen[0].supplier_id,
@@ -129,7 +129,7 @@ export const PATCH = handled(async (request: Request, { params }: { params: { id
         updated_at: now,
         timeline: [
           ...order.timeline,
-          { status: 'DISPUTED', label: 'Dispute raised — escrow frozen', at: now, actor: actor.name },
+          { status: 'DISPUTED', label: 'Claim raised - under review', at: now, actor: actor.name },
         ],
       });
 
@@ -140,7 +140,7 @@ export const PATCH = handled(async (request: Request, { params }: { params: { id
         await notify({
           userId: member.id,
           title: 'New dispute raised',
-          body: `${order.reference} — ${parsed.data.reason}. Five-day SLA clock started.`,
+          body: `${order.reference} - ${parsed.data.reason}. Five-day SLA clock started.`,
           kind: 'DISPUTE',
         });
       }
@@ -154,8 +154,8 @@ export const PATCH = handled(async (request: Request, { params }: { params: { id
       }
 
       for (const leg of legs) {
-        if (leg.status !== 'HELD') continue;
-        await update('escrow', leg.id, applyTransition(leg, 'REFUNDED', actor.name, 'Order cancelled.'));
+        if (leg.status !== 'PENDING') continue;
+        await update('supplier-payables', leg.id, applyTransition(leg, 'CANCELLED', actor.name, 'Order cancelled.'));
       }
 
       const updated = await update('orders', params.id, {

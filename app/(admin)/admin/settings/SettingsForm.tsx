@@ -4,17 +4,17 @@ import { useState } from 'react';
 import { Info, Save } from 'lucide-react';
 import toast from 'react-hot-toast';
 
-import { GoldButton } from '@/components/brand/GoldButton';
+import { ActionButton } from '@/components/brand/ActionButton';
 import { Panel, PanelBody, PanelHeader } from '@/components/brand/Panel';
 import { cn } from '@/lib/utils';
 
 /**
- * Platform settings — fully interactive, honestly not persisted.
+ * Platform settings - fully interactive, honestly not persisted.
  *
  * There is no settings collection in the data store yet, so every control
  * here is real local state (you can actually change it and see it move) but
  * "Save" only confirms the value for this browser session. The rates shown
- * as defaults are not placeholders — they are the exact commission, escrow
+ * as defaults are not placeholders - they are the exact commission, payment-term
  * window and revenue-share figures the pricing and analytics engines use
  * today, read from the same constants.
  */
@@ -33,19 +33,19 @@ interface Channel {
 
 export function SettingsForm({
   initialCommissionRate,
-  initialEscrowHoldDays,
+  initialSupplierTermsDays,
   initialRevenueShareRate,
   initialGateways,
   initialChannels,
 }: {
   initialCommissionRate: number;
-  initialEscrowHoldDays: number;
+  initialSupplierTermsDays: number;
   initialRevenueShareRate: number;
   initialGateways: Gateway[];
   initialChannels: Channel[];
 }) {
   const [commissionRate, setCommissionRate] = useState(initialCommissionRate);
-  const [escrowHoldDays, setEscrowHoldDays] = useState(initialEscrowHoldDays);
+  const [supplierTermsDays, setSupplierTermsDays] = useState(initialSupplierTermsDays);
   const [revenueShareRate, setRevenueShareRate] = useState(initialRevenueShareRate);
   const [gateways, setGateways] = useState(initialGateways);
   const [channels, setChannels] = useState(initialChannels);
@@ -55,7 +55,7 @@ export function SettingsForm({
     setSaving(true);
     window.setTimeout(() => {
       setSaving(false);
-      toast('Held for this session only — settings do not persist in this demo build.', { icon: 'ℹ️' });
+      toast('Held for this session only - settings do not persist in this demo build.', { icon: 'ℹ️' });
     }, 450);
   }
 
@@ -64,9 +64,9 @@ export function SettingsForm({
       <div className="flex items-start gap-2.5 rounded-md border border-gold/30 bg-gold/[0.06] px-4 py-3">
         <Info size={16} strokeWidth={1.5} className="mt-0.5 shrink-0 text-gold-dark" />
         <p className="text-[12.5px] leading-5 text-gold-700">
-          Demo build — every control below genuinely responds when you change it, but nothing here writes to a
-          settings store yet. The values shown are not placeholders: they are the real commission, escrow-window
-          and revenue-share figures the pricing and analytics engines use right now.
+          Demo build - every control below genuinely responds when you change it, but nothing here writes to a
+          settings store yet. The values shown are not placeholders: they are the real commission, supplier
+          payment-term and revenue-share figures the pricing and analytics engines use right now.
         </p>
       </div>
 
@@ -75,10 +75,10 @@ export function SettingsForm({
         <PanelBody className="grid grid-cols-1 gap-5 sm:grid-cols-3">
           <Field label="Commission rate" suffix="%" value={commissionRate} onChange={setCommissionRate} min={0} max={100} />
           <Field
-            label="Escrow hold window"
+            label="Supplier payment terms"
             suffix="days"
-            value={escrowHoldDays}
-            onChange={setEscrowHoldDays}
+            value={supplierTermsDays}
+            onChange={setSupplierTermsDays}
             min={1}
             max={30}
           />
@@ -128,9 +128,9 @@ export function SettingsForm({
       </Panel>
 
       <div className="flex justify-end">
-        <GoldButton onClick={save} loading={saving} icon={<Save size={15} strokeWidth={1.5} />}>
+        <ActionButton onClick={save} loading={saving} icon={<Save size={15} strokeWidth={1.5} />}>
           Save changes
-        </GoldButton>
+        </ActionButton>
       </div>
     </div>
   );

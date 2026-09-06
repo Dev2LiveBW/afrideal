@@ -5,9 +5,10 @@ import { Bike, CreditCard, MapPin, Star, User } from 'lucide-react';
 import { MoneyText } from '@/components/brand/MoneyText';
 import { PageHeader, Panel, PanelBody, PanelHeader } from '@/components/brand/Panel';
 import { StatusBadge } from '@/components/brand/StatusBadge';
-import { EscrowPanel } from '@/components/orders/EscrowPanel';
+import { SettlementPanel } from '@/components/orders/SettlementPanel';
 import { OrderTimeline, OrderTimelineLog } from '@/components/orders/OrderTimeline';
 import { ConsoleTopbar } from '@/components/layout/ConsoleTopbar';
+import { Swatch } from '@/components/storefront/Swatch';
 import { auth } from '@/lib/auth';
 import { readAll } from '@/lib/db';
 import { PAYMENT_LABELS, dateTime, shortDate } from '@/lib/format';
@@ -18,18 +19,22 @@ import { OrderNotes } from './OrderNotes';
 export const dynamic = 'force-dynamic';
 
 export default async function AdminOrderDetailPage({ params }: { params: { id: string } }) {
-  const [session, detail, shipments, runners] = await Promise.all([
+  const [session, detail, shipments, runners, allImages] = await Promise.all([
     auth(),
     getOrderDetail(params.id),
     readAll('shipments'),
     readAll('runners'),
+    readAll('product-images'),
   ]);
 
   if (!detail) notFound();
-  const { order, items, legs, escrow } = detail;
+  const { order, items, legs, payables } = detail;
 
   const notifications = session?.user ? await getNotifications(session.user.id) : [];
   const runnerById = new Map(runners.map((runner) => [runner.id, runner]));
+  const primaryImage = new Map(
+    allImages.filter((image) => image.sort_order === 0).map((image) => [image.product_id, image]),
+  );
   const legIds = new Set(legs.map((leg) => leg.id));
   const orderShipments = shipments.filter((shipment) => legIds.has(shipment.supplier_order_id));
 
@@ -85,7 +90,7 @@ export default async function AdminOrderDetailPage({ params }: { params: { id: s
               </div>
               <div className="border-t border-hairline pt-3 text-[12.5px]">
                 <p className="text-muted">Order total</p>
-                <MoneyText amount={order.total} size="lg" tone="gold" className="mt-0.5 block" />
+                <MoneyText amount={order.total} size="lg" tone="ink" className="mt-0.5 block" />
                 <p className="mt-1 text-[11px] text-muted">
                   Subtotal <span className="font-mono">{order.subtotal.toFixed(2)}</span> + delivery{' '}
                   <span className="font-mono">{order.delivery_fee.toFixed(2)}</span>
@@ -104,7 +109,7 @@ export default async function AdminOrderDetailPage({ params }: { params: { id: s
                     {leg.supplier ? (
                       <Link
                         href={`/admin/suppliers/${leg.supplier.id}`}
-                        className="text-[13.5px] font-medium text-ink transition-colors hover:text-gold-dark"
+                        className="text-[13.5px] font-medium text-ink transition-colors hover:text-forest"
                       >
                         {leg.supplier.name}
                       </Link>
@@ -189,9 +194,16 @@ export default async function AdminOrderDetailPage({ params }: { params: { id: s
                     <td>
                       <Link
                         href={`/admin/products/${item.product_id}`}
-                        className="flex items-center gap-2 font-medium text-ink transition-colors hover:text-gold-dark"
+                        className="flex items-center gap-2 font-medium text-ink transition-colors hover:text-forest"
                       >
-                        <span aria-hidden="true">{item.emoji}</span>
+                        <Swatch
+                          image={primaryImage.get(item.product_id)}
+                          fallback={['#ECEBE7', '#8A918B']}
+                          emoji={item.emoji}
+                          className="h-8 w-8 shrink-0 rounded"
+                          glyphClassName="text-[15px]"
+                          zoomOnHover={false}
+                        />
                         <span>
                           {item.product_name}
                           <span className="block text-[11px] font-normal text-muted">{item.variant_label}</span>
@@ -203,7 +215,7 @@ export default async function AdminOrderDetailPage({ params }: { params: { id: s
                       <MoneyText amount={item.unit_price} size="sm" />
                     </td>
                     <td>
-                      <MoneyText amount={item.line_total} size="sm" tone="gold" />
+                      <MoneyText amount={item.line_total} size="sm" tone="ink" />
                     </td>
                     <td className="text-right text-[12.5px] text-muted">
                       {legs.find((leg) => leg.supplier_id === item.supplier_id)?.supplier?.name ?? item.supplier_id}
@@ -215,19 +227,22 @@ export default async function AdminOrderDetailPage({ params }: { params: { id: s
           </div>
         </Panel>
 
-        {/* ── Escrow legs ────────────────────────────────────────────────── */}
+        {/* ── Supplier invoices ──────────────────────────────────────────── */}
         <div>
           <p className="eyebrow mb-3">
-            Escrow {escrow.length > 0 && `(${escrow.length} leg${escrow.length === 1 ? '' : 's'})`}
+            Supplier invoices{' '}
+            {payables.length > 0 && `(${payables.length} leg${payables.length === 1 ? '' : 's'})`}
           </p>
-          {escrow.length === 0 ? (
+          {payables.length === 0 ? (
             <Panel>
-              <PanelBody className="text-[12.5px] text-muted">No escrow has been recorded for this order.</PanelBody>
+              <PanelBody className="text-[12.5px] text-muted">
+                No supplier invoice has been raised against this order yet.
+              </PanelBody>
             </Panel>
           ) : (
             <div className="grid grid-cols-1 gap-5 md:grid-cols-2">
-              {escrow.map((record) => (
-                <EscrowPanel
+              {payables.map((record) => (
+                <SettlementPanel
                   key={record.id}
                   record={record}
                   supplierName={legs.find((leg) => leg.id === record.supplier_order_id)?.supplier?.name ?? 'Supplier'}

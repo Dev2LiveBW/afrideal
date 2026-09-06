@@ -5,9 +5,12 @@ import { useRef, useState } from 'react';
 import { ChevronLeft, ChevronRight, Heart, Plus } from 'lucide-react';
 import toast from 'react-hot-toast';
 
-import { MoneyText } from '@/components/brand/MoneyText';
-import { Swatch } from '@/components/storefront/Swatch';
+import { PriceTag } from '@/components/brand/MoneyText';
+import { pulaTag } from '@/lib/format';
+import { CategoryIcon } from '@/components/storefront/CategoryIcon';
+import { Swatch, photoUrl } from '@/components/storefront/Swatch';
 import { useAfriDealStore } from '@/store/useAfriDealStore';
+import { categoryPalette } from '@/lib/category-palette';
 import { cn } from '@/lib/utils';
 import type { Product, ProductImage } from '@/types';
 
@@ -66,6 +69,10 @@ export function ProductRail({
     const variant = product.variants[0];
     if (!variant) return;
 
+    const primary = images.find(
+      (image) => image.product_id === product.id && image.sort_order === 0,
+    );
+
     addToCart({
       product_id: product.id,
       variant_id: variant.id,
@@ -75,6 +82,7 @@ export function ProductRail({
       unit_price: variant.price,
       qty: 1,
       supplier_id: product.primarySupplierId ?? '',
+      image_url: photoUrl(primary),
     });
 
     toast.success(`${product.name} added to cart`);
@@ -120,64 +128,62 @@ export function ProductRail({
             (image) => image.product_id === product.id && image.sort_order === 0,
           );
           const isSaved = saved.has(product.id);
+          const palette = categoryPalette(product.category_id);
 
           return (
+            /*
+              The rail card carries its trade's colour, matching ProductCard.
+              Both exist because the rail scrolls horizontally and needs its own
+              width and snap behaviour, but they must not disagree about what a
+              product looks like.
+            */
             <article
               key={product.id}
               className={cn(
-                'group relative shrink-0 snap-start overflow-hidden rounded-md border border-hairline bg-surface-raised',
-                'shadow-card transition-shadow duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] hover:shadow-lift',
+                'group relative shrink-0 snap-start flex flex-col items-center text-center outline-none',
                 cardWidth,
               )}
             >
-              <Link href={`/products/${product.id}`} className="block">
-                <Swatch
-                  image={primary}
-                  fallback={product.swatch}
-                  emoji={product.emoji}
-                  className="aspect-[5/4]"
-                  label={product.name}
-                />
+              <Link href={`/products/${product.id}`} className="block relative outline-none">
+                <div 
+                  className="relative flex h-[140px] w-[140px] items-center justify-center rounded-full p-[4px] transition-transform duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] group-hover:scale-105 group-hover:shadow-lg md:h-[180px] md:w-[180px]"
+                  style={{ backgroundColor: palette.wash }}
+                >
+                  <div className="relative flex h-full w-full items-center justify-center overflow-hidden rounded-full border-[3px] border-white bg-white shadow-sm">
+                    <Swatch
+                      image={primary}
+                      fallback={product.swatch}
+                      emoji={product.emoji}
+                      className="absolute inset-0 h-full w-full rounded-full"
+                      label={product.name}
+                    />
+                    
+                    <div className="absolute inset-0 bg-black/5 opacity-0 transition-opacity duration-300 group-hover:opacity-100" />
+                  </div>
+                  
+                  {product.promotion && (
+                    <span 
+                      className="absolute -right-2 top-2 flex h-10 w-10 items-center justify-center rounded-full border-2 border-white bg-[#E67E22] font-mono text-[11px] font-bold text-white shadow-md transition-transform duration-300 group-hover:scale-110 md:-right-0 md:top-4"
+                    >
+                      -{product.promotion.discount_pct}%
+                    </span>
+                  )}
+                </div>
               </Link>
 
-              <button
-                onClick={() => toggleSave(product.id, product.name)}
-                aria-label={isSaved ? `Remove ${product.name} from your list` : `Save ${product.name} for later`}
-                aria-pressed={isSaved}
-                className="absolute right-2.5 top-2.5 flex h-8 w-8 items-center justify-center rounded-full bg-surface-raised/90 backdrop-blur-sm transition-colors hover:bg-surface-raised"
-              >
-                <Heart
-                  size={14}
-                  strokeWidth={1.5}
-                  className={isSaved ? 'fill-danger text-danger' : 'text-body'}
-                />
-              </button>
-
-              {product.promotion && (
-                <span className="absolute left-2.5 top-2.5 rounded-full bg-danger px-2 py-0.5 font-mono text-[10px] font-semibold text-white">
-                  −{product.promotion.discount_pct}%
-                </span>
-              )}
-
-              <div className="p-3.5">
-                {product.categoryName && (
-                  <p className="font-mono text-[9.5px] uppercase tracking-[0.16em] text-muted">
-                    {product.categoryName}
-                  </p>
-                )}
-
-                <Link href={`/products/${product.id}`}>
-                  <h3 className="mt-1 line-clamp-2 min-h-[2.4em] text-[13.5px] font-medium leading-5 text-ink transition-colors hover:text-gold-dark">
+              <div className="mt-5 flex w-full flex-col items-center px-2">
+                <Link href={`/products/${product.id}`} className="block">
+                  <h3 className="line-clamp-2 text-[14px] font-medium leading-tight text-ink transition-colors group-hover:text-[#E67E22]">
                     {product.name}
                   </h3>
                 </Link>
 
-                <div className="mt-2.5 flex items-end justify-between gap-2">
-                  <div className="min-w-0">
-                    <MoneyText amount={product.price} size="sm" tone="gold" />
+                <div className="mt-2.5 flex flex-col items-center gap-1.5">
+                  <div className="flex items-center gap-2">
+                    <PriceTag amount={product.price} size="md" tone="ink" />
                     {product.compare_at_price && (
-                      <span className="ml-1.5 font-mono text-[11px] tabular-nums text-muted line-through">
-                        {product.compare_at_price.toFixed(2)}
+                      <span className="text-[12.5px] tabular-nums text-muted line-through">
+                        {pulaTag(product.compare_at_price)}
                       </span>
                     )}
                   </div>
@@ -185,9 +191,9 @@ export function ProductRail({
                   <button
                     onClick={() => quickAdd(product)}
                     aria-label={`Add ${product.name} to cart`}
-                    className="flex h-8 shrink-0 items-center gap-1 rounded-full border border-hairline-strong px-2.5 text-[12px] font-medium text-ink transition-colors hover:border-gold hover:bg-gold-50"
+                    className="mt-2 flex h-9 items-center justify-center gap-1.5 rounded-full bg-white px-5 text-[13px] font-bold text-gray-800 shadow-sm ring-1 ring-inset ring-gray-200 transition-all hover:bg-[#E67E22] hover:text-white hover:ring-[#E67E22]"
                   >
-                    <Plus size={13} strokeWidth={1.75} />
+                    <Plus size={14} strokeWidth={2} />
                     Add
                   </button>
                 </div>

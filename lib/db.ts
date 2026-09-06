@@ -9,7 +9,7 @@ import type {
   Category,
   CustomerPrice,
   Dispute,
-  EscrowRecord,
+  SupplierPayable,
   InventoryRecord,
   MarginRule,
   Order,
@@ -20,6 +20,7 @@ import type {
   Rfq,
   RfqResponse,
   Runner,
+  RunnerRequest,
   Settlement,
   Shipment,
   Supplier,
@@ -33,7 +34,7 @@ import type {
  * The JSON store.
  *
  * Every collection is one file under /data. Reads are uncached so a write from
- * one request is visible to the next — which is the whole point of a demo you
+ * one request is visible to the next - which is the whole point of a demo you
  * can drive live in front of a room.
  *
  * Writes go through a per-file promise chain. Node is single-threaded, but an
@@ -55,9 +56,10 @@ export interface Schema {
   'order-items': OrderItem;
   'supplier-orders': SupplierOrder;
   'pricing-rules': PricingRule;
-  escrow: EscrowRecord;
+  'supplier-payables': SupplierPayable;
   disputes: Dispute;
   runners: Runner;
+  'runner-requests': RunnerRequest;
   shipments: Shipment;
   settlements: Settlement;
   'audit-log': AuditEntry;

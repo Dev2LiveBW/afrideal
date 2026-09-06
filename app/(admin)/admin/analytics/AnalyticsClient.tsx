@@ -60,7 +60,7 @@ export function AnalyticsClient({
       <div className={loading ? 'space-y-5 opacity-50 transition-opacity' : 'space-y-5 transition-opacity'}>
         <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4">
           <StatCard
-            label={`GMV — ${period}`}
+            label={`GMV - ${period}`}
             value={data.period_gmv}
             format="money"
             accent="gold"
@@ -91,14 +91,14 @@ export function AnalyticsClient({
 
         <div className="flex flex-wrap items-center justify-between gap-3 rounded-md border border-hairline bg-surface-raised px-5 py-3">
           <p className="text-[12.5px] text-body">
-            Lifetime GMV across every supplier — not scoped to {period}, shown for context only
+            Lifetime GMV across every supplier - not scoped to {period}, shown for context only
           </p>
           <MoneyText amount={data.lifetime_gmv} size="md" tone="muted" />
         </div>
 
         <div className="grid grid-cols-1 gap-5 lg:grid-cols-3">
           <Panel className="lg:col-span-2">
-            <PanelHeader title={`GMV trend — ${periodLabel}`} description="Daily platform GMV, cancelled orders excluded" />
+            <PanelHeader title={`GMV trend - ${periodLabel}`} description="Daily platform GMV, cancelled orders excluded" />
             <PanelBody>
               <GMVChart data={data.trend} />
             </PanelBody>
@@ -139,7 +139,7 @@ export function AnalyticsClient({
                       <td>
                         <Link
                           href={`/admin/suppliers/${supplier.id}`}
-                          className="font-medium text-ink transition-colors hover:text-gold-dark"
+                          className="font-medium text-ink transition-colors hover:text-forest"
                         >
                           {supplier.name}
                         </Link>

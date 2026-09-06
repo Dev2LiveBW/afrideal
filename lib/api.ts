@@ -20,13 +20,13 @@ export interface Actor {
   role: Role;
   supplierId: string | null;
   runnerId: string | null;
-  /** §7 — which pricing tiers this caller may be quoted. */
+  /** §7 - which pricing tiers this caller may be quoted. */
   customerType: CustomerType;
 }
 
 /**
  * Resolve the caller, optionally restricted to a set of roles.
- * Returns either `{ actor }` or `{ response }` — the caller returns the latter
+ * Returns either `{ actor }` or `{ response }` - the caller returns the latter
  * straight through, which keeps the guard to one line at each call site.
  */
 export async function guard(

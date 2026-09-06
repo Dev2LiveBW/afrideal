@@ -5,7 +5,7 @@ import { toPublicUser } from '@/lib/auth';
 export const dynamic = 'force-dynamic';
 
 /**
- * Powers the quick-login cards. Passwords are stripped here — the demo
+ * Powers the quick-login cards. Passwords are stripped here - the demo
  * credentials are documented in the README, not served from an endpoint.
  */
 export const GET = handled(async () => {

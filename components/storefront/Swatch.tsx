@@ -1,3 +1,5 @@
+import Image from 'next/image';
+
 import { cn } from '@/lib/utils';
 import type { ProductImage } from '@/types';
 
@@ -6,7 +8,7 @@ import type { ProductImage } from '@/types';
  *
  * `product-images.json` holds one of two things per row:
  *
- *   /products/p001-0.jpg          a real photograph, vendored into /public
+ *   /unsplash/assets/p001-0.jpg          a real photograph, vendored into /public
  *   swatch:#D4920A,#8B5E0A,140    a gradient stand-in
  *
  * Photographs win when they exist. The gradient is the fallback for products
@@ -40,6 +42,17 @@ export function isPhoto(imageUrl: string | undefined): boolean {
   return Boolean(imageUrl) && !imageUrl!.startsWith('swatch:');
 }
 
+/**
+ * The photograph for an image row, or undefined when it holds only a gradient.
+ *
+ * For callers that need the bare URL rather than the rendered slot - the cart
+ * copies it onto the line, so a basket built from a rail card shows the same
+ * picture the card did.
+ */
+export function photoUrl(image?: { image_url: string } | null): string | undefined {
+  return isPhoto(image?.image_url) ? image!.image_url : undefined;
+}
+
 export function Swatch({
   image,
   fallback,
@@ -67,21 +80,24 @@ export function Swatch({
     return (
       <div className={cn('relative overflow-hidden bg-surface-sunk', className)}>
         {/*
-          Plain <img> rather than next/image: these are local, already sized,
-          and next/image would add a runtime optimiser for no benefit here.
+          The source photos are all fixed at 940x627 regardless of where they
+          render - a 72px gallery thumbnail was shipping the same bytes as a
+          full-width hero. next/image resizes and re-encodes per breakpoint
+          via Vercel's image CDN instead of serving that file whole everywhere.
 
           The hover push-in is slow and small on purpose. Photography carries the
           card now, so the movement only has to suggest the image is live; a
           fast or large scale reads as a slideshow and fights the type.
         */}
-        {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img
-          src={url}
+        <Image
+          src={url!}
           alt={label ?? ''}
-          loading={priority ? 'eager' : 'lazy'}
-          decoding="async"
+          fill
+          sizes="(max-width: 640px) 45vw, (max-width: 1024px) 30vw, 320px"
+          priority={priority}
+          loading={priority ? undefined : 'lazy'}
           className={cn(
-            'h-full w-full object-cover',
+            'object-cover',
             zoomOnHover &&
               'transition-transform duration-[900ms] ease-[cubic-bezier(0.16,1,0.3,1)] group-hover:scale-[1.06]',
           )}

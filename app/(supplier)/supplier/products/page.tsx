@@ -23,14 +23,20 @@ export default async function SupplierProductsPage() {
     );
   }
 
-  const categories = await readAll('categories');
+  const [categories, images] = await Promise.all([
+    readAll('categories'),
+    readAll('product-images'),
+  ]);
 
   const rows = workspace.offers
     .map((offer) => {
       const product = workspace.products.find((candidate) => candidate.id === offer.product_id);
       if (!product) return null;
       const category = categories.find((c) => c.id === product.category_id) ?? null;
-      return { offer, product, category };
+      const image = images.find(
+        (candidate) => candidate.product_id === product.id && candidate.sort_order === 0,
+      );
+      return { offer, product, category, image };
     })
     .filter((row): row is NonNullable<typeof row> => row !== null)
     .sort((a, b) => a.product.name.localeCompare(b.product.name));

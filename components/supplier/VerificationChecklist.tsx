@@ -6,7 +6,7 @@ import { Check, FileText, X } from 'lucide-react';
 import toast from 'react-hot-toast';
 
 import { ConfirmDialog } from '@/components/brand/ConfirmDialog';
-import { GoldButton } from '@/components/brand/GoldButton';
+import { ActionButton } from '@/components/brand/ActionButton';
 import { StatusBadge } from '@/components/brand/StatusBadge';
 import { dateTime } from '@/lib/format';
 import { cn } from '@/lib/utils';
@@ -16,8 +16,8 @@ import type { SupplierStatus, VerificationDoc } from '@/types';
  * Per-document review plus the overall verification decision.
  *
  * Both write to the same endpoint (`PATCH /api/suppliers/:id`) with a
- * different body shape — `{ document }` for one file, `{ status }` for the
- * supplier as a whole — so the two actions can never leave the record in a
+ * different body shape - `{ document }` for one file, `{ status }` for the
+ * supplier as a whole - so the two actions can never leave the record in a
  * state the API itself would reject.
  */
 
@@ -161,7 +161,7 @@ export function VerificationChecklist({
         <div className="mt-3 flex flex-wrap items-center justify-between gap-3 border-t border-hairline pt-4">
           <p className="text-[12px] text-muted">
             {anyRejected
-              ? 'At least one document was rejected — the supplier can re-upload it.'
+              ? 'At least one document was rejected - the supplier can re-upload it.'
               : anyPending
                 ? 'Some documents are still awaiting review.'
                 : 'Every document is approved and ready for a decision.'}
@@ -169,23 +169,23 @@ export function VerificationChecklist({
           <div className="flex flex-wrap gap-2">
             {currentStatus === 'PENDING' && (
               <>
-                <GoldButton size="sm" variant="forest" onClick={() => setDecision('VERIFIED')}>
+                <ActionButton size="sm" variant="forest" onClick={() => setDecision('VERIFIED')}>
                   Approve supplier
-                </GoldButton>
-                <GoldButton size="sm" variant="danger" onClick={() => setDecision('REJECTED')}>
+                </ActionButton>
+                <ActionButton size="sm" variant="danger" onClick={() => setDecision('REJECTED')}>
                   Reject application
-                </GoldButton>
+                </ActionButton>
               </>
             )}
             {currentStatus === 'VERIFIED' && (
-              <GoldButton size="sm" variant="danger" onClick={() => setDecision('SUSPENDED')}>
+              <ActionButton size="sm" variant="danger" onClick={() => setDecision('SUSPENDED')}>
                 Suspend supplier
-              </GoldButton>
+              </ActionButton>
             )}
             {(currentStatus === 'SUSPENDED' || currentStatus === 'REJECTED') && (
-              <GoldButton size="sm" variant="forest" onClick={() => setDecision('VERIFIED')}>
+              <ActionButton size="sm" variant="forest" onClick={() => setDecision('VERIFIED')}>
                 {currentStatus === 'SUSPENDED' ? 'Reinstate supplier' : 'Re-approve supplier'}
-              </GoldButton>
+              </ActionButton>
             )}
           </div>
         </div>

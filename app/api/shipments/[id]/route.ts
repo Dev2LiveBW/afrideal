@@ -21,7 +21,7 @@ const NEXT: Record<ShipmentStatus, ShipmentStatus[]> = {
   FAILED: [],
 };
 
-/** PATCH /api/shipments/:id — accept a job, then move it through to delivered. */
+/** PATCH /api/shipments/:id - accept a job, then move it through to delivered. */
 export const PATCH = handled(async (request: Request, { params }: { params: { id: string } }) => {
   const { actor, response } = await guard(['RUNNER', 'SUPER_ADMIN', 'OPERATIONS_ADMIN']);
   if (response) return response;
@@ -77,7 +77,7 @@ export const PATCH = handled(async (request: Request, { params }: { params: { id
       await notify({
         userId: order.customer_id,
         title: 'Delivered',
-        body: `${order.reference} was delivered. Confirm receipt to release the escrow.`,
+        body: `${order.reference} was delivered. Confirm receipt to close the order.`,
         kind: 'ORDER',
       });
     }

@@ -14,27 +14,28 @@ import {
 import toast from 'react-hot-toast';
 
 import { EmptyState, Panel, PanelBody, PanelHeader } from '@/components/brand/Panel';
-import { GoldButton } from '@/components/brand/GoldButton';
+import { ActionButton } from '@/components/brand/ActionButton';
 import { MoneyText } from '@/components/brand/MoneyText';
 import { StatusBadge } from '@/components/brand/StatusBadge';
-import { EscrowPanel } from '@/components/orders/EscrowPanel';
+import { SettlementPanel } from '@/components/orders/SettlementPanel';
+import { Swatch } from '@/components/storefront/Swatch';
 import { dateTime, humanise } from '@/lib/format';
-import type { EscrowRecord, Order, OrderItem, SupplierOrder, SupplierOrderStatus } from '@/types';
+import type { SupplierPayable, Order, OrderItem, SupplierOrder, SupplierOrderStatus } from '@/types';
 
 /**
  * Order fulfilment list.
  *
- * Each card exposes exactly one forward action — the next step in
- * Confirm → Preparing → Ready for collection — because that's the whole
+ * Each card exposes exactly one forward action - the next step in
+ * Confirm → Preparing → Ready for collection - because that's the whole
  * supplier-side flow; a runner takes it from READY_FOR_COLLECTION onward.
- * The escrow banner underneath is always read-only here: a supplier cannot
- * release or refund their own escrow.
+ * The settlement panel underneath is always read-only here: a supplier cannot
+ * settle or cancel their own invoice.
  */
 
 type Leg = SupplierOrder & {
   order: Order | null;
   items: OrderItem[];
-  escrow: EscrowRecord | null;
+  payable: SupplierPayable | null;
 };
 
 const NEXT_ACTION: Partial<Record<SupplierOrderStatus, { status: SupplierOrderStatus; label: string }>> = {
@@ -48,7 +49,7 @@ function statusCaption(status: SupplierOrderStatus): { icon: React.ReactNode; te
     case 'READY_FOR_COLLECTION':
       return { icon: <PackageSearch size={14} strokeWidth={1.5} />, text: 'Waiting for a runner to collect.' };
     case 'COLLECTED':
-      return { icon: <Truck size={14} strokeWidth={1.5} />, text: 'Collected — on its way to the customer.' };
+      return { icon: <Truck size={14} strokeWidth={1.5} />, text: 'Collected - on its way to the customer.' };
     case 'DELIVERED':
       return { icon: <PackageCheck size={14} strokeWidth={1.5} />, text: 'Delivered to the customer.' };
     case 'CANCELLED':
@@ -58,7 +59,16 @@ function statusCaption(status: SupplierOrderStatus): { icon: React.ReactNode; te
   }
 }
 
-export function OrdersClient({ legs, supplierName }: { legs: Leg[]; supplierName: string }) {
+export function OrdersClient({
+  legs,
+  supplierName,
+  photos,
+}: {
+  legs: Leg[];
+  supplierName: string;
+  /** productId → primary photo url. Missing keys fall back to the glyph. */
+  photos: Record<string, string>;
+}) {
   const router = useRouter();
   const [savingId, setSavingId] = useState<string | null>(null);
 
@@ -118,16 +128,22 @@ export function OrdersClient({ legs, supplierName }: { legs: Leg[]; supplierName
               <ul className="divide-y divide-hairline rounded border border-hairline">
                 {leg.items.map((item) => (
                   <li key={item.id} className="flex items-center gap-3 px-3.5 py-2.5">
-                    <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-ink/[0.05] text-[15px]">
-                      {item.emoji}
-                    </span>
+                    <Swatch
+                      image={photos[item.product_id] ? { image_url: photos[item.product_id] } : undefined}
+                      fallback={['#ECEBE7', '#8A918B']}
+                      emoji={item.emoji}
+                      label={item.product_name}
+                      className="h-8 w-8 shrink-0 rounded-full"
+                      glyphClassName="text-[15px]"
+                      zoomOnHover={false}
+                    />
                     <div className="min-w-0 flex-1">
                       <p className="truncate text-[13px] font-medium text-ink">{item.product_name}</p>
                       <p className="truncate text-[11.5px] text-muted">
                         {item.variant_label} · qty {item.qty}
                       </p>
                     </div>
-                    <MoneyText amount={item.supplier_cost * item.qty} size="sm" tone="gold" />
+                    <MoneyText amount={item.supplier_cost * item.qty} size="sm" tone="ink" />
                   </li>
                 ))}
               </ul>
@@ -136,7 +152,7 @@ export function OrdersClient({ legs, supplierName }: { legs: Leg[]; supplierName
                 <div className="flex items-center gap-4">
                   <div>
                     <p className="text-[11px] text-muted">Your subtotal</p>
-                    <MoneyText amount={leg.supplier_subtotal} size="md" tone="gold" />
+                    <MoneyText amount={leg.supplier_subtotal} size="md" tone="ink" />
                   </div>
                   <div className="text-[11.5px] text-muted">
                     {qty} unit{qty === 1 ? '' : 's'}
@@ -150,7 +166,7 @@ export function OrdersClient({ legs, supplierName }: { legs: Leg[]; supplierName
                 </div>
 
                 {action ? (
-                  <GoldButton
+                  <ActionButton
                     size="sm"
                     variant="forest"
                     icon={<CheckCircle2 size={14} strokeWidth={1.5} />}
@@ -158,7 +174,7 @@ export function OrdersClient({ legs, supplierName }: { legs: Leg[]; supplierName
                     onClick={() => advance(leg.id, action.status)}
                   >
                     {action.label}
-                  </GoldButton>
+                  </ActionButton>
                 ) : (
                   caption.text && (
                     <p className="flex items-center gap-1.5 text-[12.5px] text-body">
@@ -169,11 +185,11 @@ export function OrdersClient({ legs, supplierName }: { legs: Leg[]; supplierName
                 )}
               </div>
 
-              {leg.escrow ? (
-                <EscrowPanel record={leg.escrow} supplierName={supplierName} canAct={false} />
+              {leg.payable ? (
+                <SettlementPanel record={leg.payable} supplierName={supplierName} canAct={false} />
               ) : (
                 <p className="rounded border border-hairline bg-surface px-3.5 py-2.5 text-[12px] text-muted">
-                  No escrow record for this order yet.
+                  No supplier invoice has been raised on this order yet.
                 </p>
               )}
             </PanelBody>

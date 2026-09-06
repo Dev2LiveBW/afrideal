@@ -7,6 +7,7 @@ import { Enclosure, PageHeader, Panel, PanelBody, PanelHeader } from '@/componen
 import { PricingFormula } from '@/components/brand/PricingFormula';
 import { StatusBadge } from '@/components/brand/StatusBadge';
 import { SupplierOfferTable } from '@/components/products/SupplierOfferTable';
+import { Swatch } from '@/components/storefront/Swatch';
 import { ConsoleTopbar } from '@/components/layout/ConsoleTopbar';
 import { auth } from '@/lib/auth';
 import { readAll } from '@/lib/db';
@@ -17,16 +18,21 @@ import { getNotifications, getProductDetail } from '@/lib/queries';
 export const dynamic = 'force-dynamic';
 
 export default async function AdminProductDetailPage({ params }: { params: { id: string } }) {
-  const [session, detail, pricingRules] = await Promise.all([
+  const [session, detail, pricingRules, allImages] = await Promise.all([
     auth(),
     getProductDetail(params.id),
     readAll('pricing-rules'),
+    readAll('product-images'),
   ]);
 
   if (!detail) notFound();
 
   const { product, categoryName, selection, allSelection } = detail;
   const notifications = session?.user ? await getNotifications(session.user.id) : [];
+
+  const primaryImage = allImages.find(
+    (image) => image.product_id === product.id && image.sort_order === 0,
+  );
 
   const rule = getPricingRule(pricingRules, product.category_id);
   const pricingOffer = selection.primary ?? allSelection.primary;
@@ -56,14 +62,15 @@ export default async function AdminProductDetailPage({ params }: { params: { id:
           {/* ── Left: product info, specs, variants ─────────────────────── */}
           <div className="space-y-5 lg:col-span-1">
             <Panel className="overflow-hidden">
-              <div
-                className="relative flex aspect-[16/9] items-end justify-end p-4"
-                style={{ background: `linear-gradient(140deg, ${product.swatch[0]} 0%, ${product.swatch[1]} 100%)` }}
-              >
-                <span aria-hidden="true" className="select-none text-[64px] leading-none opacity-30">
-                  {product.emoji}
-                </span>
-              </div>
+              <Swatch
+                image={primaryImage}
+                fallback={product.swatch}
+                emoji={product.emoji}
+                label={product.name}
+                className="aspect-[16/9] w-full"
+                glyphClassName="text-[64px]"
+                zoomOnHover={false}
+              />
               <PanelBody className="space-y-4">
                 <p className="text-[13px] leading-6 text-body">{product.description}</p>
 
@@ -161,7 +168,7 @@ export default async function AdminProductDetailPage({ params }: { params: { id:
               <div className="flex items-start gap-2.5 border-t border-hairline bg-surface px-5 py-3.5">
                 <Info size={15} strokeWidth={1.5} className="mt-0.5 shrink-0 text-muted" />
                 <p className="text-[12.5px] leading-5 text-body">
-                  This ranking is a live preview, recomputed from current stock and reliability — it is not tied
+                  This ranking is a live preview, recomputed from current stock and reliability - it is not tied
                   to a real order. Routing can only be overridden on an order that already exists, from that
                   order&apos;s detail page, because there has to be a live supplier order for a reassignment to
                   apply to.
@@ -174,7 +181,7 @@ export default async function AdminProductDetailPage({ params }: { params: { id:
                 title="Pricing breakdown"
                 description={
                   pricingOffer
-                    ? `Computed from ${pricingOffer.supplier.name}'s offer — the ${
+                    ? `Computed from ${pricingOffer.supplier.name}'s offer - the ${
                         selection.primary ? 'current top verified supplier' : 'best available offer'
                       }`
                     : undefined

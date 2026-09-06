@@ -6,7 +6,7 @@ import { EVENTS, audit, notify } from '@/lib/notifications';
 import { resolvePrice } from '@/lib/pricing-tiers';
 import { selectSupplier } from '@/lib/supplier-selection';
 import type {
-  EscrowRecord,
+  SupplierPayable,
   Order,
   OrderItem,
   OrderTimelineEntry,
@@ -60,7 +60,7 @@ export const GET = handled(async (request: Request) => {
   return ok(visible.sort((a, b) => b.placed_at.localeCompare(a.placed_at)));
 });
 
-// ── POST /api/orders — checkout, with the split engine ───────────────────────
+// ── POST /api/orders - checkout, with the split engine ───────────────────────
 
 /**
  * Placing an order does five things atomically enough for a demo:
@@ -69,7 +69,7 @@ export const GET = handled(async (request: Request) => {
  *   2. routes each line to a supplier using the composite score
  *   3. writes ONE customer-facing Order
  *   4. writes ONE SupplierOrder per distinct supplier
- *   5. writes ONE Escrow record per supplier order, all HELD
+ *   5. raises ONE supplier invoice per supplier order, all PENDING
  *
  * Prices are re-read from the catalogue rather than trusted from the client,
  * so a tampered cart cannot set its own price.
@@ -95,7 +95,7 @@ export const POST = handled(async (request: Request) => {
   const orderId = await nextId('orders', 'o');
   const now = new Date().toISOString();
 
-  // 1 + 2 — resolve and route every line.
+  // 1 + 2 - resolve and route every line.
   let itemSeq = Number.parseInt((await nextId('order-items', 'oi')).slice(2), 10);
   const items: OrderItem[] = [];
 
@@ -115,7 +115,7 @@ export const POST = handled(async (request: Request) => {
     if (!route) return fail(`No verified supplier can currently fulfil ${product.name}.`, 409);
 
     /**
-     * §14 — price the line from the buyer's own tier ladder, at the server, for
+     * §14 - price the line from the buyer's own tier ladder, at the server, for
      * the quantity actually ordered. The client sends no prices at all, so a
      * tampered cart cannot set its own, and a buyer who qualifies for wholesale
      * gets it whether or not the page they came from showed it.
@@ -155,10 +155,10 @@ export const POST = handled(async (request: Request) => {
 
   const timeline: OrderTimelineEntry[] = [
     { status: 'PENDING', label: 'Order placed', at: now },
-    { status: 'PAID', label: 'Payment confirmed — funds held in escrow', at: now },
+    { status: 'PAID', label: 'Payment confirmed', at: now },
   ];
 
-  // 3 — the customer-facing order.
+  // 3 - the customer-facing order.
   const orderCount = (await readAll('orders')).length;
   const order: Order = {
     id: orderId,
@@ -182,17 +182,17 @@ export const POST = handled(async (request: Request) => {
   await insert('orders', order);
   await insertMany('order-items', items);
 
-  // 4 + 5 — one supplier order and one escrow record per supplier.
+  // 4 + 5 - one supplier order and one procurement invoice per supplier.
   const bySupplier = new Map<string, OrderItem[]>();
   for (const item of items) {
     bySupplier.set(item.supplier_id, [...(bySupplier.get(item.supplier_id) ?? []), item]);
   }
 
   let supSeq = Number.parseInt((await nextId('supplier-orders', 'sup')).slice(3), 10);
-  let escrowSeq = Number.parseInt((await nextId('escrow', 'e')).slice(1), 10);
+  let payableSeq = Number.parseInt((await nextId('supplier-payables', 'pay')).slice(3), 10);
 
   const supplierOrders: SupplierOrder[] = [];
-  const escrowRecords: EscrowRecord[] = [];
+  const payableRecords: SupplierPayable[] = [];
 
   for (const [supplierId, supplierItems] of bySupplier) {
     const supplierOrderId = `sup${String(supSeq++).padStart(3, '0')}`;
@@ -218,26 +218,26 @@ export const POST = handled(async (request: Request) => {
       created_at: now,
     });
 
-    escrowRecords.push({
-      id: `e${String(escrowSeq++).padStart(3, '0')}`,
+    payableRecords.push({
+      id: `pay${String(payableSeq++).padStart(3, '0')}`,
       order_id: orderId,
       supplier_order_id: supplierOrderId,
       supplier_id: supplierId,
       amount: gross,
-      status: 'HELD',
+      status: 'PENDING',
       gateway: payment_method,
-      held_at: now,
-      released_at: null,
-      refunded_at: null,
-      hold_window_days: 7,
+      raised_at: now,
+      settled_at: null,
+      cancelled_at: null,
+      terms_days: 7,
       history: [
-        { from: null, to: 'HELD', at: now, actor: 'System', note: 'Payment confirmed — funds held.' },
+        { from: null, to: 'PENDING', at: now, actor: 'System', note: 'Procurement invoice raised against the order.' },
       ],
     });
   }
 
   await insertMany('supplier-orders', supplierOrders);
-  await insertMany('escrow', escrowRecords);
+  await insertMany('supplier-payables', payableRecords);
 
   // Events. Suppliers get told they have something to confirm.
   const users = await readAll('users');
@@ -256,7 +256,7 @@ export const POST = handled(async (request: Request) => {
   await notify({
     userId: actor.id,
     title: 'Order placed',
-    body: `${order.reference} is confirmed. Your payment is held in escrow until you confirm delivery.`,
+    body: `${order.reference} is confirmed. We are procuring it now and will let you know when it ships.`,
     kind: 'ORDER',
   });
 
@@ -266,7 +266,7 @@ export const POST = handled(async (request: Request) => {
     action: EVENTS.ORDER_CREATED,
     entity: 'order',
     entityId: orderId,
-    detail: `${order.reference} placed — ${items.length} line(s) split across ${supplierOrders.length} supplier(s).`,
+    detail: `${order.reference} placed - ${items.length} line(s) split across ${supplierOrders.length} supplier(s).`,
   });
 
   return ok(
@@ -274,7 +274,7 @@ export const POST = handled(async (request: Request) => {
       order,
       items,
       supplier_orders: supplierOrders,
-      escrow: escrowRecords,
+      payables: payableRecords,
       events: [EVENTS.ORDER_CREATED, EVENTS.PAYMENT_CONFIRMED, EVENTS.SUPPLIER_ORDER_CREATED],
     },
     { status: 201 },

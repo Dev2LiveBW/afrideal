@@ -7,16 +7,18 @@
  *
  * Everything derived is computed here rather than typed by hand: selling prices
  * come out of the pricing engine, supplier routing comes out of the composite
- * score, order totals are summed from their own line items, and escrow amounts
- * equal the supplier order they belong to. Nothing in /data is a number someone
- * guessed.
+ * score, order totals are summed from their own line items, and each supplier
+ * payable equals the supplier order it belongs to. Nothing in /data is a number
+ * someone guessed.
  */
 
 import fs from 'node:fs/promises';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
-const DATA_DIR = path.join(path.dirname(fileURLToPath(import.meta.url)), '..', 'data');
+const ROOT_DIR = path.join(path.dirname(fileURLToPath(import.meta.url)), '..');
+const DATA_DIR = path.join(ROOT_DIR, 'data');
+const PHOTO_DIR = path.join(ROOT_DIR, 'public', 'products');
 
 const NOW = new Date();
 const iso = (d) => d.toISOString();
@@ -44,33 +46,53 @@ function rng(seed) {
 const rand = rng(20260818);
 const pick = (arr) => arr[Math.floor(rand() * arr.length)];
 
+// ─── The price ladder ────────────────────────────────────────────────────────
+
+/**
+ * AfriDeal buys from the supplier and resells to the customer, so the customer
+ * price is the supplier's cost plus a published markup, decided by quantity:
+ *
+ *   1 – 4 units      Retail       cost + 60%
+ *   5 – 19 units     Bulk         cost + 46%
+ *   20 – 49 units    Wholesale    cost + 32%
+ *   50 – 99 units    Wholesale+   cost + 22%
+ *   100 units +      Custom       by quotation
+ *
+ * Kept in step with lib/pricing-model.ts, which is what the running app reads.
+ * Delivery is quoted separately at checkout rather than smeared across units.
+ */
+const RETAIL_MARKUP_PCT = 60;
+const BULK_MARKUP_PCT = 46;
+const WHOLESALE_MARKUP_PCT = 32;
+const WHOLESALE_PLUS_MARKUP_PCT = 22;
+const QUOTATION_THRESHOLD = 100;
+
 // ─── Categories ──────────────────────────────────────────────────────────────
 
 const categories = [
-  { id: 'c1', name: 'Hair & Beauty', slug: 'hair-beauty', emoji: '💄', blurb: 'Salon stock, retail lines and treatment ranges from verified regional distributors.' },
-  { id: 'c2', name: 'Electronics', slug: 'electronics', emoji: '🔌', blurb: 'Consumer and off-grid electronics, landed and warranty-backed.' },
-  { id: 'c3', name: 'Building Materials', slug: 'building-materials', emoji: '🧱', blurb: 'Cement, roofing and structural supply at contractor volumes.' },
-  { id: 'c4', name: 'Food & Agriculture', slug: 'food-agriculture', emoji: '🌾', blurb: 'Staples, seed and inputs sourced through the SADC corridor.' },
-  { id: 'c5', name: 'Office Supplies', slug: 'office-supplies', emoji: '📎', blurb: 'Consumables and stationery for offices that reorder monthly.' },
-  { id: 'c6', name: 'Clothing', slug: 'clothing', emoji: '👕', blurb: 'Workwear, uniforms and retail apparel in bulk.' },
+  { id: 'c1', name: 'Hair, Weaves & Extensions', slug: 'hair-weaves-extensions', emoji: '💇🏾‍♀️', sort_order: 1, blurb: 'Bundles, frontals, closures, wigs and braiding hair. The category the platform sells most of.' },
+  { id: 'c7', name: 'Beauty & Personal Care', slug: 'beauty-personal-care', emoji: '💄', sort_order: 2, blurb: 'Treatments, serums and salon consumables from verified regional distributors.' },
+  { id: 'c2', name: 'Electronics', slug: 'electronics', emoji: '🔌', sort_order: 3, blurb: 'Consumer and off-grid electronics, landed and warranty-backed.' },
+  { id: 'c6', name: 'Clothing & Uniforms', slug: 'clothing-uniforms', emoji: '👕', sort_order: 4, blurb: 'Workwear, school uniforms and retail apparel at trade quantities.' },
+  { id: 'c4', name: 'Food & Agriculture', slug: 'food-agriculture', emoji: '🌾', sort_order: 5, blurb: 'Staples, seed and inputs sourced through the SADC corridor.' },
+  { id: 'c3', name: 'Building Materials', slug: 'building-materials', emoji: '🧱', sort_order: 6, blurb: 'Cement, roofing and structural supply at contractor volumes.' },
+  { id: 'c5', name: 'Office Supplies', slug: 'office-supplies', emoji: '📎', sort_order: 7, blurb: 'Consumables and stationery for offices that reorder monthly.' },
 ];
 
 // ─── Pricing rules ───────────────────────────────────────────────────────────
 
-const pricingRules = [
-  ['c1', 'Hair & Beauty', 80],
-  ['c2', 'Electronics', 12],
-  ['c3', 'Building Materials', 35],
-  ['c4', 'Food & Agriculture', 42],
-  ['c5', 'Office Supplies', 40],
-  ['c6', 'Clothing', 58],
-].map(([category_id, category_name, markup_value], i) => ({
+const pricingRules = categories.map((category, i) => ({
   id: `pr${String(i + 1).padStart(3, '0')}`,
-  category_id,
-  category_name,
+  category_id: category.id,
+  category_name: category.name,
   markup_type: 'PERCENTAGE',
-  markup_value,
-  logistics_cost: 15,
+  // The platform retail markup. One figure across the catalogue, so a buyer
+  // comparing two categories is comparing supplier costs, not our arithmetic.
+  markup_value: RETAIL_MARKUP_PCT,
+  // Zero, deliberately. Delivery is quoted at checkout against the real
+  // address, so folding a per-unit contribution in here would charge for it
+  // twice and would punish the cheapest lines hardest.
+  logistics_cost: 0,
   gateway_rate: 0.025,
   active: true,
 }));
@@ -80,8 +102,7 @@ const ruleFor = (categoryId) => pricingRules.find((r) => r.category_id === categ
 function calculatePrice(supplierCost, rule) {
   const markup =
     rule.markup_type === 'PERCENTAGE' ? supplierCost * (rule.markup_value / 100) : rule.markup_value;
-  const gateway = supplierCost * rule.gateway_rate;
-  return Math.ceil(supplierCost + markup + rule.logistics_cost + gateway);
+  return Math.ceil(supplierCost + markup);
 }
 
 // ─── Suppliers ───────────────────────────────────────────────────────────────
@@ -101,7 +122,7 @@ const suppliers = [
     registration_no: 'BW00001923845', joined_at: daysAgo(412),
     rating: 4.7, fulfilment_rate: 96, reliability_score: 92, avg_fulfilment_days: 2,
     total_gmv: 486_320, products_count: 3, orders_count: 214,
-    verification_docs: docTemplate('APPROVED', 400), categories: ['c1'],
+    verification_docs: docTemplate('APPROVED', 400), categories: ['c1', 'c7'],
   },
   {
     id: 's002', name: 'GlowUp Distributors', legal_name: 'GlowUp Distributors SA (Pty) Ltd', initials: 'GU',
@@ -110,7 +131,7 @@ const suppliers = [
     registration_no: 'ZA2019/447128/07', joined_at: daysAgo(360),
     rating: 4.4, fulfilment_rate: 91, reliability_score: 86, avg_fulfilment_days: 4,
     total_gmv: 372_940, products_count: 4, orders_count: 168,
-    verification_docs: docTemplate('APPROVED', 352), categories: ['c1', 'c6'],
+    verification_docs: docTemplate('APPROVED', 352), categories: ['c1', 'c6', 'c7'],
   },
   {
     id: 's003', name: 'Kalahari Electronics', legal_name: 'Kalahari Electronics Trading CC', initials: 'KE',
@@ -137,7 +158,7 @@ const suppliers = [
     registration_no: 'ZA2017/229041/07', joined_at: daysAgo(198),
     rating: 4.2, fulfilment_rate: 88, reliability_score: 81, avg_fulfilment_days: 5,
     total_gmv: 258_600, products_count: 5, orders_count: 76,
-    verification_docs: docTemplate('APPROVED', 190), categories: ['c2', 'c4', 'c5'],
+    verification_docs: docTemplate('APPROVED', 190), categories: ['c2', 'c4', 'c5', 'c7'],
   },
   {
     id: 's006', name: 'Tsholofelo Fresh Produce', legal_name: 'Tsholofelo Fresh Produce (Pty) Ltd', initials: 'TF',
@@ -190,7 +211,7 @@ const suppliers = [
  */
 const productSpecs = [
   {
-    id: 'p001', name: 'Shea Butter Deep Treatment 500ml', category_id: 'c1', emoji: '🧴',
+    id: 'p001', name: 'Shea Butter Deep Treatment 500ml', category_id: 'c7', emoji: '🧴',
     swatch: ['#D4920A', '#8B5E0A'],
     short_description: 'Unrefined West African shea, cold-pressed, salon strength.',
     description:
@@ -212,7 +233,7 @@ const productSpecs = [
     rating: 4.6, review_count: 388, featured: true,
   },
   {
-    id: 'p003', name: 'Argan Repair Serum 100ml', category_id: 'c1', emoji: '💧',
+    id: 'p003', name: 'Argan Repair Serum 100ml', category_id: 'c7', emoji: '💧',
     swatch: ['#f0c040', '#D4920A'],
     short_description: 'Cold-pressed Moroccan argan with a lightweight silicone carrier.',
     description:
@@ -320,6 +341,62 @@ const productSpecs = [
     variants: [['Age 5–7', 'UNI-PRI-57', 0], ['Age 8–10', 'UNI-PRI-810', 8.0], ['Age 11–13', 'UNI-PRI-1113', 16.0]],
     offers: [['s002', 142, 380, 3, 10], ['s005', 154, 90, 6, 20]],
     rating: 4.4, review_count: 218, featured: true,
+  },
+
+  {
+    id: 'p013', name: 'Brazilian Body Wave Bundle — 20 inch', category_id: 'c1', emoji: '💇🏾‍♀️',
+    swatch: ['#3a2418', '#111111'],
+    short_description: '100% unprocessed human hair, double machine weft, 100g.',
+    description:
+      'The bundle salons in Gaborone reorder most often. Unprocessed human hair on a double machine weft that holds through repeated installs, with a loose body wave that keeps its pattern after washing. Sold at 100g a bundle; a full head is normally three bundles, and most salons buy them three at a time.',
+    specs: [['Length', '20 inch'], ['Weight', '100g per bundle'], ['Texture', 'Body wave'], ['Weft', 'Double machine'], ['Grade', 'Unprocessed human hair']],
+    variants: [['Natural Black 1B', 'BBW-20-1B', 0], ['Off Black 2', 'BBW-20-2', 0], ['Ombre 1B/27', 'BBW-20-OMB', 9.0]],
+    offers: [['s001', 520, 180, 2, 3], ['s002', 545, 240, 4, 3]],
+    rating: 4.8, review_count: 412, featured: true,
+  },
+  {
+    id: 'p014', name: 'HD Lace Frontal 13×4 — 18 inch', category_id: 'c1', emoji: '✨',
+    swatch: ['#2a1c14', '#0d0d0d'],
+    short_description: 'Swiss HD lace, pre-plucked hairline, bleached knots.',
+    description:
+      'A 13×4 frontal in Swiss HD lace that melts against a range of complexions rather than only the lightest. Pre-plucked hairline with bleached knots, so the install does not start with an hour of preparation. This is the line that decides whether a salon can charge for a frontal install at all, which is why it is stocked deeper than its volume alone would justify.',
+    specs: [['Size', '13×4'], ['Length', '18 inch'], ['Lace', 'Swiss HD'], ['Density', '150%'], ['Knots', 'Bleached, pre-plucked']],
+    variants: [['Natural Black 1B', 'HDF-134-18-1B', 0], ['Straight', 'HDF-134-18-ST', 0], ['Body Wave', 'HDF-134-18-BW', 6.0]],
+    offers: [['s002', 680, 95, 3, 1], ['s001', 715, 60, 2, 1]],
+    rating: 4.7, review_count: 236, featured: true,
+  },
+  {
+    id: 'p015', name: 'Bone Straight Weave Bundle — 24 inch', category_id: 'c1', emoji: '💫',
+    swatch: ['#1f1a17', '#0a0a0a'],
+    short_description: 'Silk-press straight, no chemical processing, 100g.',
+    description:
+      'Straight from the weft without a chemical relaxer, so it takes heat without the frizz that gives a processed bundle away by the second wash. Twenty-four inches is the length most requested for a sew-in in the region. Sold per bundle at 100g.',
+    specs: [['Length', '24 inch'], ['Weight', '100g per bundle'], ['Texture', 'Bone straight'], ['Weft', 'Double machine'], ['Heat rating', '200°C']],
+    variants: [['Natural Black 1B', 'BST-24-1B', 0], ['Dark Brown 2', 'BST-24-2', 0], ['Honey Blonde 27', 'BST-24-27', 11.0]],
+    offers: [['s001', 465, 210, 2, 3], ['s002', 488, 150, 4, 3]],
+    rating: 4.6, review_count: 318, featured: true,
+  },
+  {
+    id: 'p016', name: 'Passion Twist Crochet Hair — 18 inch', category_id: 'c1', emoji: '🌀',
+    swatch: ['#4a3123', '#1a1a1a'],
+    short_description: 'Pre-twisted synthetic, 8 packs to a full head.',
+    description:
+      'Pre-twisted crochet hair that turns a six-hour protective style into a two-hour one, which is the whole reason a salon stocks it. Water-wave synthetic fibre, springy rather than limp, and it holds the twist without unravelling at the ends. Eight packs does a full head on most heads.',
+    specs: [['Length', '18 inch'], ['Fibre', 'Low-temperature synthetic'], ['Strands', '18 per pack'], ['Full head', '≈8 packs'], ['Style', 'Pre-twisted']],
+    variants: [['Natural Black 1B', 'PTC-18-1B', 0], ['Dark Brown 4', 'PTC-18-4', 0], ['Burgundy 99J', 'PTC-18-99J', 5.0], ['Honey Blonde 27', 'PTC-18-27', 5.0]],
+    offers: [['s001', 92, 860, 1, 8], ['s002', 88, 620, 3, 8]],
+    rating: 4.5, review_count: 527, featured: true,
+  },
+  {
+    id: 'p017', name: 'Glueless Bob Wig — 12 inch', category_id: 'c1', emoji: '👩🏾‍🦱',
+    swatch: ['#241a13', '#111111'],
+    short_description: 'Adjustable band, no glue, wear-and-go in under a minute.',
+    description:
+      'A glueless unit on an adjustable elastic band with pre-installed combs, so it goes on without adhesive and comes off at the end of the day. The bob length has moved from a seasonal line to a standing one over the last two years, and it sells to customers who have never bought a wig before as much as to regulars.',
+    specs: [['Length', '12 inch'], ['Cap', 'Glueless, adjustable band'], ['Density', '180%'], ['Lace', '4×4 closure'], ['Fitting', 'Pre-installed combs']],
+    variants: [['Natural Black 1B', 'GBW-12-1B', 0], ['Dark Brown 2', 'GBW-12-2', 0], ['Auburn 30', 'GBW-12-30', 8.0]],
+    offers: [['s002', 742, 74, 3, 1], ['s001', 780, 45, 2, 1]],
+    rating: 4.6, review_count: 189, featured: true,
   },
 ];
 
@@ -439,6 +516,124 @@ const runners = [
   },
 ];
 
+// ─── Runner sourcing requests ────────────────────────────────────────────────
+
+/**
+ * The second way onto the platform: a buyer describes something the catalogue
+ * does not carry, and a verified runner goes and finds it.
+ *
+ * Seeded across the whole state machine so the runner portal and the customer's
+ * request list both have something real to render, including one request still
+ * waiting for a runner to accept it.
+ *
+ * [status, customer, daysAgo, item, detail, qty, budget, city, address, runner]
+ */
+const runnerRequestSpecs = [
+  [
+    'REQUESTED', 'u006', 0,
+    'Ghana-weave 22 inch, natural black',
+    'Two suppliers in Gaborone had it last month and both are out. Any colour close to 1B is fine, but it has to be human hair, not synthetic.',
+    6, 640, 'Gaborone', 'Plot 5412, Extension 12', null,
+  ],
+  [
+    'SOURCING', 'u007', 2,
+    'Salon backwash chair, second-hand acceptable',
+    'Replacing one that broke. Ceramic basin, adjustable, must have a working mixer tap. Would rather pay more for something that lasts than buy new and cheap.',
+    1, 3200, 'Gaborone', 'Plot 220, Block 6, Broadhurst', 'r001',
+  ],
+  [
+    'QUOTED', 'u006', 4,
+    'Hooded dryer, 2-seat, 220V',
+    'For a salon in Extension 12. Needs to run off normal household power, not three-phase.',
+    2, 2800, 'Gaborone', 'Plot 5412, Extension 12', 'r001',
+  ],
+  [
+    'DELIVERING', 'u007', 7,
+    'Wig display mannequin heads, canvas block',
+    'Twelve of them for a shop fit-out. Canvas block rather than polystyrene, they need to take pins.',
+    12, 180, 'Gaborone', 'Plot 220, Block 6, Broadhurst', 'r002',
+  ],
+  [
+    'CONFIRMED', 'u006', 16,
+    'Industrial hair steamer, floor standing',
+    'Whatever the two big beauty wholesalers on Lobatse Road have in stock.',
+    1, 4500, 'Gaborone', 'Plot 5412, Extension 12', 'r001',
+  ],
+];
+
+const RUNNER_REQUEST_FLOW = {
+  REQUESTED: [['REQUESTED', 'Request submitted']],
+  ACCEPTED: [['REQUESTED', 'Request submitted'], ['ACCEPTED', 'Runner accepted the job']],
+  SOURCING: [['REQUESTED', 'Request submitted'], ['ACCEPTED', 'Runner accepted the job'], ['SOURCING', 'Runner is out looking']],
+  QUOTED: [['REQUESTED', 'Request submitted'], ['ACCEPTED', 'Runner accepted the job'], ['SOURCING', 'Runner is out looking'], ['QUOTED', 'Found it, price sent for approval']],
+  APPROVED: [['REQUESTED', 'Request submitted'], ['ACCEPTED', 'Runner accepted the job'], ['SOURCING', 'Runner is out looking'], ['QUOTED', 'Found it, price sent for approval'], ['APPROVED', 'Customer approved the purchase']],
+  DELIVERING: [['REQUESTED', 'Request submitted'], ['ACCEPTED', 'Runner accepted the job'], ['SOURCING', 'Runner is out looking'], ['QUOTED', 'Found it, price sent for approval'], ['APPROVED', 'Customer approved the purchase'], ['DELIVERING', 'Bought and on the way']],
+  CONFIRMED: [['REQUESTED', 'Request submitted'], ['ACCEPTED', 'Runner accepted the job'], ['SOURCING', 'Runner is out looking'], ['QUOTED', 'Found it, price sent for approval'], ['APPROVED', 'Customer approved the purchase'], ['DELIVERING', 'Bought and on the way'], ['CONFIRMED', 'Delivered and confirmed by customer']],
+};
+
+/** The runner's fee for sourcing, as a share of what the goods cost. */
+const SOURCING_FEE_RATE = 0.12;
+
+const runnerRequests = [];
+
+runnerRequestSpecs.forEach((spec, index) => {
+  const [status, customerId, daysAgoPlaced, item, detail, quantity, budget, city, address, runnerId] = spec;
+  const customer = users.find((user) => user.id === customerId);
+  const runner = runnerId ? runners.find((entry) => entry.id === runnerId) : null;
+  const createdAt = daysAgo(daysAgoPlaced, 8 + (index % 9));
+
+  const steps = RUNNER_REQUEST_FLOW[status];
+  const timeline = steps.map(([code, label], step) => ({
+    status: code,
+    label,
+    at: daysAgo(Math.max(0, daysAgoPlaced - step), 9 + step),
+    actor: step === 0 ? customer.name : (runner?.name ?? 'AfriDeal operations'),
+  }));
+
+  /*
+   * A quote exists only once the runner has actually found the item. Anything
+   * earlier would be the platform guessing on a runner's behalf, which is the
+   * one thing this flow exists to avoid.
+   */
+  const quoted = ['QUOTED', 'APPROVED', 'DELIVERING', 'CONFIRMED'].includes(status);
+  const unitPrice = quoted ? Math.ceil(budget * 0.94) : 0;
+  const goodsTotal = unitPrice * quantity;
+  const serviceFee = quoted ? Math.ceil(goodsTotal * SOURCING_FEE_RATE) : 0;
+
+  runnerRequests.push({
+    id: `rr${String(index + 1).padStart(3, '0')}`,
+    reference: `RUN-${24810 + index}`,
+    customer_id: customerId,
+    customer_name: customer.name,
+    item,
+    detail,
+    quantity,
+    budget_per_unit: budget,
+    delivery_city: city,
+    delivery_address: address,
+    needed_by: daysAhead(4 + index * 2),
+    status,
+    runner_id: runnerId,
+    runner_name: runner?.name ?? null,
+    quote: quoted
+      ? {
+          unit_price: unitPrice,
+          service_fee: serviceFee,
+          total: goodsTotal + serviceFee,
+          found_at: index === 2 ? 'Beauty wholesaler, Lobatse Road' : 'Broadhurst trade counter',
+          condition: index === 1 ? 'Second-hand, working, some scuffing to the base' : 'New, sealed',
+          note:
+            index === 2
+              ? 'Two units in stock. Runs on 220V single phase as asked.'
+              : 'Runner inspected before quoting.',
+        }
+      : null,
+    created_at: createdAt,
+    updated_at: timeline[timeline.length - 1].at,
+    timeline,
+  });
+});
+
 // ─── Orders ──────────────────────────────────────────────────────────────────
 
 /**
@@ -466,10 +661,10 @@ const orderSpecs = [
 
 const TIMELINE_BY_STATUS = {
   PENDING: [['PENDING', 'Order placed']],
-  PROCESSING: [['PENDING', 'Order placed'], ['PAID', 'Payment confirmed — funds held in escrow'], ['PROCESSING', 'Supplier confirmed, preparing goods']],
-  IN_TRANSIT: [['PENDING', 'Order placed'], ['PAID', 'Payment confirmed — funds held in escrow'], ['PROCESSING', 'Supplier confirmed, preparing goods'], ['COLLECTED', 'Collected by runner'], ['IN_TRANSIT', 'Out for delivery']],
-  DELIVERED: [['PENDING', 'Order placed'], ['PAID', 'Payment confirmed — funds held in escrow'], ['PROCESSING', 'Supplier confirmed, preparing goods'], ['COLLECTED', 'Collected by runner'], ['IN_TRANSIT', 'Out for delivery'], ['DELIVERED', 'Delivered and confirmed by customer'], ['RELEASED', 'Escrow released to supplier']],
-  DISPUTED: [['PENDING', 'Order placed'], ['PAID', 'Payment confirmed — funds held in escrow'], ['PROCESSING', 'Supplier confirmed, preparing goods'], ['IN_TRANSIT', 'Out for delivery'], ['DISPUTED', 'Customer raised a dispute — escrow frozen']],
+  PROCESSING: [['PENDING', 'Order placed'], ['PAID', 'Payment confirmed'], ['PROCESSING', 'Supplier confirmed, preparing goods']],
+  IN_TRANSIT: [['PENDING', 'Order placed'], ['PAID', 'Payment confirmed'], ['PROCESSING', 'Supplier confirmed, preparing goods'], ['COLLECTED', 'Collected by runner'], ['IN_TRANSIT', 'Out for delivery']],
+  DELIVERED: [['PENDING', 'Order placed'], ['PAID', 'Payment confirmed'], ['PROCESSING', 'Supplier confirmed, preparing goods'], ['COLLECTED', 'Collected by runner'], ['IN_TRANSIT', 'Out for delivery'], ['DELIVERED', 'Delivered and confirmed by customer'], ['SETTLED', 'Supplier invoice settled']],
+  DISPUTED: [['PENDING', 'Order placed'], ['PAID', 'Payment confirmed'], ['PROCESSING', 'Supplier confirmed, preparing goods'], ['IN_TRANSIT', 'Out for delivery'], ['DISPUTED', 'Customer raised a claim — under review']],
   CANCELLED: [['PENDING', 'Order placed'], ['CANCELLED', 'Cancelled before payment confirmation']],
 };
 
@@ -478,13 +673,13 @@ const DELIVERY_FEE = 45;
 const orders = [];
 const orderItems = [];
 const supplierOrders = [];
-const escrow = [];
+const payables = [];
 const disputes = [];
 const shipments = [];
 
 let itemSeq = 1;
 let supOrderSeq = 1;
-let escrowSeq = 1;
+let payableSeq = 1;
 let disputeSeq = 1;
 let shipmentSeq = 1;
 
@@ -568,13 +763,13 @@ orderSpecs.forEach((spec, index) => {
     CANCELLED: 'CANCELLED',
   };
 
-  const ESCROW_STATUS = {
-    PENDING: 'HELD',
-    PROCESSING: 'HELD',
-    IN_TRANSIT: 'HELD',
-    DELIVERED: 'RELEASED',
-    DISPUTED: 'DISPUTED',
-    CANCELLED: 'REFUNDED',
+  const PAYABLE_STATUS = {
+    PENDING: 'PENDING',
+    PROCESSING: 'PENDING',
+    IN_TRANSIT: 'PENDING',
+    DELIVERED: 'SETTLED',
+    DISPUTED: 'ON_HOLD',
+    CANCELLED: 'CANCELLED',
   };
 
   for (const [supplierId, bucket] of bySupplier) {
@@ -595,31 +790,31 @@ orderSpecs.forEach((spec, index) => {
       created_at: placedAt,
     });
 
-    // Escrow: one record per supplier order, holding that leg's gross.
-    const escrowStatus = ESCROW_STATUS[status];
-    const heldAt = placedAt;
-    const settledAt =
-      escrowStatus === 'RELEASED' || escrowStatus === 'REFUNDED'
+    // One procurement invoice per supplier order, at that leg's gross.
+    const payableStatus = PAYABLE_STATUS[status];
+    const raisedAt = placedAt;
+    const closedAt =
+      payableStatus === 'SETTLED' || payableStatus === 'CANCELLED'
         ? daysAgo(Math.max(0, placedDaysAgo - 4), 15)
         : null;
 
-    const history = [{ from: null, to: 'HELD', at: heldAt, actor: 'System', note: 'Payment confirmed — funds held.' }];
-    if (escrowStatus === 'RELEASED') history.push({ from: 'HELD', to: 'RELEASED', at: settledAt, actor: 'Keabetswe Molapo', note: 'Delivery confirmed by customer.' });
-    if (escrowStatus === 'REFUNDED') history.push({ from: 'HELD', to: 'REFUNDED', at: settledAt, actor: 'Keabetswe Molapo', note: 'Order cancelled before dispatch.' });
-    if (escrowStatus === 'DISPUTED') history.push({ from: 'HELD', to: 'DISPUTED', at: daysAgo(Math.max(0, placedDaysAgo - 3), 11), actor: customer.name, note: 'Customer raised a dispute.' });
+    const history = [{ from: null, to: 'PENDING', at: raisedAt, actor: 'System', note: 'Procurement invoice raised against the order.' }];
+    if (payableStatus === 'SETTLED') history.push({ from: 'PENDING', to: 'SETTLED', at: closedAt, actor: 'Keabetswe Molapo', note: 'Delivery confirmed. Supplier invoice settled.' });
+    if (payableStatus === 'CANCELLED') history.push({ from: 'PENDING', to: 'CANCELLED', at: closedAt, actor: 'Keabetswe Molapo', note: 'Order cancelled before dispatch. Nothing owed.' });
+    if (payableStatus === 'ON_HOLD') history.push({ from: 'PENDING', to: 'ON_HOLD', at: daysAgo(Math.max(0, placedDaysAgo - 3), 11), actor: customer.name, note: 'Customer raised a claim. Settlement paused pending review.' });
 
-    escrow.push({
-      id: `e${String(escrowSeq++).padStart(3, '0')}`,
+    payables.push({
+      id: `pay${String(payableSeq++).padStart(3, '0')}`,
       order_id: orderId,
       supplier_order_id: supOrderId,
       supplier_id: supplierId,
       amount: gross,
-      status: escrowStatus,
+      status: payableStatus,
       gateway: payment,
-      held_at: heldAt,
-      released_at: escrowStatus === 'RELEASED' ? settledAt : null,
-      refunded_at: escrowStatus === 'REFUNDED' ? settledAt : null,
-      hold_window_days: 7,
+      raised_at: raisedAt,
+      settled_at: payableStatus === 'SETTLED' ? closedAt : null,
+      cancelled_at: payableStatus === 'CANCELLED' ? closedAt : null,
+      terms_days: 7,
       history,
     });
 
@@ -647,12 +842,12 @@ orderSpecs.forEach((spec, index) => {
 
   // Disputes for the two disputed orders.
   if (status === 'DISPUTED') {
-    const leg = escrow.filter((e) => e.order_id === orderId)[0];
+    const leg = payables.filter((entry) => entry.order_id === orderId)[0];
     const openedDaysAgo = Math.max(0, placedDaysAgo - 3);
     disputes.push({
       id: `dp${String(disputeSeq++).padStart(3, '0')}`,
       order_id: orderId,
-      escrow_id: leg.id,
+      payable_id: leg.id,
       customer_id: customerId,
       customer_name: customer.name,
       supplier_id: leg.supplier_id,
@@ -716,7 +911,7 @@ const settlements = suppliers
 
 const auditLog = [
   ['u002', 'Keabetswe Molapo', 'SUPPLIER_APPROVED', 'supplier', 's005', 'Approved Highveld Trade Co after document review.', 190],
-  ['u002', 'Keabetswe Molapo', 'ESCROW_RELEASED', 'escrow', 'e001', 'Released escrow on AFD-24810 following delivery confirmation.', 23],
+  ['u002', 'Keabetswe Molapo', 'PAYABLE_SETTLED', 'supplier-payable', 'pay001', 'Settled the supplier invoice on AFD-24810 following delivery confirmation.', 23],
   ['u001', 'AfriDeal Admin', 'PRICING_RULE_UPDATED', 'pricing-rule', 'pr001', 'Hair & Beauty markup changed from 75% to 80%.', 18],
   ['u002', 'Keabetswe Molapo', 'SUPPLIER_SUSPENDED', 'supplier', 's008', 'Suspended Bokamoso Textiles — fulfilment rate below 65% for two consecutive months.', 14],
   ['u008', 'Finance Admin', 'SETTLEMENT_PAID', 'settlement', 'st001', 'June settlement paid to Naledi Beauty Supplies.', 12],
@@ -737,13 +932,13 @@ const auditLog = [
 const notifications = [
   ['u001', 'Two suppliers awaiting verification', 'Tsholofelo Fresh Produce and Setlhoa Office Group have submitted documents.', 'SUPPLIER', false, 2],
   ['u001', 'Dispute SLA expiring', 'AFD-24822 has under 24 hours remaining on its resolution clock.', 'DISPUTE', false, 0],
-  ['u002', 'Escrow overdue', 'Three escrow records have passed their seven-day hold window.', 'ESCROW', false, 1],
+  ['u002', 'Supplier invoices overdue', 'Three supplier invoices have passed their seven-day payment terms.', 'PAYMENT', false, 1],
   ['u003', 'New order to confirm', 'AFD-24817 needs confirmation within 24 hours.', 'ORDER', false, 3],
-  ['u003', 'Escrow released', 'BWP 1,842.00 released against AFD-24810.', 'ESCROW', true, 23],
+  ['u003', 'Invoice settled', 'BWP 1,842.00 settled against AFD-24810.', 'PAYMENT', true, 23],
   ['u004', 'Quote request received', 'A buyer has requested pricing on 200 units of School Uniform Set.', 'ORDER', false, 1],
   ['u005', 'New job available', 'Pickup at Motswedi Francistown depot, 18.4km.', 'ORDER', false, 0],
   ['u006', 'Your order is on the way', 'AFD-24814 left the depot and is out for delivery.', 'ORDER', false, 1],
-  ['u007', 'Delivery confirmed', 'AFD-24813 was delivered. Escrow released to the supplier.', 'ORDER', true, 11],
+  ['u007', 'Delivery confirmed', 'AFD-24813 was delivered and the supplier invoice was settled.', 'ORDER', true, 11],
   ['u008', 'July settlements ready', 'Five supplier settlements are pending approval.', 'SYSTEM', false, 2],
 ].map(([user_id, title, body, kind, read, ago], i) => ({
   id: `n${String(i + 1).padStart(3, '0')}`,
@@ -826,10 +1021,15 @@ for (const product of products) {
 // ─── §10 product images ──────────────────────────────────────────────────────
 
 /**
- * There is no photography in this build. Rather than point at files that do not
- * exist, each row records the gradient swatch the UI actually renders, so the
- * table is honest about what it holds and swapping in real assets later is a
- * change of `image_url` and nothing else.
+ * Photography wins when it exists; the gradient swatch is the fallback.
+ *
+ * `npm run images` downloads real photos into public/products as
+ * `<product>-<slot>.jpg`. This seed is re-run often, and an earlier version
+ * wrote a swatch for every row unconditionally — which quietly reverted the
+ * whole catalogue to gradients the next time anyone reseeded, with the
+ * downloaded files still sitting on disk unreferenced. So the row is decided by
+ * what is actually in public/products rather than by an assumption about it,
+ * and the two scripts can now be run in either order, any number of times.
  */
 const IMAGE_ROLES = [
   ['PRIMARY', 140],
@@ -848,22 +1048,48 @@ function shiftHex(hex, amount) {
   return `#${((r << 16) | (g << 8) | b).toString(16).padStart(6, '0')}`;
 }
 
+/**
+ * Which downloaded photos are on disk right now.
+ *
+ * Read once, up front, because this runs inside a synchronous flatMap below —
+ * and a Set lookup is the difference between one directory listing and 48 stat
+ * calls.
+ */
+const photosOnDisk = await (async () => {
+  try {
+    return new Set(await fs.readdir(PHOTO_DIR));
+  } catch {
+    // No public/products yet: every row falls back to its gradient.
+    return new Set();
+  }
+})();
+
 const productImages = products.flatMap((product, i) =>
-  IMAGE_ROLES.map(([role, angle], j) => ({
-    id: `img${String(i * IMAGE_ROLES.length + j + 1).padStart(3, '0')}`,
-    product_id: product.id,
-    variant_id: null,
-    // No photography exists. Each row records the gradient the UI renders and
-    // the angle it stands in for, so the thumbnail rail is four distinct views
-    // rather than the same tile repeated, and swapping in real assets later is
-    // a change of `image_url` and nothing else.
-    image_url: `swatch:${shiftHex(product.swatch[0], j * 0.14)},${shiftHex(product.swatch[1], j * 0.1)},${angle}`,
-    image_type: role,
-    sort_order: j,
-    source: 'AFRIDEAL',
-    permission_status: 'CLEARED',
-    created_at: product.created_at,
-  })),
+  IMAGE_ROLES.map(([role, angle], j) => {
+    const filename = `${product.id}-${j}.jpg`;
+    const hasPhoto = photosOnDisk.has(filename);
+
+    return {
+      id: `img${String(i * IMAGE_ROLES.length + j + 1).padStart(3, '0')}`,
+      product_id: product.id,
+      variant_id: null,
+      // A real photograph if `npm run images` has fetched one for this slot,
+      // otherwise the gradient the UI renders in its place. The swatch records
+      // the angle it stands in for, so the thumbnail rail reads as four
+      // distinct views rather than the same tile repeated four times.
+      image_url: hasPhoto
+        ? `/products/${filename}`
+        : `swatch:${shiftHex(product.swatch[0], j * 0.14)},${shiftHex(product.swatch[1], j * 0.1)},${angle}`,
+      image_type: role,
+      sort_order: j,
+      // Stays AFRIDEAL either way: `source` is the party that supplied the
+      // asset, and the platform did. Per-file provenance for the fetched
+      // photos lives in public/products/CREDITS.json.
+      source: 'AFRIDEAL',
+      permission_status: 'CLEARED',
+      created_at: product.created_at,
+    };
+  }),
 );
 
 
@@ -875,40 +1101,61 @@ const productImages = products.flatMap((product, i) =>
  * getting a thinner margin applied to the same supplier cost, which is what
  * actually happens and what keeps §19 margin floors meaningful.
  */
-const TIER_PLAN = [
-  { customer_type: 'GUEST', tier: 'RETAIL', min: 1, max: 4, factor: 1.0, floor: 20 },
-  { customer_type: 'RETAIL', tier: 'RETAIL', min: 1, max: 4, factor: 1.0, floor: 20 },
-  { customer_type: 'RETAIL', tier: 'BULK', min: 5, max: 19, factor: 0.72, floor: 15 },
-  // A consumer buying 20 units should still be able to buy them. They get
-  // volume pricing, just not the wholesale rate a verified business reaches at
-  // the same quantity. Only past 99 does anyone need a quotation.
-  { customer_type: 'RETAIL', tier: 'BULK', min: 20, max: 99, factor: 0.66, floor: 15 },
-  { customer_type: 'BUSINESS', tier: 'RETAIL', min: 1, max: 4, factor: 1.0, floor: 20 },
-  { customer_type: 'BUSINESS', tier: 'BULK', min: 5, max: 19, factor: 0.72, floor: 15 },
-  { customer_type: 'BUSINESS', tier: 'WHOLESALE', min: 20, max: 49, factor: 0.55, floor: 10 },
-  { customer_type: 'BUSINESS', tier: 'WHOLESALE', min: 50, max: 99, factor: 0.45, floor: 8 },
-  { customer_type: 'RESELLER', tier: 'BULK', min: 5, max: 19, factor: 0.68, floor: 15 },
-  { customer_type: 'RESELLER', tier: 'WHOLESALE', min: 20, max: 49, factor: 0.52, floor: 10 },
-  { customer_type: 'RESELLER', tier: 'WHOLESALE', min: 50, max: 99, factor: 0.42, floor: 8 },
-  { customer_type: 'INSTITUTIONAL', tier: 'WHOLESALE', min: 20, max: 99, factor: 0.5, floor: 10 },
-  { customer_type: 'INSTITUTIONAL', tier: 'RFQ', min: 100, max: null, factor: 0.38, floor: 8 },
-];
+const PRICED_CUSTOMER_TYPES = ['GUEST', 'RETAIL', 'BUSINESS', 'RESELLER', 'INSTITUTIONAL'];
 
 /**
- * §19 — margin floors are per category, not global.
+ * Four published rungs, identical for every account type.
  *
- * The default floors assume a category that can carry them. Electronics cannot:
- * the brief sets a 12% markup there, and 12% over cost cannot yield a 20%
- * margin on the selling price once logistics and gateway costs come out. Those
- * two rules are in direct conflict, so the floor is the one that gives — thin
- * margins are the normal condition of consumer electronics, not a fault.
+ * The ladder used to fan out into eleven bands across five customer types, with
+ * wholesale rungs a shopper could see but not buy at. That made the catalogue
+ * look like a price list you had to qualify for, which is the opposite of the
+ * argument the storefront is making. Now the published price depends on one
+ * thing the buyer controls — how many units they take — and everything past a
+ * hundred units is answered by a quotation instead of a listing.
  *
- * Without this every Electronics band would sit permanently under its floor and
- * the alert queue would be noise an operator learns to ignore.
+ * Four rather than two, because a single break at five units left a reseller
+ * taking ninety on the same rate as a household taking five, and the catalogue
+ * had nothing to say to the buyer it most wants. These four rungs are the
+ * baseline structure for every product: no product is priced on a different
+ * set of breaks, and no rung is withheld pending an account.
+ *
+ * Floors fall as the rungs do. The thinner the markup, the closer the band sits
+ * to its floor, so each rung is given the floor its own arithmetic can actually
+ * clear against the worst routable supplier cost.
  */
-const FLOOR_OVERRIDES = {
-  c2: { RETAIL: 10, BULK: 8, WHOLESALE: 6, RFQ: 4 },
-};
+const TIER_PLAN = PRICED_CUSTOMER_TYPES.flatMap((customer_type) => [
+  { customer_type, tier: 'RETAIL', min: 1, max: 4, markup: RETAIL_MARKUP_PCT, floor: 20 },
+  { customer_type, tier: 'BULK', min: 5, max: 19, markup: BULK_MARKUP_PCT, floor: 15 },
+  {
+    customer_type,
+    tier: 'WHOLESALE',
+    min: 20,
+    max: 49,
+    markup: WHOLESALE_MARKUP_PCT,
+    floor: 12,
+  },
+  {
+    customer_type,
+    tier: 'WHOLESALE_PLUS',
+    min: 50,
+    max: QUOTATION_THRESHOLD - 1,
+    markup: WHOLESALE_PLUS_MARKUP_PCT,
+    floor: 8,
+  },
+]);
+
+/**
+ * Margin floors.
+ *
+ * With delivery billed separately and one markup across the catalogue, the
+ * realised margin no longer depends on how cheap the product is: a 60% markup
+ * clears about 35% of the selling price at any cost, 46% clears about 29%, 32%
+ * clears about 22% and 22% clears about 15%. Each sits clear of its own floor,
+ * so no category needs an exception any more —
+ * the Electronics carve-out this table used to hold existed only because a flat
+ * BWP 15 logistics contribution ate an inexpensive line alive.
+ */
+const FLOOR_OVERRIDES = {};
 
 // §16/§17 — one configurable rule per category and tier reached.
 const marginRules = [];
@@ -932,7 +1179,7 @@ for (const category of categories) {
       customer_type: plan.customer_type,
       pricing_tier: plan.tier,
       margin_type: 'PERCENTAGE_MARKUP',
-      margin_value: Math.round(base.markup_value * plan.factor * 10) / 10,
+      margin_value: plan.markup,
       fixed_component: 0,
       logistics_cost: base.logistics_cost,
       gateway_rate: base.gateway_rate,
@@ -953,7 +1200,7 @@ for (const category of categories) {
   const base = ruleFor(category.id);
   const retailFloor = FLOOR_OVERRIDES[category.id]?.RETAIL ?? 20;
 
-  for (const customerType of ['GUEST', 'RETAIL', 'BUSINESS']) {
+  for (const customerType of PRICED_CUSTOMER_TYPES) {
     marginRules.push({
       id: `mr${String(marginRules.length + 1).padStart(3, '0')}`,
       category_id: category.id,
@@ -961,7 +1208,7 @@ for (const category of categories) {
       customer_type: customerType,
       pricing_tier: 'PROMOTIONAL',
       margin_type: 'PERCENTAGE_MARKUP',
-      margin_value: Math.round(base.markup_value * 0.8 * 10) / 10,
+      margin_value: Math.round(RETAIL_MARKUP_PCT * 0.8 * 10) / 10,
       fixed_component: 0,
       logistics_cost: base.logistics_cost,
       gateway_rate: base.gateway_rate,
@@ -976,17 +1223,15 @@ for (const category of categories) {
 const customerPrices = [];
 
 for (const product of products) {
-  const base = ruleFor(product.category_id);
   const costs = supplierOffers
     .filter((offer) => offer.product_id === product.id)
     .map((offer) => offer.supplier_cost);
+  // Priced off the most expensive supplier we might actually route to, so the
+  // published figure holds whichever of them ends up filling the order.
   const worstCost = Math.max(...costs);
 
   for (const plan of TIER_PLAN) {
-    const markup = base.markup_value * plan.factor;
-    const unitPrice = Math.ceil(
-      worstCost * (1 + markup / 100) + base.logistics_cost + worstCost * base.gateway_rate,
-    );
+    const unitPrice = Math.ceil(worstCost * (1 + plan.markup / 100));
 
     customerPrices.push({
       id: `cp${String(customerPrices.length + 1).padStart(4, '0')}`,
@@ -1007,25 +1252,43 @@ for (const product of products) {
   }
 }
 
-// ─── Promotional bands (§14) ────────────────────────────────────────────────
+// ─── Promotional bands ──────────────────────────────────────────────────────
 
 /**
- * A handful of live promotions, so the flash-deal rail shows a real band with a
- * real end date rather than a discount percentage invented in the browser. Each
- * one still has to clear its category margin floor; the integrity checks below
- * treat promos exactly like every other band.
- */
-/**
- * Discounts are per category, because a category's markup caps what it can give
- * away. Electronics runs at a 12% markup, so anything past about 5% off sells
- * below cost recovery; Hair & Beauty at 80% can carry far more.
+ * A handful of live promotions, so the deals rail shows a real band with a real
+ * end date rather than a discount percentage invented in the browser.
+ *
+ * A promotion moves the whole ladder down, not just the retail rung. Cutting
+ * retail alone used to work when the rungs were far apart; with retail at 60%
+ * over cost and bulk at 44%, there are only ten points of price between them,
+ * so any discount worth the name would have pushed the retail rung underneath
+ * the bulk one and inverted the ladder — five units costing more per unit than
+ * one. Moving every rung by the same percentage keeps the shape, keeps the
+ * descent strictly monotonic, and keeps the argument.
  */
 const PROMOTIONS = [
+  ['p016', 15, 3],
   ['p002', 16, 3],
-  ['p004', 5, 5],
+  ['p013', 12, 5],
   ['p008', 14, 2],
   ['p012', 18, 6],
 ];
+
+/**
+ * Promotional margin floor.
+ *
+ * A promotion is applied as one percentage across the whole ladder, so the
+ * rung with the least room decides how deep it may go — and that is now
+ * Wholesale+ at 22% over cost, not retail at 60%. The floor is therefore set to
+ * the deepest rung's own floor rather than to half the retail one: anything
+ * looser would publish a discounted wholesale band underneath the margin the
+ * standing band was held to, which is a loss dressed as a promotion.
+ *
+ * The practical effect is that headline discounts are single-digit. That is the
+ * honest consequence of publishing a 22% rung at all, and it is better than a
+ * 15% banner the bottom of the ladder cannot pay for.
+ */
+const PROMO_FLOOR_PCT = 8;
 
 for (let [productId, discountPct, endsInDays] of PROMOTIONS) {
   const product = products.find((entry) => entry.id === productId);
@@ -1035,65 +1298,62 @@ for (let [productId, discountPct, endsInDays] of PROMOTIONS) {
   const worstCost = Math.max(
     ...supplierOffers.filter((o) => o.product_id === productId).map((o) => o.supplier_cost),
   );
-  const recoverable = worstCost + base.logistics_cost + worstCost * base.gateway_rate;
-  const promoFloorPct = (FLOOR_OVERRIDES[product.category_id]?.RETAIL ?? 20) / 2;
+
+  const bands = customerPrices.filter(
+    (band) => band.product_id === productId && band.status === 'ACTIVE',
+  );
+  if (bands.length === 0) continue;
 
   /*
-   * Two things bound how deep a promotion can go, and the data decides rather
-   * than the number above.
+   * The floor is a price, not a percentage, and it binds on the thinnest rung.
    *
-   * It cannot fall below its margin floor: P(1 − f) ≥ cost + logistics + gateway.
-   * And it cannot undercut the next rung up, or the ladder inverts and buying
-   * five costs more per unit than buying one.
+   *   margin ÷ price ≥ f,  where margin = price − cost − price × gateway
+   *   ⇒ price ≥ cost ÷ (1 − gateway − f)
    *
-   * Discounting the whole ladder instead was the other option, and it fails:
-   * the wholesale rungs already run near their floors, so scaling them down
-   * puts them under. A consumer promotion does not stack on trade pricing.
+   * Whichever rung sits closest to that line decides how deep the whole ladder
+   * may go, so the discount is clamped once and applied to every rung.
    */
-  const entry = customerPrices.find(
-    (b) => b.product_id === productId && b.customer_type === 'RETAIL' && b.minimum_quantity === 1,
+  const floorPrice = worstCost / (1 - base.gateway_rate - PROMO_FLOOR_PCT / 100);
+  const headroom = bands.reduce(
+    (deepest, band) => Math.min(deepest, 1 - floorPrice / band.unit_price),
+    1,
   );
-  const nextRung = customerPrices.find(
-    (b) => b.product_id === productId && b.customer_type === 'RETAIL' && b.minimum_quantity === 5,
-  );
-  if (!entry) continue;
 
-  const originalPrice = entry.unit_price;
-  const marginFloorPrice = Math.ceil(recoverable / (1 - promoFloorPct / 100));
-  const wanted = Math.ceil(originalPrice * (1 - discountPct / 100));
-  const promoPrice = Math.max(wanted, marginFloorPrice, nextRung?.unit_price ?? 0);
-
-  const actualPct = ((originalPrice - promoPrice) / originalPrice) * 100;
+  const applied = Math.min(discountPct / 100, Math.max(0, headroom));
 
   // Anything under three points is not a promotion, it is noise on a price tag.
-  if (actualPct < 3) continue;
+  if (applied < 0.03) continue;
 
-  entry.unit_price = promoPrice;
-  entry.pricing_tier = 'PROMOTIONAL';
-  entry.effective_from = daysAgo(2);
-  entry.effective_to = daysAhead(endsInDays);
-
-  // Guests see the same shelf price a retail shopper does.
-  const guestEntry = customerPrices.find(
-    (b) => b.product_id === productId && b.customer_type === 'GUEST' && b.minimum_quantity === 1,
+  const retailBefore = bands.find(
+    (band) => band.customer_type === 'RETAIL' && band.minimum_quantity === 1,
   );
-  if (guestEntry) {
-    guestEntry.unit_price = promoPrice;
-    guestEntry.pricing_tier = 'PROMOTIONAL';
-    guestEntry.effective_from = daysAgo(2);
-    guestEntry.effective_to = daysAhead(endsInDays);
+  const originalRetail = retailBefore ? retailBefore.unit_price : product.price;
+
+  for (const band of bands) {
+    band.unit_price = Math.ceil(band.unit_price * (1 - applied));
+    band.effective_from = daysAgo(2);
+    band.effective_to = daysAhead(endsInDays);
+    /*
+     * Only the entry rung is relabelled. The quantity rung keeps its BULK tier
+     * so the ladder still reads as a ladder, and the storefront resolves the
+     * discounted entry price through its quantity range rather than its label.
+     */
+    if (band.minimum_quantity === 1) band.pricing_tier = 'PROMOTIONAL';
   }
 
+  const promoRetail = Math.ceil(originalRetail * (1 - applied));
+  const ratio = promoRetail / originalRetail;
+
   // Keep the catalogue price in step with what a shopper actually pays.
-  const ratio = promoPrice / originalPrice;
-  product.price = promoPrice;
+  product.price = promoRetail;
   for (const variant of product.variants) {
     variant.price = Math.ceil(variant.price * ratio);
   }
-  discountPct = Math.round(actualPct);
+
+  discountPct = Math.round(applied * 100);
 
   // The strikethrough figure and the countdown the deals rail renders.
-  product.compare_at_price = originalPrice;
+  product.compare_at_price = originalRetail;
   product.promotion = {
     discount_pct: discountPct,
     ends_at: daysAhead(endsInDays),
@@ -1182,9 +1442,10 @@ const files = {
   'order-items': orderItems,
   'supplier-orders': supplierOrders,
   'pricing-rules': pricingRules,
-  escrow,
+  'supplier-payables': payables,
   disputes,
   runners,
+  'runner-requests': runnerRequests,
   shipments,
   settlements,
   'audit-log': auditLog,
@@ -1224,8 +1485,8 @@ for (const order of orders) {
   const legs = supplierOrders.filter((s) => s.order_id === order.id);
   if (legs.length === 0) problems.push(`${order.id} has no supplier orders`);
   for (const leg of legs) {
-    const matching = escrow.filter((e) => e.supplier_order_id === leg.id);
-    if (matching.length !== 1) problems.push(`${leg.id} has ${matching.length} escrow records, expected exactly 1`);
+    const matching = payables.filter((entry) => entry.supplier_order_id === leg.id);
+    if (matching.length !== 1) problems.push(`${leg.id} has ${matching.length} supplier payables, expected exactly 1`);
   }
 }
 
@@ -1243,6 +1504,15 @@ if (verified !== 5 || pending !== 2 || suspended !== 1) {
 }
 
 // ─── Procurement integrity (§14–§20) ────────────────────────────────────────
+
+for (const request of runnerRequests) {
+  if (request.status !== 'REQUESTED' && request.runner_id == null) {
+    problems.push(`${request.id} is ${request.status} with no runner assigned`);
+  }
+  if (request.status === 'REQUESTED' && request.quote != null) {
+    problems.push(`${request.id} carries a quote before a runner has seen it`);
+  }
+}
 
 for (const product of products) {
   const bands = customerPrices.filter((band) => band.product_id === product.id);

@@ -2,7 +2,7 @@ import { PageHeader } from '@/components/brand/Panel';
 import { ConsoleTopbar } from '@/components/layout/ConsoleTopbar';
 import { auth } from '@/lib/auth';
 import { readAll } from '@/lib/db';
-import { summarise } from '@/lib/escrow';
+import { summarise } from '@/lib/payables';
 import { getNotifications } from '@/lib/queries';
 
 import { AnalyticsClient } from './AnalyticsClient';
@@ -23,11 +23,11 @@ const REVENUE_SHARE_RATE = 0.05;
 async function computeAnalytics(period: AnalyticsPeriod): Promise<AnalyticsData> {
   const days = period === 'YTD' ? 365 : period === 'QTD' ? 90 : 30;
 
-  const [orders, items, suppliers, escrowRecords, settlements] = await Promise.all([
+  const [orders, items, suppliers, payableRecords, settlements] = await Promise.all([
     readAll('orders'),
     readAll('order-items'),
     readAll('suppliers'),
-    readAll('escrow'),
+    readAll('supplier-payables'),
     readAll('settlements'),
   ]);
 
@@ -68,11 +68,11 @@ async function computeAnalytics(period: AnalyticsPeriod): Promise<AnalyticsData>
   const featured = verifiedCount * 180;
   const totalRevenue = commissions + subscriptions + featured;
 
-  const refunded = escrowRecords
-    .filter((record) => record.status === 'REFUNDED')
+  const refunded = payableRecords
+    .filter((record) => record.status === 'CANCELLED')
     .reduce((sum, record) => sum + record.amount, 0);
-  const disputedHeld = escrowRecords
-    .filter((record) => record.status === 'DISPUTED')
+  const disputedHeld = payableRecords
+    .filter((record) => record.status === 'ON_HOLD')
     .reduce((sum, record) => sum + record.amount, 0);
   const cancelled = inPeriod
     .filter((order) => order.status === 'CANCELLED')
@@ -80,14 +80,14 @@ async function computeAnalytics(period: AnalyticsPeriod): Promise<AnalyticsData>
 
   const exclusions = [
     {
-      label: 'Refunded escrow',
+      label: 'Cancelled supplier invoices',
       amount: refunded,
-      why: 'Funds returned to the customer never became platform revenue.',
+      why: 'Refunded to the customer, so it never became platform revenue.',
     },
     {
-      label: 'Disputed and unsettled',
+      label: 'Claims under review',
       amount: disputedHeld,
-      why: 'Outcome unknown; excluded until the dispute resolves.',
+      why: 'Outcome unknown; excluded until the claim resolves.',
     },
     { label: 'Cancelled orders', amount: cancelled, why: 'No goods moved and no commission was earned.' },
     {
@@ -137,7 +137,7 @@ async function computeAnalytics(period: AnalyticsPeriod): Promise<AnalyticsData>
       rate: REVENUE_SHARE_RATE,
       revenue_share_due: revenueShareDue,
     },
-    escrow: summarise(escrowRecords),
+    payables: summarise(payableRecords),
     top_suppliers: topSuppliers,
     settlements_pending: settlements.filter((settlement) => settlement.status === 'PENDING').length,
   };

@@ -11,6 +11,7 @@ import { auth } from '@/lib/auth';
 import { readAll } from '@/lib/db';
 import { getCatalogue, getProductDetail, toPublicOffers } from '@/lib/queries';
 import { rankOffers } from '@/lib/supplier-selection';
+import { tierDoors } from '@/lib/tier-doors';
 
 import { ProductBuyPanel } from './ProductBuyPanel';
 
@@ -45,6 +46,7 @@ export default async function ProductPage({ params }: { params: { id: string } }
   const customerType = session?.user?.customer_type ?? 'GUEST';
   const bands = allBands.filter((band) => band.product_id === product.id);
   const images = allImages.filter((image) => image.product_id === product.id);
+  const productDoors = tierDoors(bands, product, customerType);
 
   // §5 — redacted at the server boundary. Passing selection.all straight to a
   // client component would serialise every supplier_cost into the page payload.
@@ -73,7 +75,7 @@ export default async function ProductPage({ params }: { params: { id: string } }
     );
 
   return (
-    <div className="mx-auto max-w-market px-6 pb-24 pt-28">
+    <div className="mx-auto max-w-market px-6 pb-24 pt-32">
       <Breadcrumb
         trail={[
           { label: 'Home', href: '/' },
@@ -135,6 +137,8 @@ export default async function ProductPage({ params }: { params: { id: string } }
             customerType={customerType}
             inStock={inStock}
             primarySupplierId={selection.primary?.supplier.id ?? ''}
+            primaryImage={images.find((image) => image.sort_order === 0)}
+            doors={productDoors}
           />
 
           <DeliveryEstimate offers={publicOffers} city="Gaborone" />
@@ -143,14 +147,15 @@ export default async function ProductPage({ params }: { params: { id: string } }
           <div className="mt-3 flex items-start gap-3 rounded-md border border-hairline bg-gold-50/60 px-4 py-3.5">
             <Lock size={15} strokeWidth={1.5} className="mt-0.5 shrink-0 text-gold-700" />
             <p className="text-[12.5px] leading-5 text-gold-700">
-              Your payment is held by AfriDeal and released to the supplier only once you confirm the
-              order arrived. If it does not, you raise a dispute and the funds stay frozen.
+              You pay AfriDeal, and the supplier is settled only once you confirm the order
+              arrived. If it does not, you raise a dispute and nothing is paid outward until it is
+              resolved.
             </p>
           </div>
         </div>
       </div>
 
-      <ProductTabs product={product} />
+      <ProductTabs product={product} image={images.find((image) => image.sort_order === 0)} />
 
       <section className="mt-14">
         <SupplierComparisonMatrix productName={product.name} offers={publicOffers} />

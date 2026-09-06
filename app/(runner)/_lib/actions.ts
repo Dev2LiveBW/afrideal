@@ -18,6 +18,6 @@ export async function acceptShipment(shipmentId: string): Promise<{ ok: true } |
 
     return { ok: true };
   } catch {
-    return { ok: false, error: 'Network error — could not accept this job.' };
+    return { ok: false, error: 'Network error - could not accept this job.' };
   }
 }

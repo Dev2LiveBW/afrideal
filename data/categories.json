@@ -1,44 +1,58 @@
 [
   {
     "id": "c1",
-    "name": "Hair & Beauty",
-    "slug": "hair-beauty",
+    "name": "Hair, Weaves & Extensions",
+    "slug": "hair-weaves-extensions",
+    "emoji": "💇🏾‍♀️",
+    "sort_order": 1,
+    "blurb": "Bundles, frontals, closures, wigs and braiding hair. The category the platform sells most of."
+  },
+  {
+    "id": "c7",
+    "name": "Beauty & Personal Care",
+    "slug": "beauty-personal-care",
     "emoji": "💄",
-    "blurb": "Salon stock, retail lines and treatment ranges from verified regional distributors."
+    "sort_order": 2,
+    "blurb": "Treatments, serums and salon consumables from verified regional distributors."
   },
   {
     "id": "c2",
     "name": "Electronics",
     "slug": "electronics",
     "emoji": "🔌",
+    "sort_order": 3,
     "blurb": "Consumer and off-grid electronics, landed and warranty-backed."
   },
   {
-    "id": "c3",
-    "name": "Building Materials",
-    "slug": "building-materials",
-    "emoji": "🧱",
-    "blurb": "Cement, roofing and structural supply at contractor volumes."
+    "id": "c6",
+    "name": "Clothing & Uniforms",
+    "slug": "clothing-uniforms",
+    "emoji": "👕",
+    "sort_order": 4,
+    "blurb": "Workwear, school uniforms and retail apparel at trade quantities."
   },
   {
     "id": "c4",
     "name": "Food & Agriculture",
     "slug": "food-agriculture",
     "emoji": "🌾",
+    "sort_order": 5,
     "blurb": "Staples, seed and inputs sourced through the SADC corridor."
+  },
+  {
+    "id": "c3",
+    "name": "Building Materials",
+    "slug": "building-materials",
+    "emoji": "🧱",
+    "sort_order": 6,
+    "blurb": "Cement, roofing and structural supply at contractor volumes."
   },
   {
     "id": "c5",
     "name": "Office Supplies",
     "slug": "office-supplies",
     "emoji": "📎",
+    "sort_order": 7,
     "blurb": "Consumables and stationery for offices that reorder monthly."
-  },
-  {
-    "id": "c6",
-    "name": "Clothing",
-    "slug": "clothing",
-    "emoji": "👕",
-    "blurb": "Workwear, uniforms and retail apparel in bulk."
   }
 ]

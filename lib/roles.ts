@@ -36,9 +36,15 @@ export const ADMIN_ROLES: Role[] = ['SUPER_ADMIN', 'OPERATIONS_ADMIN', 'FINANCE_
 
 export const FINANCE_ALLOWED_PREFIXES = [
   '/admin/analytics',
-  '/admin/escrow',
+  '/admin/payables',
   '/admin/settlements',
 ];
+
+/*
+ * Sourcing sits with operations rather than finance. Nothing on that queue
+ * moves money - the buyer approves a price and the runner is paid through the
+ * ordinary payables run - so a finance login has no reason to be there.
+ */
 
 export const OPS_DENIED_PREFIXES = ['/admin/settings', '/admin/finance', '/admin/settlements'];
 

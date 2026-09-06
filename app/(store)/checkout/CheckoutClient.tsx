@@ -5,15 +5,17 @@ import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { AlertCircle, Lock, ShoppingBag } from 'lucide-react';
+import { AlertCircle, ShieldCheck, ShoppingBag } from 'lucide-react';
 import { z } from 'zod';
 
-import { GoldButton } from '@/components/brand/GoldButton';
+import { ActionButton } from '@/components/brand/ActionButton';
 import { MoneyText } from '@/components/brand/MoneyText';
 import { EmptyState, Enclosure } from '@/components/brand/Panel';
-import { cartSubtotal, useAfriDealStore } from '@/store/useAfriDealStore';
+import { CartLineThumb } from '@/components/storefront/CartLineThumb';
+import { useAfriDealStore } from '@/store/useAfriDealStore';
+import { resolvePrice } from '@/lib/pricing-tiers';
 import { cn } from '@/lib/utils';
-import type { PaymentMethod } from '@/types';
+import type { CustomerPrice, CustomerType, PaymentMethod, Product } from '@/types';
 
 const DELIVERY_FEE = 45;
 
@@ -49,9 +51,16 @@ const GATEWAYS: { value: PaymentMethod; name: string; monogram: string; blurb: s
 export function CheckoutClient({
   customerName,
   customerEmail,
+  bands,
+  products,
+  customerType,
 }: {
   customerName: string;
   customerEmail: string;
+  /** Published bands, read on the server so the summary cannot quote a stale rung. */
+  bands: CustomerPrice[];
+  products: Product[];
+  customerType: CustomerType;
 }) {
   const router = useRouter();
   const cart = useAfriDealStore((state) => state.cart);
@@ -78,7 +87,31 @@ export function CheckoutClient({
   });
 
   const selectedGateway = watch('payment_method');
-  const subtotal = mounted ? cartSubtotal(cart) : 0;
+  /*
+   * Resolved per line for the quantity actually being ordered, mirroring the
+   * orders route including the variant ratio. The summary a buyer approves must
+   * be the amount that gets charged.
+   */
+  const priced = cart.map((line) => {
+    const product = products.find((candidate) => candidate.id === line.product_id);
+    if (!product) return { line, unitPrice: line.unit_price };
+
+    const resolved = resolvePrice(bands, product, line.qty, customerType, line.variant_id);
+    const variant = product.variants.find((entry) => entry.id === line.variant_id);
+    const variantRatio = product.price === 0 || !variant ? 1 : variant.price / product.price;
+
+    return { line, unitPrice: Math.ceil(resolved.unit_price * variantRatio) };
+  });
+
+  const unitPriceFor = (line: (typeof cart)[number]) =>
+    priced.find(
+      (entry) =>
+        entry.line.product_id === line.product_id && entry.line.variant_id === line.variant_id,
+    )?.unitPrice ?? line.unit_price;
+
+  const subtotal = mounted
+    ? priced.reduce((sum, entry) => sum + entry.unitPrice * entry.line.qty, 0)
+    : 0;
   const total = subtotal + DELIVERY_FEE;
 
   const onSubmit = handleSubmit(async (values) => {
@@ -128,9 +161,9 @@ export function CheckoutClient({
         description="Your cart is empty. Add something to it and come back."
         action={
           <Link href="/browse">
-            <GoldButton variant="gold" size="md" withArrow>
+            <ActionButton size="md" withArrow>
               Browse the marketplace
-            </GoldButton>
+            </ActionButton>
           </Link>
         }
         className="rounded-md border border-hairline bg-surface-raised"
@@ -140,16 +173,15 @@ export function CheckoutClient({
 
   return (
     <>
-      <p className="eyebrow">Checkout</p>
-      <h1 className="mt-3 font-display text-headline-lg font-semibold text-ink">
-        Confirm and pay into escrow
+      <h1 className="font-display text-headline-lg font-semibold text-ink">
+        Confirm and pay
       </h1>
 
       <form
         onSubmit={onSubmit}
         className="mt-8 grid gap-10 lg:grid-cols-[minmax(0,1fr)_minmax(0,380px)] lg:gap-12"
       >
-        <div className="space-y-8">
+        <div className="min-w-0 space-y-8">
           {/* Delivery */}
           <section className="rounded-md border border-hairline bg-surface-raised p-5">
             <h2 className="text-[15px] font-semibold text-ink">Delivery</h2>
@@ -207,8 +239,8 @@ export function CheckoutClient({
           <section className="rounded-md border border-hairline bg-surface-raised p-5">
             <h2 className="text-[15px] font-semibold text-ink">Payment method</h2>
             <p className="mt-1 text-[12.5px] text-body">
-              Whichever you choose, the money settles into AfriDeal&rsquo;s escrow account, not to the
-              supplier.
+              Payments are processed by licensed providers. AfriDeal does not see or store your
+              card or wallet details.
             </p>
 
             <div className="mt-5 space-y-2.5">
@@ -250,7 +282,7 @@ export function CheckoutClient({
                     <span
                       className={cn(
                         'flex h-5 w-5 shrink-0 items-center justify-center rounded-full border-2 transition-colors',
-                        active ? 'border-gold bg-gold' : 'border-hairline-strong',
+                        active ? 'border-forest bg-forest' : 'border-hairline-strong',
                       )}
                     >
                       {active && <span className="h-1.5 w-1.5 rounded-full bg-ink" />}
@@ -270,7 +302,7 @@ export function CheckoutClient({
         </div>
 
         {/* Summary */}
-        <div className="lg:sticky lg:top-24 lg:self-start">
+        <div className="min-w-0 lg:sticky lg:top-24 lg:self-start">
           <Enclosure>
             <div className="p-5">
               <h2 className="text-[15px] font-semibold text-ink">Your order</h2>
@@ -281,19 +313,21 @@ export function CheckoutClient({
                     key={`${line.product_id}-${line.variant_id}`}
                     className="flex items-start gap-3 text-[13px]"
                   >
-                    <span aria-hidden="true" className="text-[20px] leading-none">
-                      {line.emoji}
-                    </span>
+                    <CartLineThumb
+                      line={line}
+                      className="h-10 w-10 shrink-0"
+                      glyphClassName="text-[20px]"
+                    />
                     <span className="min-w-0 flex-1">
                       <span className="block truncate font-medium text-ink">{line.name}</span>
                       <span className="block text-[12px] text-muted">
                         {line.variant_label} · {line.qty} ×{' '}
                         {new Intl.NumberFormat('en-BW', { minimumFractionDigits: 2 }).format(
-                          line.unit_price,
+                          unitPriceFor(line),
                         )}
                       </span>
                     </span>
-                    <MoneyText amount={line.unit_price * line.qty} size="sm" bare />
+                    <MoneyText amount={unitPriceFor(line) * line.qty} size="sm" bare />
                   </li>
                 ))}
               </ul>
@@ -312,31 +346,31 @@ export function CheckoutClient({
                   </dd>
                 </div>
                 <div className="flex items-baseline justify-between border-t border-hairline pt-3">
-                  <dt className="font-medium text-ink">Total held in escrow</dt>
+                  <dt className="font-medium text-ink">Total to pay</dt>
                   <dd>
-                    <MoneyText amount={total} size="lg" tone="gold" />
+                    <MoneyText amount={total} size="lg" tone="ink" />
                   </dd>
                 </div>
               </dl>
 
-              <GoldButton
+              <ActionButton
                 type="submit"
-                variant="gold"
                 size="lg"
                 className="mt-5 w-full"
                 loading={isSubmitting}
                 withArrow
               >
                 Place order
-              </GoldButton>
+              </ActionButton>
             </div>
           </Enclosure>
 
           <div className="mt-4 flex items-start gap-3 rounded-md border border-gold/25 bg-gold-50/70 px-4 py-3.5">
-            <Lock size={16} strokeWidth={1.5} className="mt-0.5 shrink-0 text-gold-700" />
+            <ShieldCheck size={16} strokeWidth={1.5} className="mt-0.5 shrink-0 text-gold-700" />
             <p className="text-[12.5px] leading-5 text-gold-700">
-              Placing this order moves the total into escrow. Suppliers are notified and can start
-              preparing, but none of them are paid until you confirm delivery.
+              Placing this order buys the goods from AfriDeal. We procure them from a verified
+              supplier, deliver them to you, and cover the order under our returns and refunds
+              policy until seven days after delivery.
             </p>
           </div>
         </div>

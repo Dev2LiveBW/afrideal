@@ -12,28 +12,28 @@ import type {
 } from '@/types';
 
 /**
- * Tiered pricing engine (revised spec §14–§20).
+ * Tiered pricing engine.
  *
  * Replaces the assumption that a product has one price. A product has a ladder
- * of price bands, and which rung a buyer stands on depends on who they are and
- * how many units they are taking.
+ * of published bands, and which rung a buyer stands on depends on how many
+ * units they are taking. Above the published ladder they are quoted instead.
  *
- * Nothing here is hard-coded: bands live in /data/customer-prices.json and the
- * rules that generate them live in /data/margin-rules.json.
+ * Nothing here is hard-coded: bands live in /data/customer-prices.json, the
+ * markups that generate them live in `lib/pricing-model.ts`, and the margin
+ * floors that constrain them live in /data/margin-rules.json.
  */
 
-// ── §17/§18 — margin arithmetic ──────────────────────────────────────────────
+// ── Margin arithmetic ────────────────────────────────────────────────────────
 
 /**
  * Apply a margin rule to a supplier cost and return the selling price.
  *
- * The distinction §18 insists on:
+ * The distinction that has to be kept straight:
  *
  *   markup  → price = cost × (1 + v)          30% on 250 → 325.00
  *   margin  → price = cost ÷ (1 − v)          30% on 250 → 357.14
  *
- * Getting these the wrong way round overstates profitability on every report,
- * which is exactly why the spec calls it out.
+ * Getting these the wrong way round overstates profitability on every report.
  */
 export function applyMargin(supplierCost: number, type: MarginType, value: number, fixed = 0): number {
   switch (type) {
@@ -41,7 +41,7 @@ export function applyMargin(supplierCost: number, type: MarginType, value: numbe
       return supplierCost * (1 + value / 100);
 
     case 'PERCENTAGE_MARGIN': {
-      // A 100% margin is undefined — the divisor collapses to zero.
+      // A 100% margin is undefined - the divisor collapses to zero.
       if (value >= 100) return supplierCost * 2;
       return supplierCost / (1 - value / 100);
     }
@@ -65,14 +65,15 @@ export function applyMargin(supplierCost: number, type: MarginType, value: numbe
   }
 }
 
-/** §18 — the honest breakdown. Markup and margin are reported separately. */
+/** The honest breakdown. Markup and margin are reported separately. */
 export function marginBreakdown(
   sellingPrice: number,
   supplierCost: number,
   logisticsCost: number,
   gatewayRate: number,
 ): MarginBreakdown {
-  const gatewayCost = supplierCost * gatewayRate;
+  // The provider charges on what the customer actually pays, not on cost.
+  const gatewayCost = sellingPrice * gatewayRate;
   const grossMargin = sellingPrice - supplierCost - logisticsCost - gatewayCost;
 
   return {
@@ -86,28 +87,32 @@ export function marginBreakdown(
   };
 }
 
-// ── §7 — customer type to reachable tiers ────────────────────────────────────
+// ── Customer type to reachable tiers ─────────────────────────────────────────
 
 /**
  * Which tiers a buyer may be quoted.
  *
- * A retail consumer is never shown wholesale pricing, and a reseller is never
- * forced to buy at retail. Guests see retail only, which is what makes the
- * catalogue browsable without an account.
+ * Every account type reaches every published rung, including a visitor with no
+ * account. The published ladder is the platform's argument, and a price a buyer
+ * has to register to see is not a price they can compare. What still varies by
+ * account type is the quotation path above the ladder, where a business or
+ * institutional buyer is answered by a person rather than by a price list.
  */
+const PUBLISHED: PricingTier[] = ['RETAIL', 'BULK', 'WHOLESALE', 'WHOLESALE_PLUS'];
+
 export const TIERS_BY_CUSTOMER_TYPE: Record<CustomerType, PricingTier[]> = {
-  GUEST: ['RETAIL', 'PROMOTIONAL'],
-  RETAIL: ['RETAIL', 'BULK', 'PROMOTIONAL'],
-  BUSINESS: ['RETAIL', 'BULK', 'WHOLESALE', 'PROMOTIONAL', 'NEGOTIATED'],
-  RESELLER: ['BULK', 'WHOLESALE', 'PROMOTIONAL', 'NEGOTIATED'],
-  INSTITUTIONAL: ['BULK', 'WHOLESALE', 'NEGOTIATED', 'RFQ'],
+  GUEST: [...PUBLISHED, 'PROMOTIONAL'],
+  RETAIL: [...PUBLISHED, 'PROMOTIONAL', 'RFQ'],
+  BUSINESS: [...PUBLISHED, 'PROMOTIONAL', 'NEGOTIATED', 'RFQ'],
+  RESELLER: [...PUBLISHED, 'PROMOTIONAL', 'NEGOTIATED', 'RFQ'],
+  INSTITUTIONAL: [...PUBLISHED, 'NEGOTIATED', 'RFQ'],
 };
 
 export function canReachTier(customerType: CustomerType, tier: PricingTier): boolean {
   return TIERS_BY_CUSTOMER_TYPE[customerType]?.includes(tier) ?? false;
 }
 
-// ── §14/§15 — band resolution ────────────────────────────────────────────────
+// ── Band resolution ──────────────────────────────────────────────────────────
 
 function isLive(band: CustomerPrice, now: Date): boolean {
   if (band.status !== 'ACTIVE') return false;
@@ -147,8 +152,8 @@ export function priceLadder(
  *
  * Falls back to the retail ladder when a buyer type has no bands of its own, so
  * a business account never sees an empty price. When the quantity runs past the
- * top band, `requires_rfq` is set rather than silently quoting the top rung —
- * that is the §20 "100+ → request quotation" behaviour.
+ * top published band, `requires_rfq` is set rather than silently quoting the
+ * top rung - that is the "100 units and up, ask for a quotation" behaviour.
  */
 export function resolvePrice(
   bands: CustomerPrice[],
@@ -227,7 +232,7 @@ export function nextBand(
   return ladder.find((band) => band.minimum_quantity > quantity) ?? null;
 }
 
-// ── §19 — minimum margin protection ──────────────────────────────────────────
+// ── Minimum margin protection ────────────────────────────────────────────────
 
 /**
  * Find live prices sitting below their tier's margin floor.
@@ -296,9 +301,21 @@ export const TIER_LABELS: Record<PricingTier, string> = {
   RETAIL: 'Retail',
   BULK: 'Bulk',
   WHOLESALE: 'Wholesale',
+  WHOLESALE_PLUS: 'Wholesale+',
   NEGOTIATED: 'Negotiated',
   PROMOTIONAL: 'Promotional',
   RFQ: 'By quotation',
+};
+
+/** What each rung means to the buyer standing on it. */
+export const TIER_BLURBS: Record<PricingTier, string> = {
+  RETAIL: 'Single units and small orders.',
+  BULK: 'Restocking a salon, a shop or a small site.',
+  WHOLESALE: 'Trade quantities for a business that resells.',
+  WHOLESALE_PLUS: 'The deepest published rung, for standing volume.',
+  NEGOTIATED: 'Priced under an existing supply agreement.',
+  PROMOTIONAL: 'A published price running for a limited period.',
+  RFQ: 'Priced on quotation against your volume and delivery point.',
 };
 
 export const CUSTOMER_TYPE_LABELS: Record<CustomerType, string> = {

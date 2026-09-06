@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation';
 import { Save } from 'lucide-react';
 import toast from 'react-hot-toast';
 
-import { GoldButton } from '@/components/brand/GoldButton';
+import { ActionButton } from '@/components/brand/ActionButton';
 
 /** Staff-only note, saved via PATCH /api/orders/:id { action: 'ADD_NOTE' }. */
 export function OrderNotes({ orderId, initialNote }: { orderId: string; initialNote: string }) {
@@ -41,14 +41,14 @@ export function OrderNotes({ orderId, initialNote }: { orderId: string; initialN
         value={note}
         onChange={(event) => setNote(event.target.value)}
         rows={6}
-        placeholder="Notes visible to staff only — escalation context, delivery exceptions, customer calls…"
+        placeholder="Notes visible to staff only - escalation context, delivery exceptions, customer calls…"
         className="w-full resize-y rounded border border-hairline-strong bg-surface px-3 py-2.5 text-[13px] leading-5 text-ink outline-none focus:border-gold"
       />
       <div className="mt-3 flex items-center justify-between gap-3">
         <p className="text-[11.5px] text-muted">Staff-only. Never shown to the customer or supplier.</p>
-        <GoldButton size="sm" onClick={save} loading={saving} disabled={!dirty} icon={<Save size={14} strokeWidth={1.5} />}>
+        <ActionButton size="sm" onClick={save} loading={saving} disabled={!dirty} icon={<Save size={14} strokeWidth={1.5} />}>
           Save note
-        </GoldButton>
+        </ActionButton>
       </div>
     </div>
   );

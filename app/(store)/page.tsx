@@ -1,38 +1,59 @@
+import Image from 'next/image';
 import Link from 'next/link';
-import { BadgeCheck, Lock, PackageCheck, ShieldCheck, Truck } from 'lucide-react';
+import { ArrowRight, BadgeCheck, User, Truck } from "lucide-react";
 
-import { AfriDealMark } from '@/components/brand/AfriDealLogo';
-import { GoldButton } from '@/components/brand/GoldButton';
-import { MoneyText } from '@/components/brand/MoneyText';
-import { CustomerTierBar } from '@/components/procurement/CustomerTierBar';
-import { CategoryTiles, SupplierRail } from '@/components/storefront/DiscoveryRails';
+import { ActionButton } from '@/components/brand/ActionButton';
+import { CategoryTiles } from '@/components/storefront/DiscoveryRails';
 import { FlashDealsRail } from '@/components/storefront/FlashDealsRail';
-import { Float } from '@/components/motion/Float';
+import { HowItWorks } from '@/components/storefront/HowItWorks';
+import { LadderProof, type LadderProofRow } from '@/components/storefront/LadderProof';
+import { PackagesBoard } from '@/components/storefront/PackagesBoard';
+import { MockupCategories } from '@/components/storefront/MockupCategories';
+import { StatsBanner, PromoCards, TrustPaymentStrip } from '@/components/storefront/HomePromoSections';
+import { MockupHero } from '@/components/storefront/MockupHero';
+import { PathChooser } from '@/components/storefront/PathChooser';
+import { PriceLadder } from '@/components/storefront/PriceLadder';
 import { ProductRail } from '@/components/storefront/ProductRail';
+import { Swatch } from '@/components/storefront/Swatch';
+import { TrustStrip } from '@/components/storefront/TrustStrip';
 import { auth } from '@/lib/auth';
 import { readAll } from '@/lib/db';
+import { MARKUP_PCT, QUOTATION_THRESHOLD, deepestSavingPct } from '@/lib/pricing-model';
 import { getCatalogue } from '@/lib/queries';
 import { rankOffers } from '@/lib/supplier-selection';
+import { doorForQuantity, ladderSpread, tierDoors } from '@/lib/tier-doors';
 
-import { Reveal } from './_components/Reveal';
+import { Reveal } from '@/app/(store)/_components/Reveal';
 
 export const dynamic = 'force-dynamic';
 
+/** The category the platform actually sells. It leads the page. */
+const FLAGSHIP_CATEGORY = 'c1';
+
+/**
+ * The quantity a visitor is standing on before they have chosen one. It is the
+ * entry rung by definition, and naming it here keeps the "your tier" marker on
+ * the packages board honest rather than decorative.
+ */
+const DEFAULT_QUANTITY = 1;
+
 export default async function LandingPage() {
-  const [{ categories, products }, suppliers, orders, images, offers, session] = await Promise.all([
+  const [{ categories, products }, suppliers, images, offers, bands, session] = await Promise.all([
     getCatalogue(),
     readAll('suppliers'),
-    readAll('orders'),
     readAll('product-images'),
     readAll('supplier-offers'),
+    readAll('customer-prices'),
     auth(),
   ]);
 
   const verified = suppliers.filter((supplier) => supplier.status === 'VERIFIED');
-  const delivered = orders.filter((order) => order.status === 'DELIVERED').length;
-  const customerType = session?.user?.customer_type ?? null;
+  const customerType = session?.user?.customer_type ?? 'GUEST';
 
   const categoryName = new Map(categories.map((category) => [category.id, category.name]));
+  const primaryImage = new Map(
+    images.filter((image) => image.sort_order === 0).map((image) => [image.product_id, image]),
+  );
 
   // Attach the supplier the engine would route to, so quick-add on a rail card
   // books against a real supplier rather than an empty string.
@@ -46,313 +67,286 @@ export default async function LandingPage() {
       ).primary?.supplier.id ?? '',
   });
 
+  const flagship = products.filter((product) => product.category_id === FLAGSHIP_CATEGORY);
   const onPromotion = products.filter((product) => product.promotion).map(decorate);
-  const newArrivals = [...products]
-    .sort((a, b) => b.created_at.localeCompare(a.created_at))
-    .slice(0, 8)
-    .map(decorate);
 
-  // A real delivered order for the hero receipt.
-  const sample = orders.find((order) => order.status === 'DELIVERED') ?? orders[0];
+  const spreads = products
+    .map((product) => ({ product, spread: ladderSpread(bands, product) }))
+    .filter(
+      (
+        row,
+      ): row is {
+        product: (typeof products)[number];
+        spread: NonNullable<ReturnType<typeof ladderSpread>>;
+      } => row.spread !== null,
+    );
+
+  /*
+   * The hero prices its ladder against the flagship line, because that is what
+   * the business sells most of. Within the category it takes the most expensive
+   * product that is not currently discounted: the highest figures make the gap
+   * between the rungs legible at a glance, and a promotional price would have
+   * the hero arguing about a sale when the point is the standing price list.
+   */
+  const featured =
+    flagship.filter((product) => !product.promotion).sort((a, b) => b.price - a.price)[0] ??
+    flagship[0] ??
+    products[0];
+
+  const doors = featured ? tierDoors(bands, featured, customerType) : [];
+  const yourTier = doorForQuantity(DEFAULT_QUANTITY);
+
+  const proofRows: LadderProofRow[] = spreads
+    .filter(({ product }) => product.id !== featured?.id)
+    .sort((a, b) => {
+      // The flagship category first, then by value, so the strip reads as the
+      // same catalogue the hero came from rather than a random sample of it.
+      const aFlagship = a.product.category_id === FLAGSHIP_CATEGORY ? 0 : 1;
+      const bFlagship = b.product.category_id === FLAGSHIP_CATEGORY ? 0 : 1;
+      return aFlagship - bFlagship || b.spread.from - a.spread.from;
+    })
+    .slice(0, 4)
+    .map(({ product, spread }) => ({
+      product,
+      image: primaryImage.get(product.id),
+      ...spread,
+    }));
+
+  const flagshipCategory = categories.find((category) => category.id === FLAGSHIP_CATEGORY);
 
   return (
     <>
-      {/* ── Hero ───────────────────────────────────────────────────────── */}
-      <section className="grain relative overflow-hidden bg-ink">
-        {/*
-          Full-bleed photograph under a heavy tonal overlay. The image sets the
-          scene; the overlay is what keeps the headline at full contrast, so the
-          text never depends on which part of the photo sits behind it.
-        */}
-        {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img
-          src="/products/hero.jpg"
-          alt=""
-          aria-hidden="true"
-          className="pointer-events-none absolute inset-0 h-full w-full object-cover opacity-[0.28]"
-        />
-        <div
-          aria-hidden="true"
-          className="pointer-events-none absolute inset-0 bg-gradient-to-r from-ink via-ink/90 to-ink/60"
-        />
-        <div
-          aria-hidden="true"
-          className="pointer-events-none absolute inset-0 bg-[radial-gradient(120%_80%_at_78%_18%,rgba(212,146,10,0.16),transparent_58%)]"
-        />
+      {/* ── The offer, priced ──────────────────────────────────────────── */}
+      {/*
+        The hero is two materials that never blend. The showroom is the
+        photograph on the right - an order arriving, which is the end of the
+        sentence the headline starts. The instrument is the ink panel set down
+        across its lower edge, carrying the published ladder.
 
-        <div className="relative mx-auto grid max-w-market gap-14 px-6 pb-24 pt-32 lg:grid-cols-[minmax(0,1.05fr)_minmax(0,0.95fr)] lg:items-center lg:gap-16 lg:pb-28 lg:pt-40">
-          <div>
-            <Reveal>
-              <p className="eyebrow text-white/40">Botswana · South Africa</p>
-            </Reveal>
+        The photograph is a framed object rather than a bleed behind the whole
+        section. Run full-bleed it sat behind the three doors as well, and those
+        cards are washed tints: a picture reading through them turned three flat
+        panels into three windows onto the same photograph.
 
-            <Reveal delay={0.06}>
-              <h1 className="mt-4 font-display text-[42px] font-bold leading-[1.04] tracking-[-0.035em] text-white sm:text-[56px] lg:text-[64px]">
-                Africa&rsquo;s marketplace.
-                <br />
-                <span className="text-gold-light">Your way.</span>
-              </h1>
-            </Reveal>
+        The text column sits on flat warm ground, never on the picture, so every
+        line of it clears AA without a scrim doing the work.
+      */}
+      
+      <MockupHero />
 
-            <Reveal delay={0.12}>
-              <p className="measure mt-6 text-[16px] leading-8 text-white/60">
-                Buy from suppliers who have been verified before they were allowed to list. Your
-                payment sits in escrow, untouched, until you confirm the goods actually arrived.
-              </p>
-            </Reveal>
-
-            <Reveal delay={0.18}>
-              <div className="mt-9 flex flex-wrap items-center gap-3">
-                <Link href="/browse">
-                  <GoldButton variant="gold" size="lg" withArrow>
-                    Browse the marketplace
-                  </GoldButton>
-                </Link>
-                <Link href="/login">
-                  <GoldButton
-                    variant="ghost"
-                    size="lg"
-                    className="text-white ring-white/20 hover:bg-white/[0.08]"
-                  >
-                    Become a supplier
-                  </GoldButton>
-                </Link>
+      {/* Choose how to buy + Popular categories */}
+      <section className="bg-white py-8">
+        <div className="mx-auto max-w-[1400px] px-4">
+          <div className="grid gap-10 lg:grid-cols-[1fr_1fr] lg:gap-12">
+            <div>
+              <h2 className="mb-5 text-[20px] font-bold text-gray-900">Choose how you want to buy</h2>
+              <PathChooser />
+            </div>
+            <div>
+              <div className="mb-5 flex items-center justify-between">
+                <h2 className="text-[20px] font-bold text-gray-900">Popular categories</h2>
+                <Link href="/browse" className="flex items-center gap-1 text-[13px] font-bold text-[#E67E22] hover:underline">View all &#8594;</Link>
               </div>
-            </Reveal>
-
-            <Reveal delay={0.24}>
-              <dl className="mt-14 grid max-w-lg grid-cols-3 gap-6 border-t border-white/10 pt-8">
-                {[
-                  [String(verified.length), 'verified suppliers'],
-                  [String(products.length), 'products listed'],
-                  [String(delivered), 'orders delivered'],
-                ].map(([value, label]) => (
-                  <div key={label}>
-                    <dt className="font-mono text-[26px] font-semibold leading-none tabular-nums text-white">
-                      {value}
-                    </dt>
-                    <dd className="mt-2 text-[12.5px] leading-4 text-white/40">{label}</dd>
-                  </div>
-                ))}
-              </dl>
-            </Reveal>
+              <MockupCategories />
+            </div>
           </div>
-
-          {sample && (
-            <Float delay={0.2} className="lg:justify-self-end">
-              <div className="w-full max-w-[400px] rounded-xl bg-white/[0.06] p-1.5 ring-1 ring-white/10 backdrop-blur-sm">
-                <div className="rounded-[calc(2rem-0.375rem)] bg-[#1a1a1a] p-6 shadow-[inset_0_1px_1px_rgba(255,255,255,0.08)]">
-                  <div className="flex items-center justify-between">
-                    <span className="flex items-center gap-2.5">
-                      <AfriDealMark size={22} tone="gold" />
-                      <span className="font-mono text-[10px] uppercase tracking-[0.18em] text-white/40">
-                        Escrow receipt
-                      </span>
-                    </span>
-                    <span className="inline-flex items-center gap-1.5 rounded-full bg-forest/25 px-2.5 py-1 text-[11px] font-medium text-[#8FD69F] ring-1 ring-inset ring-forest/30">
-                      <Lock size={11} strokeWidth={2} />
-                      Released
-                    </span>
-                  </div>
-
-                  <p className="mt-7 text-[12px] text-white/40">Held on behalf of the buyer</p>
-                  <p className="mt-1">
-                    <MoneyText amount={sample.total} size="xl" tone="white" />
-                  </p>
-
-                  <dl className="mt-7 space-y-3.5 border-t border-white/10 pt-5 text-[12.5px]">
-                    {[
-                      ['Reference', sample.reference],
-                      ['Buyer', sample.customer_name],
-                      ['Destination', sample.delivery_city],
-                    ].map(([label, value]) => (
-                      <div key={label} className="flex items-center justify-between gap-4">
-                        <dt className="text-white/40">{label}</dt>
-                        <dd className="truncate font-mono tabular-nums text-white/85">{value}</dd>
-                      </div>
-                    ))}
-                  </dl>
-
-                  <div className="mt-6 flex items-start gap-2.5 rounded border border-white/10 bg-white/[0.03] p-3.5">
-                    <ShieldCheck
-                      size={15}
-                      strokeWidth={1.5}
-                      className="mt-0.5 shrink-0 text-[#8FD69F]"
-                    />
-                    <p className="text-[12px] leading-5 text-white/50">
-                      Funds were released to the supplier only after the buyer confirmed delivery.
-                    </p>
-                  </div>
-                </div>
-              </div>
-            </Float>
-          )}
         </div>
       </section>
 
+      <StatsBanner />
+
+      <PromoCards />
+
+      <TrustPaymentStrip />
+
+      {/* ── What you pay at each quantity ──────────────────────────────── */}
+      {featured && doors.length > 0 && (
+        <section id="packages" className="py-4">
+          <div className="mx-auto max-w-market px-6 py-20 lg:py-24">
+            <div className="grid gap-10 lg:grid-cols-[minmax(0,0.72fr)_minmax(0,1.28fr)] lg:gap-20">
+              <div className="min-w-0 lg:sticky lg:top-28 lg:self-start">
+                <h2 className="font-display text-headline-lg font-semibold leading-tight text-ink">
+                  The price depends on who is buying, and how many
+                </h2>
+                <p className="measure mt-4 text-[14.5px] leading-7 text-body">
+                  A product does not have one universal price. AfriDeal buys from the supplier and
+                  resells to you at a published markup that falls as the quantity rises:{' '}
+                  <span className="font-mono tabular-nums text-ink">{MARKUP_PCT.RETAIL}%</span> at
+                  retail down to{' '}
+                  <span className="font-mono tabular-nums text-ink">
+                    {MARKUP_PCT.WHOLESALE_PLUS}%
+                  </span>{' '}
+                  at fifty units. The same five packages run on every product, and the rung your
+                  quantity falls on is applied automatically at checkout.
+                </p>
+
+                {/*
+                  Which rung the reader is on right now, stated plainly. The
+                  board marks it too, but a reader who scanned the heading and
+                  stopped should still leave knowing the answer.
+                */}
+                <p className="mt-6 inline-flex items-center gap-2 rounded-full bg-forest-wash px-4 py-2 text-[13px] font-medium text-forest-ink ring-1 ring-inset ring-forest/20">
+                  <BadgeCheck size={15} strokeWidth={1.6} aria-hidden="true" className="text-forest" />
+                  You are on the Retail tier
+                </p>
+
+                <p className="mt-4 text-[13px] leading-6 text-muted">
+                  Take five units and the Bulk price applies on its own. Nothing to apply for, and
+                  no rung is hidden behind an account.
+                </p>
+
+                <Link
+                  href="/browse"
+                  className="mt-6 inline-flex items-center gap-1.5 text-[13.5px] font-medium text-forest underline-offset-4 hover:underline"
+                >
+                  See the whole catalogue
+                  <ArrowRight size={13} strokeWidth={1.75} aria-hidden="true" />
+                </Link>
+              </div>
+
+              <div className="min-w-0">
+                <p className="text-[12.5px] leading-5 text-muted">
+                  Priced on <span className="font-medium text-ink">{featured.name}</span>, per unit.
+                </p>
+
+                <PackagesBoard
+                  doors={doors}
+                  productName={featured.name}
+                  activeTier={yourTier}
+                  className="mt-4"
+                />
+
+                {/*
+                  The same claim, checked against four more products. The board
+                  above could be one generous product; this is the part that
+                  says it is the catalogue.
+                */}
+                {proofRows.length > 0 && (
+                  <div className="mt-10 border-t border-hairline pt-8">
+                    <h3 className="text-[14px] font-semibold text-ink">And on everything else</h3>
+                    <p className="mt-1.5 text-[13px] leading-5 text-muted">
+                      Retail price, the deepest published price, and what the drop is worth per
+                      unit — up to{' '}
+                      <span className="font-mono tabular-nums text-ink">
+                        {deepestSavingPct().toFixed(0)}%
+                      </span>{' '}
+                      off the retail rung.
+                    </p>
+                    <LadderProof rows={proofRows} className="mt-5" />
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+        </section>
+      )}
+
+      {/* ── The flagship category ──────────────────────────────────────── */}
+      {flagship.length > 0 && (
+        <section className="mx-auto max-w-market px-6 pt-20 lg:pt-24">
+          <ProductRail
+            products={flagship.map(decorate)}
+            images={images}
+            title={flagshipCategory?.name ?? 'Hair, Weaves & Extensions'}
+            description="Bundles, frontals, closures, wigs and braiding hair, in the range salons reorder"
+            action={
+              <Link href="/browse?category=hair-weaves-extensions">
+                <ActionButton variant="ghost" size="sm">
+                  See all {flagship.length}
+                </ActionButton>
+              </Link>
+            }
+          />
+        </section>
+      )}
+
       {/* ── Categories ─────────────────────────────────────────────────── */}
       <section className="mx-auto max-w-market px-6 pt-20">
-        <Reveal>
-          <CategoryTiles categories={categories} products={products} />
-        </Reveal>
+        <CategoryTiles categories={categories} products={products} />
       </section>
 
       {/* ── Live deals ─────────────────────────────────────────────────── */}
       {onPromotion.length > 0 && (
         <section className="mx-auto max-w-market px-6 pt-20">
-          <Reveal>
-            <FlashDealsRail products={onPromotion} images={images} />
-          </Reveal>
+          <FlashDealsRail products={onPromotion} images={images} />
         </section>
       )}
 
-      {/* ── Suppliers near you ─────────────────────────────────────────── */}
-      <section className="mx-auto max-w-market px-6 pt-20">
-        <Reveal>
-          <SupplierRail suppliers={verified} />
-        </Reveal>
-      </section>
+      {/* ── How the order actually runs ────────────────────────────────── */}
+      <section id="how-it-works" className="mt-24 py-4">
+        <div className="mx-auto max-w-market px-6 py-20 lg:py-24">
+          <div className="grid gap-8 lg:grid-cols-[minmax(0,0.8fr)_minmax(0,1.2fr)] lg:items-end lg:gap-20">
+            <div className="min-w-0">
+              <h2 className="font-display text-headline-lg font-semibold leading-tight text-ink">
+                How it works
+              </h2>
+              <p className="measure mt-4 text-[14.5px] leading-7 text-body">
+                You are buying from AfriDeal, not from the supplier. We are the merchant on your
+                order rather than an introduction service, so you get one invoice and one number to
+                call — and if the order goes wrong it is ours to fix.
+              </p>
+            </div>
 
-      {/* ── New arrivals ───────────────────────────────────────────────── */}
-      <section className="mx-auto max-w-market px-6 pt-20">
-        <Reveal>
-          <ProductRail
-            products={newArrivals}
-            images={images}
-            title="New arrivals"
-            description="Most recently listed by verified suppliers"
-            action={
-              <Link href="/browse">
-                <GoldButton variant="ghost" size="sm">
-                  See all {products.length}
-                </GoldButton>
+            <div className="min-w-0 lg:justify-self-end">
+              <Link
+                href="/how-it-works"
+                className="inline-flex items-center gap-1.5 text-[13.5px] font-medium text-forest underline-offset-4 hover:underline"
+              >
+                See both flows, step by step
+                <ArrowRight size={13} strokeWidth={1.75} aria-hidden="true" />
               </Link>
-            }
-          />
-        </Reveal>
-      </section>
+            </div>
+          </div>
 
-      {/* ── How escrow works ───────────────────────────────────────────── */}
-      <section className="mt-24 border-y border-hairline bg-surface-raised">
-        <div className="mx-auto grid max-w-market gap-14 px-6 py-24 lg:grid-cols-[minmax(0,0.8fr)_minmax(0,1.2fr)] lg:gap-20">
-          <Reveal className="lg:sticky lg:top-28 lg:self-start">
-            <p className="eyebrow">How you are protected</p>
-            <h2 className="mt-3 font-display text-headline-lg font-semibold leading-tight text-ink">
-              The money moves last
-            </h2>
-            <p className="measure mt-4 text-[14.5px] leading-7 text-body">
-              A marketplace is only worth using if the payment cannot disappear ahead of the goods.
-              Every order runs through the same four states, and a supplier is paid at the fourth.
-            </p>
-          </Reveal>
-
-          <ol className="relative">
-            {[
-              {
-                state: 'Paid',
-                tone: 'amber',
-                title: 'You pay AfriDeal, not the supplier',
-                body: 'The payment settles into a platform-held account through DPO Pay, Orange Money or PayGate. The supplier can see that it landed. They cannot touch it.',
-                icon: <Lock size={15} strokeWidth={1.5} />,
-              },
-              {
-                state: 'Held',
-                tone: 'amber',
-                title: 'The order is routed and prepared',
-                body: 'Your order splits to whichever verified suppliers are carrying the stock. Each of them sees only their own part of it, and each has their own escrow leg.',
-                icon: <PackageCheck size={15} strokeWidth={1.5} />,
-              },
-              {
-                state: 'In transit',
-                tone: 'ink',
-                title: 'A runner collects and delivers',
-                body: 'Pickup and delivery are tracked against the order. If a leg fails, that leg refunds without unwinding the rest of the order.',
-                icon: <Truck size={15} strokeWidth={1.5} />,
-              },
-              {
-                state: 'Released',
-                tone: 'green',
-                title: 'You confirm, and only then is the supplier paid',
-                body: 'Nothing releases automatically on a timer. If what arrived is wrong, you raise a dispute instead and the funds freeze until it is resolved.',
-                icon: <BadgeCheck size={15} strokeWidth={1.5} />,
-              },
-            ].map((step, index, all) => (
-              <Reveal key={step.state} delay={index * 0.08}>
-                <li className="relative flex gap-5 pb-9 last:pb-0">
-                  {index < all.length - 1 && (
-                    <span className="absolute left-[19px] top-11 h-[calc(100%-1rem)] w-px bg-hairline-strong" />
-                  )}
-
-                  <span
-                    className={`relative z-10 flex h-10 w-10 shrink-0 items-center justify-center rounded-full ring-1 ring-inset ${
-                      step.tone === 'amber'
-                        ? 'bg-gold-50 text-gold-700 ring-gold/25'
-                        : step.tone === 'green'
-                          ? 'bg-forest-wash text-forest ring-forest/20'
-                          : 'bg-ink/[0.06] text-ink ring-hairline-strong'
-                    }`}
-                  >
-                    {step.icon}
-                  </span>
-
-                  <div className="min-w-0 flex-1 pt-1">
-                    <p className="font-mono text-[10px] uppercase tracking-[0.18em] text-muted">
-                      {step.state}
-                    </p>
-                    <h3 className="mt-1.5 text-[16px] font-semibold leading-6 text-ink">
-                      {step.title}
-                    </h3>
-                    <p className="measure mt-2 text-[13.5px] leading-6 text-body">{step.body}</p>
-                  </div>
-                </li>
-              </Reveal>
-            ))}
-          </ol>
+          <HowItWorks className="mt-14" />
         </div>
       </section>
 
-      {/* ── Account tiers ──────────────────────────────────────────────── */}
-      <section className="mx-auto max-w-market px-6 py-24">
-        <Reveal>
-          <CustomerTierBar customerType={customerType} />
-        </Reveal>
+      {/*
+        The conditions under which everything above is true, on the forest band
+        that closes the page's argument. No heading: it is a specification plate
+        under the sequence, not a section making its own case.
+      */}
+      <section className="bg-forest-deep">
+        <div className="mx-auto max-w-market px-6 py-12">
+          <TrustStrip tone="dark" />
+        </div>
       </section>
 
-      {/* ── Supplier CTA ───────────────────────────────────────────────── */}
-      <section className="mx-auto max-w-market px-6 pb-24">
-        <Reveal>
-          <div className="grain relative overflow-hidden rounded-xl bg-ink px-8 py-14 text-center sm:px-14">
-            <div
-              aria-hidden="true"
-              className="pointer-events-none absolute inset-0 bg-[radial-gradient(90%_120%_at_50%_0%,rgba(212,146,10,0.20),transparent_60%)]"
-            />
-            <div className="relative">
-              <h2 className="mx-auto max-w-2xl font-display text-[30px] font-bold leading-[1.12] tracking-[-0.025em] text-white sm:text-[38px]">
-                Sell into Botswana and South Africa without chasing payment
-              </h2>
-              <p className="mx-auto mt-5 max-w-xl text-[15px] leading-7 text-white/55">
-                You see the money land in escrow before you pick and pack, and it settles to you once
-                the buyer confirms. Verification takes a few days.
-              </p>
-              <div className="mt-8 flex flex-wrap justify-center gap-3">
-                <Link href="/login">
-                  <GoldButton variant="gold" size="lg" withArrow>
-                    Apply as a supplier
-                  </GoldButton>
-                </Link>
-                <Link href="/browse">
-                  <GoldButton
-                    variant="ghost"
-                    size="lg"
-                    className="text-white ring-white/20 hover:bg-white/[0.08]"
-                  >
-                    See what sells
-                  </GoldButton>
-                </Link>
-              </div>
+      {/* ── Trade enquiries ────────────────────────────────────────────── */}
+      <section className="mx-auto max-w-market px-6 pb-24 pt-20">
+        <div className="grain relative overflow-hidden rounded-xl bg-[#111111] px-8 py-14 text-center sm:px-14">
+          <div
+            aria-hidden="true"
+            className="pointer-events-none absolute inset-0 bg-[radial-gradient(90%_120%_at_50%_0%,rgba(192,138,30,0.20),transparent_60%)]"
+          />
+          <div className="relative">
+            <h2 className="mx-auto max-w-2xl font-display text-[30px] font-bold leading-[1.12] tracking-[-0.025em] text-white sm:text-[38px]">
+              Buying {QUOTATION_THRESHOLD} units or more?
+            </h2>
+            <p className="mx-auto mt-5 max-w-xl text-[15px] leading-7 text-white/55">
+              Above the published packages we quote rather than list, because at that volume the
+              price depends on your delivery point and how much notice you can give us. Send the
+              specification and we will come back with a written quotation.
+            </p>
+            <div className="mt-8 flex flex-wrap justify-center gap-3">
+              <Link href="/browse?tier=CUSTOM">
+                <ActionButton variant="primary" size="lg" withArrow>
+                  Request a quotation
+                </ActionButton>
+              </Link>
+              <Link href="/login">
+                <ActionButton
+                  variant="ghost"
+                  size="lg"
+                  className="text-white ring-white/20 hover:bg-white/[0.08]"
+                >
+                  Apply as a supplier
+                </ActionButton>
+              </Link>
             </div>
           </div>
-        </Reveal>
+        </div>
       </section>
     </>
   );

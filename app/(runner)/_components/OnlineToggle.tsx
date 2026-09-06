@@ -12,7 +12,7 @@ import { cn } from '@/lib/utils';
  *
  * Full-width and impossible to miss, per the brief: forest green and "You're
  * online" when accepting jobs, inert grey and "You're offline" when not.
- * Optimistic — flips immediately, rolls back if the PATCH fails.
+ * Optimistic - flips immediately, rolls back if the PATCH fails.
  */
 export function OnlineToggle({ runnerId, initialOnline }: { runnerId: string; initialOnline: boolean }) {
   const router = useRouter();
@@ -36,7 +36,7 @@ export function OnlineToggle({ runnerId, initialOnline }: { runnerId: string; in
         throw new Error(error ?? 'Could not update your status.');
       }
 
-      toast.success(next ? "You're online — job alerts are on" : "You're offline");
+      toast.success(next ? "You're online - job alerts are on" : "You're offline");
       router.refresh();
     } catch (error) {
       setOnline(!next);

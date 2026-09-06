@@ -3,7 +3,7 @@ import 'server-only';
 import { readAll } from '@/lib/db';
 import { rankOffers } from '@/lib/supplier-selection';
 import type {
-  EscrowRecord,
+  SupplierPayable,
   Order,
   OrderItem,
   Product,
@@ -23,16 +23,16 @@ import type {
 export interface OrderDetail {
   order: Order;
   items: OrderItem[];
-  legs: (SupplierOrder & { supplier: Supplier | null; items: OrderItem[]; escrow: EscrowRecord | null })[];
-  escrow: EscrowRecord[];
+  legs: (SupplierOrder & { supplier: Supplier | null; items: OrderItem[]; payable: SupplierPayable | null })[];
+  payables: SupplierPayable[];
 }
 
 export async function getOrderDetail(orderId: string): Promise<OrderDetail | null> {
-  const [orders, items, legs, escrow, suppliers] = await Promise.all([
+  const [orders, items, legs, payableRecords, suppliers] = await Promise.all([
     readAll('orders'),
     readAll('order-items'),
     readAll('supplier-orders'),
-    readAll('escrow'),
+    readAll('supplier-payables'),
     readAll('suppliers'),
   ]);
 
@@ -40,19 +40,19 @@ export async function getOrderDetail(orderId: string): Promise<OrderDetail | nul
   if (!order) return null;
 
   const orderItems = items.filter((item) => item.order_id === orderId);
-  const orderEscrow = escrow.filter((record) => record.order_id === orderId);
+  const orderPayables = payableRecords.filter((record) => record.order_id === orderId);
 
   return {
     order,
     items: orderItems,
-    escrow: orderEscrow,
+    payables: orderPayables,
     legs: legs
       .filter((leg) => leg.order_id === orderId)
       .map((leg) => ({
         ...leg,
         supplier: suppliers.find((supplier) => supplier.id === leg.supplier_id) ?? null,
         items: orderItems.filter((item) => leg.item_ids.includes(item.id)),
-        escrow: orderEscrow.find((record) => record.supplier_order_id === leg.id) ?? null,
+        payable: orderPayables.find((record) => record.supplier_order_id === leg.id) ?? null,
       })),
   };
 }
@@ -61,7 +61,7 @@ export interface ProductDetail {
   product: Product;
   categoryName: string;
   selection: SelectionResult;
-  /** Every offer including unverified suppliers — admin view only. */
+  /** Every offer including unverified suppliers - admin view only. */
   allSelection: SelectionResult;
 }
 
@@ -171,14 +171,14 @@ export async function getCatalogue() {
 
 /** Everything one supplier is allowed to see about itself. */
 export async function getSupplierWorkspace(supplierId: string) {
-  const [suppliers, offers, products, legs, orders, items, escrow, settlements] = await Promise.all([
+  const [suppliers, offers, products, legs, orders, items, payableRecords, settlements] = await Promise.all([
     readAll('suppliers'),
     readAll('supplier-offers'),
     readAll('products'),
     readAll('supplier-orders'),
     readAll('orders'),
     readAll('order-items'),
-    readAll('escrow'),
+    readAll('supplier-payables'),
     readAll('settlements'),
   ]);
 
@@ -196,15 +196,15 @@ export async function getSupplierWorkspace(supplierId: string) {
       ...leg,
       order: orders.find((order) => order.id === leg.order_id) ?? null,
       items: items.filter((item) => leg.item_ids.includes(item.id)),
-      escrow: escrow.find((record) => record.supplier_order_id === leg.id) ?? null,
+      payable: payableRecords.find((record) => record.supplier_order_id === leg.id) ?? null,
     })),
     orders: orders.filter((order) => myOrderIds.has(order.id)),
-    escrow: escrow.filter((record) => record.supplier_id === supplierId),
+    payables: payableRecords.filter((record) => record.supplier_id === supplierId),
     settlements: settlements.filter((settlement) => settlement.supplier_id === supplierId),
   };
 }
 
-/** Runner workspace — their jobs, and the open pool they can accept from. */
+/** Runner workspace - their jobs, and the open pool they can accept from. */
 export async function getRunnerWorkspace(runnerId: string) {
   const [runners, shipments, orders, suppliers] = await Promise.all([
     readAll('runners'),
@@ -241,11 +241,12 @@ export async function getNotifications(userId: string) {
 
 /** Counts the admin sidebar shows as badges. */
 export async function getAdminBadges() {
-  const [suppliers, disputes, escrow, legs] = await Promise.all([
+  const [suppliers, disputes, payableRecords, legs, sourcing] = await Promise.all([
     readAll('suppliers'),
     readAll('disputes'),
-    readAll('escrow'),
+    readAll('supplier-payables'),
     readAll('supplier-orders'),
+    readAll('runner-requests'),
   ]);
 
   return {
@@ -253,7 +254,8 @@ export async function getAdminBadges() {
     openDisputes: disputes.filter(
       (dispute) => dispute.status === 'OPEN' || dispute.status === 'UNDER_REVIEW',
     ).length,
-    heldEscrow: escrow.filter((record) => record.status === 'HELD').length,
+    pendingPayables: payableRecords.filter((record) => record.status === 'PENDING').length,
     awaitingConfirmation: legs.filter((leg) => leg.status === 'AWAITING_CONFIRMATION').length,
+    unclaimedSourcing: sourcing.filter((request) => request.status === 'REQUESTED').length,
   };
 }

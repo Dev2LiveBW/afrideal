@@ -4,7 +4,7 @@ import { useEffect } from 'react';
 import { RotateCw } from 'lucide-react';
 
 import { AfriDealLogo } from '@/components/brand/AfriDealLogo';
-import { GoldButton } from '@/components/brand/GoldButton';
+import { ActionButton } from '@/components/brand/ActionButton';
 
 export default function ErrorBoundary({
   error,
@@ -26,7 +26,7 @@ export default function ErrorBoundary({
         We could not finish loading this.
       </h1>
       <p className="measure mt-4 text-[15px] leading-7 text-white/55">
-        No order, payment or escrow record was changed by whatever went wrong here. Try again, and if
+        No order, payment or settlement record was changed by whatever went wrong here. Try again, and if
         it keeps happening the message below is what to send us.
       </p>
 
@@ -35,14 +35,13 @@ export default function ErrorBoundary({
       </code>
 
       <div className="mt-8">
-        <GoldButton
-          variant="gold"
+        <ActionButton
           size="md"
           onClick={reset}
           icon={<RotateCw size={15} strokeWidth={1.5} />}
         >
           Try again
-        </GoldButton>
+        </ActionButton>
       </div>
     </main>
   );

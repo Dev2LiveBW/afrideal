@@ -2,7 +2,7 @@ import { z } from 'zod';
 
 import { fail, guard, handled, ok } from '@/lib/api';
 import { findById, update } from '@/lib/db';
-import { applyTransition } from '@/lib/escrow';
+import { applyTransition } from '@/lib/payables';
 import { audit, notify } from '@/lib/notifications';
 
 export const dynamic = 'force-dynamic';
@@ -15,7 +15,7 @@ const PatchSchema = z.object({
 /**
  * PATCH /api/disputes/:id
  *
- * Resolving a dispute is the moment the frozen escrow moves: in the customer's
+ * Resolving a claim is the moment the paused supplier invoice moves: in the customer's
  * favour it refunds, in the supplier's it releases. Both happen here so the two
  * records can never disagree about who got the money.
  */
@@ -34,14 +34,14 @@ export const PATCH = handled(async (request: Request, { params }: { params: { id
   const resolving = parsed.data.status !== 'UNDER_REVIEW';
 
   if (resolving) {
-    const escrowRecord = await findById('escrow', dispute.escrow_id);
-    if (escrowRecord && escrowRecord.status === 'DISPUTED') {
-      const outcome = parsed.data.status === 'RESOLVED_CUSTOMER' ? 'REFUNDED' : 'RELEASED';
+    const payableRecord = await findById('supplier-payables', dispute.payable_id);
+    if (payableRecord && payableRecord.status === 'ON_HOLD') {
+      const outcome = parsed.data.status === 'RESOLVED_CUSTOMER' ? 'CANCELLED' : 'SETTLED';
       await update(
-        'escrow',
-        escrowRecord.id,
+        'supplier-payables',
+        payableRecord.id,
         applyTransition(
-          escrowRecord,
+          payableRecord,
           outcome,
           actor.name,
           parsed.data.resolution_note ?? `Dispute resolved in the ${

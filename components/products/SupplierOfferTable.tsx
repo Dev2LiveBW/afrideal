@@ -6,7 +6,7 @@ import { CheckCircle2, PackageX, Repeat2, ShieldCheck } from 'lucide-react';
 import toast from 'react-hot-toast';
 
 import { ConfirmDialog } from '@/components/brand/ConfirmDialog';
-import { GoldButton } from '@/components/brand/GoldButton';
+import { ActionButton } from '@/components/brand/ActionButton';
 import { MoneyText } from '@/components/brand/MoneyText';
 import { shortDate } from '@/lib/format';
 import { cn } from '@/lib/utils';
@@ -137,7 +137,7 @@ export function SupplierOfferTable({
                           initial={{ width: 0 }}
                           animate={{ width: `${(entry.score / best) * 100}%` }}
                           transition={{ delay: 0.15 + index * 0.045, duration: 0.7, ease: [0.16, 1, 0.3, 1] }}
-                          className={cn('h-full rounded-full', isPrimary ? 'bg-forest' : 'bg-gold')}
+                          className={cn('h-full rounded-full', isPrimary ? 'bg-forest' : 'bg-ink/20')}
                         />
                       </div>
                       <span className="font-mono text-[13px] font-medium tabular-nums text-ink">
@@ -162,14 +162,14 @@ export function SupplierOfferTable({
                           {entry.label}
                         </span>
                         {onOverride && (
-                          <GoldButton
+                          <ActionButton
                             variant="ghost"
                             size="sm"
                             icon={<Repeat2 size={13} strokeWidth={1.5} />}
                             onClick={() => setPending(entry)}
                           >
                             Override
-                          </GoldButton>
+                          </ActionButton>
                         )}
                       </div>
                     )}
@@ -185,7 +185,7 @@ export function SupplierOfferTable({
       <div className="flex items-start gap-2.5 border-t border-hairline bg-forest-wash/40 px-5 py-3.5">
         <CheckCircle2 size={15} strokeWidth={1.5} className="mt-0.5 shrink-0 text-forest" />
         <p className="text-[13px] leading-5 text-forest-ink">
-          <span className="font-medium">{offers[0].supplier.name}</span> — {offers[0].reason}
+          <span className="font-medium">{offers[0].supplier.name}</span> - {offers[0].reason}
         </p>
       </div>
 

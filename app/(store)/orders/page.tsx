@@ -2,10 +2,11 @@ import type { Metadata } from 'next';
 import Link from 'next/link';
 import { LogIn, PackageOpen } from 'lucide-react';
 
-import { GoldButton } from '@/components/brand/GoldButton';
+import { ActionButton } from '@/components/brand/ActionButton';
 import { MoneyText } from '@/components/brand/MoneyText';
 import { StatusBadge } from '@/components/brand/StatusBadge';
 import { EmptyState } from '@/components/brand/Panel';
+import { Swatch } from '@/components/storefront/Swatch';
 import { auth } from '@/lib/auth';
 import { readAll } from '@/lib/db';
 import { PAYMENT_LABELS, shortDate } from '@/lib/format';
@@ -22,12 +23,12 @@ export default async function OrdersPage() {
         <EmptyState
           icon={<LogIn size={22} strokeWidth={1.5} />}
           title="Sign in to see your orders"
-          description="Order history and escrow status are tied to your account."
+          description="Your order history and delivery status, tied to your account."
           action={
             <Link href="/login">
-              <GoldButton variant="gold" size="md" withArrow>
+              <ActionButton size="md" withArrow>
                 Sign in
-              </GoldButton>
+              </ActionButton>
             </Link>
           }
           className="rounded-md border border-hairline bg-surface-raised"
@@ -36,7 +37,16 @@ export default async function OrdersPage() {
     );
   }
 
-  const [allOrders, allItems] = await Promise.all([readAll('orders'), readAll('order-items')]);
+  const [allOrders, allItems, allImages] = await Promise.all([
+    readAll('orders'),
+    readAll('order-items'),
+    readAll('product-images'),
+  ]);
+
+  // One lookup for the whole page rather than a scan per line in the stack.
+  const primaryImage = new Map(
+    allImages.filter((image) => image.sort_order === 0).map((image) => [image.product_id, image]),
+  );
 
   const orders = allOrders
     .filter((order) => order.customer_id === session.user.id)
@@ -44,23 +54,22 @@ export default async function OrdersPage() {
 
   return (
     <div className="mx-auto max-w-market px-6 pb-24 pt-28">
-      <p className="eyebrow">Account</p>
-      <h1 className="mt-3 font-display text-headline-lg font-semibold text-ink">Your orders</h1>
+      <h1 className="font-display text-headline-lg font-semibold text-ink">Your orders</h1>
       <p className="measure mt-2 text-[14px] leading-6 text-body">
-        Every order here is backed by escrow. Nothing is paid out to a supplier until you confirm it
-        arrived.
+        Every order here is covered by AfriDeal buyer protection. Confirm each one as it arrives,
+        and if something is wrong, report it and we will put it right.
       </p>
 
       {orders.length === 0 ? (
         <EmptyState
           icon={<PackageOpen size={22} strokeWidth={1.5} />}
           title="No orders yet"
-          description="When you place an order it will appear here with live tracking and its escrow status."
+          description="When you place an order it will appear here with live tracking and delivery status."
           action={
             <Link href="/browse">
-              <GoldButton variant="gold" size="md" withArrow>
+              <ActionButton size="md" withArrow>
                 Browse the marketplace
-              </GoldButton>
+              </ActionButton>
             </Link>
           }
           className="mt-8 rounded-md border border-hairline bg-surface-raised"
@@ -78,12 +87,15 @@ export default async function OrdersPage() {
                 >
                   <div className="flex -space-x-2" aria-hidden="true">
                     {items.slice(0, 3).map((item) => (
-                      <span
+                      <Swatch
                         key={item.id}
-                        className="flex h-11 w-11 items-center justify-center rounded-full border-2 border-surface-raised bg-surface-sunk text-[19px]"
-                      >
-                        {item.emoji}
-                      </span>
+                        image={primaryImage.get(item.product_id)}
+                        fallback={['#ECEBE7', '#8A918B']}
+                        emoji={item.emoji}
+                        className="h-11 w-11 rounded-full border-2 border-surface-raised"
+                        glyphClassName="text-[19px]"
+                        zoomOnHover={false}
+                      />
                     ))}
                     {items.length > 3 && (
                       <span className="flex h-11 w-11 items-center justify-center rounded-full border-2 border-surface-raised bg-ink font-mono text-[11px] font-semibold text-white">
@@ -97,8 +109,8 @@ export default async function OrdersPage() {
                       {order.reference}
                     </p>
                     <p className="mt-0.5 text-[12.5px] text-body">
-                      {shortDate(order.placed_at)} · {items.length}{' '}
-                      {items.length === 1 ? 'item' : 'items'} ·{' '}
+                      {shortDate(order.placed_at)} Â· {items.length}{' '}
+                      {items.length === 1 ? 'item' : 'items'} Â·{' '}
                       {PAYMENT_LABELS[order.payment_method] ?? order.payment_method}
                     </p>
                   </div>
@@ -106,7 +118,7 @@ export default async function OrdersPage() {
                   <StatusBadge status={order.status} />
 
                   <div className="text-right">
-                    <MoneyText amount={order.total} size="md" tone="gold" />
+                    <MoneyText amount={order.total} size="md" tone="ink" />
                   </div>
 
                   <span className="font-mono text-[10px] uppercase tracking-[0.14em] text-muted transition-colors group-hover:text-ink">

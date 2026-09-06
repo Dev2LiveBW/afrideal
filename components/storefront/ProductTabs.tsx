@@ -4,12 +4,20 @@ import { useState } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
 import { Check, Star } from 'lucide-react';
 
+import { Swatch } from '@/components/storefront/Swatch';
 import { cn } from '@/lib/utils';
-import type { Product } from '@/types';
+import type { Product, ProductImage } from '@/types';
 
 type Tab = 'description' | 'specifications' | 'reviews';
 
-export function ProductTabs({ product }: { product: Product }) {
+export function ProductTabs({
+  product,
+  image,
+}: {
+  product: Product;
+  /** Sits behind the protection note; the swatch stands in when there is no photo. */
+  image?: ProductImage;
+}) {
   const [tab, setTab] = useState<Tab>('description');
 
   const tabs: { id: Tab; label: string }[] = [
@@ -46,7 +54,7 @@ export function ProductTabs({ product }: { product: Product }) {
               <motion.span
                 layoutId="product-tab-underline"
                 transition={{ duration: 0.32, ease: [0.16, 1, 0.3, 1] }}
-                className="absolute inset-x-0 -bottom-px h-[2px] rounded-full bg-gold"
+                className="absolute inset-x-0 -bottom-px h-[2px] rounded-full bg-forest"
               />
             )}
           </button>
@@ -88,16 +96,26 @@ export function ProductTabs({ product }: { product: Product }) {
               </ul>
             </div>
 
-            <div
-              className="relative hidden overflow-hidden rounded-lg p-6 lg:block"
-              style={{
-                background: `linear-gradient(150deg, ${product.swatch[0]} 0%, ${product.swatch[1]} 100%)`,
-              }}
-            >
-              <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-ink/80 to-transparent p-5">
-                <p className="text-[15px] font-semibold text-white">Backed by escrow</p>
+            <div className="relative hidden overflow-hidden rounded-lg lg:block">
+              <Swatch
+                image={image}
+                fallback={product.swatch}
+                emoji={product.emoji}
+                label={product.name}
+                className="h-full min-h-[220px] w-full"
+                zoomOnHover={false}
+              />
+
+              {/*
+                The scrim is what makes this readable over a photograph rather
+                than over a flat colour field, so it has to be opaque enough at
+                the base to carry white type on a bright image.
+              */}
+              <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-ink/90 via-ink/60 to-transparent p-5 pt-12">
+                <p className="text-[15px] font-semibold text-white">Buyer protection</p>
                 <p className="mt-1 text-[12.5px] leading-5 text-white/70">
-                  Your payment is held until you confirm this arrived and is what you ordered.
+                  Nothing is settled to the supplier until you confirm this arrived and is what
+                  you ordered.
                 </p>
               </div>
             </div>
@@ -162,7 +180,7 @@ export function ProductTabs({ product }: { product: Product }) {
                       </span>
                       <span className="h-1.5 flex-1 overflow-hidden rounded-full bg-ink/[0.07]">
                         <span
-                          className="block h-full rounded-full bg-gold"
+                          className="block h-full rounded-full bg-forest"
                           style={{ width: `${Math.round(weight * 100)}%` }}
                         />
                       </span>
@@ -174,7 +192,7 @@ export function ProductTabs({ product }: { product: Product }) {
 
             <p className="mt-3 text-[11.5px] leading-5 text-muted">
               Aggregated from {product.review_count.toLocaleString('en-GB')} verified purchases. Only
-              buyers whose escrow released against this product can review it. The per-star
+              buyers who took delivery of this product can review it. The per-star
               distribution is derived from the overall score rather than stored per review, so
               individual reviews are not shown.
             </p>

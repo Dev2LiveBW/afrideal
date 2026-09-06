@@ -8,7 +8,7 @@ import toast from 'react-hot-toast';
 
 import { TabButton } from '@/app/(admin)/admin/_components/TabButton';
 import { ConfirmDialog } from '@/components/brand/ConfirmDialog';
-import { GoldButton } from '@/components/brand/GoldButton';
+import { ActionButton } from '@/components/brand/ActionButton';
 import { MoneyText } from '@/components/brand/MoneyText';
 import { EmptyState } from '@/components/brand/Panel';
 import { StatusBadge } from '@/components/brand/StatusBadge';
@@ -20,8 +20,8 @@ export interface OrderRow {
   order: Order;
   itemCount: number;
   legs: { id: string; supplierName: string; status: SupplierOrderStatus }[];
-  heldEscrowIds: string[];
-  heldEscrowTotal: number;
+  pendingPayablesIds: string[];
+  pendingPayablesTotal: number;
 }
 
 const STATUS_TABS: { id: OrderStatus | 'ALL'; label: string }[] = [
@@ -52,12 +52,12 @@ export function OrdersTable({ rows }: { rows: OrderRow[] }) {
     if (!pending) return;
     setSaving(true);
     try {
-      const response = await fetch('/api/escrow', {
+      const response = await fetch('/api/payables', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          ids: pending.heldEscrowIds,
-          status: 'RELEASED',
+          ids: pending.pendingPayablesIds,
+          status: 'SETTLED',
           note: `Released from the orders queue for ${pending.order.reference}.`,
         }),
       });
@@ -68,9 +68,9 @@ export function OrdersTable({ rows }: { rows: OrderRow[] }) {
       const { moved, skipped } = (await response.json()) as { moved: string[]; skipped: { id: string; reason: string }[] };
 
       if (skipped.length === 0) {
-        toast.success(`Released ${moved.length} escrow leg${moved.length === 1 ? '' : 's'} for ${pending.order.reference}`);
+        toast.success(`Settled ${moved.length} supplier invoice${moved.length === 1 ? '' : 's'} for ${pending.order.reference}`);
       } else if (moved.length === 0) {
-        toast.error(`Nothing released — ${skipped.length} leg${skipped.length === 1 ? '' : 's'} could not move.`);
+        toast.error(`Nothing released - ${skipped.length} leg${skipped.length === 1 ? '' : 's'} could not move.`);
       } else {
         toast(`Released ${moved.length} of ${moved.length + skipped.length} legs for ${pending.order.reference}. ${skipped.length} could not move.`, { icon: '⚠️' });
       }
@@ -78,7 +78,7 @@ export function OrdersTable({ rows }: { rows: OrderRow[] }) {
       setPending(null);
       router.refresh();
     } catch (error) {
-      toast.error(error instanceof Error ? error.message : 'Could not release escrow');
+      toast.error(error instanceof Error ? error.message : 'Could not settle the invoices');
     } finally {
       setSaving(false);
     }
@@ -113,7 +113,7 @@ export function OrdersTable({ rows }: { rows: OrderRow[] }) {
                   <th>Payment</th>
                   <th className="w-[22%]">Supplier legs</th>
                   <th>Status</th>
-                  <th className="text-right">Escrow</th>
+                  <th className="text-right">Owed to suppliers</th>
                 </tr>
               </thead>
               <tbody>
@@ -122,7 +122,7 @@ export function OrdersTable({ rows }: { rows: OrderRow[] }) {
                     <td>
                       <Link
                         href={`/admin/orders/${row.order.id}`}
-                        className="font-mono text-[12.5px] font-medium text-ink transition-colors hover:text-gold-dark"
+                        className="font-mono text-[12.5px] font-medium text-ink transition-colors hover:text-forest"
                       >
                         {row.order.reference}
                       </Link>
@@ -144,7 +144,7 @@ export function OrdersTable({ rows }: { rows: OrderRow[] }) {
                           <span
                             key={leg.id}
                             className="whitespace-nowrap rounded-full bg-ink/[0.05] px-2 py-0.5 text-[10.5px] font-medium text-body"
-                            title={`${leg.supplierName} — ${humanise(leg.status)}`}
+                            title={`${leg.supplierName} - ${humanise(leg.status)}`}
                           >
                             {leg.supplierName} · {humanise(leg.status)}
                           </span>
@@ -155,17 +155,17 @@ export function OrdersTable({ rows }: { rows: OrderRow[] }) {
                       <StatusBadge status={row.order.status} size="sm" />
                     </td>
                     <td className="text-right">
-                      {row.heldEscrowIds.length > 0 ? (
-                        <GoldButton
+                      {row.pendingPayablesIds.length > 0 ? (
+                        <ActionButton
                           size="sm"
                           variant="forest"
                           icon={<Unlock size={13} strokeWidth={1.5} />}
                           onClick={() => setPending(row)}
                         >
                           Release
-                        </GoldButton>
+                        </ActionButton>
                       ) : (
-                        <span className="text-[11.5px] text-muted">—</span>
+                        <span className="text-[11.5px] text-muted">-</span>
                       )}
                     </td>
                   </tr>
@@ -182,10 +182,10 @@ export function OrdersTable({ rows }: { rows: OrderRow[] }) {
         onConfirm={confirmRelease}
         loading={saving}
         tone="forest"
-        title={pending ? `Release escrow for ${pending.order.reference}?` : ''}
+        title={pending ? `Settle supplier invoices for ${pending.order.reference}?` : ''}
         description={
           pending
-            ? `${pending.heldEscrowIds.length} escrow leg${pending.heldEscrowIds.length === 1 ? '' : 's'} totalling ${new Intl.NumberFormat('en-BW', { minimumFractionDigits: 2 }).format(pending.heldEscrowTotal)} BWP will be released to the supplier(s) immediately. This cannot be reversed from here.`
+            ? `${pending.pendingPayablesIds.length} supplier invoice${pending.pendingPayablesIds.length === 1 ? '' : 's'} totalling BWP ${new Intl.NumberFormat('en-BW', { minimumFractionDigits: 2 }).format(pending.pendingPayablesTotal)} will be paid out immediately. This cannot be reversed from here.`
             : ''
         }
         confirmLabel="Release funds"

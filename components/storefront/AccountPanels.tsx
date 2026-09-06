@@ -1,5 +1,5 @@
 import Link from 'next/link';
-import { CreditCard, Heart, MapPin, Package, Phone, Settings, Star } from 'lucide-react';
+import { CreditCard, Heart, MapPin, Package, PackageSearch, Phone, Settings, Star } from 'lucide-react';
 
 import { cn } from '@/lib/utils';
 import type { Runner } from '@/types';
@@ -8,6 +8,7 @@ import type { Runner } from '@/types';
 
 const NAV = [
   { href: '/orders', label: 'Orders', icon: Package, live: true },
+  { href: '/requests', label: 'Runner requests', icon: PackageSearch, live: true },
   { href: '/orders', label: 'Addresses', icon: MapPin, live: false },
   { href: '/orders', label: 'Payments', icon: CreditCard, live: false },
   { href: '/orders', label: 'Saved items', icon: Heart, live: false },
@@ -103,7 +104,7 @@ export function RunnerContactCard({ runner }: { runner: Runner }) {
           </span>
         </p>
         <p className="mt-0.5 text-[12.5px] text-body">
-          {runner.vehicle} · {runner.plate} — carrying your order
+          {runner.vehicle} · {runner.plate} - carrying your order
         </p>
       </div>
 

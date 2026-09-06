@@ -1,18 +1,27 @@
 'use client';
 
+import Link from 'next/link';
 import { useMemo, useState } from 'react';
-import { PackageSearch, Search, X } from 'lucide-react';
+import { FileText, PackageSearch, Search, X } from 'lucide-react';
 
 import { EmptyState } from '@/components/brand/Panel';
-import { GoldButton } from '@/components/brand/GoldButton';
+import { ActionButton } from '@/components/brand/ActionButton';
 import { ProductCard } from '@/components/products/ProductCard';
+import { TierSwitch, type TierSwitchOption } from '@/components/storefront/TierSwitch';
 import { cn } from '@/lib/utils';
+import { QUOTATION_THRESHOLD } from '@/lib/pricing-model';
+import type { DoorTier } from '@/lib/tier-doors';
 import type { Category, Product, ProductImage } from '@/types';
 
 interface BrowseProduct extends Product {
   supplierCount: number;
   categoryName?: string;
   primarySupplierId?: string;
+  /** Published unit price at the selected rung; null in the default view. */
+  tierPrice?: number | null;
+  tierSavingPct?: number;
+  tierByQuotation?: boolean;
+  tierMinQty?: number;
 }
 
 type Sort = 'featured' | 'price-asc' | 'price-desc' | 'rating' | 'newest';
@@ -31,12 +40,17 @@ export function BrowseClient({
   images,
   initialCategory,
   initialQuery,
+  tier,
+  tierOptions,
 }: {
   categories: Category[];
   products: BrowseProduct[];
   images: ProductImage[];
   initialCategory: string;
   initialQuery: string;
+  /** Selected rung, resolved from the URL on the server. */
+  tier: DoorTier | null;
+  tierOptions: TierSwitchOption[];
 }) {
   const [category, setCategory] = useState(initialCategory);
   const [query, setQuery] = useState(initialQuery);
@@ -54,13 +68,17 @@ export function BrowseClient({
       );
     });
 
+    // Sorting follows whatever price is on screen; ordering by list price
+    // while showing bulk prices would put the grid out of order.
+    const shown = (product: BrowseProduct) => product.tierPrice ?? product.price;
+
     const sorted = [...filtered];
     switch (sort) {
       case 'price-asc':
-        sorted.sort((a, b) => a.price - b.price);
+        sorted.sort((a, b) => shown(a) - shown(b));
         break;
       case 'price-desc':
-        sorted.sort((a, b) => b.price - a.price);
+        sorted.sort((a, b) => shown(b) - shown(a));
         break;
       case 'rating':
         sorted.sort((a, b) => b.rating - a.rating);
@@ -77,18 +95,69 @@ export function BrowseClient({
 
   const activeCategory = categories.find((entry) => entry.id === category);
 
+  /*
+   * The tier links arrive built from `searchParams`, but category and query
+   * live in client state — so picking a rung after filtering to a category
+   * silently threw the category away. Rebuild the hrefs against what is
+   * actually on screen.
+   */
+  const tierHrefs = useMemo(() => {
+    const build = (tierValue: string | null) => {
+      const search = new URLSearchParams();
+      if (category !== 'all') search.set('category', category);
+      if (query.trim()) search.set('q', query.trim());
+      if (tierValue) search.set('tier', tierValue);
+      const qs = search.toString();
+      return qs ? `/browse?${qs}` : '/browse';
+    };
+
+    return tierOptions.map((option) => ({
+      ...option,
+      href: build(tier === option.tier ? null : option.tier),
+    }));
+  }, [tierOptions, category, query, tier]);
+  const activeTierLabel = tierOptions.find((option) => option.tier === tier)?.label.toLowerCase();
+  const tierIsQuoted = Boolean(
+    tier && tierOptions.find((option) => option.tier === tier)?.byQuotation,
+  );
+
   return (
     <>
       <header className="mb-8">
-        <p className="eyebrow">Marketplace</p>
-        <h1 className="mt-3 font-display text-headline-lg font-semibold text-ink">
+        <h1 className="font-display text-headline-lg font-semibold text-ink">
           {activeCategory ? activeCategory.name : 'Everything on AfriDeal'}
         </h1>
         <p className="measure mt-2 text-[14px] leading-6 text-body">
           {activeCategory
             ? activeCategory.blurb
-            : 'Every listing is carried by at least one verified supplier and settles through escrow.'}
+            : 'Every listing is carried by at least one verified supplier, and the price you see is the price at the quantity you take.'}
         </p>
+
+        <div className="mt-6 flex flex-wrap items-center gap-x-4 gap-y-3">
+          <TierSwitch options={tierHrefs} active={tier} />
+          <p className="text-[12.5px] leading-5 text-muted">
+            {tierIsQuoted
+              ? 'Cards keep their retail figure, because nothing is listed at this quantity.'
+              : tier
+                ? `Showing ${activeTierLabel} prices per unit.`
+                : 'Prices shown per unit. Pick a quantity band to re-price the catalogue.'}
+          </p>
+        </div>
+
+        {tierIsQuoted && (
+          <p className="mt-4 flex flex-wrap items-center gap-x-2 gap-y-1 rounded-md bg-gold/[0.09] px-4 py-3 text-[12.5px] leading-5 text-ink">
+            <FileText size={12} strokeWidth={2} aria-hidden="true" className="text-gold-dark" />
+            Orders of {QUOTATION_THRESHOLD} units and above are quoted rather than listed, against
+            your volume, delivery point and lead time.
+            <Link
+              href="/browse"
+              className="font-medium text-gold-dark underline underline-offset-4"
+            >
+              Pick a product and request a quotation from its page
+            </Link>
+          </p>
+        )}
+
       </header>
 
       {/* Filters */}
@@ -99,7 +168,7 @@ export function BrowseClient({
             className={cn(
               'rounded-full px-3.5 py-2 text-[13px] font-medium transition-colors duration-200',
               category === 'all'
-                ? 'bg-ink text-white'
+                ? 'bg-forest text-white'
                 : 'bg-surface-raised text-body ring-1 ring-inset ring-hairline-strong hover:bg-ink/[0.04] hover:text-ink',
             )}
           >
@@ -113,13 +182,10 @@ export function BrowseClient({
               className={cn(
                 'rounded-full px-3.5 py-2 text-[13px] font-medium transition-colors duration-200',
                 category === entry.id
-                  ? 'bg-ink text-white'
+                  ? 'bg-forest text-white'
                   : 'bg-surface-raised text-body ring-1 ring-inset ring-hairline-strong hover:bg-ink/[0.04] hover:text-ink',
               )}
             >
-              <span aria-hidden="true" className="mr-1.5">
-                {entry.emoji}
-              </span>
               {entry.name}
             </button>
           ))}
@@ -178,7 +244,7 @@ export function BrowseClient({
           title="Nothing matches that"
           description="Try a broader search, or clear the category filter to see the whole catalogue."
           action={
-            <GoldButton
+            <ActionButton
               variant="ghost"
               size="sm"
               onClick={() => {
@@ -187,7 +253,7 @@ export function BrowseClient({
               }}
             >
               Clear filters
-            </GoldButton>
+            </ActionButton>
           }
           className="rounded-md border border-hairline bg-surface-raised"
         />
@@ -204,6 +270,10 @@ export function BrowseClient({
                 (image) => image.product_id === product.id && image.sort_order === 0,
               )}
               index={index}
+              tierPrice={product.tierPrice}
+              tierSavingPct={product.tierSavingPct}
+              tierByQuotation={product.tierByQuotation}
+              tierMinQty={product.tierMinQty}
             />
           ))}
         </div>

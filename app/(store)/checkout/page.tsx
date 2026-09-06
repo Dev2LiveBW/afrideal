@@ -2,9 +2,10 @@ import type { Metadata } from 'next';
 import Link from 'next/link';
 import { LogIn } from 'lucide-react';
 
-import { GoldButton } from '@/components/brand/GoldButton';
+import { ActionButton } from '@/components/brand/ActionButton';
 import { EmptyState } from '@/components/brand/Panel';
 import { auth } from '@/lib/auth';
+import { readAll } from '@/lib/db';
 
 import { CheckoutClient } from './CheckoutClient';
 
@@ -20,12 +21,12 @@ export default async function CheckoutPage() {
         <EmptyState
           icon={<LogIn size={22} strokeWidth={1.5} />}
           title="Sign in to complete this order"
-          description="Checkout needs an account so the order, the escrow record and the delivery can be tied to you. Your cart is saved and will still be here."
+          description="Checkout needs an account so the order, the invoice and the delivery can be tied to you. Your cart is saved and will still be here."
           action={
             <Link href="/login">
-              <GoldButton variant="gold" size="md" withArrow>
+              <ActionButton size="md" withArrow>
                 Sign in
-              </GoldButton>
+              </ActionButton>
             </Link>
           }
           className="rounded-md border border-hairline bg-surface-raised"
@@ -34,11 +35,21 @@ export default async function CheckoutPage() {
     );
   }
 
+  /*
+   * The summary has to quote the same figures the orders route will charge, so
+   * the ladder is resolved here rather than trusting the price frozen onto each
+   * cart line when it was added.
+   */
+  const [bands, products] = await Promise.all([readAll('customer-prices'), readAll('products')]);
+
   return (
     <div className="mx-auto max-w-market px-6 pb-24 pt-28">
       <CheckoutClient
         customerName={session.user.name ?? 'Customer'}
         customerEmail={session.user.email ?? ''}
+        bands={bands}
+        products={products}
+        customerType={session.user.customer_type ?? 'RETAIL'}
       />
     </div>
   );

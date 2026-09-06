@@ -2,7 +2,9 @@ import { ShieldAlert } from 'lucide-react';
 
 import { EmptyState, PageHeader } from '@/components/brand/Panel';
 import { auth } from '@/lib/auth';
+import { readAll } from '@/lib/db';
 import { getSupplierWorkspace } from '@/lib/queries';
+import { photoUrl } from '@/components/storefront/Swatch';
 import { OrdersClient } from './OrdersClient';
 
 export const dynamic = 'force-dynamic';
@@ -33,6 +35,20 @@ export default async function SupplierOrdersPage() {
     );
   }
 
+  /*
+   * A plain productId → url map rather than the image rows themselves: this
+   * crosses into a client component, and the rows carry fields the browser has
+   * no use for.
+   */
+  const images = await readAll('product-images');
+  const photos: Record<string, string> = {};
+
+  for (const image of images) {
+    if (image.sort_order !== 0) continue;
+    const url = photoUrl(image);
+    if (url) photos[image.product_id] = url;
+  }
+
   const legs = [...workspace.legs].sort((a, b) => {
     const priorityDelta = (PRIORITY[a.status] ?? 9) - (PRIORITY[b.status] ?? 9);
     if (priorityDelta !== 0) return priorityDelta;
@@ -44,10 +60,10 @@ export default async function SupplierOrdersPage() {
       <PageHeader
         eyebrow="Fulfilment"
         title="Your orders"
-        description="Confirm, prepare and hand off to collection — a runner takes it from there."
+        description="Confirm, prepare and hand off to collection - a runner takes it from there."
       />
 
-      <OrdersClient legs={legs} supplierName={workspace.supplier.name} />
+      <OrdersClient legs={legs} supplierName={workspace.supplier.name} photos={photos} />
     </div>
   );
 }

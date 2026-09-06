@@ -18,35 +18,35 @@ const TIERS: {
   label: string;
   quantities: string;
   icon: typeof ShoppingBag;
-  unlocks: string;
+  suits: string;
 }[] = [
   {
     id: 'RETAIL',
     label: 'Retail',
-    quantities: '1–19 units',
+    quantities: 'Typically 1–19 units',
     icon: ShoppingBag,
-    unlocks: 'Standard and bulk bands, escrow on every order.',
+    suits: 'Households and shop-counter buying.',
   },
   {
     id: 'BUSINESS',
     label: 'Business',
-    quantities: '1–99 units',
+    quantities: 'Typically 5–99 units',
     icon: Building2,
-    unlocks: 'Wholesale bands once your registration is verified.',
+    suits: 'Salons, spazas and small sites restocking.',
   },
   {
     id: 'RESELLER',
     label: 'Reseller',
-    quantities: '5–99 units',
+    quantities: 'Typically 20–99 units',
     icon: Store,
-    unlocks: 'Trade pricing from the bulk band upward.',
+    suits: 'Buying to resell, with named account management.',
   },
   {
     id: 'INSTITUTIONAL',
     label: 'Institutional',
-    quantities: '20 units and above',
+    quantities: '100 units and above',
     icon: ShieldCheck,
-    unlocks: 'Wholesale bands plus quotations on large volumes.',
+    suits: 'Schools, clinics and tenders, priced by quotation.',
   },
 ];
 
@@ -57,7 +57,7 @@ export function CustomerTierBar({ customerType }: { customerType: CustomerType |
         <div>
           <p className="eyebrow">Account tiers</p>
           <h2 className="mt-2.5 font-display text-headline-md font-semibold text-ink">
-            The price depends on who is buying and how many
+            The price depends on how many, not on who
           </h2>
           <p className="measure mt-2 text-[13.5px] leading-6 text-body">
             A product does not have one universal price. Bands are set per account type and per
@@ -97,7 +97,7 @@ export function CustomerTierBar({ customerType }: { customerType: CustomerType |
 
               <p className="mt-3 text-[13.5px] font-semibold text-ink">{tier.label}</p>
               <p className="font-mono text-[11px] tabular-nums text-muted">{tier.quantities}</p>
-              <p className="mt-2 text-[12px] leading-5 text-body">{tier.unlocks}</p>
+              <p className="mt-2 text-[12px] leading-5 text-body">{tier.suits}</p>
             </li>
           );
         })}
@@ -110,7 +110,7 @@ export function CustomerTierBar({ customerType }: { customerType: CustomerType |
         </p>
         <Link
           href="/login"
-          className="text-[12.5px] font-medium text-gold-dark transition-colors hover:text-ink"
+          className="text-[12.5px] font-medium text-forest transition-colors hover:text-ink"
         >
           Apply for a business account →
         </Link>

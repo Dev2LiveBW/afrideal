@@ -4,7 +4,7 @@ import { cn } from '@/lib/utils';
  * Horizontal bar breakdown of a supplier's performance metrics.
  *
  * Shared between the admin supplier detail page and, potentially, the
- * supplier's own portal — a supplier should be able to see the exact same
+ * supplier's own portal - a supplier should be able to see the exact same
  * numbers an operator sees when deciding whether to keep routing them
  * orders. No wrapper chrome of its own, so either caller can drop it inside
  * whatever Panel fits its layout.

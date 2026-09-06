@@ -7,8 +7,8 @@ import type { PriceResult } from '@/types';
 /**
  * The pricing formula, drawn.
  *
- * Suppliers and operators both ask the same question — "where did that price
- * come from" — so the answer is laid out as the sum it actually is rather than
+ * Suppliers and operators both ask the same question - "where did that price
+ * come from" - so the answer is laid out as the sum it actually is rather than
  * hidden behind a single figure.
  */
 
@@ -50,7 +50,7 @@ export function PricingFormula({
 
         <div className="flex-1 rounded-r-md bg-gradient-to-r from-gold-50 to-gold-50/40 px-4 py-3.5">
           <p className="text-[11.5px] font-medium text-gold-700">Selling price</p>
-          <MoneyText amount={result.recommended_price} size="lg" tone="gold" className="mt-0.5 block" />
+          <MoneyText amount={result.recommended_price} size="lg" tone="ink" className="mt-0.5 block" />
         </div>
       </div>
 
