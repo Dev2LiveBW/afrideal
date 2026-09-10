@@ -81,24 +81,40 @@ export function MockupHero() {
             
             {/* Runner Image */}
             {/*
-              Two things kept the runner small, and both are fixed here.
+              The runner sits in the flow on a narrow card, and only becomes
+              a corner element once there is room for one.
 
-              The photograph carried 20% empty ground on its left and 11% on
-              its right, so a third of every box it was given went to
-              background. It is now trimmed to the subject, which turned it
-              from 1024x819 landscape into 730x817 - close to square, and a
-              far better fit for a card that is tall and narrow.
+              Three attempts got here. Held at h-[95%] the box was a tall
+              narrow slot and object-contain left it two-thirds empty. The
+              photograph also carried its own empty ground - 20% left, 11%
+              right - so it is trimmed to the subject, 1024x819 landscape
+              becoming 730x817. Sized to fill, though, it then covered the
+              bullet list: dark figure, dark text, nothing readable.
 
-              The box was fixed at h-[95%], which only matches the
-              photograph's shape once the card is genuinely wide. The cards
-              sit two-up from the smallest width, so they stay narrow all the
-              way to `lg` - at 768px each is about 360px against 400px of
-              height, and object-contain fitted to the width and left the
-              rest empty. The box now follows the photograph's ratio until
-              `lg`, where the original treatment takes over.
+              The card is about 290px wide below `lg` because the two cards
+              are side by side from the narrowest width. That is not enough
+              for a text column beside a photograph, so nothing is layered -
+              copy, then runner, then the call to action, in that order. At
+              `lg` the card is 664px and the original bottom-right treatment
+              takes over, where the overlap was always intentional.
+
+              Below `lg` it takes the full content width. Nothing sits under
+              it any more, so size only costs card height, and the note from
+              the product owner twice over was that it read too small.
+
+              shrink-0 matters: as a flex item in a column the box was being
+              compressed on the main axis, and with an aspect ratio set the
+              width followed it down - 61% of the card at 390px against 78%
+              at 640px, for the same rule.
             */}
-            <div className="pointer-events-none absolute -right-2 bottom-0 z-0 aspect-[730/817] w-[86%] lg:-right-12 lg:aspect-auto lg:h-[95%] lg:w-[80%]">
-               <Image src="/images/hero/runner.jpg" alt="Runner" fill className="object-contain object-right-bottom" />
+            <div className="relative z-0 mt-2 aspect-[730/817] w-full shrink-0 self-end lg:pointer-events-none lg:absolute lg:bottom-0 lg:-right-12 lg:mt-0 lg:aspect-auto lg:h-[95%] lg:w-[80%] lg:self-auto">
+               <Image
+                 src="/images/hero/runner.jpg"
+                 alt=""
+                 fill
+                 sizes="(max-width: 1024px) 45vw, 560px"
+                 className="object-contain object-bottom lg:object-right-bottom"
+               />
             </div>
             
             <Link href="/request-a-runner" className="relative z-10 mt-auto flex h-8 w-full items-center justify-center gap-1 rounded-lg bg-[#E67E22] px-2 text-[10.5px] font-bold text-white hover:bg-[#D35400] transition-colors sm:h-12 sm:gap-2 sm:rounded-xl sm:px-8 sm:text-[15px] lg:h-14 lg:w-[80%] lg:text-[16px]">
