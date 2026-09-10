@@ -8,7 +8,7 @@ import { LiveDeals, type LiveDealRow } from '@/components/storefront/LiveDeals';
 import { StatsBanner, PromoCards } from '@/components/storefront/HomePromoSections';
 import { MockupHero } from '@/components/storefront/MockupHero';
 import { PopularCategories } from '@/components/storefront/PopularCategories';
-import { PricingExplainer } from '@/components/storefront/PricingExplainer';
+import { PathChooser } from '@/components/storefront/PathChooser';
 import { SupplierDirectorySection } from '@/components/storefront/SupplierDirectory';
 import { TrustStrip } from '@/components/storefront/TrustStrip';
 import { auth } from '@/lib/auth';
@@ -21,7 +21,7 @@ import {
 } from '@/lib/directory-placement';
 import { getCatalogue } from '@/lib/queries';
 import { rankOffers } from '@/lib/supplier-selection';
-import { doorForQuantity, ladderSpread, tierDoors } from '@/lib/tier-doors';
+import { ladderSpread } from '@/lib/tier-doors';
 
 export const dynamic = 'force-dynamic';
 
@@ -47,7 +47,6 @@ export default async function LandingPage() {
       getDirectoryListings({ limit: DIRECTORY_PREVIEW_COUNT }),
     ]);
 
-  const customerType = session?.user?.customer_type ?? 'GUEST';
 
   const primaryImage = new Map(
     images.filter((image) => image.sort_order === 0).map((image) => [image.product_id, image]),
@@ -80,8 +79,6 @@ export default async function LandingPage() {
     flagship[0] ??
     products[0];
 
-  const doors = featured ? tierDoors(bands, featured, customerType) : [];
-  const yourTier = doorForQuantity(DEFAULT_QUANTITY);
 
   /*
    * Biggest saving in Pula first, not the deepest percentage.
@@ -157,19 +154,13 @@ export default async function LandingPage() {
       */}
       <LiveDeals rows={dealRows} className="pb-10" />
 
-      {/* ── What a price depends on ─────────────────────────────────────
-        TICKET-003. The single pricing-tier block on the page: the rule, the
-        rungs with their real markups and real prices, and the reader's own
-        tier as a badge.
+      {/* ── How the quantity ladder works ──────────────────────────────
+        TICKET-003. The single pricing block on the page. The prose explainer
+        and the five-rung board that used to sit here were the same argument a
+        second and third time; the product owner asked for the cards alone,
+        which say it without the essay.
       */}
-      {featured && doors.length > 0 && (
-        <PricingExplainer
-          doors={doors}
-          productName={featured.name}
-          currentTier={yourTier}
-          className="pb-12"
-        />
-      )}
+      <PathChooser className="mx-auto max-w-market px-4 pb-12" />
 
       <StatsBanner />
 

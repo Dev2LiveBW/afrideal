@@ -17,19 +17,39 @@ import { cn } from '@/lib/utils';
  * row honest on a 375px screen without wrapping it.
  */
 
+/* One colour per guarantee, matching the product owner's ribbon reference. */
 const ITEMS = [
-  { icon: CreditCard, title: 'Multiple payment options', sub: 'Card, Orange Money, PayGate' },
-  { icon: ShieldCheck, title: 'Buyer protection', sub: 'Held until you confirm delivery' },
-  { icon: MapPin, title: 'Easy order tracking', sub: 'Every leg, every status' },
+  {
+    icon: CreditCard,
+    title: 'Multiple Payment Options',
+    sub: 'Pay how you like',
+    tone: 'bg-blue-50 text-blue-600',
+  },
+  {
+    icon: ShieldCheck,
+    title: 'Buyer Protection',
+    sub: "We've got you covered",
+    tone: 'bg-[#E8F6EE] text-[#1E8449]',
+  },
+  {
+    icon: MapPin,
+    title: 'Easy Order Tracking',
+    sub: 'Track every step',
+    tone: 'bg-[#FDF0E4] text-[#E67E22]',
+  },
 ];
 
 export function InfoRibbon({ className }: { className?: string }) {
   return (
     <div className={cn('mx-auto max-w-market px-4', className)}>
       <ul className="grid grid-cols-3 divide-x divide-hairline rounded-lg border border-hairline bg-surface-raised">
-        {ITEMS.map(({ icon: Icon, title, sub }) => (
-          <li key={title} className="flex min-w-0 items-center justify-center gap-2.5 px-3 py-3">
-            <Icon size={17} strokeWidth={1.75} className="shrink-0 text-[#E67E22]" aria-hidden="true" />
+        {ITEMS.map(({ icon: Icon, title, sub, tone }) => (
+          <li key={title} className="flex min-w-0 items-center justify-center gap-2.5 px-3 py-2.5">
+            <span
+              className={cn('flex h-8 w-8 shrink-0 items-center justify-center rounded-lg', tone)}
+            >
+              <Icon size={16} strokeWidth={1.9} aria-hidden="true" />
+            </span>
             <div className="min-w-0">
               <p className="truncate text-[13px] font-semibold leading-tight text-ink">{title}</p>
               <p className="hidden truncate text-[11.5px] leading-tight text-muted sm:block">{sub}</p>

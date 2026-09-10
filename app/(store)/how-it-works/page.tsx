@@ -115,7 +115,8 @@ export default async function HowItWorksPage() {
           are trying to buy.
         </p>
 
-        <PathChooser className="mt-8" />
+        {/* This section writes its own heading, so the cards must not add one. */}
+        <PathChooser className="mt-8" heading={false} />
       </section>
 
       {/* ── The two flows ──────────────────────────────────────────────── */}
