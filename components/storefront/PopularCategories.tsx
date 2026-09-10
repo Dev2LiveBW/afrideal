@@ -88,27 +88,28 @@ export function PopularCategories({ className }: { className?: string }) {
       </div>
 
       {/*
-        Three across on a phone would put a 24px circle next to a two-word label
-        that then wraps to three lines. Two across below `sm`, six across once
-        there is room for the whole set on one row.
+        Six across at every width. The set is one row of trades and it stays
+        one row on a phone - the tile and the label shrink instead, which is
+        what the product owner asked for over letting it reflow into three
+        rows and push the listings down the page.
       */}
-      <ul className="grid grid-cols-2 gap-x-4 gap-y-6 sm:grid-cols-3 lg:grid-cols-6">
+      <ul className="grid grid-cols-6 gap-x-1.5 gap-y-3 sm:gap-x-4 sm:gap-y-6">
         {CATEGORIES.map((category) => (
           <li key={category.name}>
             <Link
               href={category.href}
-              className="group flex flex-col items-center gap-2 text-center outline-none"
+              className="group flex flex-col items-center gap-1 text-center outline-none sm:gap-2"
             >
-              <div className="relative h-24 w-24 overflow-hidden rounded-full bg-surface-sunk ring-1 ring-black/5 transition-all group-hover:ring-[#E67E22]/50 group-focus-visible:ring-2 group-focus-visible:ring-[#E67E22]">
+              <div className="relative aspect-square w-full max-w-[96px] overflow-hidden rounded-full bg-surface-sunk ring-1 ring-black/5 transition-all group-hover:ring-[#E67E22]/50 group-focus-visible:ring-2 group-focus-visible:ring-[#E67E22]">
                 <Image
                   src={category.img}
                   alt=""
                   fill
-                  sizes="96px"
+                  sizes="(max-width: 640px) 16vw, 96px"
                   className="object-cover object-center transition-transform duration-300 group-hover:scale-105"
                 />
               </div>
-              <span className="text-[13px] font-semibold text-ink transition-colors group-hover:text-[#E67E22]">
+              <span className="text-[8.5px] font-semibold leading-tight text-ink transition-colors group-hover:text-[#E67E22] sm:text-[13px]">
                 {category.name}
               </span>
             </Link>

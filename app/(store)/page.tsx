@@ -1,7 +1,6 @@
 import Link from 'next/link';
 import { ArrowRight } from 'lucide-react';
 
-import { FlashDealsRail } from '@/components/storefront/FlashDealsRail';
 import { HowItWorks } from '@/components/storefront/HowItWorks';
 import { InfoRibbon } from '@/components/storefront/InfoRibbon';
 import { LiveDeals, type LiveDealRow } from '@/components/storefront/LiveDeals';
@@ -54,7 +53,6 @@ export default async function LandingPage() {
   const categoryName = new Map(categories.map((category) => [category.id, category.name]));
 
   const flagship = products.filter((product) => product.category_id === FLAGSHIP_CATEGORY);
-  const onPromotion = products.filter((product) => product.promotion);
 
   const spreads = products
     .map((product) => ({ product, spread: ladderSpread(bands, product) }))
@@ -166,15 +164,7 @@ export default async function LandingPage() {
 
       <PromoCards />
 
-      {/* ── Time-boxed promotions ───────────────────────────────────────
-        Headed "Flash deals" - the clock is what separates it from Live Deals
-        above, which is the standing published ladder.
-      */}
-      {onPromotion.length > 0 && (
-        <section className="mx-auto max-w-market px-4 pt-10">
-          <FlashDealsRail products={onPromotion} images={images} />
-        </section>
-      )}
+
 
       {/* ── How the order actually runs ─────────────────────────────────── */}
       <section id="how-it-works" className="mt-16 py-4">

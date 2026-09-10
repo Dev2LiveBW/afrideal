@@ -100,10 +100,10 @@ export function LiveDeals({ rows, className }: { rows: LiveDealRow[]; className?
             <Zap size={20} strokeWidth={2.5} className="fill-[#27AE60] text-[#27AE60]" aria-hidden="true" />
           </span>
           <div className="min-w-0">
-            <h2 id="live-deals" className="font-display text-[26px] font-bold leading-tight text-ink sm:text-[30px]">
+            <h2 id="live-deals" className="font-display text-[20px] font-bold leading-tight text-ink sm:text-[26px] lg:text-[30px]">
               Live Deals
             </h2>
-            <p className="truncate text-[13px] text-muted">Limited time offers across all categories</p>
+            <p className="truncate text-[10.5px] text-muted sm:text-[13px]">Limited time offers across all categories</p>
           </div>
         </div>
 
@@ -135,7 +135,7 @@ export function LiveDeals({ rows, className }: { rows: LiveDealRow[]; className?
                     fallback={product.swatch}
                     emoji={product.emoji}
                     label={product.name}
-                    className="h-[88px] w-[88px] sm:h-[104px] sm:w-[104px]"
+                    className="h-[68px] w-[68px] sm:h-[104px] sm:w-[104px]"
                     glyphClassName="text-[34px] bottom-1 right-2"
                   />
                   <span className="absolute left-0 top-0 rounded-br-lg rounded-tl-lg bg-[#27AE60] px-1.5 py-0.5 font-mono text-[10.5px] font-bold tabular-nums text-white">

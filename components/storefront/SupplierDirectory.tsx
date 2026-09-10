@@ -42,7 +42,7 @@ export function SupplierDirectory({
   }
 
   return (
-    <ul className={cn('grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4', className)}>
+    <ul className={cn('grid grid-cols-2 gap-2.5 sm:gap-4 lg:grid-cols-3 xl:grid-cols-4', className)}>
       {listings.map((listing) => (
         <li key={listing.id}>
           <Link
@@ -66,8 +66,8 @@ export function SupplierDirectory({
               )}
             </div>
 
-            <div className="flex flex-1 flex-col p-4">
-              <h3 className="line-clamp-2 text-[14px] font-medium leading-5 text-ink transition-colors group-hover:text-forest">
+            <div className="flex flex-1 flex-col p-2.5 sm:p-4">
+              <h3 className="line-clamp-2 text-[11.5px] font-medium leading-snug text-ink transition-colors group-hover:text-forest sm:text-[14px] sm:leading-5">
                 {listing.product_name}
               </h3>
 
@@ -81,20 +81,20 @@ export function SupplierDirectory({
                 quantities the two figures are one fact, and a buyer who reads
                 the price without the minimum has read half of it.
               */}
-              <p className="mt-1.5 inline-flex w-fit items-center gap-1.5 rounded-full bg-surface-sunk px-2.5 py-1 text-[11.5px] text-body">
+              <p className="mt-1.5 inline-flex w-fit items-center gap-1 rounded-full bg-surface-sunk px-1.5 py-0.5 text-[9.5px] text-body sm:gap-1.5 sm:px-2.5 sm:py-1 sm:text-[11.5px]">
                 <Package size={12} strokeWidth={1.6} aria-hidden="true" />
                 MOQ <span className="font-mono tabular-nums text-ink">{listing.moq}</span> units
               </p>
 
               {/* ── The company ─────────────────────────────────────── */}
-              <div className="mt-4 border-t border-hairline pt-3">
+              <div className="mt-2.5 border-t border-hairline pt-2 sm:mt-4 sm:pt-3">
                 <div className="flex min-w-0 items-center gap-2.5">
                   <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-forest-wash font-mono text-[11px] font-semibold text-forest">
                     {listing.supplier_initials}
                   </span>
 
                   <div className="min-w-0 flex-1">
-                    <p className="truncate text-[12.5px] font-medium text-ink">
+                    <p className="truncate text-[10.5px] font-medium text-ink sm:text-[12.5px]">
                       {listing.supplier_name}
                     </p>
                     <p className="mt-0.5 flex items-center gap-1 text-[11px] text-muted">

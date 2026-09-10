@@ -163,12 +163,18 @@ export function StorefrontNav({ categories = [] }: { categories?: Category[] }) 
     <>
       <header className="sticky top-0 z-40 bg-white shadow-sm">
         {/* Row 1: Logo | Search | Controls */}
-        <div className="mx-auto flex max-w-[1400px] items-center gap-3 px-4 py-2.5">
+        <div className="mx-auto flex max-w-[1400px] items-center gap-2 px-3 py-2 sm:gap-3 sm:px-4 sm:py-2.5">
           <Link href="/" className="shrink-0">
             <AfriDealLogo variant="light" size="sm" />
           </Link>
 
-          <div className="relative flex flex-1 items-center">
+          {/*
+            min-w-0 is load-bearing: an <input> carries an intrinsic
+            min-width of about 170px, so without it this flex child
+            refuses to shrink and the header pushes the whole document
+            into a horizontal scroll on a 320px phone.
+          */}
+          <div className="relative flex min-w-0 flex-1 items-center">
             <Search size={16} className="absolute left-3.5 text-gray-400 pointer-events-none" />
             <input
               type="search"
