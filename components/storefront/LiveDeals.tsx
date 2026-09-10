@@ -151,9 +151,14 @@ export function LiveDeals({ rows, className }: { rows: LiveDealRow[]; className?
                     </h3>
                   </Link>
 
-                  <span className="inline-flex w-fit items-center gap-1.5 rounded-md bg-[#E8F6EE] px-2 py-1 text-[11.5px] font-semibold text-[#1E8449]">
+                  {/*
+                    One text run, not a figure plus a caption. Split across two
+                    spans the flex gap opened a hole after the percentage and
+                    the tag read as two separate claims.
+                  */}
+                  <span className="inline-flex w-fit items-center gap-1.5 rounded-md bg-[#E8F6EE] px-2 py-1 text-[11.5px] font-semibold tabular-nums text-[#1E8449]">
                     <Tag size={12} strokeWidth={2.25} aria-hidden="true" />
-                    <span className="font-mono tabular-nums">−{pct.toFixed(0)}%</span> at {lowestRange} units
+                    {`−${pct.toFixed(0)}% at ${lowestRange} units`}
                   </span>
 
                   {categoryName && (
