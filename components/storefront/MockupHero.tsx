@@ -80,7 +80,14 @@ export function MockupHero() {
             </div>
             
             {/* Runner Image */}
-            <div className="absolute -right-12 bottom-0 w-[80%] h-[95%] z-0 pointer-events-none">
+            {/*
+              The box follows the photograph's own 1024:819 below `sm`.
+              Held at h-[95%] it became a tall narrow slot on a phone -
+              133x285 for a landscape image - and object-contain fitted to
+              the width, so the runner filled 37% of the slot against 85%
+              on a wide card. Matching the ratio lets it fill either way.
+            */}
+            <div className="pointer-events-none absolute -right-2 bottom-0 z-0 aspect-[1024/819] w-[94%] sm:-right-12 sm:aspect-auto sm:h-[95%] sm:w-[80%]">
                <Image src="/images/hero/runner.jpg" alt="Runner" fill className="object-contain object-right-bottom" />
             </div>
             
