@@ -90,6 +90,19 @@ export default withAuth(
           pathname.startsWith('/browse') ||
           pathname.startsWith('/products') ||
           /*
+           * The supplier / product directory (TICKET-007). It is a discovery
+           * surface in the same class as /browse - published prices, MOQs and
+           * verified badges, all of it already public on the catalogue - and
+           * the storefront nav links to it for signed-out visitors. Bouncing
+           * them to sign in to look at a price list would be the one thing the
+           * page exists to avoid.
+           *
+           * Route comes from DIRECTORY_ROUTE in lib/directory-placement.ts;
+           * it is written literally here because middleware runs on the Edge
+           * runtime and this list has to stay statically analysable.
+           */
+          pathname.startsWith('/suppliers') ||
+          /*
            * The explainer is the page a visitor is sent to before they trust
            * the platform with anything. Asking them to sign in to read how
            * signing in works is the wrong way round.

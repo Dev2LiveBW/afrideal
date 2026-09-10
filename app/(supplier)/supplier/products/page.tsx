@@ -1,8 +1,10 @@
-import { ShieldAlert } from 'lucide-react';
+import Link from 'next/link';
+import { ArrowUpRight, ShieldAlert } from 'lucide-react';
 
 import { EmptyState, PageHeader } from '@/components/brand/Panel';
 import { auth } from '@/lib/auth';
 import { readAll } from '@/lib/db';
+import { DIRECTORY_ROUTE } from '@/lib/directory-placement';
 import { getSupplierWorkspace } from '@/lib/queries';
 import { ProductsClient } from './ProductsClient';
 
@@ -47,6 +49,24 @@ export default async function SupplierProductsPage() {
         eyebrow="Catalogue"
         title="Your products"
         description="Everything you currently list on AfriDeal, with the price customers pay alongside what you're paid per unit."
+        action={
+          /*
+           * TICKET-007 - the supplier side of the directory. A supplier
+           * managing listings here cannot otherwise see what a buyer sees:
+           * the same rows appear in the public grid with their MOQ, the
+           * verified badge and the company name attached.
+           *
+           * TODO(TICKET-007): the directory's placement is unconfirmed, so
+           * this link follows DIRECTORY_ROUTE rather than hard-coding a path.
+           */
+          <Link
+            href={DIRECTORY_ROUTE}
+            className="inline-flex items-center gap-1.5 text-[13px] font-medium text-forest underline-offset-4 hover:underline"
+          >
+            View your public listings
+            <ArrowUpRight size={14} strokeWidth={1.75} aria-hidden="true" />
+          </Link>
+        }
       />
 
       <ProductsClient rows={rows} categories={categories} />

@@ -1,6 +1,6 @@
 import Image from 'next/image';
 import Link from 'next/link';
-import { Users, Package, ShieldCheck, Truck, CreditCard, MapPin } from 'lucide-react';
+import { Users, Package, ShieldCheck, Truck } from 'lucide-react';
 
 export function StatsBanner() {
   return (
@@ -70,26 +70,10 @@ export function PromoCards() {
   );
 }
 
-export function TrustPaymentStrip() {
-  return (
-    <div className="mx-auto max-w-[1400px] px-4 py-4 pb-8">
-      <div className="flex flex-wrap items-center justify-around gap-4 rounded-2xl border border-gray-100 bg-white px-6 py-5 shadow-sm">
-        {[
-          { icon: CreditCard, title: 'Multiple Payment Options', sub: 'Pay how you like' },
-          { icon: ShieldCheck, title: 'Buyer Protection', sub: "We've got you covered" },
-          { icon: MapPin, title: 'Easy Order Tracking', sub: 'Track every step' },
-        ].map((item, i) => (
-          <div key={i} className="flex items-center gap-3">
-            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-blue-50">
-              <item.icon size={20} className="text-blue-600" />
-            </div>
-            <div>
-              <p className="text-[14px] font-bold text-gray-900">{item.title}</p>
-              <p className="text-[12px] text-gray-500">{item.sub}</p>
-            </div>
-          </div>
-        ))}
-      </div>
-    </div>
-  );
-}
+/*
+ * `TrustPaymentStrip` used to live here - the large boxed "Multiple Payment
+ * Options / Buyer Protection / Easy Order Tracking" panel. It was replaced for
+ * TICKET-005 by the compact single-row ribbon in
+ * `components/storefront/InfoRibbon.tsx`, which says the same three things in
+ * about a third of the height.
+ */

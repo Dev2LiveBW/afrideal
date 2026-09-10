@@ -12,7 +12,12 @@ import { categoryPalette } from '@/lib/category-palette';
 import type { Product, ProductImage } from '@/types';
 
 /**
- * Live promotions.
+ * Time-boxed promotions.
+ *
+ * Titled "Flash deals". It used to be headed "Live deals", which TICKET-004
+ * gave to the published-ladder section; two blocks under one name would have
+ * put the reader in front of two different sets of deals with nothing to tell
+ * them apart. This rail is the one with a clock on it.
  *
  * Every figure here is seeded: the discount is the gap between a PROMOTIONAL
  * band and the standing retail band, and the clock counts to that band's real
@@ -78,7 +83,7 @@ export function FlashDealsRail({
             <Zap size={17} strokeWidth={2} />
           </span>
           <div>
-            <h2 className="font-display text-headline-md font-semibold text-ink">Live deals</h2>
+            <h2 className="font-display text-headline-md font-semibold text-ink">Flash deals</h2>
             <p className="text-[12.5px] text-body">Ends when the clock does, not before</p>
           </div>
         </div>

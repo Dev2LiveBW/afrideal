@@ -26,6 +26,11 @@ import { CategoryIcon } from '@/components/storefront/CategoryIcon';
 import { ActionButton } from '@/components/brand/ActionButton';
 import { DELIVERY_CITIES, cartCount, useAfriDealStore } from '@/store/useAfriDealStore';
 import type { Category } from '@/types';
+import {
+  DIRECTORY_IN_NAV,
+  DIRECTORY_LABEL,
+  DIRECTORY_ROUTE,
+} from '@/lib/directory-placement';
 import { cn } from '@/lib/utils';
 
 /**
@@ -243,9 +248,25 @@ export function StorefrontNav({ categories = [] }: { categories?: Category[] }) 
         >
           <div className="mx-auto flex max-w-[1400px] items-center justify-between px-4 py-1.5">
             <DeliverToPicker />
-            <Link href="/orders" className="text-[12px] font-medium text-[#E67E22] hover:underline">
-              Track order →
-            </Link>
+            <div className="flex items-center gap-4">
+              {/*
+                TODO(TICKET-007): temporary entry point. The supplier / product
+                directory's final placement - homepage section, dedicated page or a
+                nav tab of its own - is unconfirmed. Toggle with DIRECTORY_IN_NAV in
+                lib/directory-placement.ts.
+              */}
+              {DIRECTORY_IN_NAV && (
+                <Link
+                  href={DIRECTORY_ROUTE}
+                  className="text-[12px] font-medium text-gray-600 hover:text-gray-900"
+                >
+                  {DIRECTORY_LABEL}
+                </Link>
+              )}
+              <Link href="/orders" className="text-[12px] font-medium text-[#E67E22] hover:underline">
+                Track order →
+              </Link>
+            </div>
           </div>
         </div>
       </header>
@@ -270,6 +291,8 @@ export function StorefrontNav({ categories = [] }: { categories?: Category[] }) 
             <nav className="max-h-[calc(100dvh-4rem)] overflow-y-auto px-6 pb-10 pt-6">
               {[
                 { href: '/browse', label: 'Browse' },
+                // TODO(TICKET-007): temporary entry point, see the nav row above.
+                { href: DIRECTORY_ROUTE, label: DIRECTORY_LABEL },
                 { href: '/browse?category=hair-weaves-extensions', label: 'Hair & Weaves' },
                 { href: '/request-a-runner', label: 'Request a runner' },
                 { href: '/how-it-works', label: 'How it works' },
