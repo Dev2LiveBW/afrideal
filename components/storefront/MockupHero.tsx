@@ -42,15 +42,38 @@ export function MockupHero() {
               </Link>
             </div>
             
-            {/* Phone Image */}
-            <div 
-              className="absolute right-0 bottom-0 top-0 w-[95%] z-0 pointer-events-none"
+            {/*
+              Narrow: the product shot in flow, whole.
+
+              As a full-bleed cover background it was cropped to a vertical
+              slice of a 4:3 photograph - on a 290px card that meant one
+              cardboard box blown up past its own resolution, which is what
+              the product owner was looking at. Contained at the photograph's
+              own 4:3 it stays legible and the phone, blender, headphones,
+              bag and boxes are all still in it.
+            */}
+            <div className="relative z-0 mt-2 aspect-[4/3] w-full shrink-0 overflow-hidden rounded-lg lg:hidden">
+              <Image
+                src="/images/hero/mockup.jpg"
+                alt=""
+                fill
+                sizes="45vw"
+                className="object-contain object-bottom"
+              />
+            </div>
+
+            {/*
+              Wide: the original full-bleed treatment, masked into the card's
+              black on its left edge so the copy keeps its contrast. Only
+              from `lg`, where the card is 664px and the crop is gentle.
+            */}
+            <div
+              className="pointer-events-none absolute bottom-0 right-0 top-0 z-0 hidden w-[95%] lg:block"
               style={{ maskImage: 'linear-gradient(to right, transparent 0%, black 45%)', WebkitMaskImage: 'linear-gradient(to right, transparent 0%, black 45%)' }}
             >
-               <Image src="/images/hero/mockup.jpg" alt="App preview" fill className="object-cover object-right" />
+              <Image src="/images/hero/mockup.jpg" alt="" fill sizes="640px" className="object-cover object-right" />
             </div>
-            {/* Gradient mask to fade image into black on the left for text readability */}
-            <div className="absolute inset-y-0 right-0 w-[100%] bg-gradient-to-r from-[#0e0701] via-[#0e0701]/40 to-transparent pointer-events-none z-0"></div>
+            <div className="pointer-events-none absolute inset-y-0 right-0 z-0 hidden w-full bg-gradient-to-r from-[#0e0701] via-[#0e0701]/40 to-transparent lg:block" />
           </div>
 
           {/* Right Card: Runner Service */}
