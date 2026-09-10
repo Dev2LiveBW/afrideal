@@ -116,17 +116,17 @@ export function PathChooser({
           </p>
           <h2
             id="buying-options"
-            className="mt-1 font-display text-[20px] font-bold leading-tight text-ink sm:text-[28px] lg:text-[34px]"
+            className="mt-1.5 font-display text-[28px] font-bold leading-tight text-ink sm:text-[34px]"
           >
             Choose how you want to buy
           </h2>
-          <p className="mt-1 text-[11px] text-muted sm:mt-1.5 sm:text-[14.5px]">
+          <p className="mt-1.5 text-[14.5px] text-muted">
             Same product. Different quantities. Better prices.
           </p>
         </div>
       )}
 
-      <div className="grid grid-cols-3 gap-2 sm:gap-4">
+      <div className="grid gap-4 md:grid-cols-3">
         {DOORS.map((door) => {
           const Icon = door.icon;
 
@@ -135,14 +135,14 @@ export function PathChooser({
               key={door.key}
               href={door.href}
               className={cn(
-                'group relative flex flex-col overflow-hidden rounded-xl p-2.5 shadow-sm ring-1 ring-black/5 transition-shadow duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] hover:shadow-lift sm:rounded-2xl sm:p-5 lg:p-6',
+                'group relative flex flex-col overflow-hidden rounded-2xl p-5 shadow-sm ring-1 ring-black/5 transition-shadow duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] hover:shadow-lift sm:p-6',
                 door.surface,
               )}
             >
               {/* The affordance the reference design puts in the top-right. */}
               <span
                 aria-hidden="true"
-                className="absolute right-2 top-2 hidden h-7 w-7 items-center justify-center rounded-full bg-white/70 text-body transition-transform duration-300 group-hover:translate-x-0.5 sm:right-4 sm:top-4 sm:flex"
+                className="absolute right-4 top-4 flex h-7 w-7 items-center justify-center rounded-full bg-white/70 text-body transition-transform duration-300 group-hover:translate-x-0.5"
               >
                 <ChevronRight size={16} strokeWidth={2} />
               </span>
@@ -150,27 +150,28 @@ export function PathChooser({
               <div className="relative z-10 flex flex-1 flex-col">
                 <span
                   className={cn(
-                    'mb-2 flex h-7 w-7 items-center justify-center rounded-full sm:mb-4 sm:h-11 sm:w-11',
+                    'mb-4 flex h-11 w-11 items-center justify-center rounded-full',
                     door.disc,
                   )}
                 >
-                  <Icon strokeWidth={1.9} className={cn('h-3.5 w-3.5 sm:h-[21px] sm:w-[21px]', door.accent)} aria-hidden="true" />
+                  <Icon size={21} strokeWidth={1.9} className={door.accent} aria-hidden="true" />
                 </span>
 
-                <h3 className="font-display text-[14px] font-bold leading-none text-ink sm:text-[20px] lg:text-[24px]">
+                <h3 className="font-display text-[24px] font-bold leading-none text-ink">
                   {door.title}
                 </h3>
-                <p className="mt-1 text-[9.5px] font-bold leading-tight text-ink sm:mt-2 sm:text-[13px] lg:text-[15px]">{door.band}</p>
-                <p className="mt-1 max-w-[30ch] text-[8.5px] leading-snug text-muted sm:mt-1.5 sm:text-[12px] sm:leading-5 lg:text-[13.5px] lg:leading-6">
+                <p className="mt-2 text-[15px] font-bold text-ink">{door.band}</p>
+                <p className="mt-1.5 max-w-[30ch] text-[13.5px] leading-6 text-muted">
                   {door.blurb}
                 </p>
 
-                <ul className="mt-2 space-y-1 sm:mt-4 sm:space-y-2">
+                <ul className="mt-4 space-y-2">
                   {door.points.map((point) => (
-                    <li key={point} className="flex items-start gap-1 text-[8.5px] leading-tight text-ink sm:items-center sm:gap-2 sm:text-[12px] lg:text-[13.5px]">
+                    <li key={point} className="flex items-center gap-2 text-[13.5px] text-ink">
                       <CheckCircle2
+                        size={17}
                         strokeWidth={2}
-                        className={cn('h-3 w-3 shrink-0 sm:h-[17px] sm:w-[17px]', door.accent)}
+                        className={cn('shrink-0', door.accent)}
                         aria-hidden="true"
                       />
                       {point}
@@ -180,12 +181,12 @@ export function PathChooser({
 
                 <span
                   className={cn(
-                    'mt-3 inline-flex h-7 w-full items-center justify-center gap-1 rounded-lg px-1.5 text-[9px] font-bold leading-none transition-colors sm:mt-6 sm:h-11 sm:gap-2 sm:rounded-xl sm:px-4 sm:text-[13px] lg:w-auto lg:self-start lg:px-6 lg:text-[14px]',
+                    'mt-6 inline-flex h-11 w-full items-center justify-center gap-2 rounded-xl px-4 text-[14px] font-bold transition-colors sm:w-auto sm:self-start sm:px-6',
                     door.button,
                   )}
                 >
                   {door.cta}
-                  <ArrowRight strokeWidth={2.25} className="h-2.5 w-2.5 shrink-0 sm:h-4 sm:w-4" aria-hidden="true" />
+                  <ArrowRight size={16} strokeWidth={2.25} aria-hidden="true" />
                 </span>
               </div>
 

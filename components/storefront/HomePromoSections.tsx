@@ -5,20 +5,29 @@ import { Users, Package, ShieldCheck, Truck } from 'lucide-react';
 export function StatsBanner() {
   return (
     <div className="mx-auto max-w-[1400px] px-4 py-6">
-      <div className="flex flex-wrap items-center justify-around gap-6 rounded-2xl bg-[#111111] px-8 py-6">
+      {/*
+        Four figures on one row at every width. `flex-wrap` sent the last two
+        onto a second line on a phone, which is the banner growing a row
+        exactly where there is least room for it - the icon sits over the
+        figure below `sm` and the type steps down instead.
+      */}
+      <div className="grid grid-cols-4 items-center gap-1 rounded-2xl bg-[#111111] px-2 py-3 sm:gap-6 sm:px-8 sm:py-6">
         {[
           { icon: Users, stat: '100+', label: 'Verified Suppliers' },
           { icon: Package, stat: '10,000+', label: 'Products' },
           { icon: ShieldCheck, stat: 'Secure', label: 'Payments' },
           { icon: Truck, stat: 'Fast', label: 'Reliable Delivery' },
         ].map((item, i) => (
-          <div key={i} className="flex items-center gap-3">
-            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-[#E67E22]/10">
-              <item.icon size={20} className="text-[#E67E22]" />
+          <div
+            key={i}
+            className="flex min-w-0 flex-col items-center gap-1 text-center sm:flex-row sm:justify-center sm:gap-3 sm:text-left"
+          >
+            <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-[#E67E22]/10 sm:h-10 sm:w-10">
+              <item.icon className="h-3.5 w-3.5 text-[#E67E22] sm:h-5 sm:w-5" />
             </div>
-            <div>
-              <p className="text-[22px] font-bold leading-none text-white">{item.stat}</p>
-              <p className="text-[12px] text-white/60">{item.label}</p>
+            <div className="min-w-0">
+              <p className="text-[12px] font-bold leading-none text-white sm:text-[22px]">{item.stat}</p>
+              <p className="text-[8.5px] leading-tight text-white/60 sm:text-[12px]">{item.label}</p>
             </div>
           </div>
         ))}
