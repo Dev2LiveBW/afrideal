@@ -81,13 +81,23 @@ export function MockupHero() {
             
             {/* Runner Image */}
             {/*
-              The box follows the photograph's own 1024:819 below `sm`.
-              Held at h-[95%] it became a tall narrow slot on a phone -
-              133x285 for a landscape image - and object-contain fitted to
-              the width, so the runner filled 37% of the slot against 85%
-              on a wide card. Matching the ratio lets it fill either way.
+              Two things kept the runner small, and both are fixed here.
+
+              The photograph carried 20% empty ground on its left and 11% on
+              its right, so a third of every box it was given went to
+              background. It is now trimmed to the subject, which turned it
+              from 1024x819 landscape into 730x817 - close to square, and a
+              far better fit for a card that is tall and narrow.
+
+              The box was fixed at h-[95%], which only matches the
+              photograph's shape once the card is genuinely wide. The cards
+              sit two-up from the smallest width, so they stay narrow all the
+              way to `lg` - at 768px each is about 360px against 400px of
+              height, and object-contain fitted to the width and left the
+              rest empty. The box now follows the photograph's ratio until
+              `lg`, where the original treatment takes over.
             */}
-            <div className="pointer-events-none absolute -right-2 bottom-0 z-0 aspect-[1024/819] w-[94%] sm:-right-12 sm:aspect-auto sm:h-[95%] sm:w-[80%]">
+            <div className="pointer-events-none absolute -right-2 bottom-0 z-0 aspect-[730/817] w-[86%] lg:-right-12 lg:aspect-auto lg:h-[95%] lg:w-[80%]">
                <Image src="/images/hero/runner.jpg" alt="Runner" fill className="object-contain object-right-bottom" />
             </div>
             
