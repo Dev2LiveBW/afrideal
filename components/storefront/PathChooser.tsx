@@ -44,14 +44,11 @@ interface Door {
   accent: string;
   button: string;
   /**
-   * TODO(assets): the product owner's reference design puts an AfriDeal-branded
-   * package render on the right of each card - a paper bag for Retail, stacked
-   * cartons for Bulk, a pallet for Wholesale. Those renders have not been
-   * supplied yet, so the slot stays empty and the card lays out without it
-   * rather than borrowing an unrelated photograph. Drop the files in
-   * /public/images/buying/ and fill this in.
+   * The AfriDeal package render for this door, supplied by the product owner
+   * and cut out to transparency so the card's own ground shows through rather
+   * than a second, slightly-off rectangle of it.
    */
-  image?: { src: string; alt: string };
+  image: { src: string; alt: string };
 }
 
 const DOORS: Door[] = [
@@ -68,6 +65,7 @@ const DOORS: Door[] = [
     disc: 'bg-[#F5B041]/20',
     accent: 'text-[#D35400]',
     button: 'bg-[#F5B041] text-black hover:bg-[#E9A331]',
+    image: { src: '/images/buying/retail-bag.png', alt: 'An AfriDeal paper bag' },
   },
   {
     key: 'bulk',
@@ -82,6 +80,7 @@ const DOORS: Door[] = [
     disc: 'bg-forest/10',
     accent: 'text-forest',
     button: 'bg-forest text-white hover:bg-forest-light',
+    image: { src: '/images/buying/bulk-boxes.png', alt: 'Stacked AfriDeal cartons' },
   },
   {
     key: 'wholesale',
@@ -96,6 +95,7 @@ const DOORS: Door[] = [
     accent: 'text-royal',
     disc: 'bg-royal/10',
     button: 'bg-royal text-white hover:bg-royal-light',
+    image: { src: '/images/buying/wholesale-pallet.png', alt: 'A pallet of AfriDeal cartons' },
   },
 ];
 
@@ -190,17 +190,21 @@ export function PathChooser({
                 </span>
               </div>
 
-              {door.image && (
-                <div className="pointer-events-none absolute bottom-0 right-0 z-0 h-[62%] w-[46%]">
-                  <Image
-                    src={door.image.src}
-                    alt={door.image.alt}
-                    fill
-                    sizes="(max-width: 768px) 45vw, 200px"
-                    className="object-contain object-bottom"
-                  />
-                </div>
-              )}
+              {/*
+                The render sits behind the copy and is clipped by the card, so
+                the text column keeps its own measure. Hidden below `sm`, where
+                the card is narrow enough that the bag would sit under the
+                bullet list rather than beside it.
+              */}
+              <div className="pointer-events-none absolute -bottom-1 right-0 z-0 hidden h-[58%] w-[44%] sm:block">
+                <Image
+                  src={door.image.src}
+                  alt=""
+                  fill
+                  sizes="(max-width: 1024px) 30vw, 220px"
+                  className="object-contain object-right-bottom"
+                />
+              </div>
             </Link>
           );
         })}

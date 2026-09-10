@@ -17,6 +17,11 @@ import { cn } from '@/lib/utils';
  * the call site, so a future page cannot render the grid under a third wording
  * and re-open the duplicate.
  *
+ * The artwork is cut from the product owner's reference board
+ * (2026-09-10): each disc is lifted at its own centre and radius, and the
+ * strip the label pill covered is filled with the disc's own ground colour.
+ * Source board kept out of the repo; regenerate from it if the set changes.
+ *
  * The six trades below are the client's reference set. They are a marketing
  * grouping rather than the seeded catalogue taxonomy, so each one links to the
  * catalogue slug that actually holds its stock where there is one, and falls
@@ -36,33 +41,33 @@ const CATEGORIES: CategoryTile[] = [
   {
     name: 'Beauty & Hair',
     href: '/browse?category=hair-weaves-extensions',
-    img: 'https://images.unsplash.com/photo-1603878562683-c2149bda665f?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&w=400&q=80',
+    img: '/images/categories/beauty-hair.jpg',
   },
   {
     name: 'Electronics',
     href: '/browse?category=electronics',
-    img: 'https://images.unsplash.com/photo-1638803782506-d975a6809f43?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&w=400&q=80',
+    img: '/images/categories/electronics.jpg',
   },
   {
     name: 'Fashion',
     href: '/browse?category=clothing-uniforms',
-    img: 'https://images.unsplash.com/photo-1559050993-d4e4fbf11769?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&w=400&q=80',
+    img: '/images/categories/fashion.jpg',
   },
   // No seeded catalogue category yet - see the note above.
   {
     name: 'Home & Kitchen',
     href: '/browse',
-    img: 'https://images.unsplash.com/photo-1583241475880-083f84372725?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&w=400&q=80',
+    img: '/images/categories/home-kitchen.jpg',
   },
   {
     name: 'Auto Accessories',
     href: '/browse',
-    img: 'https://images.unsplash.com/photo-1691382418385-bbe3cf722388?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&w=400&q=80',
+    img: '/images/categories/auto-accessories.jpg',
   },
   {
     name: 'Baby & Kids',
     href: '/browse',
-    img: 'https://images.unsplash.com/photo-1725328493423-3771b60d02c2?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&w=400&q=80',
+    img: '/images/categories/baby-kids.jpg',
   },
 ];
 
