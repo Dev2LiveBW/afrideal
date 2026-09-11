@@ -25,9 +25,13 @@ import type { Category, Product, ProductImage } from '@/types';
  * benchmark uses, routing to the filtered catalogue. When sub-categories are
  * seeded the tiles change; the frame does not.
  *
- * Client-side rail state only. The catalogue is seven categories and seventeen
- * products, all already on the page; a round trip per rail tap would be slower
- * than the tap.
+ * Client-side rail state only, which is also what the live site does: a rail
+ * tap swaps the pane in place with no navigation. The catalogue is seven
+ * categories and seventeen products, all already on the page.
+ *
+ * Rail and tiles measured live on m.alibaba.com/category.html at 390px:
+ * rail 100px, items 13px on a 48px pitch, bold on white when active; discs
+ * 78px on a 16px column gap; captions 11px.
  */
 
 export function CategoryBrowser({
@@ -69,7 +73,6 @@ export function CategoryBrowser({
         <ul>
           {ordered.map((category) => {
             const isActive = category.id === active.id;
-            const count = products.filter((product) => product.category_id === category.id).length;
             return (
               <li key={category.id}>
                 <button
@@ -77,7 +80,7 @@ export function CategoryBrowser({
                   onClick={() => setActiveId(category.id)}
                   aria-current={isActive ? 'true' : undefined}
                   className={cn(
-                    'relative flex w-full flex-col items-start gap-0.5 px-2.5 py-3 text-left text-[11px] leading-[1.25] transition-colors sm:px-3 sm:text-[12px]',
+                    'relative flex min-h-[48px] w-full items-center px-2.5 py-2 text-left text-[13px] leading-[1.25] transition-colors sm:px-3',
                     isActive
                       ? 'bg-surface-raised font-semibold text-ink'
                       : 'text-body hover:bg-surface-raised/60 hover:text-ink',
@@ -90,7 +93,6 @@ export function CategoryBrowser({
                     />
                   )}
                   <span className="line-clamp-2">{category.name}</span>
-                  <span className="font-mono text-[10px] tabular-nums text-muted">{count}</span>
                 </button>
               </li>
             );
@@ -115,7 +117,7 @@ export function CategoryBrowser({
           benchmark's ~78px on a 384px screen; here it is the column width
           less the gap so it scales with the pane rather than with the phone.
         */}
-        <ul className="grid grid-cols-3 gap-x-3 gap-y-4">
+        <ul className="grid grid-cols-3 gap-x-4 gap-y-5">
           {tiles.map((product) => (
             <li key={product.id}>
               <Link

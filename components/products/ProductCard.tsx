@@ -20,7 +20,8 @@ import type { Product, ProductImage } from '@/types';
  * she sent with "see how small their boxes are, and this is on a phone": two
  * across, a square photograph the full width of the card with no border and
  * no shadow, and four lines under it - name, price, minimum order, a meta
- * line - at 13 / 15 / 12 / 11px. About five cards to a phone screen.
+ * line. Measured live on m.alibaba.com: title 12px grey, price 14px bold
+ * ink, 8px radius on the photograph. About five cards to a phone screen.
  *
  * What went: the coloured wash ground, the card border and shadow, the
  * two-line description, and the footer band. A card in a grid is identified
@@ -125,7 +126,7 @@ export function ProductCard({
         className="flex h-full flex-col outline-none"
       >
         {/* ── The photograph, and the two things you can do on it ─────── */}
-        <div className="relative overflow-hidden rounded-sm bg-surface-sunk">
+        <div className="relative overflow-hidden rounded-[8px] bg-surface-sunk">
           <Swatch
             image={image}
             fallback={product.swatch}
@@ -171,7 +172,7 @@ export function ProductCard({
 
         {/* ── Four lines, in the benchmark's order ─────────────────────── */}
         <div className="flex flex-1 flex-col pt-2">
-          <h3 className="line-clamp-2 text-[13px] font-medium leading-[1.3] text-ink transition-colors group-hover:text-forest">
+          <h3 className="line-clamp-2 text-[12px] font-normal leading-[1.35] text-body transition-colors group-hover:text-ink">
             {product.name}
           </h3>
 
@@ -186,7 +187,7 @@ export function ProductCard({
               amount={showingTier ? tierPrice! : product.price}
               size="sm"
               tone={tierByQuotation ? 'muted' : 'ink'}
-              className="text-[15px]"
+              className="text-[14px]"
             />
             {showingTier ? (
               tierPrice! < product.price && (
@@ -247,7 +248,7 @@ export function ProductCard({
 export function ProductCardSkeleton() {
   return (
     <div>
-      <div className="skeleton aspect-square rounded-sm" />
+      <div className="skeleton aspect-square rounded-[8px]" />
       <div className="space-y-1.5 pt-2">
         <div className="skeleton h-3.5 w-full" />
         <div className="skeleton h-3.5 w-2/3" />

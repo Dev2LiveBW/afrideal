@@ -13,11 +13,19 @@ mapping from each Alibaba pattern to the AfriDeal component that implements
 it. If the screen you are touching is listed in its §5 "Not yet observed",
 ask for a recording rather than guessing.
 
-The app is not a fetchable web page, so there is no live lookup — the
-benchmark file *is* the lookup. When a new recording arrives, pull frames
-with ffmpeg, measure, and extend the file. `docs/research/alibaba-1688-features.md`
-explains where AfriDeal's model deliberately diverges (it is the merchant of
-record; Alibaba is an introduction service).
+**Measure live where you can.** The mobile site (`m.alibaba.com`) renders
+the same layouts as the app and its DOM can be measured exactly in the
+Browser pane at a 390px viewport — computed font sizes, colours, radii,
+pitches. The benchmark's access map says which screens are reachable (home,
+categories, RFQ landing) and which sit behind a slider CAPTCHA (search,
+product detail, sign-in). **Never attempt to pass the CAPTCHA.** For gated
+screens use the product owner's recordings: pull frames with ffmpeg, measure,
+extend the file. A live figure beats a video estimate; when they disagree,
+update the file and note the source.
+
+`docs/research/alibaba-1688-features.md` explains where AfriDeal's model
+deliberately diverges (it is the merchant of record; Alibaba is an
+introduction service).
 
 ## Which working copy
 

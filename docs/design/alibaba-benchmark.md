@@ -11,11 +11,35 @@
 
 ## How this document is maintained
 
-The source is screen recordings of the Alibaba app supplied by the product
-owner. Frames are pulled with ffmpeg, measured, and written up here. The app
-is not a web page, so it cannot be fetched live - **this file is the lookup**.
-When a new recording arrives, extract the screens it adds and extend the
-relevant section; do not describe from memory.
+Two sources, in order of authority:
+
+1. **The live mobile site, measured in the Browser pane.** `m.alibaba.com`
+   renders the same layouts as the app and its DOM can be measured exactly -
+   computed font sizes, colours, radii, pitches. Where a figure below is
+   marked *live* it came from this and supersedes any video estimate. Only
+   some screens are reachable, see the access map.
+2. **Screen recordings of the app** supplied by the product owner, for the
+   screens the site gates. Frames are pulled with ffmpeg and measured;
+   figures from these are estimates to within a few pixels.
+
+**This file is the lookup.** When a screen changes or a new recording
+arrives, re-measure and extend the relevant section; do not describe from
+memory.
+
+### Access map (checked 2026-09-11, 390px viewport)
+
+| screen | live | route | note |
+| --- | --- | --- | --- |
+| Home | **yes** | `https://m.alibaba.com` | redirects to `www.alibaba.com/?isSpider=true` - flagged as automated, still fully rendered. An app-install interstitial appears on load; its × dismisses it |
+| Categories | **yes** | `https://www.alibaba.com/category.html` | the two-pane browser; rail taps swap the pane in place |
+| RFQ landing | **yes** | `https://rfq.alibaba.com/rfq/lp_page_retriever.htm` | |
+| Search results | no | `/trade/search?SearchText=…` | slider CAPTCHA. **Do not attempt to pass it.** Use the 2:58 recording |
+| Product detail | no | `/product-detail/…` | slider CAPTCHA. Use the 2:32 recording for chrome; the physical-good page is unrecorded |
+| Sign-in | no | `login.alibaba.com` | redirects to a blank bot-check page. Needs a recording |
+
+Prices on the live site render in **Pula** when browsed from Botswana - the
+site geolocates - so `P 670.06` in a measurement is Alibaba's own display,
+not ours.
 
 Recordings on file:
 
@@ -24,9 +48,9 @@ Recordings on file:
 | 2026-09-09 | 2:58 | home, categories, search results, product detail (an agent listing) |
 | 2026-09-09 | 2:32 | product detail Details tab (FAQ), **Recommended tab - the catalogue card grid**, sticky enquiry bar |
 
-Measurements below are from the two 2026-09-09 recordings. The phone in
-them is 384px wide; figures are given as a share of viewport width so they
-transfer.
+Figures marked *live* were measured on the mobile site at a 390px viewport
+on 2026-09-11. The rest are from the two 2026-09-09 recordings, whose phone
+is 384px wide. Both are given as a share of viewport width so they transfer.
 
 ---
 
@@ -97,18 +121,22 @@ grid of products - the catalogue, related items, a supplier's other lines.
  Verified 2 yrs · CN 1 yr · CN          ← 11px muted
 ```
 
-| property | value |
-| --- | --- |
-| columns | 2, at every phone width |
-| card width | ~46% of viewport (178px at 384); 7px gutter, 11px page margin |
-| image | square, the card's full width, ~4px radius |
-| card chrome | **none** - no border, no shadow, no tinted ground; the photograph is the card's edge |
-| title | two lines, 13px, medium, ellipsis on the second line |
-| price | 15px bold, a range where one exists |
-| minimum order | 12px, `Min. order: 500 pieces` |
-| meta line | 11px muted: `Verified` (bold blue) + years + country, or just years + country |
-| card pitch | ~266px vertical → **~5 cards per phone screen** |
-| overlays | a small image-search glyph bottom-left of the photograph; nothing else |
+| property | value | source |
+| --- | --- | --- |
+| columns | 2, at every phone width | live |
+| card width | **179px at 390** (46%); columns at x=12 and x=199; **8px gutter, 12px margins** | live |
+| image | **square, 179×179, 8px radius** | live |
+| card chrome | **none** - `border: 0`, no shadow, transparent background; the photograph is the card's edge | live |
+| title | **12px, weight 400, `#666`**, two lines, ellipsis | live |
+| price | **14px, weight 700, `#111`**, a range where one exists | live |
+| minimum order | **12px, `#888`**, written `1 piece (MOQ)` on the feed, `Min. order: 500 pieces` in search | live / video |
+| meta line | 11px muted: `Verified` (bold blue) + years + country | video (search only) |
+| card pitch | **285–310px** vertical → 4–5 cards per phone screen | live |
+| overlays | a small image-search glyph bottom-left of the photograph; nothing else | video |
+
+The live figures moved three things from the video estimate: the title is a
+point smaller and grey rather than ink, the price a point smaller, and the
+radius 8px not 4px.
 
 **AfriDeal mapping.** `components/products/ProductCard.tsx`, on the `/browse`
 grid. Title → name. Price → `PriceTag`. Minimum order → the rung's minimum
@@ -161,17 +189,18 @@ still in §5.
 └─────────┴──────────────────────────────────────┘
 ```
 
-| property | value |
-| --- | --- |
-| page header | `Categories`, ~18px bold, left; one icon right |
-| left rail width | ~25% of viewport (~96px at 390) |
-| left rail ground | light grey; active item white with a left accent bar |
-| left rail item | ~11px, wraps to two lines, ~48px row pitch, scrolls independently |
-| right pane | white, 3 columns |
-| tile | circle, ~78px, light grey disc, image or word inside |
-| tile pitch | ~113px per row, caption ~11px below, two lines max |
-| set terminator | a `View all` tile with a grid glyph |
-| below the grid | a content section (`Get product inspiration`) |
+| property | value | source |
+| --- | --- | --- |
+| page header | `Categories`, **18px** bold, centred; back arrow left, one icon right | live |
+| left rail width | **100px at 390 (26%)** | live |
+| left rail ground | **`#f4f4f4`**; active item **white**, no accent bar on the web | live |
+| left rail item | **13px, `#222`, 700 when active / 400 otherwise, 48px row pitch**, wraps to two lines, `overflow-y: auto` | live |
+| right pane | 290px, transparent over white, 3 columns; heading 16px bold (`Recommendations` on *For you*) | live |
+| tile | **78px disc, fully round** (`border-radius: 999px`), image inside | live |
+| tile grid | **16px column gap, 128px row pitch**; caption **11px `#222`** below | live |
+| interaction | **tapping a rail item swaps the pane in place** - no navigation, URL unchanged, tapped item goes bold on white, tiles replaced with that trade's sub-categories | live |
+| set terminator | a `View all` tile with a grid glyph | video |
+| below the grid | `Get product inspiration` - a 2-column §1b grid | live |
 
 **AfriDeal mapping.** New route `/categories`, and the `Categories` tab in
 the mobile tab bar points at it. Left rail → the seven seeded categories.
@@ -183,12 +212,15 @@ second level yet (research doc §2.1), so products stand in until we do.
 
 ## 3. Home
 
-| pattern | value |
-| --- | --- |
-| service entry points | three tiles in one row under the search field: `Source by category`, `Request for Quotation`, `Verified Pro Supplier`. ~44px tall, icon left, two-line ~12px label |
-| horizontal rails | `Factory matches for recent views`, `Get samples`, `Top-ranking manufacturers` - each a 4-up rail of ~90px square tiles with a caption and a `From US$x` line, section title ~16px bold with an arrow |
-| segmented tabs | `AI Mode | Products | Manufacturers | Worldwide` above the search field |
-| category chips | horizontal scroll under the search field, `All` active |
+| pattern | value | source |
+| --- | --- | --- |
+| segmented tabs | `AI Mode | Products | Manufacturers | Worldwide`: **active 18px 700, inactive 16px 400**, underline in the accent | live |
+| category chips | one row, **45px tall**, horizontal scroll, `All` active | live |
+| service entry points | one row of tiles: **128×52 each, 11px 700 label, 32px icon at 4px radius**, no radius on the tile. `Source by category` → `/category.html`; `Request for Quotation` → the RFQ landing (§3b) | live |
+| horizontal rails | `Top Deals`, `New Arrivals`: section title **13px** with an arrow; cards **136×172, image 136×136 at 4px radius, no chrome; price 13px 700 in `rgb(247,66,30)`, caption 11px `#666`**; the floor is 250px tall | live |
+| feed | the page continues into a 2-column §1b grid, ~6,700px of it | live |
+| sign-in nudge | a 48px banner above the tab bar: `Sign in for better sourcing experience` + button | live |
+| bottom tab bar | **56px**: `Home | Tips | Messenger | Cart | My Alibaba` (the app says `Categories` where the web says `Tips`) | live |
 
 **AfriDeal mapping.** The three service tiles map to `Browse`, `Request a
 quotation` (RFQ - exists, entry point unresolved after TICKET-006) and
@@ -198,13 +230,49 @@ the "strips stay strips on a phone" rule.
 
 ---
 
+## 3b. Request for Quotation landing — *live*
+
+`rfq.alibaba.com/rfq/lp_page_retriever.htm`, reached from the home tile.
+This is the top-level RFQ entry point that TICKET-006 left AfriDeal without
+(research doc, open question 2).
+
+```
+┌──────────────────────────────────────┐
+│ ‹  [RFQ] Request for Quotation       │  ← page header
+│ Get quotes for your custom request   │  ← 18px 700, white on an indigo hero
+│ Accurate supplier matching, fast …   │  ← 13px
+│ Popular Requests for Quotation       │
+│ [Design] [Logo] [Bundling]  ⓘ Learn  │  ← three tiles, horizontal
+├──────────────────────────────────────┤
+│ Tell us what you need                │  ← 16px 700, on a white card
+│ ┌──────────────────────────────────┐ │
+│ │ +  Upload an image, or enter     │ │  ← textarea, 64px, with a + for
+│ │    keywords. For example, "100pcs│ │     an image attachment
+│ │    bear toys, see upload…"       │ │
+│ └──────────────────────────────────┘ │
+│ ☑ Easily generate an RFQ with AI     │  ← 13px
+│ [       Write RFQ details        ]   │  ← 38px, full width, pill,
+│                                      │     `rgb(255,102,0)`, 13px 700
+│ "RFQ saves me a lot of time…"        │  ← testimonial
+└──────────────────────────────────────┘
+```
+
+**AfriDeal mapping.** The shape is one free-text field plus an image, and
+one button - the whole form is deferred to the next step. Our
+`components/procurement/RfqModal.tsx` opens with the full form. If RFQ gets
+a top-level home again, this two-step shape (say what you need → then the
+details) is the one to copy, and the `/suppliers` directory is the natural
+place for the tile.
+
+---
+
 ## 4. Global patterns
 
 | pattern | Alibaba | AfriDeal |
 | --- | --- | --- |
-| accent | one orange, on the active tab underline, primary button, badges | `#E67E22` on the storefront (already in use) |
-| type scale | body 12-13px, titles 14px, prices 18px bold - dense | keep the scale, keep our faces |
-| corners | ~6-8px on images and tiles, full pills on chips | `rounded-md` / `rounded-full` |
+| accent | **`rgb(255,102,0)`** on buttons, **`rgb(247,66,30)`** on rail prices; the active tab underline. *live* | `#E67E22` on the storefront (already in use) |
+| type scale | body **12px `#666` / `#888`**, card price **14px 700 `#111`**, rail price 13px, section titles 13-16px 700, page titles 18px 700, tabs 16/18. *live* | keep the scale, keep our faces |
+| corners | **8px** on feed images, **4px** on rail images and icons, **999px** on category discs and buttons. *live* | `rounded-[8px]` / `rounded-sm` / `rounded-full` |
 | list chrome | hairline separators, no shadows on lists | `divide-hairline`; save `shadow-card` for true cards |
 | top chrome | sticky search field | already so |
 | bottom chrome | 5-tab bar, active in the accent | `MobileTabBar`, already so |
@@ -217,7 +285,7 @@ the "strips stay strips on a phone" rule.
 These are named in the product owner's brief but are not in any recording on
 file. Do not build them from memory - request a recording.
 
-- **Sign-up and onboarding flow**
+- **Sign-up and onboarding flow** - `login.alibaba.com` sends an automated browser to a blank bot-check page, so this cannot be measured live
 - **Product detail page** for a physical good. Both recordings show an
   agent-service listing; its chrome is in §1c, but the price ladder, variant
   picker and gallery of a physical good are not on file.
