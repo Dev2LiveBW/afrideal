@@ -35,11 +35,6 @@ export function MockupHero() {
                   </li>
                 ))}
               </ul>
-              
-              <Link href="/browse" className="inline-flex h-8 items-center justify-center gap-1 rounded-full bg-gold px-3 text-[10.5px] font-bold text-black hover:bg-gold-light transition-colors sm:h-12 sm:gap-2 sm:px-8 sm:text-[15px]">
-                Browse products
-                <ArrowRight className="h-3 w-3 sm:h-[18px] sm:w-[18px]" />
-              </Link>
             </div>
             
             {/*
@@ -74,6 +69,16 @@ export function MockupHero() {
               <Image src="/images/hero/mockup.jpg" alt="" fill sizes="640px" className="object-cover object-right" />
             </div>
             <div className="pointer-events-none absolute inset-y-0 right-0 z-0 hidden w-full bg-gradient-to-r from-[#0e0701] via-[#0e0701]/40 to-transparent lg:block" />
+
+            {/*
+              Last in the card and pushed to its foot, the same as the right
+              card's button, so the two sit on one line under their images
+              rather than one above and one below.
+            */}
+            <Link href="/browse" className="relative z-10 mt-3 flex h-8 w-full items-center justify-center gap-1 rounded-lg bg-gold px-2 text-[10.5px] font-bold text-black hover:bg-gold-light transition-colors sm:mt-4 sm:h-12 sm:gap-2 sm:rounded-full sm:px-8 sm:text-[15px] lg:mt-auto lg:h-14 lg:w-auto lg:self-start lg:text-[16px]">
+              Browse products
+              <ArrowRight className="h-3 w-3 sm:h-[18px] sm:w-[18px]" />
+            </Link>
           </div>
 
           {/* Right Card: Runner Service */}
