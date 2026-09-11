@@ -376,7 +376,7 @@ export function StorefrontNav({ categories = [] }: { categories?: Category[] }) 
  */
 const TABS = [
   { href: '/', label: 'Home', icon: Home },
-  { href: '/browse', label: 'Categories', icon: Grid2x2 },
+  { href: '/categories', label: 'Categories', icon: Grid2x2 },
   { href: '/how-it-works', label: 'Compare', icon: ArrowLeftRight },
   { href: '/orders', label: 'Orders', icon: Package },
   { href: '/login', label: 'Account', icon: User },

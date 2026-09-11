@@ -1,29 +1,32 @@
 import Link from 'next/link';
-import { ArrowRight, BadgeCheck, MapPin, Package, Star } from 'lucide-react';
+import { ArrowRight, BadgeCheck, CheckCircle2 } from 'lucide-react';
 
-import { MoneyText } from '@/components/brand/MoneyText';
+import { PriceTag } from '@/components/brand/MoneyText';
 import { Swatch } from '@/components/storefront/Swatch';
 import { humanise } from '@/lib/format';
 import { cn } from '@/lib/utils';
 import type { DirectoryListing } from '@/lib/directory';
 
 /**
- * The supplier / product directory grid. (TICKET-007)
+ * The supplier / product directory. (TICKET-007)
  *
- * An Alibaba-style listing card: the product photograph, the published price,
- * the minimum order quantity, the verified badge and the company behind it.
- * MOQ and the company name are the two fields a trade buyer scans for and
- * neither appears on the retail `ProductCard`, which is why this is its own
- * card rather than a variant of that one.
+ * Drawn to the Alibaba benchmark - see docs/design/alibaba-benchmark.md §1.
  *
- * One card is one product-supplier pairing. The same product from two
- * companies is two cards, because the MOQ and the lead time differ and that is
+ * Rows, not cards. The previous version was a vertical card with a full-width
+ * 4:3 photograph, which put about one listing on a phone screen; the product
+ * owner's note was "see how small their boxes are, and this is on a phone."
+ * Alibaba's search results are full-width rows with a square image on the
+ * left taking about a third of the width, and the trade fields stacked beside
+ * it - roughly four and a half to a screen. This does the same.
+ *
+ * One row is one product-supplier pairing. The same product from two
+ * companies is two rows, because the MOQ and the lead time differ and that is
  * the comparison the page exists to support.
  *
- * Structure and tokens are the storefront's own - `shadow-card` / `shadow-lift`
- * on a hairline border, `MoneyText` for every figure, `Swatch` for the image
- * slot with its gradient fallback - so the grid sits beside the catalogue
- * rather than beside it looking imported.
+ * The fields, top to bottom, follow the benchmark's order: name, price,
+ * minimum order, the trust line, the performance line. Verified and the
+ * company name are the two that must survive at any density - they are what
+ * a trade buyer scans for.
  */
 
 export function SupplierDirectory({
@@ -42,85 +45,69 @@ export function SupplierDirectory({
   }
 
   return (
-    <ul className={cn('grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4', className)}>
+    /*
+     * Two columns of rows from `lg`, one below. A row is wide enough that
+     * four across on a desktop would starve the title; two keeps the row's
+     * shape and doubles the density the benchmark asks for.
+     */
+    <ul className={cn('grid grid-cols-1 gap-x-6 lg:grid-cols-2', className)}>
       {listings.map((listing) => (
-        <li key={listing.id}>
+        <li key={listing.id} className="border-b border-hairline last:border-b-0 lg:[&:nth-last-child(2)]:border-b-0">
           <Link
             href={`/products/${listing.product_id}`}
-            className="group flex h-full flex-col overflow-hidden rounded-md border border-hairline bg-surface-raised shadow-card transition-shadow duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] hover:shadow-lift"
+            className="group flex gap-2.5 py-2.5 outline-none sm:gap-3 sm:py-3"
           >
-            <div className="relative">
+            {/* Square, a third of the row, radius on the image not the row */}
+            <div className="relative w-[31%] max-w-[132px] shrink-0">
               <Swatch
                 image={listing.image}
                 fallback={listing.swatch}
                 emoji={listing.emoji}
                 label={listing.product_name}
-                className="aspect-[4/3]"
-                glyphClassName="text-[48px] bottom-3 right-4"
+                className="aspect-square rounded-md"
+                glyphClassName="text-[28px] bottom-1.5 right-2"
+                zoomOnHover={false}
               />
-
               {!listing.in_stock && (
-                <span className="absolute left-3 top-3 rounded-full bg-ink/70 px-2.5 py-1 font-mono text-[10px] uppercase tracking-[0.14em] text-white backdrop-blur-sm">
+                <span className="absolute left-1.5 top-1.5 rounded bg-ink/75 px-1.5 py-0.5 font-mono text-[9px] uppercase tracking-[0.12em] text-white">
                   Out of stock
                 </span>
               )}
             </div>
 
-            <div className="flex flex-1 flex-col p-4">
-              <h3 className="line-clamp-2 text-[14px] font-medium leading-5 text-ink transition-colors group-hover:text-forest">
+            <div className="flex min-w-0 flex-1 flex-col justify-center">
+              <h3 className="truncate text-[13.5px] font-medium text-ink transition-colors group-hover:text-forest sm:text-[14px]">
                 {listing.product_name}
               </h3>
 
-              <div className="mt-3">
-                <p className="text-[10.5px] text-muted">From</p>
-                <MoneyText amount={listing.price} size="md" tone="ink" />
+              <div className="mt-0.5">
+                <PriceTag amount={listing.price} size="md" tone="ink" />
               </div>
 
-              {/*
-                MOQ next to the price rather than in the metadata row: at trade
-                quantities the two figures are one fact, and a buyer who reads
-                the price without the minimum has read half of it.
-              */}
-              <p className="mt-1.5 inline-flex w-fit items-center gap-1.5 rounded-full bg-surface-sunk px-2.5 py-1 text-[11.5px] text-body">
-                <Package size={12} strokeWidth={1.6} aria-hidden="true" />
-                MOQ <span className="font-mono tabular-nums text-ink">{listing.moq}</span> units
+              <p className="mt-0.5 text-[12px] text-body">
+                Min. order: <span className="font-mono tabular-nums text-ink">{listing.moq}</span> units
               </p>
 
-              {/* ── The company ─────────────────────────────────────── */}
-              <div className="mt-4 border-t border-hairline pt-3">
-                <div className="flex min-w-0 items-center gap-2.5">
-                  <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-forest-wash font-mono text-[11px] font-semibold text-forest">
-                    {listing.supplier_initials}
+              {/* The trust line. Verified is the word a buyer looks for first. */}
+              <p className="mt-1 flex min-w-0 items-center gap-1 text-[12px] text-body">
+                {listing.verified && (
+                  <span className="inline-flex shrink-0 items-center gap-0.5 font-semibold text-ocean">
+                    <BadgeCheck size={13} strokeWidth={2.25} aria-hidden="true" />
+                    Verified
                   </span>
+                )}
+                <span className="truncate">
+                  {listing.supplier_name} · {listing.city}
+                </span>
+              </p>
 
-                  <div className="min-w-0 flex-1">
-                    <p className="truncate text-[12.5px] font-medium text-ink">
-                      {listing.supplier_name}
-                    </p>
-                    <p className="mt-0.5 flex items-center gap-1 text-[11px] text-muted">
-                      <MapPin size={10} strokeWidth={1.6} aria-hidden="true" />
-                      <span className="truncate">
-                        {listing.city}, {listing.country}
-                      </span>
-                      <span aria-hidden="true">·</span>
-                      <Star size={10} strokeWidth={1.5} className="shrink-0 fill-gold text-gold" />
-                      <span className="font-mono tabular-nums">{listing.rating.toFixed(1)}</span>
-                    </p>
-                  </div>
-                </div>
-
-                <div className="mt-2.5 flex flex-wrap items-center gap-1.5">
-                  {listing.verified && (
-                    <span className="inline-flex items-center gap-1 rounded-full bg-forest-wash px-2 py-0.5 text-[10px] font-medium uppercase tracking-[0.08em] text-forest-ink">
-                      <BadgeCheck size={11} strokeWidth={2} aria-hidden="true" />
-                      Verified supplier
-                    </span>
-                  )}
-                  <span className="rounded-full bg-surface-sunk px-2 py-0.5 text-[10px] font-medium uppercase tracking-[0.08em] text-body">
-                    {humanise(listing.supplier_type)}
-                  </span>
-                </div>
-              </div>
+              {/* The performance line. Alibaba shows reorder rate; we hold fulfilment. */}
+              <p className="mt-0.5 flex items-center gap-1 text-[12px] text-body">
+                <CheckCircle2 size={12} strokeWidth={2} className="shrink-0 text-forest" aria-hidden="true" />
+                <span className="font-mono tabular-nums">{listing.fulfilment_rate}%</span> fulfilment
+                <span className="text-muted">·</span>
+                <span className="truncate">{humanise(listing.supplier_type)}</span>
+              </p>
             </div>
           </Link>
         </li>
@@ -130,7 +117,7 @@ export function SupplierDirectory({
 }
 
 /**
- * The directory as a homepage section: heading, the first few cards, and a
+ * The directory as a homepage section: heading, the first few rows, and a
  * route through to the full page.
  */
 export function SupplierDirectorySection({
@@ -146,7 +133,7 @@ export function SupplierDirectorySection({
 
   return (
     <section className={cn('mx-auto max-w-market px-4', className)} aria-labelledby="supplier-directory">
-      <div className="mb-5 flex flex-wrap items-end justify-between gap-4">
+      <div className="mb-2 flex flex-wrap items-end justify-between gap-4">
         <div className="min-w-0">
           <h2 id="supplier-directory" className="font-display text-headline-md font-semibold text-ink">
             Source from verified suppliers

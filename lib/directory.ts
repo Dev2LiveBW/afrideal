@@ -34,6 +34,8 @@ export interface DirectoryListing {
   supplier_type: string;
   verified: boolean;
   rating: number;
+  /** 0-100. Stands in for Alibaba's reorder rate on the listing row. */
+  fulfilment_rate: number;
   fulfilment_days: number;
   in_stock: boolean;
   category_id: string;
@@ -96,6 +98,7 @@ export async function getDirectoryListings({
           supplier_type: supplier.supplier_type ?? 'WHOLESALER',
           verified,
           rating: supplier.rating,
+          fulfilment_rate: supplier.fulfilment_rate,
           fulfilment_days: offer.fulfilment_days,
           in_stock: offer.stock > 0,
           category_id: product.category_id,

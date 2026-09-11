@@ -102,6 +102,7 @@ export default withAuth(
            * runtime and this list has to stay statically analysable.
            */
           pathname.startsWith('/suppliers') ||
+          pathname.startsWith('/categories') ||
           /*
            * The explainer is the page a visitor is sent to before they trust
            * the platform with anything. Asking them to sign in to read how
