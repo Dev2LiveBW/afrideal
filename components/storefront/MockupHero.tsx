@@ -38,29 +38,42 @@ export function MockupHero() {
             </div>
             
             {/*
-              Narrow: the product shot in flow, whole.
+              Below `lg`: the band.
 
-              As a full-bleed cover background it was cropped to a vertical
-              slice of a 4:3 photograph - on a 290px card that meant one
-              cardboard box blown up past its own resolution, which is what
-              the product owner was looking at. Contained at the photograph's
-              own 4:3 it stays legible and the phone, blender, headphones,
-              bag and boxes are all still in it.
+              A row of fixed proportion under the copy, 16:9 of the card's
+              width. The photograph sits in its bottom-right corner and bleeds
+              past the padding to the card's edge; the button sits in its
+              bottom-left corner, over the photograph's foot. Because the band
+              is its own row, the copy above can never run into either of
+              them - the layered look of the earlier build without the runner
+              landing on the bullet list, which is what the free-floating
+              version did.
+
+              Both cards use the same band, so both buttons sit on one line.
             */}
-            <div className="relative z-0 mt-2 aspect-[4/3] w-full shrink-0 overflow-hidden rounded-lg lg:hidden">
-              <Image
-                src="/images/hero/mockup.jpg"
-                alt=""
-                fill
-                sizes="45vw"
-                className="object-contain object-bottom"
-              />
+            <div className="relative mt-2 aspect-[16/9] w-full shrink-0 lg:hidden">
+              <div className="pointer-events-none absolute -bottom-3.5 -right-3.5 top-0 w-[70%] sm:-bottom-8 sm:-right-8">
+                <Image
+                  src="/images/hero/mockup.jpg"
+                  alt=""
+                  fill
+                  sizes="45vw"
+                  className="object-contain object-right-bottom"
+                />
+              </div>
+              <Link
+                href="/browse"
+                className="absolute bottom-0 left-0 z-10 flex h-8 w-[90%] items-center justify-center gap-1 whitespace-nowrap rounded-full bg-gold px-1.5 text-[10px] font-bold text-black transition-colors hover:bg-gold-light sm:h-12 sm:w-[76%] sm:gap-2 sm:px-4 sm:text-[15px]"
+              >
+                Browse products
+                <ArrowRight className="hidden h-[18px] w-[18px] shrink-0 sm:block" />
+              </Link>
             </div>
 
             {/*
-              Wide: the original full-bleed treatment, masked into the card's
-              black on its left edge so the copy keeps its contrast. Only
-              from `lg`, where the card is 664px and the crop is gentle.
+              From `lg`: the original full-bleed treatment, masked into the
+              card's black on its left edge so the copy keeps its contrast,
+              and the button pinned to the card's foot.
             */}
             <div
               className="pointer-events-none absolute bottom-0 right-0 top-0 z-0 hidden w-[95%] lg:block"
@@ -69,15 +82,12 @@ export function MockupHero() {
               <Image src="/images/hero/mockup.jpg" alt="" fill sizes="640px" className="object-cover object-right" />
             </div>
             <div className="pointer-events-none absolute inset-y-0 right-0 z-0 hidden w-full bg-gradient-to-r from-[#0e0701] via-[#0e0701]/40 to-transparent lg:block" />
-
-            {/*
-              Last in the card and pushed to its foot, the same as the right
-              card's button, so the two sit on one line under their images
-              rather than one above and one below.
-            */}
-            <Link href="/browse" className="relative z-10 mt-3 flex h-8 w-full items-center justify-center gap-1 rounded-lg bg-gold px-2 text-[10.5px] font-bold text-black hover:bg-gold-light transition-colors sm:mt-4 sm:h-12 sm:gap-2 sm:rounded-full sm:px-8 sm:text-[15px] lg:mt-auto lg:h-14 lg:w-auto lg:self-start lg:text-[16px]">
+            <Link
+              href="/browse"
+              className="relative z-10 mt-auto hidden h-14 items-center justify-center gap-2 self-start whitespace-nowrap rounded-full bg-gold px-8 text-[16px] font-bold text-black transition-colors hover:bg-gold-light lg:inline-flex"
+            >
               Browse products
-              <ArrowRight className="h-3 w-3 sm:h-[18px] sm:w-[18px]" />
+              <ArrowRight className="h-[18px] w-[18px] shrink-0" />
             </Link>
           </div>
 
@@ -107,47 +117,54 @@ export function MockupHero() {
               </ul>
             </div>
             
-            {/* Runner Image */}
             {/*
-              The runner sits in the flow on a narrow card, and only becomes
-              a corner element once there is room for one.
+              Below `lg`: the same band as the left card - the runner in its
+              bottom-right corner, bleeding to the card's edge; the button in
+              its bottom-left, over his feet. The band is the guarantee that
+              he does not land on the bullet list.
 
-              Three attempts got here. Held at h-[95%] the box was a tall
-              narrow slot and object-contain left it two-thirds empty. The
-              photograph also carried its own empty ground - 20% left, 11%
-              right - so it is trimmed to the subject, 1024x819 landscape
-              becoming 730x817. Sized to fill, though, it then covered the
-              bullet list: dark figure, dark text, nothing readable.
+              The runner photograph is trimmed to the subject (730x817, from a
+              1024x819 frame that was a fifth empty ground), which is why it
+              fills its corner rather than sitting small in it.
 
-              The card is about 290px wide below `lg` because the two cards
-              are side by side from the narrowest width. That is not enough
-              for a text column beside a photograph, so nothing is layered -
-              copy, then runner, then the call to action, in that order. At
-              `lg` the card is 664px and the original bottom-right treatment
-              takes over, where the overlap was always intentional.
-
-              Below `lg` it takes the full content width. Nothing sits under
-              it any more, so size only costs card height, and the note from
-              the product owner twice over was that it read too small.
-
-              shrink-0 matters: as a flex item in a column the box was being
-              compressed on the main axis, and with an aspect ratio set the
-              width followed it down - 61% of the card at 390px against 78%
-              at 640px, for the same rule.
+              The button carries `whitespace-nowrap` and light padding: with
+              px-8 it wrapped "Request a runner" onto two lines at 620px.
             */}
-            <div className="relative z-0 mt-2 aspect-[730/817] w-full shrink-0 self-end lg:pointer-events-none lg:absolute lg:bottom-0 lg:-right-12 lg:mt-0 lg:aspect-auto lg:h-[95%] lg:w-[80%] lg:self-auto">
-               <Image
-                 src="/images/hero/runner.jpg"
-                 alt=""
-                 fill
-                 sizes="(max-width: 1024px) 45vw, 560px"
-                 className="object-contain object-bottom lg:object-right-bottom"
-               />
+            <div className="relative mt-2 aspect-[16/9] w-full shrink-0 lg:hidden">
+              <div className="pointer-events-none absolute -bottom-3.5 -right-3.5 top-0 w-[58%] sm:-bottom-8 sm:-right-8">
+                <Image
+                  src="/images/hero/runner.jpg"
+                  alt=""
+                  fill
+                  sizes="40vw"
+                  className="object-contain object-right-bottom"
+                />
+              </div>
+              <Link
+                href="/request-a-runner"
+                className="absolute bottom-0 left-0 z-10 flex h-8 w-[90%] items-center justify-center gap-1 whitespace-nowrap rounded-full bg-[#E67E22] px-1.5 text-[10px] font-bold text-white transition-colors hover:bg-[#D35400] sm:h-12 sm:w-[76%] sm:gap-2 sm:px-4 sm:text-[15px]"
+              >
+                Request a runner
+                <ArrowRight className="hidden h-[18px] w-[18px] shrink-0 sm:block" />
+              </Link>
             </div>
-            
-            <Link href="/request-a-runner" className="relative z-10 mt-auto flex h-8 w-full items-center justify-center gap-1 rounded-lg bg-[#E67E22] px-2 text-[10.5px] font-bold text-white hover:bg-[#D35400] transition-colors sm:h-12 sm:gap-2 sm:rounded-xl sm:px-8 sm:text-[15px] lg:h-14 lg:w-[80%] lg:text-[16px]">
+
+            {/* From `lg`: the original bottom-right runner and the button at the card's foot. */}
+            <div className="pointer-events-none absolute -right-12 bottom-0 z-0 hidden h-[95%] w-[80%] lg:block">
+              <Image
+                src="/images/hero/runner.jpg"
+                alt=""
+                fill
+                sizes="560px"
+                className="object-contain object-right-bottom"
+              />
+            </div>
+            <Link
+              href="/request-a-runner"
+              className="relative z-10 mt-auto hidden h-14 w-[80%] items-center justify-center gap-2 whitespace-nowrap rounded-xl bg-[#E67E22] px-8 text-[16px] font-bold text-white transition-colors hover:bg-[#D35400] lg:flex"
+            >
               Request a runner
-              <ArrowRight className="h-3 w-3 sm:h-[18px] sm:w-[18px]" />
+              <ArrowRight className="h-[18px] w-[18px] shrink-0" />
             </Link>
           </div>
 
