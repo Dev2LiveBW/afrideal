@@ -16,7 +16,12 @@ ask for a recording rather than guessing.
 **Measure live where you can.** The mobile site (`m.alibaba.com`) renders
 the same layouts as the app and its DOM can be measured exactly in the
 Browser pane at a 390px viewport — computed font sizes, colours, radii,
-pitches. The benchmark's access map says which screens are reachable (home,
+pitches. It serves the phone layout only if the tab's *first* request is
+already phone-sized: open a fresh tab on some other site, set 390px, then
+navigate (the access map has the detail). The pane does not run
+`requestAnimationFrame` while this session drives it, so framer-motion
+animations stall there - verify motion from the CSS and props, not by
+watching. The benchmark's access map says which screens are reachable (home,
 categories, RFQ landing) and which sit behind a slider CAPTCHA (search,
 product detail, sign-in). **Never attempt to pass the CAPTCHA.** For gated
 screens use the product owner's recordings: pull frames with ffmpeg, measure,
@@ -47,10 +52,20 @@ This repo is checked out twice on the product owner's machine. **This one**
 
 ## Storefront layout rules already agreed
 
-- Badge and banner strips (hero badges, stats banner, info ribbon) stay on
-  **one row** at every width — shrink type and padding, do not wrap.
-- Sections that display artwork (categories, deals, listings) reflow
-  normally: 1 → 2 → 4 columns.
+- **The home page is the benchmark's grid** (2026-09-11, "copy the homepage
+  grid layout from Alibaba as well as transitions, pages and links, even
+  effects"): header → ways-to-buy tabs → trade chips → tool floor → floors
+  on white → the 2-column feed. Specs in the benchmark §3a, effects in §4b.
+  New home-page content goes in as a **floor** (`components/storefront/home/
+  Floor.tsx`: linked header + rail of 136px cards) or as feed cells - not as
+  a new kind of section.
+- Motion follows §4b: press states (`.press`, `.press-soft`) on everything
+  tappable, a push between screens on phones and none on wide screens, no
+  entrance animation on any list or grid.
+- Badge and banner strips (stats banner, info ribbon) stay on **one row** at
+  every width - shrink type and padding, do not wrap.
+- Sections that display artwork reflow normally on their own pages
+  (1 → 2 → 4 columns); on the home page they are rails.
 - The two hero cards sit side by side at every width. Below `lg` each card
   ends in a **band** - a 16:9 row after the copy with the photograph in its
   bottom-right corner (bleeding to the card's edge) and the button in its

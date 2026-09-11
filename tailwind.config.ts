@@ -193,12 +193,21 @@ const config: Config = {
         shimmer: {
           '100%': { transform: 'translateX(100%)' },
         },
+        /*
+         * The search field's rolling placeholder, from the benchmark's own
+         * stylesheet: each new term drops in from above over .3s ease-in.
+         */
+        'ticker-in': {
+          '0%': { transform: 'translateY(-100%)' },
+          '100%': { transform: 'translateY(0)' },
+        },
       },
       animation: {
         'count-in': 'count-in 320ms cubic-bezier(0.22,1,0.36,1) both',
         'pulse-soft': 'pulse-soft 2.4s ease-in-out infinite',
         shake: 'shake 480ms ease-in-out',
         shimmer: 'shimmer 1.6s infinite',
+        'ticker-in': 'ticker-in 300ms ease-in both',
       },
     },
   },

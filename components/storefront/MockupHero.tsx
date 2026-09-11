@@ -3,10 +3,20 @@ import Link from 'next/link';
 import { ArrowRight, BadgeCheck, ShoppingBag, Truck, ShieldCheck, Users, RefreshCw, Headphones, Tag, CheckCircle2, Sparkles, Star, Briefcase, FileText } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
-export function MockupHero() {
+/**
+ * The two-card hero, replicated from the product owner's earlier build
+ * (2026-09-11). On the home page it stands where the benchmark's banner
+ * would, as the first floor after the tools.
+ *
+ * `badges` - the six-tile strip under the cards. Off on the home page,
+ * where the benchmark's tool floor (`ToolFloor`) now does the same job one
+ * floor higher: the strip's two real doors (Request a Quote, Become a
+ * Supplier) are both on it, and the other four tiles were labels.
+ */
+export function MockupHero({ badges = true }: { badges?: boolean }) {
   return (
-    <section className="bg-surface-raised pt-4 pb-8 sm:pt-6 sm:pb-12">
-      <div className="mx-auto max-w-market px-6">
+    <section className={cn('bg-surface-raised pt-3 sm:pt-6', badges ? 'pb-8 sm:pb-12' : 'pb-4 sm:pb-8')}>
+      <div className="mx-auto max-w-market px-3 sm:px-6">
         
         {/* Two Big Cards */}
         <div className="grid grid-cols-2 gap-2.5 sm:gap-4 lg:gap-6">
@@ -171,6 +181,7 @@ export function MockupHero() {
         </div>
 
         {/* 6 Badges Strip */}
+        {badges && (
         <div className="mt-4 grid grid-cols-6 gap-1 border-b border-hairline pb-4 sm:mt-8 sm:gap-4 sm:pb-8">
           {[
             { icon: Sparkles, title: 'New Arrivals', sub: 'Latest trends', color: 'text-[#E67E22]', bg: 'bg-[#E67E22]/10' },
@@ -204,6 +215,7 @@ export function MockupHero() {
             );
           })}
         </div>
+        )}
 
       </div>
     </section>

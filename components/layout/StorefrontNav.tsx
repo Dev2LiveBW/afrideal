@@ -6,7 +6,6 @@ import { useEffect, useRef, useState } from 'react';
 import { useSession, signOut } from 'next-auth/react';
 import { AnimatePresence, motion } from 'framer-motion';
 import {
-  ArrowLeftRight,
   ChevronDown,
   ChevronRight,
   Grid2x2,
@@ -22,8 +21,8 @@ import {
 } from 'lucide-react';
 
 import { AfriDealLogo } from '@/components/brand/AfriDealLogo';
+import { markTabNavigation } from '@/components/motion/PageTransition';
 import { CategoryIcon } from '@/components/storefront/CategoryIcon';
-import { ActionButton } from '@/components/brand/ActionButton';
 import { DELIVERY_CITIES, cartCount, useAfriDealStore } from '@/store/useAfriDealStore';
 import type { Category } from '@/types';
 import {
@@ -130,7 +129,96 @@ function DeliverToPicker() {
   );
 }
 
-export function StorefrontNav({ categories = [] }: { categories?: Category[] }) {
+/**
+ * The search field. Benchmark §3a, measured live: a 34px pill on `#f4f4f4`
+ * with 16px of left padding, the text at 16px (which is also what stops iOS
+ * zooming the page when the field is tapped), and a 40×26 black pill at the
+ * right end holding a white magnifier - the button dips to 80% while it is
+ * pressed. No border, no ring.
+ *
+ * The placeholder rolls. The benchmark keeps a list of live searches and
+ * drops a new one into the empty field every few seconds (`slideIn`, .3s
+ * ease-in, from above). Submitting the field empty searches for whatever
+ * term is showing, which is what makes the rolling worth doing: the reader
+ * can take the suggestion with one tap.
+ */
+const TICKER_MS = 3000;
+
+function SearchField({ terms }: { terms: string[] }) {
+  const router = useRouter();
+  const [value, setValue] = useState('');
+  const [focused, setFocused] = useState(false);
+  const [index, setIndex] = useState(0);
+
+  useEffect(() => {
+    if (terms.length < 2) return;
+    const id = window.setInterval(() => setIndex((i) => (i + 1) % terms.length), TICKER_MS);
+    return () => window.clearInterval(id);
+  }, [terms.length]);
+
+  const showing = terms[index];
+  const rolling = terms.length > 0 && !focused && value === '';
+
+  function submit(event: React.FormEvent) {
+    event.preventDefault();
+    const term = (value.trim() || showing || '').trim();
+    router.push(term ? `/browse?q=${encodeURIComponent(term)}` : '/browse');
+  }
+
+  return (
+    <form
+      role="search"
+      onSubmit={submit}
+      className="flex h-[34px] min-w-0 flex-1 items-center rounded-full bg-[#f4f4f4] pl-4 pr-1"
+    >
+      <label htmlFor="storefront-search" className="sr-only">
+        Search products
+      </label>
+      <div className="relative h-[22px] min-w-0 flex-1">
+        <input
+          id="storefront-search"
+          type="search"
+          value={value}
+          onChange={(event) => setValue(event.target.value)}
+          onFocus={() => setFocused(true)}
+          onBlur={() => setFocused(false)}
+          placeholder={rolling ? '' : 'Search products'}
+          autoComplete="off"
+          className="h-full w-full bg-transparent p-0 text-[16px] leading-[22px] text-[#222] outline-none placeholder:text-[#b8b8b8] sm:text-[14px]"
+        />
+        {rolling && (
+          <span
+            aria-hidden="true"
+            className="pointer-events-none absolute inset-0 overflow-hidden"
+          >
+            <span
+              key={showing}
+              className="block animate-ticker-in truncate text-[13px] leading-[22px] text-[#b8b8b8]"
+            >
+              {showing}
+            </span>
+          </span>
+        )}
+      </div>
+      <button
+        type="submit"
+        aria-label="Search"
+        className="press ml-1 flex h-[26px] w-10 shrink-0 items-center justify-center rounded-full bg-[#222] text-white"
+      >
+        <Search size={15} strokeWidth={2.5} aria-hidden="true" />
+      </button>
+    </form>
+  );
+}
+
+export function StorefrontNav({
+  categories = [],
+  hotSearches = [],
+}: {
+  categories?: Category[];
+  /** What the search field suggests while it is empty. */
+  hotSearches?: string[];
+}) {
   const pathname = usePathname();
   const router = useRouter();
   const { data: session } = useSession();
@@ -163,43 +251,25 @@ export function StorefrontNav({ categories = [] }: { categories?: Category[] }) 
 
   return (
     <>
-      <header className="sticky top-0 z-40 bg-white shadow-sm">
-        {/* Row 1: Logo | Search | Controls */}
-        <div className="mx-auto flex max-w-[1400px] items-center gap-2 px-3 py-2 sm:gap-3 sm:px-4 sm:py-2.5">
+      <header className="sticky top-0 z-40 bg-white shadow-[0_1px_0_rgba(0,0,0,0.12)]">
+        {/*
+          Row 1: Logo | Search | Controls. Benchmark §3a: 50px tall, the
+          logo at the left, the search pill taking the rest. The cart is
+          not up here on a phone - it is a tab on the bottom bar, as on the
+          benchmark - and comes back from `md`, where there is no bar.
+        */}
+        <div className="mx-auto flex h-[50px] max-w-[1400px] items-center gap-2 px-3 sm:h-14 sm:gap-3 sm:px-4">
           <Link href="/" className="shrink-0">
             <AfriDealLogo variant="light" size="sm" />
           </Link>
 
-          {/*
-            min-w-0 is load-bearing: an <input> carries an intrinsic
-            min-width of about 170px, so without it this flex child
-            refuses to shrink and the header pushes the whole document
-            into a horizontal scroll on a 320px phone.
-          */}
-          <div className="relative flex min-w-0 flex-1 items-center">
-            <Search size={16} className="absolute left-3.5 text-gray-400 pointer-events-none" />
-            <input
-              type="search"
-              placeholder="Search products, brands or categories…"
-              className="h-10 w-full rounded-full border border-gray-200 bg-gray-50 pl-10 pr-4 text-[14px] text-gray-700 outline-none focus:border-[#E67E22] focus:bg-white focus:ring-2 focus:ring-[#E67E22]/20 sm:pr-28"
-            />
-            {/*
-              The button reserved 112px of the field at every width. On a 390px
-              phone that left about one character visible between the icon and
-              the button, so the field could not show what had been typed into
-              it. Below `sm` the magnifier and the placeholder carry the
-              affordance and the whole width goes to the text.
-            */}
-            <button className="absolute right-1 hidden h-8 items-center rounded-full bg-[#E67E22] px-4 text-[13px] font-bold text-white transition-colors hover:bg-[#D35400] sm:flex">
-              Search
-            </button>
-          </div>
+          <SearchField terms={hotSearches} />
 
-          <div className="flex shrink-0 items-center gap-2">
+          <div className="flex shrink-0 items-center gap-1 sm:gap-2">
             <Link
               href="/cart"
               aria-label={`Cart, ${count} item${count === 1 ? '' : 's'}`}
-              className="relative flex h-10 w-10 items-center justify-center rounded-full hover:bg-gray-100 transition-colors"
+              className="relative hidden h-10 w-10 items-center justify-center rounded-full transition-colors hover:bg-gray-100 md:flex"
             >
               <ShoppingCart size={20} strokeWidth={1.75} className="text-gray-700" />
               <AnimatePresence>
@@ -232,12 +302,12 @@ export function StorefrontNav({ categories = [] }: { categories?: Category[] }) 
             ) : (
               <div className="hidden items-center gap-2 md:flex">
                 <Link href="/login" className="rounded-full px-4 py-2 text-[13px] font-medium text-gray-700 hover:bg-gray-100 transition-colors">Sign in</Link>
-                <button onClick={() => router.push('/signup')} className="rounded-full bg-[#E67E22] px-4 py-2 text-[13px] font-bold text-white hover:bg-[#D35400] transition-colors">Sign up</button>
+                <button onClick={() => router.push('/signup')} className="press rounded-full bg-[#E67E22] px-4 py-2 text-[13px] font-bold text-white hover:bg-[#D35400] transition-colors">Sign up</button>
               </div>
             )}
 
-            <button onClick={() => setMenuOpen(true)} aria-label="Open menu" className="flex h-10 w-10 items-center justify-center rounded-full hover:bg-gray-100 transition-colors md:hidden">
-              <Menu size={20} strokeWidth={1.75} className="text-gray-700" />
+            <button onClick={() => setMenuOpen(true)} aria-label="Open menu" className="press flex h-9 w-9 items-center justify-center rounded-full md:hidden">
+              <Menu size={22} strokeWidth={1.75} className="text-[#222]" />
             </button>
           </div>
         </div>
@@ -377,21 +447,25 @@ export function StorefrontNav({ categories = [] }: { categories?: Category[] }) 
 }
 
 /**
- * The thumb rail.
+ * The thumb rail. Benchmark §3a, measured live: 56px, white, a 1px `#eee`
+ * rule along its top, five equal tabs of a 26px icon over a 12px label, the
+ * active one in the accent. Pinned to the bottom on phones and tablets,
+ * gone from `md` up where the header carries the same links. Padded for
+ * the home indicator through `env(safe-area-inset-bottom)`, which is why
+ * the root viewport export declares `viewport-fit=cover`.
  *
- * Five destinations pinned to the bottom of the viewport on phones and tablets,
- * gone from `md` up where the header carries the same links. Padded for the
- * home indicator through `env(safe-area-inset-bottom)`, which is why the root
- * viewport export declares `viewport-fit=cover`.
+ * `Home | Categories | Cart | Orders | Account` follows the benchmark's
+ * `Home | Categories | Messenger | Cart | My Alibaba` as far as this
+ * marketplace has the screens - we have no messenger, and the cart is the
+ * tab the header gives up on a phone.
  *
- * "Compare" points at the ladder rather than a filtered grid: comparing on this
- * marketplace means comparing what a thing costs at one, ten or fifty units,
- * and that is the page which answers it.
+ * Every tap here tells the page transition it is a tab switch, which the
+ * benchmark performs as an instant swap rather than a push.
  */
 const TABS = [
   { href: '/', label: 'Home', icon: Home },
   { href: '/categories', label: 'Categories', icon: Grid2x2 },
-  { href: '/how-it-works', label: 'Compare', icon: ArrowLeftRight },
+  { href: '/cart', label: 'Cart', icon: ShoppingCart },
   { href: '/orders', label: 'Orders', icon: Package },
   { href: '/login', label: 'Account', icon: User },
 ];
@@ -399,13 +473,18 @@ const TABS = [
 export function MobileTabBar() {
   const pathname = usePathname();
   const { data: session } = useSession();
+  const cart = useAfriDealStore((state) => state.cart);
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => setMounted(true), []);
+  const count = mounted ? cartCount(cart) : 0;
 
   return (
     <nav
       aria-label="Primary"
-      className="fixed inset-x-0 bottom-0 z-40 border-t border-gray-200 bg-white/95 pb-[env(safe-area-inset-bottom)] backdrop-blur-md md:hidden"
+      className="fixed inset-x-0 bottom-0 z-40 border-t border-[#eee] bg-white pb-[env(safe-area-inset-bottom)] md:hidden"
     >
-      <ul className="mx-auto flex max-w-[1400px]">
+      <ul className="mx-auto flex h-14 max-w-[1400px] px-2">
         {TABS.map((tab) => {
           // Signed in, the account tab is the buyer's own area rather than the
           // sign-in screen they have already been through.
@@ -416,16 +495,22 @@ export function MobileTabBar() {
             <li key={tab.label} className="flex-1">
               <Link
                 href={href}
+                onClick={markTabNavigation}
                 aria-current={active ? 'page' : undefined}
                 className={cn(
-                  'flex flex-col items-center gap-1 py-2.5 transition-colors',
-                  active ? 'text-[#E67E22]' : 'text-gray-400 hover:text-gray-700',
+                  'press-soft relative flex h-full flex-col items-center pt-[5px] outline-none transition-colors',
+                  active ? 'text-[#E67E22]' : 'text-[#222]',
                 )}
               >
-                <tab.icon size={20} strokeWidth={active ? 2 : 1.75} />
-                <span className={cn('text-[10.5px] leading-3', active && 'font-semibold')}>
-                  {tab.label}
+                <span className="relative flex h-[26px] w-[26px] items-center justify-center">
+                  <tab.icon size={24} strokeWidth={active ? 2.25 : 1.75} />
+                  {tab.href === '/cart' && count > 0 && (
+                    <span className="absolute -right-2 -top-1 flex h-4 min-w-[16px] items-center justify-center rounded-full bg-[#E67E22] px-1 font-mono text-[9.5px] font-bold leading-none text-white">
+                      {count}
+                    </span>
+                  )}
                 </span>
+                <span className="mt-px text-[12px] leading-[14px]">{tab.label}</span>
               </Link>
             </li>
           );

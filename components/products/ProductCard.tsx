@@ -2,7 +2,6 @@
 
 import Link from 'next/link';
 import { useState } from 'react';
-import { motion } from 'framer-motion';
 import { Heart, Plus, ShieldCheck, Star } from 'lucide-react';
 import toast from 'react-hot-toast';
 
@@ -33,12 +32,16 @@ import type { Product, ProductImage } from '@/types';
  * The image slot is a gradient built from the product's own swatch with the
  * category glyph set small and low contrast. That reads as a deliberate
  * placeholder rather than a missing asset, which a large centred emoji does not.
+ *
+ * Nothing animates in. The card used to fade and rise as it scrolled into
+ * view; the benchmark's grids do not (§4), and on a feed that loads in
+ * batches the stagger made each batch arrive as a little parade. The only
+ * motion is the benchmark's press state - a 10% dip while the finger is down.
  */
 
 export function ProductCard({
   product,
   supplierCount,
-  index = 0,
   href,
   image,
   categoryName,
@@ -51,6 +54,7 @@ export function ProductCard({
 }: {
   product: Product;
   supplierCount?: number;
+  /** Accepted for call-site compatibility; the card no longer staggers. */
   index?: number;
   href?: string;
   image?: ProductImage;
@@ -114,13 +118,7 @@ export function ProductCard({
   }
 
   return (
-    <motion.article
-      initial={{ opacity: 0, y: 16 }}
-      whileInView={{ opacity: 1, y: 0 }}
-      viewport={{ once: true, margin: '-60px' }}
-      transition={{ delay: Math.min(index * 0.05, 0.3), duration: 0.55, ease: [0.16, 1, 0.3, 1] }}
-      className={cn('group relative', className)}
-    >
+    <article className={cn('press-soft group relative', className)}>
       <Link
         href={href ?? `/products/${product.id}`}
         className="flex h-full flex-col outline-none"
@@ -241,7 +239,7 @@ export function ProductCard({
           </p>
         </div>
       </Link>
-    </motion.article>
+    </article>
   );
 }
 

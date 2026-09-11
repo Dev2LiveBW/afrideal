@@ -1,7 +1,16 @@
 import Image from 'next/image';
 import Link from 'next/link';
-import { ArrowRight, Building2, CheckCircle2, ChevronRight, Package, ShoppingCart } from 'lucide-react';
+import {
+  ArrowRight,
+  Building2,
+  CheckCircle2,
+  ChevronRight,
+  Package,
+  ShoppingBag,
+  ShoppingCart,
+} from 'lucide-react';
 
+import { Floor } from '@/components/storefront/home/Floor';
 import { cn } from '@/lib/utils';
 
 /**
@@ -27,6 +36,12 @@ import { cn } from '@/lib/utils';
  * Each card answers "is this me?" before it answers "what does it cost?" - a
  * quantity range on its own tells a salon owner nothing about whether the
  * wholesale door is meant for her.
+ *
+ * Two layouts. `grid` is the three cards side by side, for /how-it-works.
+ * `floor` is the home page's: the benchmark's floor grammar (§3a) - a linked
+ * header, then the three cards on a rail at a fixed width, so on a phone
+ * they scroll past like every other floor rather than stacking into a
+ * column three screens tall.
  */
 
 interface Door {
@@ -99,14 +114,146 @@ const DOORS: Door[] = [
   },
 ];
 
+function DoorCard({ door, compact }: { door: Door; compact: boolean }) {
+  const Icon = door.icon;
+
+  return (
+    <Link
+      href={door.href}
+      className={cn(
+        'press-soft group relative flex h-full flex-col overflow-hidden rounded-2xl shadow-sm ring-1 ring-black/5 transition-shadow duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] hover:shadow-lift',
+        compact ? 'p-4' : 'p-5 sm:p-6',
+        door.surface,
+      )}
+    >
+      {/* The affordance the reference design puts in the top-right. */}
+      <span
+        aria-hidden="true"
+        className="absolute right-3 top-3 flex h-7 w-7 items-center justify-center rounded-full bg-white/70 text-body transition-transform duration-300 group-hover:translate-x-0.5"
+      >
+        <ChevronRight size={16} strokeWidth={2} />
+      </span>
+
+      <div className="relative z-10 flex flex-1 flex-col">
+        <span
+          className={cn(
+            'flex items-center justify-center rounded-full',
+            compact ? 'mb-3 h-9 w-9' : 'mb-4 h-11 w-11',
+            door.disc,
+          )}
+        >
+          <Icon size={compact ? 18 : 21} strokeWidth={1.9} className={door.accent} aria-hidden="true" />
+        </span>
+
+        <h3
+          className={cn(
+            'font-display font-bold leading-none text-ink',
+            compact ? 'text-[20px]' : 'text-[24px]',
+          )}
+        >
+          {door.title}
+        </h3>
+        <p className={cn('font-bold text-ink', compact ? 'mt-1.5 text-[13px]' : 'mt-2 text-[15px]')}>
+          {door.band}
+        </p>
+        <p
+          className={cn(
+            'max-w-[30ch] text-muted',
+            compact ? 'mt-1 text-[12px] leading-5' : 'mt-1.5 text-[13.5px] leading-6',
+          )}
+        >
+          {door.blurb}
+        </p>
+
+        {/* In the rail card the list stops short of the render's column. */}
+        <ul className={cn(compact ? 'mt-3 max-w-[72%] space-y-1.5' : 'mt-4 space-y-2')}>
+          {door.points.map((point) => (
+            <li
+              key={point}
+              className={cn('flex items-center gap-2 text-ink', compact ? 'text-[12px]' : 'text-[13.5px]')}
+            >
+              <CheckCircle2
+                size={compact ? 15 : 17}
+                strokeWidth={2}
+                className={cn('shrink-0', door.accent)}
+                aria-hidden="true"
+              />
+              {point}
+            </li>
+          ))}
+        </ul>
+
+        <span
+          className={cn(
+            'inline-flex w-full items-center justify-center gap-2 rounded-xl px-4 font-bold transition-colors',
+            compact
+              ? 'mt-4 h-9 text-[12.5px] sm:w-auto sm:self-start'
+              : 'mt-6 h-11 text-[14px] sm:w-auto sm:self-start sm:px-6',
+            door.button,
+          )}
+        >
+          {door.cta}
+          <ArrowRight size={compact ? 14 : 16} strokeWidth={2.25} aria-hidden="true" />
+        </span>
+      </div>
+
+      {/*
+        The render sits behind the copy and is clipped by the card, so the
+        text column keeps its own measure. In the grid it is hidden below
+        `sm`, where the card is narrow enough that the bag would sit under
+        the bullet list rather than beside it; the rail card is a fixed
+        width, so it always has room.
+      */}
+      <div
+        className={cn(
+          'pointer-events-none absolute -bottom-1 right-0 z-0',
+          compact ? 'h-[44%] w-[38%]' : 'hidden h-[58%] w-[44%] sm:block',
+        )}
+      >
+        <Image
+          src={door.image.src}
+          alt=""
+          fill
+          sizes="(max-width: 1024px) 30vw, 220px"
+          className="object-contain object-right-bottom"
+        />
+      </div>
+    </Link>
+  );
+}
+
 export function PathChooser({
   className,
   heading = true,
+  variant = 'grid',
 }: {
   className?: string;
   /** The /how-it-works page introduces the cards itself. */
   heading?: boolean;
+  variant?: 'grid' | 'floor';
 }) {
+  if (variant === 'floor') {
+    return (
+      <Floor
+        id="buying-options"
+        title="Choose how you want to buy"
+        subtitle="Same product. Different quantities. Better prices."
+        href="/how-it-works"
+        icon={ShoppingBag}
+        iconClassName="text-[#27AE60]"
+        className={className}
+      >
+        <ul className="no-scrollbar flex gap-2 overflow-x-auto px-3 pb-3 pt-2 sm:px-4 md:grid md:grid-cols-3 md:overflow-visible">
+          {DOORS.map((door) => (
+            <li key={door.key} className="w-[250px] shrink-0 md:w-auto">
+              <DoorCard door={door} compact />
+            </li>
+          ))}
+        </ul>
+      </Floor>
+    );
+  }
+
   return (
     <section className={cn(className)} aria-labelledby="buying-options">
       {heading && (
@@ -127,87 +274,9 @@ export function PathChooser({
       )}
 
       <div className="grid gap-4 md:grid-cols-3">
-        {DOORS.map((door) => {
-          const Icon = door.icon;
-
-          return (
-            <Link
-              key={door.key}
-              href={door.href}
-              className={cn(
-                'group relative flex flex-col overflow-hidden rounded-2xl p-5 shadow-sm ring-1 ring-black/5 transition-shadow duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] hover:shadow-lift sm:p-6',
-                door.surface,
-              )}
-            >
-              {/* The affordance the reference design puts in the top-right. */}
-              <span
-                aria-hidden="true"
-                className="absolute right-4 top-4 flex h-7 w-7 items-center justify-center rounded-full bg-white/70 text-body transition-transform duration-300 group-hover:translate-x-0.5"
-              >
-                <ChevronRight size={16} strokeWidth={2} />
-              </span>
-
-              <div className="relative z-10 flex flex-1 flex-col">
-                <span
-                  className={cn(
-                    'mb-4 flex h-11 w-11 items-center justify-center rounded-full',
-                    door.disc,
-                  )}
-                >
-                  <Icon size={21} strokeWidth={1.9} className={door.accent} aria-hidden="true" />
-                </span>
-
-                <h3 className="font-display text-[24px] font-bold leading-none text-ink">
-                  {door.title}
-                </h3>
-                <p className="mt-2 text-[15px] font-bold text-ink">{door.band}</p>
-                <p className="mt-1.5 max-w-[30ch] text-[13.5px] leading-6 text-muted">
-                  {door.blurb}
-                </p>
-
-                <ul className="mt-4 space-y-2">
-                  {door.points.map((point) => (
-                    <li key={point} className="flex items-center gap-2 text-[13.5px] text-ink">
-                      <CheckCircle2
-                        size={17}
-                        strokeWidth={2}
-                        className={cn('shrink-0', door.accent)}
-                        aria-hidden="true"
-                      />
-                      {point}
-                    </li>
-                  ))}
-                </ul>
-
-                <span
-                  className={cn(
-                    'mt-6 inline-flex h-11 w-full items-center justify-center gap-2 rounded-xl px-4 text-[14px] font-bold transition-colors sm:w-auto sm:self-start sm:px-6',
-                    door.button,
-                  )}
-                >
-                  {door.cta}
-                  <ArrowRight size={16} strokeWidth={2.25} aria-hidden="true" />
-                </span>
-              </div>
-
-              {/*
-                The render sits behind the copy and is clipped by the card, so
-                the text column keeps its own measure. Hidden below `sm`, where
-                the card is narrow enough that the bag would sit under the
-                bullet list rather than beside it.
-              */}
-              <div className="pointer-events-none absolute -bottom-1 right-0 z-0 hidden h-[58%] w-[44%] sm:block">
-                <Image
-                  src={door.image.src}
-                  alt=""
-                  fill
-                  sizes="(max-width: 1024px) 30vw, 220px"
-                  className="object-contain object-right-bottom"
-                />
-              </div>
-            </Link>
-          );
-        })}
+        {DOORS.map((door) => (
+          <DoorCard key={door.key} door={door} compact={false} />
+        ))}
       </div>
     </section>
   );

@@ -1,10 +1,15 @@
 import Link from 'next/link';
 import { ArrowRight } from 'lucide-react';
 
+import { HomeCatalogue, type FeedProduct } from '@/components/storefront/home/HomeCatalogue';
+import { HomeTabs } from '@/components/storefront/home/HomeTabs';
+import { HOME_PROMOS } from '@/components/storefront/home/promos';
+import { SignInNudge } from '@/components/storefront/home/SignInNudge';
+import { ToolFloor } from '@/components/storefront/home/ToolFloor';
 import { HowItWorks } from '@/components/storefront/HowItWorks';
 import { InfoRibbon } from '@/components/storefront/InfoRibbon';
 import { LiveDeals, type LiveDealRow } from '@/components/storefront/LiveDeals';
-import { StatsBanner, PromoCards } from '@/components/storefront/HomePromoSections';
+import { StatsBanner } from '@/components/storefront/HomePromoSections';
 import { MockupHero } from '@/components/storefront/MockupHero';
 import { PopularCategories } from '@/components/storefront/PopularCategories';
 import { PathChooser } from '@/components/storefront/PathChooser';
@@ -112,59 +117,91 @@ export default async function LandingPage() {
       ...spread,
     }));
 
+  /*
+   * The feed: every listed product, in the benchmark's 2-column grid, with
+   * the same routing the catalogue page does so a quick-add books against a
+   * real supplier. Featured first, then by rating - the default order the
+   * catalogue page opens on.
+   */
+  const feed: FeedProduct[] = products
+    .map((product) => ({
+      ...product,
+      image: primaryImage.get(product.id),
+      categoryName: categoryName.get(product.category_id),
+      primarySupplierId:
+        rankOffers(
+          offers.filter((offer) => offer.product_id === product.id),
+          suppliers,
+        ).primary?.supplier.id ?? '',
+    }))
+    .sort((a, b) => Number(b.featured) - Number(a.featured) || b.rating - a.rating);
+
   return (
     <>
-      <MockupHero />
+      {/*
+        ── The home page, in the benchmark's grammar ────────────────────
+        docs/design/alibaba-benchmark.md §3a, measured live on the Alibaba
+        buyer home at 390px. Top to bottom: the ways-to-buy tabs, the trade
+        chips, the tool floor, then floors on white down to the feed. The
+        chips swap everything between themselves and the feed in place;
+        the floors are the children of HomeCatalogue for that reason.
 
-      {/* ── Popular Categories ──────────────────────────────────────────
-        TICKET-001. Exactly one block, and the heading lives inside the
-        component so it cannot be duplicated from a call site. The old
-        "Choose how you want to buy" cards that sat beside it were the
-        Retail/Bulk/Wholesale explainer a third time over - consolidated into
-        PricingExplainer below for TICKET-003 - so this now runs full width.
+        Two things the benchmark does not have are kept because the product
+        owner asked for them by name: the hero (her earlier build, replicated
+        on 2026-09-11) stands where the benchmark's banner would, and her
+        ribbon and stats strip stay as strips.
       */}
-      <section className="bg-surface-raised py-8">
-        <div className="mx-auto max-w-market px-4">
-          <PopularCategories />
+      <HomeTabs />
+
+      <HomeCatalogue categories={categories} products={feed} promos={HOME_PROMOS}>
+        <ToolFloor />
+
+        <MockupHero badges={false} />
+
+        {/* ── The service guarantees, compact ─────────────────────────
+          TICKET-005. One hairline row where a boxed panel used to stand.
+        */}
+        <div className="bg-surface-raised pb-3">
+          <InfoRibbon />
         </div>
-      </section>
 
-      {/* ── The service guarantees, compact ─────────────────────────────
-        TICKET-005. One hairline row where a boxed panel used to stand, so the
-        supplier listings below it clear the fold.
-      */}
-      <InfoRibbon className="pb-6" />
+        {/* ── Popular Categories ──────────────────────────────────────
+          TICKET-001. Exactly one block, and the heading lives inside the
+          component so it cannot be duplicated from a call site.
+        */}
+        <PopularCategories className="border-t border-[#f5f5f5]" />
 
-      {/* ── Supplier / product directory ────────────────────────────────
-        TICKET-007. TODO(TICKET-007): this homepage placement is temporary.
-        The directory also stands alone at DIRECTORY_ROUTE and appears in the
-        storefront nav; which of the three survives is the product owner's
-        call. Flip DIRECTORY_ON_HOMEPAGE in lib/directory-placement.ts.
-      */}
-      {DIRECTORY_ON_HOMEPAGE && (
-        <SupplierDirectorySection listings={directory} href={DIRECTORY_ROUTE} className="pb-8" />
-      )}
+        {/* ── Live Deals ──────────────────────────────────────────────
+          TICKET-004. Each card carries the drop and the quantity that earns it.
+        */}
+        <LiveDeals rows={dealRows} className="border-t border-[#f5f5f5]" />
 
-      {/* ── Live Deals ──────────────────────────────────────────────────
-        TICKET-004. Was "And on everything else", a caption-and-list block
-        buried under the packages board. Cards now, each carrying the drop and
-        the quantity that earns it.
-      */}
-      <LiveDeals rows={dealRows} className="pb-10" />
+        {/* ── Supplier / product directory ────────────────────────────
+          TICKET-007. TODO(TICKET-007): this homepage placement is temporary.
+          The directory also stands alone at DIRECTORY_ROUTE and appears in
+          the storefront nav; which of the three survives is the product
+          owner's call. Flip DIRECTORY_ON_HOMEPAGE in lib/directory-placement.ts.
+        */}
+        {DIRECTORY_ON_HOMEPAGE && (
+          <SupplierDirectorySection
+            listings={directory}
+            href={DIRECTORY_ROUTE}
+            className="border-t border-[#f5f5f5]"
+          />
+        )}
 
-      {/* ── How the quantity ladder works ──────────────────────────────
-        TICKET-003. The single pricing block on the page. The prose explainer
-        and the five-rung board that used to sit here were the same argument a
-        second and third time; the product owner asked for the cards alone,
-        which say it without the essay.
-      */}
-      <PathChooser className="mx-auto max-w-market px-4 pb-12" />
+        {/* ── How the quantity ladder works ──────────────────────────
+          TICKET-003. The single pricing block on the page: the product
+          owner's three cards, on a rail.
+        */}
+        <PathChooser variant="floor" className="border-t border-[#f5f5f5]" />
 
-      <StatsBanner />
+        <div className="bg-surface-raised">
+          <StatsBanner />
+        </div>
+      </HomeCatalogue>
 
-      <PromoCards />
-
-
+      <SignInNudge />
 
       {/* ── How the order actually runs ─────────────────────────────────── */}
       <section id="how-it-works" className="mt-16 py-4">

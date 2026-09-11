@@ -1,8 +1,10 @@
 import Link from 'next/link';
-import { ArrowRight, BadgeCheck, CheckCircle2 } from 'lucide-react';
+import { BadgeCheck, CheckCircle2 } from 'lucide-react';
 
 import { PriceTag } from '@/components/brand/MoneyText';
+import { Floor, Rail, RailCard } from '@/components/storefront/home/Floor';
 import { Swatch } from '@/components/storefront/Swatch';
+import { pulaTag } from '@/lib/format';
 import { humanise } from '@/lib/format';
 import { cn } from '@/lib/utils';
 import type { DirectoryListing } from '@/lib/directory';
@@ -117,8 +119,10 @@ export function SupplierDirectory({
 }
 
 /**
- * The directory as a homepage section: heading, the first few rows, and a
- * route through to the full page.
+ * The directory as a floor on the home page: a rail of the first few
+ * listings, the header linking through to the full rows at `/suppliers`.
+ * Benchmark §3a - the same 136px card the deals use, the supplier's name
+ * and city as the second line, `Verified` on the pill.
  */
 export function SupplierDirectorySection({
   listings,
@@ -132,27 +136,44 @@ export function SupplierDirectorySection({
   if (listings.length === 0) return null;
 
   return (
-    <section className={cn('mx-auto max-w-market px-4', className)} aria-labelledby="supplier-directory">
-      <div className="mb-2 flex flex-wrap items-end justify-between gap-4">
-        <div className="min-w-0">
-          <h2 id="supplier-directory" className="font-display text-headline-md font-semibold text-ink">
-            Source from verified suppliers
-          </h2>
-          <p className="mt-1 text-[13px] leading-5 text-body">
-            Published prices and minimum order quantities, from companies AfriDeal has verified.
-          </p>
-        </div>
-
-        <Link
-          href={href}
-          className="inline-flex shrink-0 items-center gap-1.5 text-[13px] font-medium text-forest transition-colors hover:text-ink"
-        >
-          Browse the directory
-          <ArrowRight size={14} strokeWidth={1.75} aria-hidden="true" />
-        </Link>
-      </div>
-
-      <SupplierDirectory listings={listings} />
-    </section>
+    <Floor
+      id="supplier-directory"
+      title="Verified suppliers"
+      subtitle="Published prices and minimum orders from companies we have checked"
+      href={href}
+      icon={BadgeCheck}
+      iconClassName="text-ocean"
+      className={className}
+    >
+      <Rail>
+        {listings.map((listing) => (
+          <RailCard
+            key={listing.id}
+            href={`/products/${listing.product_id}`}
+            image={
+              <Swatch
+                image={listing.image}
+                fallback={listing.swatch}
+                emoji={listing.emoji}
+                label={listing.product_name}
+                className="h-full w-full"
+                glyphClassName="text-[28px] bottom-1.5 right-2"
+                zoomOnHover={false}
+              />
+            }
+            tag={listing.verified ? 'Verified' : undefined}
+            primary={
+              <>
+                <span className="font-mono tabular-nums">{pulaTag(listing.price)}</span>
+                <span className="ml-1 text-[11px] font-normal text-[#666]">
+                  MOQ <span className="font-mono tabular-nums">{listing.moq}</span>
+                </span>
+              </>
+            }
+            secondary={`${listing.supplier_name} · ${listing.city}`}
+          />
+        ))}
+      </Rail>
+    </Floor>
   );
 }

@@ -1,8 +1,7 @@
 import Image from 'next/image';
-import Link from 'next/link';
-import { ArrowRight } from 'lucide-react';
+import { LayoutGrid } from 'lucide-react';
 
-import { cn } from '@/lib/utils';
+import { Floor, Rail, RailCard } from '@/components/storefront/home/Floor';
 
 /**
  * Popular categories - the one canonical block on the storefront. (TICKET-001)
@@ -21,6 +20,13 @@ import { cn } from '@/lib/utils';
  * (2026-09-10): each disc is lifted at its own centre and radius, and the
  * strip the label pill covered is filled with the disc's own ground colour.
  * Source board kept out of the repo; regenerate from it if the set changes.
+ *
+ * Laid out as a floor - the benchmark's home-page unit (§3a): a linked
+ * header and a rail of 136px cards. The product owner's artwork is the card
+ * photograph; her six labels are the cards' first line. The disc-on-a-grid
+ * of the earlier version is what the benchmark's *categories page* does, and
+ * that is where it now lives (`/categories`); the home page shows trades the
+ * way it shows everything else, on a rail.
  *
  * The six trades below are the client's reference set. They are a marketing
  * grouping rather than the seeded catalogue taxonomy, so each one links to the
@@ -73,48 +79,34 @@ const CATEGORIES: CategoryTile[] = [
 
 export function PopularCategories({ className }: { className?: string }) {
   return (
-    <section className={cn(className)} aria-labelledby="popular-categories">
-      <div className="mb-5 flex items-center justify-between gap-4">
-        <h2 id="popular-categories" className="text-[20px] font-bold text-ink">
-          Popular Categories
-        </h2>
-        <Link
-          href="/browse"
-          className="inline-flex items-center gap-1 text-[13px] font-bold text-[#E67E22] hover:underline"
-        >
-          View all
-          <ArrowRight size={14} strokeWidth={2} aria-hidden="true" />
-        </Link>
-      </div>
-
-      {/*
-        Three across on a phone would put a 24px circle next to a two-word label
-        that then wraps to three lines. Two across below `sm`, six across once
-        there is room for the whole set on one row.
-      */}
-      <ul className="grid grid-cols-2 gap-x-4 gap-y-6 sm:grid-cols-3 lg:grid-cols-6">
+    <Floor
+      id="popular-categories"
+      title="Popular Categories"
+      subtitle="Shop by what you are buying"
+      href="/categories"
+      icon={LayoutGrid}
+      iconClassName="text-[#E67E22]"
+      className={className}
+    >
+      <Rail>
         {CATEGORIES.map((category) => (
-          <li key={category.name}>
-            <Link
-              href={category.href}
-              className="group flex flex-col items-center gap-2 text-center outline-none"
-            >
-              <div className="relative h-24 w-24 overflow-hidden rounded-full bg-surface-sunk ring-1 ring-black/5 transition-all group-hover:ring-[#E67E22]/50 group-focus-visible:ring-2 group-focus-visible:ring-[#E67E22]">
-                <Image
-                  src={category.img}
-                  alt=""
-                  fill
-                  sizes="96px"
-                  className="object-cover object-center transition-transform duration-300 group-hover:scale-105"
-                />
-              </div>
-              <span className="text-[13px] font-semibold text-ink transition-colors group-hover:text-[#E67E22]">
-                {category.name}
-              </span>
-            </Link>
-          </li>
+          <RailCard
+            key={category.name}
+            href={category.href}
+            image={
+              <Image
+                src={category.img}
+                alt=""
+                fill
+                sizes="136px"
+                className="object-cover object-center"
+              />
+            }
+            primary={category.name}
+            secondary={category.href === '/browse' ? 'Coming soon' : 'Shop the range'}
+          />
         ))}
-      </ul>
-    </section>
+      </Rail>
+    </Floor>
   );
 }
