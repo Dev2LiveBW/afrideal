@@ -51,8 +51,15 @@ This repo is checked out twice on the product owner's machine. **This one**
   **one row** at every width — shrink type and padding, do not wrap.
 - Sections that display artwork (categories, deals, listings) reflow
   normally: 1 → 2 → 4 columns.
-- The two hero cards sit side by side at every width. Below `lg` their
-  images sit in flow under the copy, never layered behind it.
+- The two hero cards sit side by side at every width. Below `lg` each card
+  ends in a **band** - a 16:9 row after the copy with the photograph in its
+  bottom-right corner (bleeding to the card's edge) and the button in its
+  bottom-left, over the photograph's foot. Both cards share the band, so the
+  buttons sit on one line. The copy is never layered over a photograph; the
+  band is what stops it. Do not go back to a free-floating image - that is
+  how the runner ended up on the bullet list.
+- "Request a runner" stays on one row at every width. Below `sm` the button
+  drops its arrow and runs at 10px to fit the 320px band.
 - One pricing explanation on the front page, the three "Choose how you want
   to buy" cards. No prose explainer, no tier badge — the product owner
   removed both.
