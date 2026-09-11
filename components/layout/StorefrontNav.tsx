@@ -76,11 +76,13 @@ function DeliverToPicker() {
         onClick={() => setOpen((value) => !value)}
         aria-expanded={open}
         aria-haspopup="listbox"
-        className="flex items-center gap-1.5 text-[12px] text-gray-600 hover:text-gray-900"
+        className="flex max-w-full items-center gap-1.5 text-[11.5px] text-gray-600 hover:text-gray-900 sm:text-[12px]"
       >
-        <MapPin size={13} className="text-[#E67E22]" />
-        <span>
-          Deliver to: <span className="font-semibold text-gray-900">{city}, Botswana</span>
+        <MapPin size={13} className="shrink-0 text-[#E67E22]" />
+        {/* "Deliver to:" and the country are dropped below `sm`; the pin says it. */}
+        <span className="truncate">
+          <span className="hidden sm:inline">Deliver to: </span>
+          <span className="font-semibold text-gray-900">{city}<span className="hidden sm:inline">, Botswana</span></span>
         </span>
         <ChevronDown
           size={13}
@@ -252,9 +254,16 @@ export function StorefrontNav({ categories = [] }: { categories?: Category[] }) 
             compact ? 'max-h-0 overflow-hidden border-t-0 opacity-0' : 'max-h-16 opacity-100',
           )}
         >
-          <div className="mx-auto flex max-w-[1400px] items-center justify-between px-4 py-1.5">
-            <DeliverToPicker />
-            <div className="flex items-center gap-4">
+          {/*
+            A strip. Three links on the right and a city on the left is more
+            than 360px holds at 12px, so nothing here may wrap: the links keep
+            their words, the picker takes what is left and truncates.
+          */}
+          <div className="mx-auto flex max-w-[1400px] items-center justify-between gap-3 px-3 py-1.5 sm:px-4">
+            <div className="min-w-0 flex-1 truncate">
+              <DeliverToPicker />
+            </div>
+            <div className="flex shrink-0 items-center gap-2.5 sm:gap-4">
               {/*
                 TODO(TICKET-007): temporary entry point. The supplier / product
                 directory's final placement - homepage section, dedicated page or a
@@ -264,12 +273,16 @@ export function StorefrontNav({ categories = [] }: { categories?: Category[] }) 
               {DIRECTORY_IN_NAV && (
                 <Link
                   href={DIRECTORY_ROUTE}
-                  className="text-[12px] font-medium text-gray-600 hover:text-gray-900"
+                  className="whitespace-nowrap text-[11.5px] font-medium text-gray-600 hover:text-gray-900 sm:text-[12px]"
                 >
                   {DIRECTORY_LABEL}
                 </Link>
               )}
-              <Link href="/orders" className="text-[12px] font-medium text-[#E67E22] hover:underline">
+              {/* The quotation door TICKET-006 took off the front page, restored here. */}
+              <Link href="/rfq" className="whitespace-nowrap text-[11.5px] font-medium text-gray-600 hover:text-gray-900 sm:text-[12px]">
+                Get a quote
+              </Link>
+              <Link href="/orders" className="whitespace-nowrap text-[11.5px] font-medium text-[#E67E22] hover:underline sm:text-[12px]">
                 Track order →
               </Link>
             </div>
@@ -299,6 +312,7 @@ export function StorefrontNav({ categories = [] }: { categories?: Category[] }) 
                 { href: '/browse', label: 'Browse' },
                 // TODO(TICKET-007): temporary entry point, see the nav row above.
                 { href: DIRECTORY_ROUTE, label: DIRECTORY_LABEL },
+                { href: '/rfq', label: 'Request a quote' },
                 { href: '/browse?category=hair-weaves-extensions', label: 'Hair & Weaves' },
                 { href: '/request-a-runner', label: 'Request a runner' },
                 { href: '/how-it-works', label: 'How it works' },

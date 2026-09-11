@@ -104,6 +104,12 @@ export default withAuth(
           pathname.startsWith('/suppliers') ||
           pathname.startsWith('/categories') ||
           /*
+           * The quotation landing is a pitch page; the details step behind it
+           * asks for sign-in itself, with a `next` that carries what the buyer
+           * typed. Gating the whole prefix here would drop that.
+           */
+          pathname.startsWith('/rfq') ||
+          /*
            * The explainer is the page a visitor is sent to before they trust
            * the platform with anything. Asking them to sign in to read how
            * signing in works is the wrong way round.

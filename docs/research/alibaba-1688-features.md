@@ -357,9 +357,10 @@ and all four use data the platform already holds.
 1. **Category set (blocks a clean TICKET-001 close).** Home & Kitchen, Auto
    Accessories and Baby & Kids appear on the reference design but not in the
    catalogue. Seed them, or replace those tiles with real categories?
-2. **RFQ entry point (raised by TICKET-006).** The homepage bulk-quotation card
-   is gone. Where does "Request a quotation" surface at top level now — the
-   `/suppliers` directory, the nav, or nowhere until a buyer is in the catalogue?
+2. ~~**RFQ entry point (raised by TICKET-006).**~~ **Answered 2026-09-11:**
+   `/rfq`, a landing in Alibaba's two-step shape (benchmark §3b), reached
+   from the hero badge strip and the nav. The 100+ units path on a listing
+   is unchanged.
 3. **"Apply as a supplier" (raised by TICKET-006).** Same card, same question.
    The backend flow is untouched and still live at `/signup` → `/supplier/*` →
    `/admin/suppliers`. Only the homepage entry point was removed. Where does it

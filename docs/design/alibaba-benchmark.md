@@ -257,12 +257,29 @@ This is the top-level RFQ entry point that TICKET-006 left AfriDeal without
 └──────────────────────────────────────┘
 ```
 
-**AfriDeal mapping.** The shape is one free-text field plus an image, and
-one button - the whole form is deferred to the next step. Our
-`components/procurement/RfqModal.tsx` opens with the full form. If RFQ gets
-a top-level home again, this two-step shape (say what you need → then the
-details) is the one to copy, and the `/suppliers` directory is the natural
-place for the tile.
+**AfriDeal mapping — built.** `app/(store)/rfq/page.tsx` is the landing;
+`app/(store)/rfq/details/page.tsx` is step two. Measured against the live
+page at 360px: tiles 109×94 (theirs 109×94), 12px radius, h1 18px 700,
+field 64px with a 13px `#999` placeholder, CTA a 38px pill, steps on 24px
+outlined numbers. At 320×690 the whole first step sits above the tab bar.
+
+What differs, and why:
+
+- **Step two is the runner request form.** Our `/api/rfqs` needs a
+  `product_id`; the product-agnostic "describe anything" request on this
+  storefront is a runner finding and pricing it, and that form already
+  captures what a quote needs. It arrives pre-filled with the landing text.
+- **Sign-in is asked at step two**, as on Alibaba, with `next` carrying the
+  description so nothing typed is lost.
+- **No AI toggle** - nothing is behind it, and a checked box that does
+  nothing is a lie. **No testimonial carousel** - we have none.
+- **No image attach yet** - there is no upload endpoint. The field's
+  placeholder still invites a description; add the `+` when uploads exist.
+- The three "popular requests" are AfriDeal's real shapes: a bulk order of
+  a listing (`/browse?tier=CUSTOM`), something not listed, branded/custom.
+
+Entry points: the hero badge strip (`Request a Quote`, replacing a
+placeholder badge), the nav's second row (`Get a quote`), the mobile menu.
 
 ---
 

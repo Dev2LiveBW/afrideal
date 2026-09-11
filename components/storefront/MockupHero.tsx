@@ -1,6 +1,6 @@
 import Image from 'next/image';
 import Link from 'next/link';
-import { ArrowRight, BadgeCheck, ShoppingBag, Truck, ShieldCheck, Users, RefreshCw, Headphones, Tag, CheckCircle2, Sparkles, Star, Briefcase, Palette } from 'lucide-react';
+import { ArrowRight, BadgeCheck, ShoppingBag, Truck, ShieldCheck, Users, RefreshCw, Headphones, Tag, CheckCircle2, Sparkles, Star, Briefcase, FileText } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 export function MockupHero() {
@@ -154,20 +154,33 @@ export function MockupHero() {
             { icon: Sparkles, title: 'New Arrivals', sub: 'Latest trends', color: 'text-[#E67E22]', bg: 'bg-[#E67E22]/10' },
             { icon: Star, title: 'Top Rated', sub: 'Best sellers', color: 'text-[#27AE60]', bg: 'bg-[#27AE60]/10' },
             { icon: Briefcase, title: 'Become a Supplier', sub: 'Sell with us', color: 'text-[#7C3AED]', bg: 'bg-[#7C3AED]/10' },
-            { icon: Palette, title: 'Color Application', sub: 'Custom styles', color: 'text-blue-500', bg: 'bg-blue-500/10' },
+            { icon: FileText, title: 'Request a Quote', sub: 'Listed or not', color: 'text-royal', bg: 'bg-royal/10', href: '/rfq' },
             { icon: Tag, title: 'Best Prices', sub: 'Compare & save', color: 'text-rose-500', bg: 'bg-rose-500/10' },
             { icon: Truck, title: 'Fast Delivery', sub: 'Nationwide', color: 'text-teal-500', bg: 'bg-teal-500/10' },
-          ].map((badge, i) => (
-            <div key={i} className="flex flex-col items-center gap-1 text-center sm:gap-2">
-              <div className={cn('flex h-7 w-7 items-center justify-center rounded-full sm:h-12 sm:w-12', badge.bg)}>
-                <badge.icon className={cn('h-3.5 w-3.5 sm:h-[22px] sm:w-[22px]', badge.color)} />
+          ].map((badge, i) => {
+            const body = (
+              <>
+                <div className={cn('flex h-7 w-7 items-center justify-center rounded-full sm:h-12 sm:w-12', badge.bg)}>
+                  <badge.icon className={cn('h-3.5 w-3.5 sm:h-[22px] sm:w-[22px]', badge.color)} />
+                </div>
+                <div className="min-w-0">
+                  <h4 className="text-[8.5px] font-bold leading-tight text-ink sm:text-[13px]">{badge.title}</h4>
+                  <p className="hidden text-[11px] leading-tight text-muted sm:block">{badge.sub}</p>
+                </div>
+              </>
+            );
+            const cls = 'flex flex-col items-center gap-1 text-center sm:gap-2';
+            // A badge with somewhere to go is a link; the rest are labels.
+            return 'href' in badge && badge.href ? (
+              <Link key={i} href={badge.href} className={cn(cls, 'group outline-none')}>
+                {body}
+              </Link>
+            ) : (
+              <div key={i} className={cls}>
+                {body}
               </div>
-              <div className="min-w-0">
-                <h4 className="text-[8.5px] font-bold leading-tight text-ink sm:text-[13px]">{badge.title}</h4>
-                <p className="hidden text-[11px] leading-tight text-muted sm:block">{badge.sub}</p>
-              </div>
-            </div>
-          ))}
+            );
+          })}
         </div>
 
       </div>
