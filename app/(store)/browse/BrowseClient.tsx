@@ -123,19 +123,25 @@ export function BrowseClient({
 
   return (
     <>
-      <header className="mb-8">
-        <h1 className="font-display text-headline-lg font-semibold text-ink">
+      {/*
+        Alibaba benchmark §1: on a phone the page opens with a title bar and
+        a row of chips, and the first product is on the first screen. The
+        prose and the helper copy come back from `sm`, where there is room
+        for them above the fold rather than instead of it.
+      */}
+      <header className="mb-3 sm:mb-8">
+        <h1 className="font-display text-[18px] font-bold text-ink sm:text-headline-lg sm:font-semibold">
           {activeCategory ? activeCategory.name : 'Everything on AfriDeal'}
         </h1>
-        <p className="measure mt-2 text-[14px] leading-6 text-body">
+        <p className="measure mt-2 hidden text-[14px] leading-6 text-body sm:block">
           {activeCategory
             ? activeCategory.blurb
             : 'Every listing is carried by at least one verified supplier, and the price you see is the price at the quantity you take.'}
         </p>
 
-        <div className="mt-6 flex flex-wrap items-center gap-x-4 gap-y-3">
+        <div className="mt-3 flex flex-wrap items-center gap-x-4 gap-y-3 sm:mt-6">
           <TierSwitch options={tierHrefs} active={tier} />
-          <p className="text-[12.5px] leading-5 text-muted">
+          <p className="hidden text-[12.5px] leading-5 text-muted sm:block">
             {tierIsQuoted
               ? 'Cards keep their retail figure, because nothing is listed at this quantity.'
               : tier
@@ -161,12 +167,14 @@ export function BrowseClient({
       </header>
 
       {/* Filters */}
-      <div className="mb-7 space-y-4">
-        <div className="flex flex-wrap items-center gap-2">
+      <div className="mb-4 space-y-3 sm:mb-7 sm:space-y-4">
+        {/* One row that scrolls sideways; eight chips wrapped to five lines on a phone. */}
+        <div className="no-scrollbar -mx-4 overflow-x-auto px-4">
+        <div className="flex w-max items-center gap-2">
           <button
             onClick={() => setCategory('all')}
             className={cn(
-              'rounded-full px-3.5 py-2 text-[13px] font-medium transition-colors duration-200',
+              'h-8 whitespace-nowrap rounded-full px-3 text-[12px] font-medium transition-colors duration-200 sm:h-auto sm:px-3.5 sm:py-2 sm:text-[13px]',
               category === 'all'
                 ? 'bg-forest text-white'
                 : 'bg-surface-raised text-body ring-1 ring-inset ring-hairline-strong hover:bg-ink/[0.04] hover:text-ink',
@@ -180,7 +188,7 @@ export function BrowseClient({
               key={entry.id}
               onClick={() => setCategory(entry.id)}
               className={cn(
-                'rounded-full px-3.5 py-2 text-[13px] font-medium transition-colors duration-200',
+                'h-8 whitespace-nowrap rounded-full px-3 text-[12px] font-medium transition-colors duration-200 sm:h-auto sm:px-3.5 sm:py-2 sm:text-[13px]',
                 category === entry.id
                   ? 'bg-forest text-white'
                   : 'bg-surface-raised text-body ring-1 ring-inset ring-hairline-strong hover:bg-ink/[0.04] hover:text-ink',
@@ -189,6 +197,7 @@ export function BrowseClient({
               {entry.name}
             </button>
           ))}
+        </div>
         </div>
 
         <div className="flex flex-wrap items-center gap-3">
@@ -258,7 +267,7 @@ export function BrowseClient({
           className="rounded-md border border-hairline bg-surface-raised"
         />
       ) : (
-        <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
+        <div className="grid grid-cols-2 gap-x-2 gap-y-5 sm:gap-x-4 lg:grid-cols-4 lg:gap-5">
           {visible.map((product, index) => (
             <ProductCard
               key={product.id}

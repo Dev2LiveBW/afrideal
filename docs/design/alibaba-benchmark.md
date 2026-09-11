@@ -22,10 +22,11 @@ Recordings on file:
 | date | length | screens covered |
 | --- | --- | --- |
 | 2026-09-09 | 2:58 | home, categories, search results, product detail (an agent listing) |
-| 2026-09-11 | 2:32 | *not yet on disk - product owner to supply the file* |
+| 2026-09-09 | 2:32 | product detail Details tab (FAQ), **Recommended tab - the catalogue card grid**, sticky enquiry bar |
 
-Measurements below are from the 2026-09-09 recording. The phone in it is
-384px wide; figures are given as a share of viewport width so they transfer.
+Measurements below are from the two 2026-09-09 recordings. The phone in
+them is 384px wide; figures are given as a share of viewport width so they
+transfer.
 
 ---
 
@@ -73,6 +74,74 @@ product name. Price → published customer price via `PriceTag`. Minimum order �
 fulfilment rate, which we hold and Alibaba's reorder rate stands in for. The
 verified badge and the supplier's company name are the two fields that must
 survive at any density; they are what a trade buyer scans for.
+
+---
+
+## 1b. Catalogue cards — the other "boxes"
+
+The second recording is the one the product owner sent with *"see how small
+their boxes are, and this is on a phone"*. It shows the **Recommended** tab of
+a listing: a two-column grid of product cards. This is the pattern for any
+grid of products - the catalogue, related items, a supplier's other lines.
+
+```
+┌───────────────┐ ┌───────────────┐
+│               │ │               │
+│    square     │ │    square     │   ← full card width, ~4px radius,
+│    image      │ │    image      │     NO border, NO shadow, NO ground
+│               │ │               │
+└───────────────┘ └───────────────┘
+ Professional Gua…   Trendy Clothing…  ← 2 lines, 13px, ellipsis
+ US$0.01             US$0.05-0.20      ← 15px bold
+ Min. order: 1 unit  Min. order: 1 unit ← 12px
+ Verified 2 yrs · CN 1 yr · CN          ← 11px muted
+```
+
+| property | value |
+| --- | --- |
+| columns | 2, at every phone width |
+| card width | ~46% of viewport (178px at 384); 7px gutter, 11px page margin |
+| image | square, the card's full width, ~4px radius |
+| card chrome | **none** - no border, no shadow, no tinted ground; the photograph is the card's edge |
+| title | two lines, 13px, medium, ellipsis on the second line |
+| price | 15px bold, a range where one exists |
+| minimum order | 12px, `Min. order: 500 pieces` |
+| meta line | 11px muted: `Verified` (bold blue) + years + country, or just years + country |
+| card pitch | ~266px vertical → **~5 cards per phone screen** |
+| overlays | a small image-search glyph bottom-left of the photograph; nothing else |
+
+**AfriDeal mapping.** `components/products/ProductCard.tsx`, on the `/browse`
+grid. Title → name. Price → `PriceTag`. Minimum order → the rung's minimum
+when the grid is filtered to a rung, else `1 unit`. Meta line → `N verified`
++ rating + category. Quick-add is kept as a round button on the photograph's
+corner: the benchmark has no cart on its cards because Alibaba is not the
+seller, and AfriDeal is. The save-for-later heart sits opposite it.
+
+What was removed to get there: the tinted card ground, border and shadow,
+the two-line description, and the footer band with the full-width Add button.
+
+---
+
+## 1c. Product detail — chrome only
+
+The recording scrolls one listing's **Details** tab and its **Recommended**
+tab. The **Overview** tab was captured in the first recording (research doc
+§2.8). What transfers is the frame, not the content - the listing is an
+agent service with a FAQ, not a physical good.
+
+| pattern | value |
+| --- | --- |
+| top | back, search field (pre-filled with the query), camera, cart, more |
+| tabs | `Overview | Details | Recommended`, active underlined, sticky under the search |
+| bottom bar | sticky: a `Store` icon, `Chat now` (outlined pill), `Send inquiry` (filled accent pill) - the two pills share the width |
+| Details tab | the seller's own long description, then a numbered FAQ (`1. How to start…`, `2. How do you charge…`, payment terms, on-time delivery, quality control) |
+| Recommended tab | `Recommended from this supplier` grid (§1b), then `Recommended products` grid |
+
+**AfriDeal mapping.** `Chat now / Send inquiry` → `Add to cart / Request a
+quotation` on `app/(store)/products/[id]`. The tab strip and the sticky
+bottom bar are the parts worth adopting; the FAQ is seller-authored content
+and does not transfer. Not built yet - the physical-good detail page is
+still in §5.
 
 ---
 
@@ -149,8 +218,9 @@ These are named in the product owner's brief but are not in any recording on
 file. Do not build them from memory - request a recording.
 
 - **Sign-up and onboarding flow**
-- **Product detail page** for a physical good (the recording shows an
-  agent-service listing, which is a different template)
+- **Product detail page** for a physical good. Both recordings show an
+  agent-service listing; its chrome is in §1c, but the price ladder, variant
+  picker and gallery of a physical good are not on file.
 - **Cart and checkout**
 - **Messenger / enquiry thread**
 - **Supplier upload flow** - the product owner's phrase was "their style for

@@ -8,15 +8,26 @@ import toast from 'react-hot-toast';
 
 import { PriceTag } from '@/components/brand/MoneyText';
 import { pulaTag } from '@/lib/format';
-import { CategoryIcon } from '@/components/storefront/CategoryIcon';
 import { Swatch, photoUrl } from '@/components/storefront/Swatch';
 import { useAfriDealStore } from '@/store/useAfriDealStore';
-import { categoryPalette } from '@/lib/category-palette';
 import { cn } from '@/lib/utils';
 import type { Product, ProductImage } from '@/types';
 
 /**
- * Storefront product card.
+ * Storefront product card. Alibaba benchmark §1b.
+ *
+ * Drawn to the catalogue card in the product owner's second recording, which
+ * she sent with "see how small their boxes are, and this is on a phone": two
+ * across, a square photograph the full width of the card with no border and
+ * no shadow, and four lines under it - name, price, minimum order, a meta
+ * line - at 13 / 15 / 12 / 11px. About five cards to a phone screen.
+ *
+ * What went: the coloured wash ground, the card border and shadow, the
+ * two-line description, and the footer band. A card in a grid is identified
+ * by its photograph; chrome around it only spends the width the photograph
+ * needs. Quick-add stays, as a round button on the photograph's corner - the
+ * benchmark has no cart on its cards because Alibaba is not the seller, and
+ * AfriDeal is.
  *
  * The image slot is a gradient built from the product's own swatch with the
  * category glyph set small and low contrast. That reads as a deliberate
@@ -101,8 +112,6 @@ export function ProductCard({
     );
   }
 
-  const palette = categoryPalette(product.category_id);
-
   return (
     <motion.article
       initial={{ opacity: 0, y: 16 }}
@@ -111,34 +120,28 @@ export function ProductCard({
       transition={{ delay: Math.min(index * 0.05, 0.3), duration: 0.55, ease: [0.16, 1, 0.3, 1] }}
       className={cn('group relative', className)}
     >
-      {/*
-        The card carries its trade's colour rather than sitting on white. The
-        wash is pale enough that the photograph and the figure still outrank it;
-        the hue itself is spent only on the icon and the category label, where it
-        does identification work instead of decoration.
-      */}
       <Link
         href={href ?? `/products/${product.id}`}
-        style={{ backgroundColor: palette.wash, borderColor: palette.edge }}
-        className="flex h-full flex-col overflow-hidden rounded-md border shadow-card transition-shadow duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] hover:shadow-lift"
+        className="flex h-full flex-col outline-none"
       >
-        <div className="relative">
+        {/* ── The photograph, and the two things you can do on it ─────── */}
+        <div className="relative overflow-hidden rounded-sm bg-surface-sunk">
           <Swatch
             image={image}
             fallback={product.swatch}
             emoji={product.emoji}
-            className="aspect-[4/3]"
-            glyphClassName="text-[52px] bottom-3 right-4 transition-transform duration-700 ease-[cubic-bezier(0.16,1,0.3,1)] group-hover:scale-110"
+            className="aspect-square"
+            glyphClassName="text-[40px] bottom-2 right-3 transition-transform duration-700 ease-[cubic-bezier(0.16,1,0.3,1)] group-hover:scale-110"
             label={product.name}
           />
 
           {product.promotion ? (
-            <span className="absolute left-3 top-3 rounded-full bg-danger px-2 py-0.5 font-mono text-[10px] font-semibold text-white">
+            <span className="absolute left-2 top-2 rounded bg-danger px-1.5 py-0.5 font-mono text-[10px] font-semibold text-white">
               −{product.promotion.discount_pct}%
             </span>
           ) : (
             product.featured && (
-              <span className="absolute left-3 top-3 rounded-full bg-ink/70 px-2.5 py-1 font-mono text-[10px] uppercase tracking-[0.16em] text-white backdrop-blur-sm">
+              <span className="absolute left-2 top-2 rounded bg-ink/70 px-1.5 py-0.5 font-mono text-[9px] uppercase tracking-[0.14em] text-white backdrop-blur-sm">
                 Featured
               </span>
             )
@@ -148,103 +151,93 @@ export function ProductCard({
             onClick={toggleSave}
             aria-label={saved ? `Remove ${product.name} from your list` : `Save ${product.name} for later`}
             aria-pressed={saved}
-            className="absolute right-3 top-3 flex h-8 w-8 items-center justify-center rounded-full bg-surface-raised/90 backdrop-blur-sm transition-colors hover:bg-surface-raised"
+            className="absolute right-2 top-2 flex h-7 w-7 items-center justify-center rounded-full bg-surface-raised/90 backdrop-blur-sm transition-colors hover:bg-surface-raised"
           >
             <Heart
-              size={14}
-              strokeWidth={1.5}
+              size={13}
+              strokeWidth={1.75}
               className={saved ? 'fill-danger text-danger' : 'text-body'}
             />
           </button>
+
+          <button
+            onClick={quickAdd}
+            aria-label={`Add ${product.name} to cart`}
+            className="absolute bottom-2 right-2 flex h-8 w-8 items-center justify-center rounded-full bg-[#E67E22] text-white shadow-md transition-colors hover:bg-[#D35400]"
+          >
+            <Plus size={16} strokeWidth={2.25} />
+          </button>
         </div>
 
-        <div className="flex flex-1 flex-col p-4">
-          {/*
-            The category used to sit above the name as a mono uppercase kicker.
-            It is a classification rather than a heading, so it now joins the
-            rating and supplier count in the metadata row below the name.
-          */}
-          <h3 className="text-[14.5px] font-semibold leading-5 text-ink transition-colors group-hover:text-forest">
+        {/* ── Four lines, in the benchmark's order ─────────────────────── */}
+        <div className="flex flex-1 flex-col pt-2">
+          <h3 className="line-clamp-2 text-[13px] font-medium leading-[1.3] text-ink transition-colors group-hover:text-forest">
             {product.name}
           </h3>
 
-          <p className="mt-1.5 line-clamp-2 flex-1 text-[12.5px] leading-5 text-body">
-            {product.short_description}
-          </p>
-
-          <div className="mt-3 flex flex-wrap items-center gap-x-3 gap-y-1 text-[11.5px] text-muted">
-            {categoryName && (
-              <span
-                className="inline-flex min-w-0 items-center gap-1.5 font-medium"
-                style={{ color: palette.hue }}
-              >
-                <CategoryIcon categoryId={product.category_id} size={12} />
-                <span className="truncate">{categoryName}</span>
+          {/*
+            When the catalogue is priced at a rung, that price is the one on
+            the card and the list price sits struck through beside it. The
+            card must never show a cheaper headline than the grid was
+            filtered to, or the sort order stops matching what is read.
+          */}
+          <p className="mt-1 flex flex-wrap items-baseline gap-x-1.5">
+            <PriceTag
+              amount={showingTier ? tierPrice! : product.price}
+              size="sm"
+              tone={tierByQuotation ? 'muted' : 'ink'}
+              className="text-[15px]"
+            />
+            {showingTier ? (
+              tierPrice! < product.price && (
+                <span className="text-[11px] tabular-nums text-muted line-through">
+                  {pulaTag(product.price)}
+                </span>
+              )
+            ) : (
+              product.compare_at_price && (
+                <span className="text-[11px] tabular-nums text-muted line-through">
+                  {pulaTag(product.compare_at_price)}
+                </span>
+              )
+            )}
+            {showingTier && (tierSavingPct ?? 0) > 0 && (
+              <span className="font-mono text-[10.5px] tabular-nums text-forest">
+                −{Math.round(tierSavingPct!)}%
               </span>
             )}
-            <span className="inline-flex items-center gap-1">
-              <Star size={12} strokeWidth={1.5} className="fill-gold text-gold" />
-              <span className="font-mono tabular-nums">{product.rating.toFixed(1)}</span>
-              <span>({product.review_count})</span>
-            </span>
+          </p>
+
+          {/*
+            The rung's minimum, or one - the retail rung has no floor. "On
+            quotation" replaces the figure on the custom rung, where there is
+            no published price to have a minimum for.
+          */}
+          <p className="mt-0.5 text-[12px] leading-tight text-body">
+            {tierByQuotation
+              ? 'On quotation'
+              : <>Min. order: <span className="font-mono tabular-nums text-ink">{showingTier && tierMinQty ? tierMinQty : 1}</span> {showingTier && tierMinQty && tierMinQty > 1 ? 'units' : 'unit'}</>}
+          </p>
+
+          <p className="mt-0.5 flex min-w-0 items-center gap-1 text-[11px] leading-tight text-muted">
             {supplierCount !== undefined && supplierCount > 0 && (
-              <span className="inline-flex items-center gap-1 text-forest">
-                <ShieldCheck size={12} strokeWidth={1.5} />
+              <span className="inline-flex shrink-0 items-center gap-0.5 font-semibold text-ocean">
+                <ShieldCheck size={11} strokeWidth={2.25} />
                 {supplierCount} verified
               </span>
             )}
-          </div>
-
-          <div className="mt-3 flex items-end justify-between gap-2 border-t border-hairline pt-3">
-            <div className="min-w-0">
-              {/*
-                When the catalogue is priced at a rung, that price is the one on
-                the card and the list price sits struck through beside it. The
-                card must never show a cheaper headline than the grid was
-                filtered to, or the sort order stops matching what is read.
-              */}
-              {/*
-                The quoted rung says so once, above the grid - every card is in
-                the same state, so repeating it twelve times is noise that
-                crowds out the figure the card exists to show.
-              */}
-              <p className="text-[10.5px] text-muted">
-                {showingTier ? (tierByQuotation ? 'On quotation' : 'Your price') : 'From'}
-              </p>
-              <PriceTag
-                amount={showingTier ? tierPrice! : product.price}
-                size="md"
-                tone={tierByQuotation ? 'muted' : 'gold'}
-              />
-              {showingTier ? (
-                tierPrice! < product.price && (
-                  <span className="ml-1.5 text-[11.5px] tabular-nums text-muted line-through">
-                    {pulaTag(product.price)}
-                  </span>
-                )
-              ) : (
-                product.compare_at_price && (
-                  <span className="ml-1.5 text-[11.5px] tabular-nums text-muted line-through">
-                    {pulaTag(product.compare_at_price)}
-                  </span>
-                )
-              )}
-              {showingTier && (tierSavingPct ?? 0) > 0 && (
-                <span className="ml-1.5 font-mono text-[11px] tabular-nums text-forest">
-                  −{Math.round(tierSavingPct!)}%
-                </span>
-              )}
-            </div>
-
-            <button
-              onClick={quickAdd}
-              aria-label={`Add ${product.name} to cart`}
-              className="flex h-8 shrink-0 items-center gap-1 rounded-full border border-hairline-strong px-2.5 text-[12px] font-medium text-ink transition-colors hover:border-gold hover:bg-gold-50"
-            >
-              <Plus size={13} strokeWidth={1.75} />
-              Add
-            </button>
-          </div>
+            {supplierCount !== undefined && supplierCount > 0 && <span aria-hidden="true">·</span>}
+            <span className="inline-flex items-center gap-0.5">
+              <Star size={10} strokeWidth={1.5} className="fill-gold text-gold" />
+              <span className="font-mono tabular-nums">{product.rating.toFixed(1)}</span>
+            </span>
+            {categoryName && (
+              <>
+                <span aria-hidden="true">·</span>
+                <span className="truncate">{categoryName}</span>
+              </>
+            )}
+          </p>
         </div>
       </Link>
     </motion.article>
@@ -253,13 +246,13 @@ export function ProductCard({
 
 export function ProductCardSkeleton() {
   return (
-    <div className="overflow-hidden rounded-md border border-hairline bg-surface-raised">
-      <div className="skeleton aspect-[4/3] rounded-none" />
-      <div className="space-y-2.5 p-4">
-        <div className="skeleton h-4 w-3/4" />
-        <div className="skeleton h-3 w-full" />
-        <div className="skeleton h-3 w-2/3" />
-        <div className="skeleton mt-3 h-5 w-1/3" />
+    <div>
+      <div className="skeleton aspect-square rounded-sm" />
+      <div className="space-y-1.5 pt-2">
+        <div className="skeleton h-3.5 w-full" />
+        <div className="skeleton h-3.5 w-2/3" />
+        <div className="skeleton h-4 w-1/3" />
+        <div className="skeleton h-3 w-1/2" />
       </div>
     </div>
   );
