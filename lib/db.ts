@@ -2,6 +2,8 @@ import 'server-only';
 import fs from 'node:fs/promises';
 import path from 'node:path';
 
+import { applyToSanity, isSanityBacked, readFromSanity } from '@/lib/sanity/catalogue';
+
 import type {
   AppNotification,
   AuditEntry,
@@ -41,9 +43,20 @@ import type {
  * `await` inside read-modify-write is a yield point, so two concurrent POSTs to
  * the same collection can interleave and lose an update. `mutate()` serialises
  * them and is the only sanctioned way to change a collection.
+ *
+ * With `CATALOGUE_SOURCE=sanity` the six catalogue collections (products and
+ * their images, categories, brands, suppliers, supplier offers) are read from
+ * and written to the Sanity dataset the Studio edits instead - see
+ * lib/sanity/catalogue.ts. Every other collection stays in the JSON files.
  */
 
 const DATA_DIR = path.join(process.cwd(), 'data');
+
+const CATALOGUE_SOURCE = process.env.CATALOGUE_SOURCE ?? 'json';
+
+function viaSanity(collection: Collection): boolean {
+  return CATALOGUE_SOURCE === 'sanity' && isSanityBacked(collection);
+}
 
 export interface Schema {
   users: User;
@@ -83,6 +96,9 @@ function fileFor(collection: Collection): string {
 
 /** Read a whole collection. */
 export async function readAll<C extends Collection>(collection: C): Promise<Schema[C][]> {
+  if (viaSanity(collection)) {
+    return (await readFromSanity(collection as Parameters<typeof readFromSanity>[0])) as Schema[C][];
+  }
   const raw = await fs.readFile(fileFor(collection), 'utf8');
   return JSON.parse(raw) as Schema[C][];
 }
@@ -110,7 +126,11 @@ export async function mutate<C extends Collection, R>(
   const next = previous.then(async () => {
     const rows = await readAll(collection);
     const { rows: updated, result } = await fn(rows);
-    await writeAll(collection, updated);
+    if (viaSanity(collection)) {
+      await applyToSanity(collection as Parameters<typeof applyToSanity>[0], rows, updated);
+    } else {
+      await writeAll(collection, updated);
+    }
     return result;
   });
 

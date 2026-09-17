@@ -26,16 +26,19 @@ Two sources, in order of authority:
 arrives, re-measure and extend the relevant section; do not describe from
 memory.
 
-### Access map (checked 2026-09-11, 390px viewport)
+### Access map (checked 2026-09-11; sign-in and CAPTCHA rows 2026-09-14; 390px viewport)
+
+> **The benchmark is the app, the site is the stand-in.** Figures marked *live* were measured on `m.alibaba.com`; re-verify against the app captures in `captures/alibaba-app/` (checklist there) before they drive work. Where the app is known to differ it is said so.
 
 | screen | live | route | note |
 | --- | --- | --- | --- |
 | Home | **yes** | `https://m.alibaba.com` | redirects to `www.alibaba.com/?isSpider=true` - flagged as automated, still fully rendered. An app-install interstitial appears on load; its × dismisses it. **Serves the phone layout only when the tab's first request is already phone-sized**: open a fresh tab on any other site, set the 390px viewport, *then* navigate. A tab that has once received the desktop page keeps getting it, and a tab-row tap (`/?tab=supplier`) flips it to desktop too |
 | Categories | **yes** | `https://www.alibaba.com/category.html` | the two-pane browser; rail taps swap the pane in place |
-| RFQ landing | **yes** | `https://rfq.alibaba.com/rfq/lp_page_retriever.htm` | |
+| RFQ landing | **yes / CAPTCHA** | `https://rfq.alibaba.com/rfq/lp_page_retriever.htm` | live on 2026-09-11; on 2026-09-14 it served the slider CAPTCHA after a search attempt in the same session. Open it *before* anything gated |
 | Search results | no | `/trade/search?SearchText=…` | slider CAPTCHA. **Do not attempt to pass it.** Use the 2:58 recording |
 | Product detail | no | `/product-detail/…` | slider CAPTCHA. Use the 2:32 recording for chrome; the physical-good page is unrecorded |
-| Sign-in | no | `login.alibaba.com` | redirects to a blank bot-check page. Needs a recording |
+| Sign-in / create account | **yes** | tap the bottom bar's `Cart` | redirects to `login.alibaba.com/mini_login.htm?…isMobile=true` and renders the welcome, sign-in and create-account screens (§3c, 2026-09-14). A direct visit to `login.alibaba.com` still blanks |
+| Cart · Orders · My Alibaba | no | | behind sign-in; the app is the only source |
 
 Prices on the live site render in **Pula** when browsed from Botswana - the
 site geolocates - so `P 670.06` in a measurement is Alibaba's own display,
@@ -130,7 +133,7 @@ grid of products - the catalogue, related items, a supplier's other lines.
 | title | **12px, weight 400, `#666`**, two lines, ellipsis | live |
 | price | **14px, weight 700, `#111`**, a range where one exists | live |
 | minimum order | **12px, `#888`**, written `1 piece (MOQ)` on the feed, `Min. order: 500 pieces` in search | live / video |
-| meta line | 11px muted: `Verified` (bold blue) + years + country | video (search only) |
+| meta line | search rows *(video)*: 11px muted `Verified` (bold blue) + years + country. **Home feed *(live, 2026-09-14)*: a badge row after the MOQ — a `N YRS` pill image 28×16, a gold shield 16×16, then either a gold coin 16×16 or the blue `Verified` wordmark 34×16; hot listings carry a red `Super` flag 34×16 inline before the title**. Cell height 277–300 with the row | video / live |
 | card pitch | **285–310px** vertical → 4–5 cards per phone screen | live |
 | overlays | a small image-search glyph bottom-left of the photograph; nothing else | video |
 
@@ -193,8 +196,8 @@ still in §5.
 | --- | --- | --- |
 | page header | `Categories`, **18px** bold, centred; back arrow left, one icon right | live |
 | left rail width | **100px at 390 (26%)** | live |
-| left rail ground | **`#f4f4f4`**; active item **white**, no accent bar on the web | live |
-| left rail item | **13px, `#222`, 700 when active / 400 otherwise, 48px row pitch**, wraps to two lines, `overflow-y: auto` | live |
+| left rail ground | **`#f4f4f4`**; active item **white** with a **black accent bar** on its left edge (2026-09-14; on 2026-09-11 there was none) | live |
+| left rail item | **13px, `#222`, 700 when active / 400 otherwise**; row pitch **64px** on 2026-09-14 (48px on 2026-09-11 - the site A/B tests this; the app recording is the tiebreaker), wraps to two lines, `overflow-y: auto` | live |
 | right pane | 290px, transparent over white, 3 columns; heading 16px bold (`Recommendations` on *For you*) | live |
 | tile | **78px disc, fully round** (`border-radius: 999px`), image inside | live |
 | tile grid | **16px column gap, 128px row pitch**; caption **11px `#222`** below | live |
@@ -416,6 +419,43 @@ placeholder badge), the nav's second row (`Get a quote`), the mobile menu.
 
 ---
 
+## 3c. Sign in and create account — *live (site), 2026-09-14*
+
+Reached from the bottom bar's `Cart`. Three screens of one decision each. The app's
+version is native and unrecorded; treat these as the shape and re-measure from the
+app captures.
+
+```
+┌──────────────────────────────────────┐
+│ [logo]                            ×  │  ← on rgb(204,61,0), 430px tall
+│       Global B2B sourcing with       │  ← 13px white
+│   order protection & great savings   │  ← 20px 700 white
+│          [3D illustration]           │
+├──────────────────────────────────────┤  ← white from y=400
+│ ( G  Continue with Google          ) │  ← 358×48 pill, 1px #222, 16/600 #222
+│ ( f  Continue with Facebook        ) │
+│ ───────────── OR ────────────────    │  ← 13px #767676
+│ ( ✉  Continue with email           ) │  ← 1px rgb(214,64,0), text rgb(214,64,0)
+└──────────────────────────────────────┘
+```
+
+| screen | item | value |
+| --- | --- | --- |
+| welcome | hero | `rgb(204,61,0)`, 430px; eyebrow 13px white; h1 **20px 700** white, 270px wide, centred; close × top-right |
+| welcome | options | `.login-button` **358×48, `border-radius: 999px`, 16px 600**, 12px apart, from y=412; white ground; Google/Facebook `1px solid #222`; email `1px solid rgb(214,64,0)` with the text in the same orange |
+| sign in | page header | ‹ back left · `Sign in` **18px 600 `#222`** · headset (help) icon right |
+| sign in | fields | `.aocn-input__field` **350×48, `1px solid #ddd`, 8px radius**, white; placeholder 13px `#767676` (`Email address`, `Enter password` + eye); first field at **y=72**, 12px between |
+| sign in | links | `Forgot password?` right-aligned, underlined, 13px; `Sign in with a code` 13px 600 underlined, centred; `New to Alibaba.com? Create an account` 13px |
+| sign in | CTA | `Continue` **350×48 pill `rgb(214,64,0)` 16px 600 white**; **disabled at ~50% opacity until the fields validate** |
+| sign in | social | Google · Facebook as two grey tiles, 50% width each, below the links |
+| create account | form | page header `Create account`; **one field** (`Email address`) at y=72; `Next` (disabled); `Already have an account? Sign in`; Google · Apple · Facebook as three grey tiles. Password and profile come on later screens |
+
+**AfriDeal mapping.** Not built. `app/(auth)/login` and `/signup` are marketing
+pages with the form a screen and a half down; see the gap analysis §3.7 for the
+target: a `Welcome` screen, then one-field page-header screens with a disabled CTA.
+
+---
+
 ## 4. Global patterns
 
 | pattern | Alibaba | AfriDeal |
@@ -485,11 +525,11 @@ foot spins the arc. `ProductCard` lost its fade-and-rise.
 These are named in the product owner's brief but are not in any recording on
 file. Do not build them from memory - request a recording.
 
-- **Sign-up and onboarding flow** - `login.alibaba.com` sends an automated browser to a blank bot-check page, so this cannot be measured live
+- **Sign-up and onboarding flow in the app** - the site's version is in §3c; the app's native sheet is unrecorded
 - **Product detail page** for a physical good. Both recordings show an
   agent-service listing; its chrome is in §1c, but the price ladder, variant
   picker and gallery of a physical good are not on file.
-- **Cart and checkout**
+- **Cart and checkout** - behind sign-in on the site; app only
 - **Messenger / enquiry thread**
 - **Supplier upload flow** - the product owner's phrase was "their style for
   uploading suppliers"; whether that means the supplier-side listing form or

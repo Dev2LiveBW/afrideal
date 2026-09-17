@@ -38,6 +38,27 @@ This repo is checked out twice on the product owner's machine. **This one**
 (`Tshego/v2/afrideal/afrideal`, tracking `origin/main`) is the live one.
 `Tshego/afrideal` is a stale sibling on an old branch — do not work there.
 
+## Where the catalogue lives
+
+Since 2026-09-16 the **Sanity Studio** in `Tshego/studio/` (project
+`bly84glb`, dataset `production`) is the product owner's admin for the
+catalogue: products and their images, categories, brands, suppliers and
+supplier offers. With `CATALOGUE_SOURCE=sanity` in `.env.local` the app reads
+those six collections from Sanity through `lib/sanity/catalogue.ts`; every
+other collection (orders, payables, inventory, users, runners…) is still the
+JSON store. `lib/db.ts` routes by collection name, so pages and route
+handlers do not know which store they hit.
+
+- Studio edits are **drafts until published**; the app reads the published
+  perspective only.
+- The app's own catalogue writes (a supplier's verification status) need
+  `SANITY_API_WRITE_TOKEN`; without it they fail with a clear error.
+- `npm run verify` targets the JSON store (`CATALOGUE_SOURCE=json`, the
+  default) - reseed with `npm run seed`. In Sanity mode it passes except the
+  supplier-approval checks when no write token is set.
+- Studio schema lives in `Tshego/studio/schemaTypes/`; the seed import is
+  `node scripts/seed-from-app.mjs` there (see the file header).
+
 ## Verifying UI
 
 - The dev server is `npm run dev` (`.claude/launch.json` → `afrideal`).
