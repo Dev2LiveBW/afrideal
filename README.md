@@ -218,7 +218,7 @@ npm run dev      # one terminal
 npm run verify   # another
 ```
 
-`scripts/verify.mjs` signs in over the real NextAuth flow and drives the HTTP API, so it exercises the actual engines rather than a copy of their rules. 104 checks across 16 sections:
+`scripts/verify.mjs` signs in over the real NextAuth flow and drives the HTTP API, so it exercises the actual engines rather than a copy of their rules. 109 checks across 16 sections:
 
 - all eight logins land on the right role, and bad credentials are rejected
 - pricing arithmetic, and no product sells below its highest supplier cost

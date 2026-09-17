@@ -513,7 +513,7 @@ section('13. Tiered pricing — the ladder is real, not hard-coded');
   const unit1 = order1.body?.items?.[0]?.unit_price;
   check('qty 1 is charged the retail band', unit1 === p001?.price, `${unit1} vs ${p001?.price}`);
 
-  // Bulk band, 5–99.
+  // Bulk rung, 5–19.
   const order5 = await json(business, '/api/orders', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
@@ -529,22 +529,31 @@ section('13. Tiered pricing — the ladder is real, not hard-coded');
   check('bulk line total uses the bulk unit price', order5.body?.items?.[0]?.line_total === unit5 * 5);
 
   /*
-   * The bulk band runs the whole way to 99 now, so a larger quantity inside it
-   * is priced identically rather than dropping again. That is the point of
-   * collapsing the ladder to two published rungs: one break, not four.
+   * Four published rungs (scripts/seed.mjs, lib/pricing-model.ts): retail 1–4,
+   * bulk 5–19, wholesale 20–49, wholesale+ 50–99. Each break drops the unit
+   * price; a quantity inside a rung is priced identically to its neighbours.
    */
-  const order20 = await json(business, '/api/orders', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({
-      lines: [{ product_id: 'p001', variant_id: 'p001v1', qty: 20 }],
-      payment_method: 'DPO_PAY',
-      delivery_address: 'Plot 220, Block 6',
-      delivery_city: 'Gaborone',
-    }),
-  });
-  const unit20 = order20.body?.items?.[0]?.unit_price;
-  check('qty 20 stays on the same bulk band', unit20 === unit5, `${unit20} vs ${unit5}`);
+  const unitAt = async (qty) => {
+    const order = await json(business, '/api/orders', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        lines: [{ product_id: 'p001', variant_id: 'p001v1', qty }],
+        payment_method: 'DPO_PAY',
+        delivery_address: 'Plot 220, Block 6',
+        delivery_city: 'Gaborone',
+      }),
+    });
+    return order.body?.items?.[0]?.unit_price;
+  };
+  const unit19 = await unitAt(19);
+  const unit20 = await unitAt(20);
+  const unit49 = await unitAt(49);
+  const unit50 = await unitAt(50);
+  check('qty 19 stays on the bulk rung', unit19 === unit5, `${unit19} vs ${unit5}`);
+  check('qty 20 drops to the wholesale rung', unit20 < unit5, `${unit20} vs ${unit5}`);
+  check('qty 49 stays on the wholesale rung', unit49 === unit20, `${unit49} vs ${unit20}`);
+  check('qty 50 drops to the wholesale+ rung', unit50 < unit20, `${unit50} vs ${unit20}`);
 
   /*
    * The published ladder is not gated by account type. A retail shopper taking
@@ -563,22 +572,26 @@ section('13. Tiered pricing — the ladder is real, not hard-coded');
   });
   const retailUnit20 = retail20.body?.items?.[0]?.unit_price;
   check(
-    'a retail account is quoted the same published bulk price',
+    'a retail account is quoted the same published wholesale price',
     retailUnit20 === unit20,
     `retail ${retailUnit20} vs business ${unit20}`,
   );
 
   /*
    * And the markups themselves are the published ones: 60% over cost at retail
-   * quantities, 44% from five units up. Checked against the band the API
-   * actually charged rather than against the seed, so a drift between the
-   * pricing model and the data shows up here.
+   * quantities, then 46%, 32% and 22% down the ladder. Checked as ratios
+   * against the rung the API actually charged rather than against the seed, so
+   * a drift between the pricing model and the data shows up here.
    */
-  check(
-    'the bulk rung is 10% under the retail rung',
-    Math.abs(unit5 / unit1 - 1.44 / 1.6) < 0.02,
-    `${unit5} / ${unit1} = ${(unit5 / unit1).toFixed(4)}`,
-  );
+  const rung = (label, unit, markup) =>
+    check(
+      `the ${label} rung is cost + ${markup}%`,
+      Math.abs(unit / unit1 - (1 + markup / 100) / 1.6) < 0.02,
+      `${unit} / ${unit1} = ${(unit / unit1).toFixed(4)}`,
+    );
+  rung('bulk', unit5, 46);
+  rung('wholesale', unit20, 32);
+  rung('wholesale+', unit50, 22);
 
   // Past the top band the answer is a quotation, not a guessed price.
   const order100 = await json(business, '/api/orders', {
