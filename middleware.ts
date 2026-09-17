@@ -1,5 +1,5 @@
 import { clerkMiddleware, createRouteMatcher } from '@clerk/nextjs/server';
-import { NextResponse } from 'next/server';
+import { NextResponse, type NextFetchEvent, type NextRequest } from 'next/server';
 
 import type { Role } from '@/types';
 
@@ -91,7 +91,7 @@ function roleOf(claims: CustomJwtSessionClaims | null): Role | null {
   return role && role in LANDING ? role : null;
 }
 
-export default clerkMiddleware(async (auth, req) => {
+const withClerk = clerkMiddleware(async (auth, req) => {
   if (isApi(req)) return NextResponse.next();
 
   const { userId, sessionClaims, redirectToSignIn } = await auth();
@@ -112,6 +112,35 @@ export default clerkMiddleware(async (auth, req) => {
 
   return NextResponse.next();
 });
+
+/**
+ * Three base64url segments whose first two decode to JSON. Clerk's decoder
+ * throws a bare SyntaxError on anything less (a truncated token, a typo, a
+ * probe), which Next would turn into a 500 page. A malformed credential is a
+ * 401 like any other bad credential - and the check costs nothing on the
+ * requests that matter, which carry no Authorization header at all.
+ */
+function looksLikeJwt(token: string): boolean {
+  const parts = token.split('.');
+  if (parts.length !== 3 || parts.some((part) => !/^[A-Za-z0-9_-]+$/.test(part))) return false;
+  try {
+    for (const part of parts.slice(0, 2)) {
+      const padded = part.replace(/-/g, '+').replace(/_/g, '/').padEnd(Math.ceil(part.length / 4) * 4, '=');
+      JSON.parse(atob(padded));
+    }
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+export default function middleware(req: NextRequest, event: NextFetchEvent) {
+  const authorization = req.headers.get('authorization');
+  if (authorization?.startsWith('Bearer ') && !looksLikeJwt(authorization.slice('Bearer '.length).trim())) {
+    return NextResponse.json({ error: 'Invalid session token.' }, { status: 401 });
+  }
+  return withClerk(req, event);
+}
 
 export const config = {
   matcher: [

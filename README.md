@@ -11,12 +11,16 @@ This is a working MVP, not a clickable prototype. Every screen reads real data, 
 ```bash
 cd afrideal
 npm install
+cp .env.example .env.local        # then fill in the Clerk keys
+node scripts/sync-users-to-clerk.mjs
 npm run dev
 ```
 
 Open http://localhost:3000.
 
-Node 18.17 or later. No database, no external services, no API keys. The whole platform runs off JSON files in `data/`.
+Node 18.17 or later. Two external services: **Clerk** for sign-in (a free development instance; `clerk init` or the dashboard gives you the two keys) and, when `CATALOGUE_SOURCE=sanity`, the **Sanity Studio** in `../../../studio` for the catalogue. Everything else - orders, payables, inventory, the people directory's profile rows - runs off JSON files in `data/`.
+
+`node scripts/sync-users-to-clerk.mjs` creates the eight demo accounts on your Clerk instance from the Sanity people directory, with their roles, and stamps each one onto its profile row. Run it once after setting the keys, and again whenever the directory changes.
 
 | Command | What it does |
 |---|---|
@@ -32,7 +36,7 @@ Node 18.17 or later. No database, no external services, no API keys. The whole p
 
 ## Logins
 
-Eight seeded accounts. The login page has a one-click card for each of them, so nobody has to type these during a demo.
+Eight seeded accounts. The sign-in page has a one-click card for each of them, so nobody has to type these during a demo.
 
 | Email | Password | Role | Lands on |
 |---|---|---|---|
@@ -45,9 +49,9 @@ Eight seeded accounts. The login page has a one-click card for each of them, so 
 | thabo@gmail.com | `Customer@2026` | Customer | `/` |
 | kefilwe@gmail.com | `Customer@2026` | Customer | `/` |
 
-Buyers can also open their own account at `/signup`. Registration is deliberately narrow: it creates a `CUSTOMER` on the `RETAIL` tier and nothing else. Supplier and runner accounts carry consequences a form should not be able to grant - a supplier can be routed real orders, a runner can mark a delivery complete - so those stay behind admin creation and verification. The duplicate-email check and the insert share one `mutate` pass, so two simultaneous signups cannot both find an address free.
+Buyers can also open their own account at `/sign-up`, which is Clerk's form. A new account gets a profile row on first sight - `CUSTOMER` on the `RETAIL` tier and nothing else. Supplier and runner accounts carry consequences a form should not be able to grant - a supplier can be routed real orders, a runner can mark a delivery complete - so those roles are only ever written by `scripts/sync-users-to-clerk.mjs` from the people directory.
 
-Passwords sit in plain text in `data/users.json`. That is deliberate for a demo whose main feature is switching roles in one click, and it is the first thing to change before this touches a real user. Hash on write, compare with a constant-time check in `lib/auth.ts` - and in `app/api/auth/register/route.ts`, which writes them. The two changes are the same edit and belong together.
+Credentials live in Clerk, never here. `lib/auth.ts` turns a Clerk session into the app's session - the profile row from `data/users.json` (found by `clerk_user_id`, then by e-mail) plus the role, supplier, runner and customer type from the Clerk user's public metadata. `middleware.ts` reads the same fields from the session token to bounce a finance login off the settings page before the request reaches a page; for that it needs the Clerk dashboard set to include `{"metadata": "{{user.public_metadata}}"}` in the session token (Sessions → Customize session token). Without it, the portal layouts still enforce the rules one hop later.
 
 ## What each role can reach
 
@@ -67,9 +71,9 @@ Supplier isolation is the one worth checking. A supplier reading `/api/orders` g
 
 ## Tech
 
-Next.js 14 (App Router), React 18, TypeScript in strict mode, Tailwind 3.4, NextAuth 4 with a credentials provider, Zustand for the cart, Framer Motion, Recharts, Lucide icons, React Hook Form with Zod.
+Next.js 14 (App Router), React 18, TypeScript in strict mode, Tailwind 3.4, Clerk for authentication, Sanity for the catalogue, Zustand for the cart, Framer Motion, Recharts, Lucide icons, React Hook Form with Zod.
 
-Two notes on version choices. NextAuth is pinned to 4.x because 5.x is still beta and its docs describe an API that the stable release does not have. Tailwind is pinned to 3.4 rather than 4.x because 4 changes configuration to a CSS-first model, and there was nothing to gain here by taking that on.
+Two notes on version choices. `@clerk/nextjs` is pinned to the 6.x line because 7.x requires Next.js 15.2 or later; moving to 7 is part of a Next 15 upgrade, not a package bump. Tailwind is pinned to 3.4 rather than 4.x because 4 changes configuration to a CSS-first model, and there was nothing to gain here by taking that on.
 
 Pages are server components that read `lib/db` directly. Only mutations go through HTTP. That avoids a fetch waterfall on every screen and means a write is visible on the next render without cache juggling.
 
@@ -218,9 +222,9 @@ npm run dev      # one terminal
 npm run verify   # another
 ```
 
-`scripts/verify.mjs` signs in over the real NextAuth flow and drives the HTTP API, so it exercises the actual engines rather than a copy of their rules. 109 checks across 16 sections:
+`scripts/verify.mjs` mints a Clerk session for each seeded account with `CLERK_SECRET_KEY` and drives the HTTP API as that user, so it exercises the actual middleware, guards and engines rather than a copy of their rules. 110 checks across 16 sections:
 
-- all eight logins land on the right role, and bad credentials are rejected
+- all eight accounts resolve to the right role, and a missing, forged or unknown session is refused
 - pricing arithmetic, and no product sells below its highest supplier cost
 - composite ranking, including that the cheapest offer does not win
 - an illegal supplier-payable transition is refused with a 409
@@ -243,7 +247,8 @@ Do not run `npm run build` while `npm run dev` is running. Both write to `.next`
 ```
 afrideal/
 ├── app/
-│   ├── (auth)/login/         login and the quick-login cards
+│   ├── (auth)/               /login and /signup redirects, /after-sign-in landing
+│   ├── sign-in/, sign-up/    Clerk's pages; sign-in carries the quick-login cards
 │   ├── (admin)/admin/        operations console
 │   ├── (supplier)/supplier/  supplier workspace
 │   ├── (runner)/runner/      runner app, mobile first
@@ -318,7 +323,7 @@ Satoshi loads from Fontshare over the network. Geist is bundled through its npm 
 
 Worth saying out loud before a demo.
 
-Passwords are plain text, as described above. Payment gateways are represented but not integrated, so no money moves.
+Payment gateways are represented but not integrated, so no money moves. The demo accounts' passwords are documented above and set on a development Clerk instance only; a production instance must not get them.
 
 Product photography is stock, not the actual goods. It is accurate to the product type and legally clear for commercial use, but a live marketplace takes its images from suppliers at listing time. Treat `public/products` as scaffolding.
 

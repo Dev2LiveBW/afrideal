@@ -59,6 +59,24 @@ handlers do not know which store they hit.
 - Studio schema lives in `Tshego/studio/schemaTypes/`; the seed import is
   `node scripts/seed-from-app.mjs` there (see the file header).
 
+## Who signs people in
+
+Clerk, since 2026-09-17 (`@clerk/nextjs` 6.x - the 7.x line needs Next 15).
+`lib/auth.ts` still returns the old session shape, so pages and route
+handlers read `session.user.role` etc. unchanged. Roles come from the Clerk
+user's `publicMetadata`, written only by `node scripts/sync-users-to-clerk.mjs`
+from the Sanity people directory - never by hand in the Clerk dashboard.
+
+- Sign-in page is `/sign-in` (Clerk's form plus the eight demo cards);
+  `/login` and `/signup` redirect there. `/after-sign-in` lands each role.
+- `npm run verify` mints Clerk sessions with `CLERK_SECRET_KEY` from
+  `.env.local` and sends bearer tokens; it needs the demo accounts to exist
+  (run the sync script once).
+- Middleware role gating needs the dashboard's session token to include
+  `{"metadata": "{{user.public_metadata}}"}`; without it the portal layouts
+  gate one hop later. Do not add `auth.protect()` to `/api` routes - they
+  answer JSON 401/403 through `guard()`.
+
 ## Verifying UI
 
 - The dev server is `npm run dev` (`.claude/launch.json` → `afrideal`).

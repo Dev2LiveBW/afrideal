@@ -7,9 +7,24 @@
  * This drives the real HTTP API, so it exercises the actual pricing engine,
  * selection engine and payable state machine rather than a copy of their rules.
  * Anything it asserts is a claim that has been checked, not assumed.
+ *
+ * Sessions are Clerk sessions, minted server-side with CLERK_SECRET_KEY for
+ * the eight seeded accounts (`scripts/sync-users-to-clerk.mjs` creates them)
+ * and sent as a bearer token. No browser, no bot detection, no cookies to
+ * juggle - and the same middleware and `auth()` the app runs in production.
  */
+import nextEnv from '@next/env';
+import { createClerkClient } from '@clerk/backend';
+
+nextEnv.loadEnvConfig(process.cwd());
 
 const BASE = process.env.VERIFY_BASE ?? 'http://localhost:3000';
+
+if (!process.env.CLERK_SECRET_KEY) {
+  console.error('CLERK_SECRET_KEY is not set in .env.local - the suite cannot mint sessions.');
+  process.exit(1);
+}
+const clerk = createClerkClient({ secretKey: process.env.CLERK_SECRET_KEY });
 
 let passed = 0;
 const failures = [];
@@ -29,12 +44,13 @@ function section(title) {
   console.log('─'.repeat(title.length));
 }
 
-// ── Minimal cookie jar ───────────────────────────────────────────────────────
+// ── Minimal cookie jar, plus the bearer token that actually signs requests ───
 
 function makeJar() {
   const jar = new Map();
 
   return {
+    token: null,
     header: () =>
       [...jar.entries()].map(([name, value]) => `${name}=${value}`).join('; '),
     absorb(response) {
@@ -52,29 +68,34 @@ async function request(jar, path, init = {}) {
   const response = await fetch(`${BASE}${path}`, {
     ...init,
     redirect: 'manual',
-    headers: { cookie: jar.header(), ...(init.headers ?? {}) },
+    headers: {
+      cookie: jar.header(),
+      ...(jar.token ? { authorization: `Bearer ${jar.token}` } : {}),
+      ...(init.headers ?? {}),
+    },
   });
   jar.absorb(response);
   return response;
 }
 
-/** Full NextAuth credentials sign-in: csrf → callback → session. */
-async function signIn(email, password) {
+/**
+ * A Clerk session for a seeded account: look the account up by e-mail, create
+ * a session for it, mint a token, then ask the app who it thinks we are.
+ * Ten-minute token because the whole suite runs on one set of sessions.
+ */
+async function signIn(email) {
   const jar = makeJar();
 
-  const csrfResponse = await request(jar, '/api/auth/csrf');
-  const { csrfToken } = await csrfResponse.json();
+  const { data } = await clerk.users.getUserList({ emailAddress: [email], limit: 1 });
+  const account = data[0];
+  if (!account) return { jar, session: null };
 
-  await request(jar, '/api/auth/callback/credentials', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-    body: new URLSearchParams({ csrfToken, email, password, json: 'true' }).toString(),
-  });
+  const created = await clerk.sessions.createSession({ userId: account.id });
+  const { jwt } = await clerk.sessions.getToken(created.id, undefined, 600);
+  jar.token = jwt;
 
-  const sessionResponse = await request(jar, '/api/auth/session');
-  const session = await sessionResponse.json();
-
-  return { jar, session: session?.user ? session : null };
+  const me = await json(jar, '/api/me');
+  return { jar, session: me.status === 200 ? me.body : null };
 }
 
 async function json(jar, path, init) {
@@ -86,21 +107,21 @@ async function json(jar, path, init) {
 // ── 1. Every seeded login works and carries the right role ───────────────────
 
 const ACCOUNTS = [
-  ['admin@afrideal.co.bw', 'Admin@2026', 'SUPER_ADMIN'],
-  ['ops@afrideal.co.bw', 'Ops@2026', 'OPERATIONS_ADMIN'],
-  ['finance@afrideal.co.bw', 'Finance@2026', 'FINANCE_ADMIN'],
-  ['supplier@naledi.co.bw', 'Supplier@2026', 'SUPPLIER_OWNER'],
-  ['supplier@glowup.co.za', 'Supplier@2026', 'SUPPLIER_OWNER'],
-  ['runner@afrideal.co.bw', 'Runner@2026', 'RUNNER'],
-  ['thabo@gmail.com', 'Customer@2026', 'CUSTOMER'],
-  ['kefilwe@gmail.com', 'Customer@2026', 'CUSTOMER'],
+  ['admin@afrideal.co.bw', 'SUPER_ADMIN'],
+  ['ops@afrideal.co.bw', 'OPERATIONS_ADMIN'],
+  ['finance@afrideal.co.bw', 'FINANCE_ADMIN'],
+  ['supplier@naledi.co.bw', 'SUPPLIER_OWNER'],
+  ['supplier@glowup.co.za', 'SUPPLIER_OWNER'],
+  ['runner@afrideal.co.bw', 'RUNNER'],
+  ['thabo@gmail.com', 'CUSTOMER'],
+  ['kefilwe@gmail.com', 'CUSTOMER'],
 ];
 
 section('1. Authentication — all 8 seeded users');
 
 const sessions = {};
-for (const [email, password, expectedRole] of ACCOUNTS) {
-  const { jar, session } = await signIn(email, password);
+for (const [email, expectedRole] of ACCOUNTS) {
+  const { jar, session } = await signIn(email);
   sessions[email] = { jar, session };
   check(
     `${email} → ${expectedRole}`,
@@ -109,12 +130,20 @@ for (const [email, password, expectedRole] of ACCOUNTS) {
   );
 }
 
-section('2. Bad credentials are rejected');
+section('2. Requests without a valid session are refused');
 {
-  const { session } = await signIn('admin@afrideal.co.bw', 'wrong-password');
-  check('wrong password yields no session', session === null);
-  const missing = await signIn('nobody@example.com', 'whatever');
-  check('unknown email yields no session', missing.session === null);
+  // Passwords are Clerk's to check now; what the app owns is refusing anything
+  // that is not a verified session token.
+  const anonymous = await json(makeJar(), '/api/me');
+  check('no token yields 401', anonymous.status === 401, `got ${anonymous.status}`);
+
+  const forgedJar = makeJar();
+  forgedJar.token = 'eyJhbGciOiJSUzI1NiJ9.not-a-real-session.token';
+  const forged = await json(forgedJar, '/api/me');
+  check('a forged token yields 401', forged.status === 401, `got ${forged.status}`);
+
+  const missing = await signIn('nobody@example.com');
+  check('unknown email has no account', missing.session === null);
 }
 
 // ── 3. Pricing engine ────────────────────────────────────────────────────────
