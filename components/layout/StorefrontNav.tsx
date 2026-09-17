@@ -3,7 +3,7 @@
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import { useEffect, useRef, useState } from 'react';
-import { useSession, signOut } from 'next-auth/react';
+import { useSession, useSignOut } from '@/lib/use-session';
 import { AnimatePresence, motion } from 'framer-motion';
 import {
   ChevronDown,
@@ -222,6 +222,7 @@ export function StorefrontNav({
   const pathname = usePathname();
   const router = useRouter();
   const { data: session } = useSession();
+  const signOut = useSignOut();
   const cart = useAfriDealStore((state) => state.cart);
   const pulse = useAfriDealStore((state) => state.cartPulse);
 
@@ -295,7 +296,7 @@ export function StorefrontNav({
                   </span>
                   <span className="text-[13px] font-medium text-gray-800">{session.user.name?.split(' ')[0]}</span>
                 </Link>
-                <button onClick={() => signOut({ callbackUrl: '/' })} aria-label="Sign out" className="rounded-full p-2 text-gray-500 hover:bg-gray-100 hover:text-gray-800 transition-colors">
+                <button onClick={() => signOut('/')} aria-label="Sign out" className="rounded-full p-2 text-gray-500 hover:bg-gray-100 hover:text-gray-800 transition-colors">
                   <LogOut size={16} strokeWidth={1.5} />
                 </button>
               </div>
@@ -430,7 +431,7 @@ export function StorefrontNav({
                 className="pt-8"
               >
                 {session?.user ? (
-                  <button onClick={() => signOut({ callbackUrl: '/' })} className="w-full rounded-full border border-white/25 py-3.5 text-center text-[14px] font-medium text-white hover:bg-white/10 transition-colors">Sign out</button>
+                  <button onClick={() => signOut('/')} className="w-full rounded-full border border-white/25 py-3.5 text-center text-[14px] font-medium text-white hover:bg-white/10 transition-colors">Sign out</button>
                 ) : (
                   <div className="space-y-3">
                     <button onClick={() => router.push('/signup')} className="w-full rounded-full bg-[#E67E22] py-3.5 text-[14px] font-bold text-white hover:bg-[#D35400] transition-colors">Create an account</button>

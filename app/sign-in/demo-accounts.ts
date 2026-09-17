@@ -3,10 +3,12 @@ import type { Role } from '@/types';
 /**
  * The eight seeded accounts, for the one-click demo cards.
  *
- * These passwords are in `data/users.json` in plain text and are documented in
- * the README. Nothing is being leaked by putting them here: the whole point of
- * this build is that anyone watching a demo can jump between roles without
- * typing. Real credentials would never live in a client bundle.
+ * These are the demo passwords `scripts/sync-users-to-clerk.mjs` sets on the
+ * development Clerk instance, and they are documented in the README. Nothing is
+ * being leaked by putting them here: the whole point of this build is that
+ * anyone watching a demo can jump between roles without typing. Real
+ * credentials would never live in a client bundle, and the production instance
+ * will not have these accounts.
  */
 
 export interface DemoAccount {
