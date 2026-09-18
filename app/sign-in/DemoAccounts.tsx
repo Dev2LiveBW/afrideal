@@ -35,7 +35,12 @@ export function DemoAccounts() {
       const attempt = await signIn.create({ identifier: account.email, password: account.password });
 
       if (attempt.status !== 'complete' || !attempt.createdSessionId) {
-        toast.error(`Sign-in for ${account.name} needs another step (${attempt.status}).`);
+        const factors = (attempt.supportedSecondFactors ?? attempt.supportedFirstFactors ?? [])
+          .map((factor) => factor.strategy)
+          .join(', ');
+        toast.error(
+          `Sign-in for ${account.name} needs another step: ${attempt.status}${factors ? ` (${factors})` : ''}.`,
+        );
         setPendingEmail(null);
         return;
       }

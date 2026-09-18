@@ -40,14 +40,14 @@ Eight seeded accounts. The sign-in page has a one-click card for each of them, s
 
 | Email | Password | Role | Lands on |
 |---|---|---|---|
-| admin@afrideal.co.bw | `Admin@2026` | Super Admin | `/admin/dashboard` |
-| ops@afrideal.co.bw | `Ops@2026` | Operations | `/admin/dashboard` |
-| finance@afrideal.co.bw | `Finance@2026` | Finance | `/admin/analytics` |
-| supplier@naledi.co.bw | `Supplier@2026` | Supplier (Naledi Beauty) | `/supplier/dashboard` |
-| supplier@glowup.co.za | `Supplier@2026` | Supplier (GlowUp) | `/supplier/dashboard` |
-| runner@afrideal.co.bw | `Runner@2026` | Runner | `/runner/dashboard` |
-| thabo@gmail.com | `Customer@2026` | Customer | `/` |
-| kefilwe@gmail.com | `Customer@2026` | Customer | `/` |
+| admin@afrideal.co.bw | `Admin-AfriDeal-2026!` | Super Admin | `/admin/dashboard` |
+| ops@afrideal.co.bw | `Ops-AfriDeal-2026!` | Operations | `/admin/dashboard` |
+| finance@afrideal.co.bw | `Finance-AfriDeal-2026!` | Finance | `/admin/analytics` |
+| supplier@naledi.co.bw | `Naledi-AfriDeal-2026!` | Supplier (Naledi Beauty) | `/supplier/dashboard` |
+| supplier@glowup.co.za | `GlowUp-AfriDeal-2026!` | Supplier (GlowUp) | `/supplier/dashboard` |
+| runner@afrideal.co.bw | `Runner-AfriDeal-2026!` | Runner | `/runner/dashboard` |
+| thabo@gmail.com | `Thabo-AfriDeal-2026!` | Customer | `/` |
+| kefilwe@gmail.com | `Kefilwe-AfriDeal-2026!` | Customer | `/` |
 
 Buyers can also open their own account at `/sign-up`, which is Clerk's form. A new account gets a profile row on first sight - `CUSTOMER` on the `RETAIL` tier and nothing else. Supplier and runner accounts carry consequences a form should not be able to grant - a supplier can be routed real orders, a runner can mark a delivery complete - so those roles are only ever written by `scripts/sync-users-to-clerk.mjs` from the people directory.
 

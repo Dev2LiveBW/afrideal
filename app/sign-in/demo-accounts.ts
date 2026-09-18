@@ -28,7 +28,7 @@ export const DEMO_GROUPS: { heading: string; caption: string; accounts: DemoAcco
     accounts: [
       {
         email: 'admin@afrideal.co.bw',
-        password: 'Admin@2026',
+        password: 'Admin-AfriDeal-2026!',
         name: 'AfriDeal Admin',
         role: 'SUPER_ADMIN',
         avatar: 'AA',
@@ -36,7 +36,7 @@ export const DEMO_GROUPS: { heading: string; caption: string; accounts: DemoAcco
       },
       {
         email: 'ops@afrideal.co.bw',
-        password: 'Ops@2026',
+        password: 'Ops-AfriDeal-2026!',
         name: 'Keabetswe Molapo',
         role: 'OPERATIONS_ADMIN',
         avatar: 'KM',
@@ -44,7 +44,7 @@ export const DEMO_GROUPS: { heading: string; caption: string; accounts: DemoAcco
       },
       {
         email: 'finance@afrideal.co.bw',
-        password: 'Finance@2026',
+        password: 'Finance-AfriDeal-2026!',
         name: 'Finance Admin',
         role: 'FINANCE_ADMIN',
         avatar: 'FA',
@@ -58,7 +58,7 @@ export const DEMO_GROUPS: { heading: string; caption: string; accounts: DemoAcco
     accounts: [
       {
         email: 'supplier@naledi.co.bw',
-        password: 'Supplier@2026',
+        password: 'Naledi-AfriDeal-2026!',
         name: 'Naledi Beauty Supplies',
         role: 'SUPPLIER_OWNER',
         avatar: 'NB',
@@ -66,7 +66,7 @@ export const DEMO_GROUPS: { heading: string; caption: string; accounts: DemoAcco
       },
       {
         email: 'supplier@glowup.co.za',
-        password: 'Supplier@2026',
+        password: 'GlowUp-AfriDeal-2026!',
         name: 'GlowUp Distributors',
         role: 'SUPPLIER_OWNER',
         avatar: 'GU',
@@ -80,7 +80,7 @@ export const DEMO_GROUPS: { heading: string; caption: string; accounts: DemoAcco
     accounts: [
       {
         email: 'runner@afrideal.co.bw',
-        password: 'Runner@2026',
+        password: 'Runner-AfriDeal-2026!',
         name: 'Kagiso Sithole',
         role: 'RUNNER',
         avatar: 'KS',
@@ -94,7 +94,7 @@ export const DEMO_GROUPS: { heading: string; caption: string; accounts: DemoAcco
     accounts: [
       {
         email: 'thabo@gmail.com',
-        password: 'Customer@2026',
+        password: 'Thabo-AfriDeal-2026!',
         name: 'Thabo Modise',
         role: 'CUSTOMER',
         avatar: 'TM',
@@ -102,7 +102,7 @@ export const DEMO_GROUPS: { heading: string; caption: string; accounts: DemoAcco
       },
       {
         email: 'kefilwe@gmail.com',
-        password: 'Customer@2026',
+        password: 'Kefilwe-AfriDeal-2026!',
         name: 'Kefilwe Dithebe',
         role: 'CUSTOMER',
         avatar: 'KD',

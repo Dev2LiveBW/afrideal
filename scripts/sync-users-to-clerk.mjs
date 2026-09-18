@@ -3,6 +3,7 @@
  *
  *   node scripts/sync-users-to-clerk.mjs            # create or update every account
  *   node scripts/sync-users-to-clerk.mjs --dry-run  # say what would change
+ *   node scripts/sync-users-to-clerk.mjs --reset-passwords  # also re-apply the demo passwords
  *
  * The Sanity Studio is where the product owner adds and edits users, so it is
  * the source of truth for who exists and with which role. This script makes
@@ -34,6 +35,8 @@ const ROOT = process.cwd();
 nextEnv.loadEnvConfig(ROOT);
 
 const DRY_RUN = process.argv.includes('--dry-run');
+/** Re-apply the demo passwords to accounts that already exist (after changing the map above). */
+const RESET_PASSWORDS = process.argv.includes('--reset-passwords');
 
 const secretKey = process.env.CLERK_SECRET_KEY;
 if (!secretKey) {
@@ -45,16 +48,21 @@ if (!secretKey.startsWith('sk_test_') && !DRY_RUN) {
   process.exit(1);
 }
 
-/** Demo passwords, development instance only. Keep in step with README §Demo accounts. */
+/**
+ * Demo passwords, development instance only. Keep in step with README §Logins and
+ * app/sign-in/demo-accounts.ts. Long and unique on purpose: Clerk checks passwords
+ * against breach lists at sign-in as well as at creation, and the obvious
+ * `Admin@2026` style is in those lists.
+ */
 const DEMO_PASSWORDS = {
-  'admin@afrideal.co.bw': 'Admin@2026',
-  'ops@afrideal.co.bw': 'Ops@2026',
-  'finance@afrideal.co.bw': 'Finance@2026',
-  'supplier@naledi.co.bw': 'Supplier@2026',
-  'supplier@glowup.co.za': 'Supplier@2026',
-  'runner@afrideal.co.bw': 'Runner@2026',
-  'thabo@gmail.com': 'Customer@2026',
-  'kefilwe@gmail.com': 'Customer@2026',
+  'admin@afrideal.co.bw': 'Admin-AfriDeal-2026!',
+  'ops@afrideal.co.bw': 'Ops-AfriDeal-2026!',
+  'finance@afrideal.co.bw': 'Finance-AfriDeal-2026!',
+  'supplier@naledi.co.bw': 'Naledi-AfriDeal-2026!',
+  'supplier@glowup.co.za': 'GlowUp-AfriDeal-2026!',
+  'runner@afrideal.co.bw': 'Runner-AfriDeal-2026!',
+  'thabo@gmail.com': 'Thabo-AfriDeal-2026!',
+  'kefilwe@gmail.com': 'Kefilwe-AfriDeal-2026!',
 };
 
 const clerk = createClerkClient({ secretKey });
@@ -138,8 +146,16 @@ for (const entry of directory) {
   } else {
     const nameChanged = account.firstName !== firstName || account.lastName !== lastName;
     const metadataChanged = !sameMetadata(account.publicMetadata, metadata);
-    action = nameChanged || metadataChanged ? 'updated' : 'unchanged';
-    if (!DRY_RUN && nameChanged) await clerk.users.updateUser(account.id, { firstName, lastName });
+    const password = RESET_PASSWORDS ? DEMO_PASSWORDS[email] : undefined;
+    action = nameChanged || metadataChanged || password ? 'updated' : 'unchanged';
+    if (password) action += ' (password reset)';
+    if (!DRY_RUN && (nameChanged || password)) {
+      await clerk.users.updateUser(account.id, {
+        firstName,
+        lastName,
+        ...(password ? { password, skipPasswordChecks: true } : {}),
+      });
+    }
     if (!DRY_RUN && metadataChanged) await clerk.users.updateUserMetadata(account.id, { publicMetadata: metadata });
   }
 
