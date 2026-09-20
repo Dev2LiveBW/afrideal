@@ -18,7 +18,7 @@ npm run dev
 
 Open http://localhost:3000.
 
-Node 18.17 or later. Two external services: **Clerk** for sign-in (a free development instance; `clerk init` or the dashboard gives you the two keys) and, when `CATALOGUE_SOURCE=sanity`, the **Sanity Studio** in `../../../studio` for the catalogue. Everything else - orders, payables, inventory, the people directory's profile rows - runs off JSON files in `data/`.
+Node 18.17 or later. Two external services: **Clerk** for sign-in (a free development instance; `clerk init` or the dashboard gives you the two keys) and, when `CATALOGUE_SOURCE=sanity`, the **Sanity Studio** in `../../../studio` for the catalogue. Everything else - orders, payables, inventory, the people directory's profile rows - lives in **Neon Postgres** when `DB_DRIVER=postgres` (`DATABASE_URL` from the Neon console; `npm run db:migrate` then `npm run db:load` once), or in JSON files under `data/` when `DB_DRIVER=json`.
 
 `node scripts/sync-users-to-clerk.mjs` creates the eight demo accounts on your Clerk instance from the Sanity people directory, with their roles, and stamps each one onto its profile row. Run it once after setting the keys, and again whenever the directory changes.
 
@@ -79,9 +79,13 @@ Pages are server components that read `lib/db` directly. Only mutations go throu
 
 ## How the data store works
 
-`lib/db.ts` wraps 17 JSON files with typed read and write helpers. Reads are uncached so a write from one request is visible to the next.
+`lib/db.ts` wraps the 25 collections with typed read and write helpers and routes each by name: the six catalogue collections to Sanity when `CATALOGUE_SOURCE=sanity`, everything else to Postgres when `DB_DRIVER=postgres`, and otherwise to the JSON file of the same name. Reads are uncached so a write from one request is visible to the next.
+
+In Postgres each collection is a document table in the `afrideal` schema - `id`, a `seq` that preserves insertion order, and the row itself as `jsonb` - so the types in `types/` and every caller are unchanged. Hot fields can be promoted to indexed generated columns later without touching a caller. Schema lives in `lib/postgres/schema.ts`; migrations are generated with `npm run db:generate` into `drizzle/` and applied with `npm run db:migrate`.
 
 Writes go through `mutate()`, which serialises them per collection. Node is single threaded, but an `await` inside a read-modify-write is a yield point, so two concurrent POSTs to the same file can interleave and lose an update. Every write in the app takes that lock, and writes land on a temp file that is then renamed, so a crash mid-write cannot leave a half-written JSON file.
+
+On Postgres that lock is `pg_advisory_xact_lock` on the collection name, taken inside the transaction that reads, runs the mutation and writes the diff, so one-writer-per-collection also holds across server instances. Reads use Neon's HTTP driver, writes the WebSocket driver; both retry on a dropped connection.
 
 Regenerating the seed runs integrity checks and exits non-zero if any fail: every product priced above its highest supplier cost, every order subtotal equal to the sum of its own line items, exactly one supplier invoice per supplier order, and the status and supplier mixes the brief specifies.
 
@@ -331,7 +335,7 @@ Supplier self-service listing management is out of scope by design: Phase 1 is A
 
 Product matching on barcode or GTIN is modelled but not implemented, because nothing in this build ingests a supplier catalogue yet. The `brands` table and the one-product-many-offers shape are the parts that had to exist now so that adding it later is not a migration.
 
-The JSON store is single writer and fine for a demo or a pilot. A real deployment moves `lib/db.ts` behind Firestore or Postgres, which is why every read and write already goes through it rather than touching `fs` directly.
+The JSON store is single writer and fine for a demo. Production runs `DB_DRIVER=postgres`; the JSON adapter stays as the rollback flag until the Postgres path has run through a pilot.
 
 One consequence of the flat ladder is worth flagging rather than burying. A single 60% markup across the catalogue is right for hair, which is what the platform sells, and is optimistic for consumer electronics, where thin margins are the normal condition of the trade rather than a fault. The ladder is deliberately the default and not the ceiling: `data/pricing-rules.json` still holds a rule per category, editable from `/admin/pricing`, so Electronics can be tuned down without touching code. Nothing enforces the platform figure once someone decides otherwise.
 

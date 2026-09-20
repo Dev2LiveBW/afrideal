@@ -2,6 +2,8 @@ import 'server-only';
 import fs from 'node:fs/promises';
 import path from 'node:path';
 
+import { mutateInPostgres, readFromPostgres } from '@/lib/postgres/store';
+import { tables as postgresTables } from '@/lib/postgres/schema';
 import { applyToSanity, isSanityBacked, readFromSanity } from '@/lib/sanity/catalogue';
 
 import type {
@@ -47,15 +49,28 @@ import type {
  * With `CATALOGUE_SOURCE=sanity` the six catalogue collections (products and
  * their images, categories, brands, suppliers, supplier offers) are read from
  * and written to the Sanity dataset the Studio edits instead - see
- * lib/sanity/catalogue.ts. Every other collection stays in the JSON files.
+ * lib/sanity/catalogue.ts.
+ *
+ * With `DB_DRIVER=postgres` every collection Sanity does not own lives in
+ * Neon Postgres instead of a file - see lib/postgres/store.ts. Same
+ * signatures, same read-whole-then-diff write, plus a database-level lock so
+ * the serialisation holds across server instances, not just inside one.
+ *
+ * Routing is by collection name, so nothing outside this file knows which
+ * store it hit.
  */
 
 const DATA_DIR = path.join(process.cwd(), 'data');
 
 const CATALOGUE_SOURCE = process.env.CATALOGUE_SOURCE ?? 'json';
+const DB_DRIVER = process.env.DB_DRIVER ?? 'json';
 
 function viaSanity(collection: Collection): boolean {
   return CATALOGUE_SOURCE === 'sanity' && isSanityBacked(collection);
+}
+
+function viaPostgres(collection: Collection): boolean {
+  return DB_DRIVER === 'postgres' && !viaSanity(collection);
 }
 
 export interface Schema {
@@ -90,6 +105,10 @@ export interface Schema {
 
 export type Collection = keyof Schema;
 
+// Adding a collection above without a table in lib/postgres/schema.ts fails here.
+const _everyCollectionHasATable: Record<Collection, unknown> = postgresTables;
+void _everyCollectionHasATable;
+
 function fileFor(collection: Collection): string {
   return path.join(DATA_DIR, `${collection}.json`);
 }
@@ -98,6 +117,9 @@ function fileFor(collection: Collection): string {
 export async function readAll<C extends Collection>(collection: C): Promise<Schema[C][]> {
   if (viaSanity(collection)) {
     return (await readFromSanity(collection as Parameters<typeof readFromSanity>[0])) as Schema[C][];
+  }
+  if (viaPostgres(collection)) {
+    return readFromPostgres<Schema[C] & { id: string }>(collection);
   }
   const raw = await fs.readFile(fileFor(collection), 'utf8');
   return JSON.parse(raw) as Schema[C][];
@@ -124,6 +146,10 @@ export async function mutate<C extends Collection, R>(
   const previous = locks.get(collection) ?? Promise.resolve();
 
   const next = previous.then(async () => {
+    if (viaPostgres(collection)) {
+      // Read, fn and write all happen inside one locked transaction.
+      return mutateInPostgres<Schema[C] & { id: string }, R>(collection, fn as never);
+    }
     const rows = await readAll(collection);
     const { rows: updated, result } = await fn(rows);
     if (viaSanity(collection)) {

@@ -1596,3 +1596,13 @@ if (problems.length > 0) {
   for (const problem of problems) console.warn(`    - ${problem}`);
 }
 console.log('\n✓ integrity checks complete');
+
+// When the app reads from Postgres, the regenerated files are only half the
+// reset - push them there too so `npm run seed` still means "clean slate".
+const { default: nextEnv } = await import('@next/env');
+nextEnv.loadEnvConfig(ROOT_DIR);
+if (process.env.DB_DRIVER === 'postgres') {
+  const { loadAll } = await import('./db-load.mjs');
+  const loaded = await loadAll();
+  console.log(`✓ ${loaded.length} collections loaded into Postgres`);
+}

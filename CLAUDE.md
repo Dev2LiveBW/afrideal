@@ -59,6 +59,39 @@ handlers do not know which store they hit.
 - Studio schema lives in `Tshego/studio/schemaTypes/`; the seed import is
   `node scripts/seed-from-app.mjs` there (see the file header).
 
+## Where everything else lives
+
+Since 2026-09-20 the transactional store is **Neon Postgres** (`DB_DRIVER=postgres`
+in `.env.local`, connection string in `DATABASE_URL`). Every collection Sanity
+does not own - orders, order items, supplier orders, payables, settlements,
+inventory, users, runners, RFQs, audit log and the rest - is a document table
+in the `afrideal` schema: `{ id, seq, data jsonb }`, one table per collection,
+`lib/postgres/`. `lib/db.ts` routes by collection name, so pages and route
+handlers still call `readAll / findMany / insert / update / mutate` and do not
+know which store answered. `DB_DRIVER=json` puts everything back on
+`data/*.json` - that is the rollback, not a second code path to maintain.
+
+- Reads go over Neon's HTTP driver; `mutate()` runs in a WebSocket
+  transaction that first takes `pg_advisory_xact_lock` on the collection, so
+  the one-writer-per-collection rule holds across server instances. Both
+  retry once or twice on a dropped connection.
+- Schema changes: edit `lib/postgres/schema.ts`, `npm run db:generate`,
+  commit the file it writes under `drizzle/`, `npm run db:migrate`.
+- `npm run seed` regenerates `data/` **and** reloads Postgres from it when
+  `DB_DRIVER=postgres`. `npm run db:load` does only the second half.
+- The Neon database this started on is shared with another project whose
+  tables sit in `public`. Do not touch `public`; everything of ours is under
+  `afrideal`. Move to a Company-owned Neon project before staging (plan §5
+  row 4) and rotate the connection string when you do.
+- `npm run verify` and `npm run audit` both take the server URL from
+  `VERIFY_BASE` / `AUDIT_BASE` (default `http://localhost:3000`). The full
+  Postgres run is `CATALOGUE_SOURCE=json DB_DRIVER=postgres`, so all 25
+  collections hit Neon; both were green on 2026-09-20 (110/110, 41/41).
+- From this machine a round trip to Neon (London) is ~200 ms, and a page can
+  do a dozen reads, so local pages feel slow. On Vercel set the function
+  region to London (`lhr1`) and it is single-digit ms. Per-request read
+  memoisation is the follow-up if it still matters.
+
 ## Who signs people in
 
 Clerk, since 2026-09-17 (`@clerk/nextjs` 6.x - the 7.x line needs Next 15).
