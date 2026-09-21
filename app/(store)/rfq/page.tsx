@@ -1,3 +1,6 @@
+// Rendered under the root ClerkProvider — cannot prerender without the key.
+export const dynamic = 'force-dynamic';
+
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import { ChevronLeft, FileText, Layers, PackageSearch, PenLine } from 'lucide-react';
