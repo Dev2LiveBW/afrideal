@@ -29,6 +29,8 @@ import path from 'node:path';
 
 import nextEnv from '@next/env';
 import { createClerkClient } from '@clerk/backend';
+
+import { allowSlowHandshakes } from '../lib/postgres/network.mjs';
 import { createClient } from '@sanity/client';
 
 const ROOT = process.cwd();
@@ -65,6 +67,7 @@ const DEMO_PASSWORDS = {
   'kefilwe@gmail.com': 'Kefilwe-AfriDeal-2026!',
 };
 
+allowSlowHandshakes();
 const clerk = createClerkClient({ secretKey });
 
 const sanity = createClient({

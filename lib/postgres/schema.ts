@@ -1,4 +1,4 @@
-import { bigserial, jsonb, pgSchema, text, timestamp } from 'drizzle-orm/pg-core';
+import { bigint, bigserial, jsonb, pgSchema, text, timestamp } from 'drizzle-orm/pg-core';
 
 /**
  * The Postgres store's shape: one document table per collection.
@@ -89,3 +89,14 @@ export const tables = {
 } as const;
 
 export type PostgresCollection = keyof typeof tables;
+
+/**
+ * One row per id series (`orders:o`, `order-items:oi`, ...). `nextId()` bumps
+ * `last` in a single statement, so two server instances minting an order id
+ * at the same moment get different numbers - something a scan of existing
+ * ids can never promise.
+ */
+export const idCounters = afrideal.table('id_counters', {
+  key: text('key').primaryKey(),
+  last: bigint('last', { mode: 'number' }).notNull(),
+});

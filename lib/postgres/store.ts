@@ -3,7 +3,7 @@ import { inArray, sql } from 'drizzle-orm';
 import type { PgDatabase, PgQueryResultHKT } from 'drizzle-orm/pg-core';
 
 import { getHttpDb, getPoolDb } from './client';
-import { tables, type PostgresCollection } from './schema';
+import { idCounters, tables, type PostgresCollection } from './schema';
 import type * as schema from './schema';
 
 /**
@@ -97,6 +97,28 @@ export async function mutateInPostgres<T extends Row, R>(
       return result;
     }),
   );
+}
+
+/**
+ * Reserve `count` consecutive numbers for an id series and return the last
+ * one. `floor` is the highest number already in use as far as the caller can
+ * see; the counter never drops below it, so a series that predates the
+ * counter (or a reseeded table) picks up where the data actually ends.
+ * One atomic statement, so concurrent callers on any instance get disjoint
+ * blocks. A retried call after a lost reply skips a block, which is fine.
+ */
+export async function reserveIds(key: string, count: number, floor: number): Promise<number> {
+  return withRetry(`reserve ${key}`, async () => {
+    const [row] = await getHttpDb()
+      .insert(idCounters)
+      .values({ key, last: floor + count })
+      .onConflictDoUpdate({
+        target: idCounters.key,
+        set: { last: sql`greatest(${idCounters.last}, ${floor}) + ${count}` },
+      })
+      .returning({ last: idCounters.last });
+    return row.last;
+  });
 }
 
 async function applyWith<T extends Row>(

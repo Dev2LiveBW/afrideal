@@ -1,8 +1,9 @@
 import 'server-only';
 import fs from 'node:fs/promises';
 import path from 'node:path';
+import { cache } from 'react';
 
-import { mutateInPostgres, readFromPostgres } from '@/lib/postgres/store';
+import { mutateInPostgres, readFromPostgres, reserveIds } from '@/lib/postgres/store';
 import { tables as postgresTables } from '@/lib/postgres/schema';
 import { applyToSanity, isSanityBacked, readFromSanity } from '@/lib/sanity/catalogue';
 
@@ -37,9 +38,10 @@ import type {
 /**
  * The JSON store.
  *
- * Every collection is one file under /data. Reads are uncached so a write from
- * one request is visible to the next - which is the whole point of a demo you
- * can drive live in front of a room.
+ * Every collection is one file under /data. Reads are memoised only within a
+ * request, never across them, so a write from one request is visible to the
+ * next - which is the whole point of a demo you can drive live in front of a
+ * room.
  *
  * Writes go through a per-file promise chain. Node is single-threaded, but an
  * `await` inside read-modify-write is a yield point, so two concurrent POSTs to
@@ -113,8 +115,8 @@ function fileFor(collection: Collection): string {
   return path.join(DATA_DIR, `${collection}.json`);
 }
 
-/** Read a whole collection. */
-export async function readAll<C extends Collection>(collection: C): Promise<Schema[C][]> {
+/** Read a whole collection from whichever store owns it. Never memoised. */
+async function readFresh<C extends Collection>(collection: C): Promise<Schema[C][]> {
   if (viaSanity(collection)) {
     return (await readFromSanity(collection as Parameters<typeof readFromSanity>[0])) as Schema[C][];
   }
@@ -123,6 +125,28 @@ export async function readAll<C extends Collection>(collection: C): Promise<Sche
   }
   const raw = await fs.readFile(fileFor(collection), 'utf8');
   return JSON.parse(raw) as Schema[C][];
+}
+
+/**
+ * Reads already made in this request, keyed by collection. React scopes
+ * `cache()` to one server render, so a page's layout, page and components
+ * share one read per collection instead of each paying a round trip; outside
+ * a render (a script, a test) it is a fresh Map every call and nothing is
+ * memoised. A mutation drops its collection's entry so the next read in the
+ * same request sees the write.
+ */
+const requestReads = cache(() => new Map<Collection, Promise<unknown[]>>());
+
+/** Read a whole collection, once per request. Callers get their own array. */
+export async function readAll<C extends Collection>(collection: C): Promise<Schema[C][]> {
+  const memo = requestReads();
+  let pending = memo.get(collection);
+  if (!pending) {
+    pending = readFresh(collection);
+    memo.set(collection, pending);
+  }
+  const rows = (await pending) as Schema[C][];
+  return [...rows];
 }
 
 /** Overwrite a whole collection. Prefer `mutate()` unless you already hold the lock. */
@@ -144,20 +168,27 @@ export async function mutate<C extends Collection, R>(
   fn: (rows: Schema[C][]) => Promise<{ rows: Schema[C][]; result: R }> | { rows: Schema[C][]; result: R },
 ): Promise<R> {
   const previous = locks.get(collection) ?? Promise.resolve();
+  const memo = requestReads();
 
   const next = previous.then(async () => {
-    if (viaPostgres(collection)) {
-      // Read, fn and write all happen inside one locked transaction.
-      return mutateInPostgres<Schema[C] & { id: string }, R>(collection, fn as never);
+    try {
+      if (viaPostgres(collection)) {
+        // Read, fn and write all happen inside one locked transaction.
+        return await mutateInPostgres<Schema[C] & { id: string }, R>(collection, fn as never);
+      }
+      // Fresh, not memoised: a read taken before the lock could predate
+      // another request's write, and fn would then overwrite it.
+      const rows = await readFresh(collection);
+      const { rows: updated, result } = await fn(rows);
+      if (viaSanity(collection)) {
+        await applyToSanity(collection as Parameters<typeof applyToSanity>[0], rows, updated);
+      } else {
+        await writeAll(collection, updated);
+      }
+      return result;
+    } finally {
+      memo.delete(collection);
     }
-    const rows = await readAll(collection);
-    const { rows: updated, result } = await fn(rows);
-    if (viaSanity(collection)) {
-      await applyToSanity(collection as Parameters<typeof applyToSanity>[0], rows, updated);
-    } else {
-      await writeAll(collection, updated);
-    }
-    return result;
   });
 
   // Keep the chain alive even if this link rejects, so one failure does not
@@ -196,12 +227,29 @@ export async function findMany<C extends Collection>(
   return rows.filter(predicate);
 }
 
+/**
+ * Refuse to append an id that is already there. Runs inside the mutation, so
+ * it sees every committed row; on Postgres a silent duplicate would otherwise
+ * become an upsert over someone else's record.
+ */
+function assertNewIds<C extends Collection>(collection: C, rows: Schema[C][], incoming: Schema[C][]): void {
+  const taken = new Set(rows.map((row) => (row as { id: string }).id));
+  for (const row of incoming) {
+    const id = (row as { id: string }).id;
+    if (taken.has(id)) throw new Error(`${collection}: id ${id} already exists`);
+    taken.add(id);
+  }
+}
+
 /** Append a row. */
 export async function insert<C extends Collection>(
   collection: C,
   row: Schema[C],
 ): Promise<Schema[C]> {
-  return mutate(collection, (rows) => ({ rows: [...rows, row], result: row }));
+  return mutate(collection, (rows) => {
+    assertNewIds(collection, rows, [row]);
+    return { rows: [...rows, row], result: row };
+  });
 }
 
 /** Append several rows in one write. */
@@ -209,7 +257,10 @@ export async function insertMany<C extends Collection>(
   collection: C,
   incoming: Schema[C][],
 ): Promise<Schema[C][]> {
-  return mutate(collection, (rows) => ({ rows: [...rows, ...incoming], result: incoming }));
+  return mutate(collection, (rows) => {
+    assertNewIds(collection, rows, incoming);
+    return { rows: [...rows, ...incoming], result: incoming };
+  });
 }
 
 /** Shallow-merge a patch into the row with `id`. Returns null when not found. */
@@ -241,14 +292,18 @@ export async function remove<C extends Collection>(collection: C, id: string): P
 }
 
 /**
- * Next id for a collection, e.g. `nextId('orders', 'o')` → `o016`.
- * Scans existing ids rather than counting rows, so deletes cannot cause a clash.
+ * The next `count` ids for a collection, e.g. `nextIds('order-items', 'oi', 3)`
+ * → `['oi024', 'oi025', 'oi026']`. Scans existing ids rather than counting
+ * rows, so deletes cannot cause a clash. On Postgres the numbers are reserved
+ * through an atomic counter as well, so two server instances minting at the
+ * same moment cannot both get `o016`; a scan alone cannot promise that.
  */
-export async function nextId<C extends Collection>(
+export async function nextIds<C extends Collection>(
   collection: C,
   prefix: string,
+  count: number,
   width = 3,
-): Promise<string> {
+): Promise<string[]> {
   const rows = await readAll(collection);
   const highest = rows.reduce((max, row) => {
     const id = (row as { id: string }).id;
@@ -257,5 +312,18 @@ export async function nextId<C extends Collection>(
     return Number.isFinite(n) && n > max ? n : max;
   }, 0);
 
-  return `${prefix}${String(highest + 1).padStart(width, '0')}`;
+  const last =
+    DB_DRIVER === 'postgres' ? await reserveIds(`${collection}:${prefix}`, count, highest) : highest + count;
+  const first = last - count + 1;
+  return Array.from({ length: count }, (_, i) => `${prefix}${String(first + i).padStart(width, '0')}`);
+}
+
+/** Next id for a collection, e.g. `nextId('orders', 'o')` → `o016`. */
+export async function nextId<C extends Collection>(
+  collection: C,
+  prefix: string,
+  width = 3,
+): Promise<string> {
+  const [id] = await nextIds(collection, prefix, 1, width);
+  return id;
 }

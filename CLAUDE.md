@@ -71,6 +71,18 @@ handlers still call `readAll / findMany / insert / update / mutate` and do not
 know which store answered. `DB_DRIVER=json` puts everything back on
 `data/*.json` - that is the rollback, not a second code path to maintain.
 
+- `readAll` (and everything built on it) is memoised for the life of one
+  request via React `cache()`, so a layout, page and its components share one
+  read per collection; a `mutate()` drops the entry so the next read in the
+  same request sees the write. Never across requests. Callers get their own
+  copy of the array. `mutate()` itself always reads fresh under its lock.
+- Ids: `nextId()` / `nextIds(collection, prefix, count)` still scan for the
+  highest existing number, but on Postgres they also reserve the block through
+  `afrideal.id_counters` in one atomic statement, so two instances cannot both
+  mint `o016`. `insert()` refuses an id that already exists rather than
+  upserting over it. Checkout reserves its `oi` / `sup` / `pay` series as
+  blocks; the order `reference` is derived from the id (`o001` = `AFD-24810`).
+  `npm run db:load` (and so `npm run seed`) resets the counters to the data.
 - Reads go over Neon's HTTP driver; `mutate()` runs in a WebSocket
   transaction that first takes `pg_advisory_xact_lock` on the collection, so
   the one-writer-per-collection rule holds across server instances. Both
@@ -79,18 +91,30 @@ know which store answered. `DB_DRIVER=json` puts everything back on
   commit the file it writes under `drizzle/`, `npm run db:migrate`.
 - `npm run seed` regenerates `data/` **and** reloads Postgres from it when
   `DB_DRIVER=postgres`. `npm run db:load` does only the second half.
-- The Neon database this started on is shared with another project whose
-  tables sit in `public`. Do not touch `public`; everything of ours is under
-  `afrideal`. Move to a Company-owned Neon project before staging (plan §5
-  row 4) and rotate the connection string when you do.
+- The Neon project is **afrideal** (`noisy-sky-21749196`, org
+  `org-round-wind-61711243`, region `aws-us-east-2`), linked from this
+  directory with the Neon CLI (`.neon`, gitignored). `neon link` and
+  `neon deploy` **rewrite `DATABASE_URL` and nine other variables in
+  `.env.local`** - do not hand-edit those lines; re-run `neon link` instead.
+  `neon.ts` declares the project's services (Neon Auth, an `uploads` bucket,
+  a `hello.ts` function); the app uses none of them yet - Clerk is auth.
+  Still to do before staging: transfer the project to a Company-owned org
+  (plan §5 row 4).
+- From Botswana a TCP handshake to us-east-2 takes longer than the 250 ms
+  Node allows per address when a host has IPv6 and IPv4 records, so Node
+  reports `ETIMEDOUT` while `curl` succeeds. `lib/postgres/network.mjs`
+  raises that budget. `instrumentation.ts` calls it when the server boots
+  (Clerk's API is on the same side of the line), and so do `db-load.mjs`,
+  `drizzle.config.ts`, `verify`, `audit` and the Clerk sync script. Any new
+  script that opens a connection must too.
 - `npm run verify` and `npm run audit` both take the server URL from
   `VERIFY_BASE` / `AUDIT_BASE` (default `http://localhost:3000`). The full
   Postgres run is `CATALOGUE_SOURCE=json DB_DRIVER=postgres`, so all 25
-  collections hit Neon; both were green on 2026-09-20 (110/110, 41/41).
-- From this machine a round trip to Neon (London) is ~200 ms, and a page can
+  collections hit Neon; both were green on 2026-09-20 against the afrideal
+  project (110/110, 41/41).
+- From this machine a round trip to Neon (Ohio) is ~275 ms, and a page can
   do a dozen reads, so local pages feel slow. On Vercel set the function
-  region to London (`lhr1`) and it is single-digit ms. Per-request read
-  memoisation is the follow-up if it still matters.
+  region to `cle1` or `iad1` and it is single-digit ms.
 
 ## Who signs people in
 
@@ -118,6 +142,10 @@ from the Sanity people directory - never by hand in the Clerk dashboard.
 - In the browser pane, **reload after every viewport resize** before reading
   computed styles. Measuring straight after a resize has returned stale
   values repeatedly.
+- A tab left open on `/` in the pane while other routes compile makes Next
+  dev log bursts of `Cannot read properties of null (reading 'useContext')`
+  with `page: '/'` - HMR refetches of that tab whose abandoned streams fire
+  after teardown. Dev-only; real requests are unaffected.
 - The pane renders too small for screenshots to be legible. Verify with DOM
   measurements; ask the product owner for a screenshot when the question is
   how it *looks*.

@@ -8,6 +8,13 @@
       "when": 1789881048711,
       "tag": "0000_document_tables",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1789901684844,
+      "tag": "0001_id_counters",
+      "breakpoints": true
     }
   ]
 }

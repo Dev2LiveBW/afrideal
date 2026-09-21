@@ -18,7 +18,10 @@
 import nextEnv from '@next/env';
 import { createClerkClient } from '@clerk/backend';
 
+import { allowSlowHandshakes } from '../lib/postgres/network.mjs';
+
 nextEnv.loadEnvConfig(process.cwd());
+allowSlowHandshakes();
 
 const BASE = process.env.AUDIT_BASE ?? 'http://localhost:3000';
 

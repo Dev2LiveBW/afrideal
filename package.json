@@ -20,6 +20,8 @@
   "dependencies": {
     "@clerk/nextjs": "^6.39.6",
     "@hookform/resolvers": "3.10.0",
+    "@neon/config": "^1.7.2",
+    "@neon/env": "^1.4.3",
     "@neondatabase/serverless": "^1.1.0",
     "@radix-ui/react-dialog": "^1.1.23",
     "@radix-ui/react-select": "^2.3.7",

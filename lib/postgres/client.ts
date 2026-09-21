@@ -3,6 +3,7 @@ import { neon, Pool } from '@neondatabase/serverless';
 import { drizzle as drizzleHttp, type NeonHttpDatabase } from 'drizzle-orm/neon-http';
 import { drizzle as drizzleWs, type NeonDatabase } from 'drizzle-orm/neon-serverless';
 
+import { allowSlowHandshakes } from './network.mjs';
 import * as schema from './schema';
 
 /**
@@ -27,6 +28,7 @@ type PoolDb = NeonDatabase<typeof schema>;
 const globalForDb = globalThis as unknown as { __afridealHttp?: HttpDb; __afridealPool?: PoolDb };
 
 function connectionString(): string {
+  allowSlowHandshakes();
   const url = process.env.DATABASE_URL;
   if (!url) {
     throw new Error('DATABASE_URL is not set - DB_DRIVER=postgres needs the Neon connection string in .env.local');

@@ -2,6 +2,10 @@
 const nextConfig = {
   reactStrictMode: true,
   experimental: {
+    // instrumentation.ts raises Node's TCP handshake budget before the first
+    // outbound call; see lib/postgres/network.mjs.
+    instrumentationHook: true,
+
     // The JSON store is read/written with node:fs at request time.
     // Keep these out of the bundle trace optimisation so the files stay on disk.
     outputFileTracingIncludes: { '/api/**/*': ['./data/**/*'] },

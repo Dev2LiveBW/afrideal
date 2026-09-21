@@ -19,12 +19,15 @@ import { fileURLToPath } from 'node:url';
 import nextEnv from '@next/env';
 import { Pool } from '@neondatabase/serverless';
 
+import { allowSlowHandshakes } from '../lib/postgres/network.mjs';
+
 const ROOT_DIR = path.join(path.dirname(fileURLToPath(import.meta.url)), '..');
 const DATA_DIR = path.join(ROOT_DIR, 'data');
 const SCHEMA = 'afrideal';
 const CHUNK = 200;
 
 nextEnv.loadEnvConfig(ROOT_DIR);
+allowSlowHandshakes();
 
 const tableFor = (collection) => collection.replaceAll('-', '_');
 
@@ -70,6 +73,9 @@ export async function loadAll({ only } = {}) {
       }
       summary.push([collection, rows.length]);
     }
+    // A full reload puts the data back to where the seed left it; the id
+    // counters follow, so the next order is o016 again rather than o0xx.
+    if (!only) await client.query(`TRUNCATE "${SCHEMA}"."id_counters"`);
   } finally {
     client.release();
     await pool.end();
