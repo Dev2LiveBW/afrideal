@@ -68,7 +68,7 @@ export function TrustStrip({
           <div
             key={claim.title}
             className={cn(
-              'flex flex-col gap-1 rounded-lg p-1 sm:flex-row sm:gap-3 sm:rounded-none sm:p-0 sm:px-6 sm:py-4 lg:first:pl-0',
+              'flex flex-col items-center gap-1 rounded-lg p-1 text-center sm:flex-row sm:items-start sm:gap-3 sm:rounded-none sm:p-0 sm:px-6 sm:py-4 sm:text-left lg:first:pl-0',
               dark ? 'bg-white/[0.04] sm:bg-transparent' : 'bg-surface-raised/60 sm:bg-transparent',
             )}
           >
@@ -76,22 +76,30 @@ export function TrustStrip({
               strokeWidth={1.75}
               aria-hidden="true"
               className={cn(
-                'h-2.5 w-2.5 shrink-0 sm:h-[17px] sm:w-[17px] sm:mt-0.5',
+                'h-4 w-4 shrink-0 sm:h-[17px] sm:w-[17px] sm:mt-0.5',
                 dark ? 'text-gold-light' : 'text-forest',
               )}
             />
             <div className="min-w-0">
               <p
                 className={cn(
-                  'text-[6.5px] font-semibold leading-tight sm:text-[13px] sm:leading-5',
+                  'text-[8.5px] font-semibold leading-tight sm:text-[13px] sm:leading-5',
                   dark ? 'text-white' : 'text-ink',
                 )}
               >
                 {claim.title}
               </p>
+              {/*
+               * No line-clamp here, deliberately. Tailwind's `line-clamp-none`
+               * sets `display: block`, so tailwind-merge puts line-clamp and
+               * display in the same conflict group and keeps whichever comes
+               * last - which silently dropped `hidden` and `sm:block` and left
+               * the body visible at 320px. The clamp is redundant anyway now
+               * that the body is hidden below sm.
+               */}
               <p
                 className={cn(
-                  'mt-0.5 text-[5.5px] leading-tight line-clamp-4 sm:mt-1 sm:line-clamp-none sm:text-[12px] sm:leading-5',
+                  'hidden mt-0.5 text-[5.5px] leading-tight sm:block sm:mt-1 sm:text-[12px] sm:leading-5',
                   dark ? 'text-white/55' : 'text-muted',
                 )}
               >

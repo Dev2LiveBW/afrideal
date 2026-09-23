@@ -97,7 +97,7 @@ export function HowItWorks({ className }: { className?: string }) {
                     </span>{' '}
                     {step.title}
                   </h3>
-                  <p className="hidden mt-0.5 text-[5.5px] leading-snug text-muted line-clamp-3 sm:block sm:mt-1.5 sm:line-clamp-none sm:text-[12.5px] sm:leading-5 md:mx-auto md:max-w-[22ch]">
+                  <p className="hidden mt-0.5 text-[5.5px] leading-snug text-muted sm:block sm:mt-1.5 sm:text-[12.5px] sm:leading-5 md:mx-auto md:max-w-[22ch]">
                     {step.body}
                   </p>
                 </div>
