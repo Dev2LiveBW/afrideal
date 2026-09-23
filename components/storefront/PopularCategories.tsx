@@ -1,7 +1,8 @@
 import Image from 'next/image';
+import Link from 'next/link';
 import { LayoutGrid } from 'lucide-react';
 
-import { Floor, Rail, RailCard } from '@/components/storefront/home/Floor';
+import { Floor } from '@/components/storefront/home/Floor';
 
 /**
  * Popular categories - the one canonical block on the storefront. (TICKET-001)
@@ -88,25 +89,32 @@ export function PopularCategories({ className }: { className?: string }) {
       iconClassName="text-[#E67E22]"
       className={className}
     >
-      <Rail>
+      <ul className="grid grid-cols-6 gap-1 px-3 pb-3 pt-2 sm:gap-3 sm:px-4">
         {CATEGORIES.map((category) => (
-          <RailCard
-            key={category.name}
-            href={category.href}
-            image={
-              <Image
-                src={category.img}
-                alt=""
-                fill
-                sizes="136px"
-                className="object-cover object-center"
-              />
-            }
-            primary={category.name}
-            secondary={category.href === '/browse' ? 'Coming soon' : 'Shop the range'}
-          />
+          <li key={category.name}>
+            <Link
+              href={category.href}
+              className="press-soft group flex flex-col items-center text-center outline-none"
+            >
+              <div className="relative h-11 w-11 overflow-hidden rounded-full border border-black/5 bg-surface-sunk shadow-sm transition-transform duration-300 group-hover:scale-105 sm:h-20 sm:w-20">
+                <Image
+                  src={category.img}
+                  alt={category.name}
+                  fill
+                  sizes="(max-width: 640px) 15vw, 96px"
+                  className="object-cover object-center"
+                />
+              </div>
+              <span className="mt-0.5 line-clamp-1 text-[7.5px] font-semibold text-[#222] transition-colors group-hover:text-[#E67E22] sm:text-[12.5px]">
+                {category.name}
+              </span>
+              <span className="hidden text-[10px] text-[#767676] sm:block">
+                {category.href === '/browse' ? 'Coming soon' : 'Shop'}
+              </span>
+            </Link>
+          </li>
         ))}
-      </Rail>
+      </ul>
     </Floor>
   );
 }

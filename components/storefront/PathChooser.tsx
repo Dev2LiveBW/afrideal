@@ -121,100 +121,105 @@ function DoorCard({ door, compact }: { door: Door; compact: boolean }) {
     <Link
       href={door.href}
       className={cn(
-        'press-soft group relative flex h-full flex-col overflow-hidden rounded-2xl shadow-sm ring-1 ring-black/5 transition-shadow duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] hover:shadow-lift',
-        compact ? 'p-4' : 'p-5 sm:p-6',
+        'press-soft group relative flex h-full flex-col overflow-hidden rounded-xl sm:rounded-2xl shadow-sm ring-1 ring-black/5 transition-shadow duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] hover:shadow-lift',
+        compact ? 'p-2 sm:p-4' : 'p-2 sm:p-5 md:p-6',
         door.surface,
       )}
     >
       {/* The affordance the reference design puts in the top-right. */}
       <span
         aria-hidden="true"
-        className="absolute right-3 top-3 flex h-7 w-7 items-center justify-center rounded-full bg-white/70 text-body transition-transform duration-300 group-hover:translate-x-0.5"
+        className="absolute right-1.5 top-1.5 sm:right-3 sm:top-3 flex h-5 w-5 sm:h-7 sm:w-7 items-center justify-center rounded-full bg-white/70 text-body transition-transform duration-300 group-hover:translate-x-0.5"
       >
-        <ChevronRight size={16} strokeWidth={2} />
+        <ChevronRight size={13} strokeWidth={2} className="sm:hidden" />
+        <ChevronRight size={16} strokeWidth={2} className="hidden sm:block" />
       </span>
 
       <div className="relative z-10 flex flex-1 flex-col">
         <span
           className={cn(
             'flex items-center justify-center rounded-full',
-            compact ? 'mb-3 h-9 w-9' : 'mb-4 h-11 w-11',
+            compact ? 'mb-1.5 h-6 w-6 sm:mb-3 sm:h-9 sm:w-9' : 'mb-2 h-7 w-7 sm:mb-4 sm:h-11 sm:w-11',
             door.disc,
           )}
         >
-          <Icon size={compact ? 18 : 21} strokeWidth={1.9} className={door.accent} aria-hidden="true" />
+          <Icon size={compact ? 13 : 15} strokeWidth={2} className={cn('sm:hidden', door.accent)} aria-hidden="true" />
+          <Icon size={compact ? 18 : 21} strokeWidth={1.9} className={cn('hidden sm:block', door.accent)} aria-hidden="true" />
         </span>
 
         <h3
           className={cn(
             'font-display font-bold leading-none text-ink',
-            compact ? 'text-[20px]' : 'text-[24px]',
+            compact ? 'text-[12px] sm:text-[18px]' : 'text-[13px] sm:text-[22px]',
           )}
         >
           {door.title}
         </h3>
-        <p className={cn('font-bold text-ink', compact ? 'mt-1.5 text-[13px]' : 'mt-2 text-[15px]')}>
+        <p className={cn('font-bold text-ink leading-tight', compact ? 'mt-1 text-[8.5px] sm:text-[13px]' : 'mt-1 text-[9.5px] sm:text-[14px]')}>
           {door.band}
         </p>
         <p
           className={cn(
-            'max-w-[30ch] text-muted',
-            compact ? 'mt-1 text-[12px] leading-5' : 'mt-1.5 text-[13.5px] leading-6',
+            'max-w-[30ch] text-muted hidden sm:block',
+            compact ? 'mt-1 text-[11px] leading-4' : 'mt-1.5 text-[13px] leading-5',
           )}
         >
           {door.blurb}
         </p>
 
         {/* In the rail card the list stops short of the render's column. */}
-        <ul className={cn(compact ? 'mt-3 max-w-[72%] space-y-1.5' : 'mt-4 space-y-2')}>
-          {door.points.map((point) => (
+        <ul className={cn(compact ? 'mt-1.5 space-y-0.5 sm:mt-3 sm:space-y-1.5' : 'mt-2 space-y-1 sm:mt-4 sm:space-y-2')}>
+          {door.points.slice(0, 2).map((point) => (
             <li
               key={point}
-              className={cn('flex items-center gap-2 text-ink', compact ? 'text-[12px]' : 'text-[13.5px]')}
+              className={cn('flex items-center gap-1 text-ink leading-tight', compact ? 'text-[7.5px] sm:text-[11.5px]' : 'text-[8.5px] sm:text-[13px]')}
             >
               <CheckCircle2
-                size={compact ? 15 : 17}
+                size={10}
                 strokeWidth={2}
-                className={cn('shrink-0', door.accent)}
+                className={cn('shrink-0 sm:hidden', door.accent)}
                 aria-hidden="true"
               />
-              {point}
+              <CheckCircle2
+                size={compact ? 13 : 15}
+                strokeWidth={2}
+                className={cn('shrink-0 hidden sm:block', door.accent)}
+                aria-hidden="true"
+              />
+              <span className="truncate">{point}</span>
             </li>
           ))}
         </ul>
 
         <span
           className={cn(
-            'inline-flex w-full items-center justify-center gap-2 rounded-xl px-4 font-bold transition-colors',
+            'inline-flex w-full items-center justify-center gap-1 rounded-lg px-1 font-bold transition-colors',
             compact
-              ? 'mt-4 h-9 text-[12.5px] sm:w-auto sm:self-start'
-              : 'mt-6 h-11 text-[14px] sm:w-auto sm:self-start sm:px-6',
+              ? 'mt-2 h-6 text-[8px] sm:mt-4 sm:h-9 sm:text-[12px] sm:px-3 sm:w-auto sm:self-start'
+              : 'mt-2.5 h-7 text-[9px] sm:mt-6 sm:h-11 sm:text-[14px] sm:px-5 sm:w-auto sm:self-start',
             door.button,
           )}
         >
-          {door.cta}
-          <ArrowRight size={compact ? 14 : 16} strokeWidth={2.25} aria-hidden="true" />
+          <span className="truncate">{door.cta}</span>
+          <ArrowRight size={10} strokeWidth={2.25} className="sm:hidden shrink-0" aria-hidden="true" />
+          <ArrowRight size={compact ? 13 : 15} strokeWidth={2.25} className="hidden sm:block shrink-0" aria-hidden="true" />
         </span>
       </div>
 
       {/*
-        The render sits behind the copy and is clipped by the card, so the
-        text column keeps its own measure. In the grid it is hidden below
-        `sm`, where the card is narrow enough that the bag would sit under
-        the bullet list rather than beside it; the rail card is a fixed
-        width, so it always has room.
+        The render sits in the corner, scaled down on mobile so it doesn't crowd text.
       */}
       <div
         className={cn(
           'pointer-events-none absolute -bottom-1 right-0 z-0',
-          compact ? 'h-[44%] w-[38%]' : 'hidden h-[58%] w-[44%] sm:block',
+          compact ? 'h-[36%] w-[34%] sm:h-[44%] sm:w-[38%]' : 'h-[36%] w-[34%] sm:h-[58%] sm:w-[44%]',
         )}
       >
         <Image
           src={door.image.src}
           alt=""
           fill
-          sizes="(max-width: 1024px) 30vw, 220px"
+          sizes="(max-width: 640px) 25vw, 220px"
           className="object-contain object-right-bottom"
         />
       </div>
@@ -243,9 +248,9 @@ export function PathChooser({
         iconClassName="text-[#27AE60]"
         className={className}
       >
-        <ul className="no-scrollbar flex gap-2 overflow-x-auto px-3 pb-3 pt-2 sm:px-4 md:grid md:grid-cols-3 md:overflow-visible">
+        <ul className="grid grid-cols-3 gap-1.5 px-2 pb-3 pt-2 sm:gap-3 sm:px-4 md:gap-4">
           {DOORS.map((door) => (
-            <li key={door.key} className="w-[250px] shrink-0 md:w-auto">
+            <li key={door.key} className="w-full">
               <DoorCard door={door} compact />
             </li>
           ))}
@@ -257,23 +262,23 @@ export function PathChooser({
   return (
     <section className={cn(className)} aria-labelledby="buying-options">
       {heading && (
-        <div className="mb-6">
-          <p className="text-[12px] font-bold uppercase tracking-[0.14em] text-[#27AE60]">
+        <div className="mb-4 sm:mb-6">
+          <p className="text-[11px] font-bold uppercase tracking-[0.14em] text-[#27AE60] sm:text-[12px]">
             Buying options
           </p>
           <h2
             id="buying-options"
-            className="mt-1.5 font-display text-[28px] font-bold leading-tight text-ink sm:text-[34px]"
+            className="mt-1 font-display text-[22px] font-bold leading-tight text-ink sm:text-[34px]"
           >
             Choose how you want to buy
           </h2>
-          <p className="mt-1.5 text-[14.5px] text-muted">
+          <p className="mt-1 text-[12.5px] text-muted sm:text-[14.5px]">
             Same product. Different quantities. Better prices.
           </p>
         </div>
       )}
 
-      <div className="grid gap-4 md:grid-cols-3">
+      <div className="grid grid-cols-3 gap-1.5 sm:gap-4">
         {DOORS.map((door) => (
           <DoorCard key={door.key} door={door} compact={false} />
         ))}

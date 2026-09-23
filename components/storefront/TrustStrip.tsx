@@ -54,10 +54,10 @@ export function TrustStrip({
   return (
     <div
       className={cn(
-        'grid divide-y sm:grid-cols-2 sm:divide-y-0 lg:grid-cols-4',
+        'grid grid-cols-4 gap-1 sm:gap-4',
         dark
-          ? 'divide-white/10 sm:divide-x sm:[&>*:nth-child(3)]:border-t sm:[&>*:nth-child(3)]:border-white/10 sm:[&>*:nth-child(4)]:border-t sm:[&>*:nth-child(4)]:border-white/10 lg:[&>*]:border-t-0'
-          : 'divide-hairline sm:divide-x sm:[&>*:nth-child(3)]:border-t sm:[&>*:nth-child(3)]:border-hairline sm:[&>*:nth-child(4)]:border-t sm:[&>*:nth-child(4)]:border-hairline lg:[&>*]:border-t-0',
+          ? 'sm:divide-x sm:divide-white/10 sm:[&>*:nth-child(3)]:border-t sm:[&>*:nth-child(3)]:border-white/10 sm:[&>*:nth-child(4)]:border-t sm:[&>*:nth-child(4)]:border-white/10 lg:[&>*]:border-t-0'
+          : 'sm:divide-x sm:divide-hairline sm:[&>*:nth-child(3)]:border-t sm:[&>*:nth-child(3)]:border-hairline sm:[&>*:nth-child(4)]:border-t sm:[&>*:nth-child(4)]:border-hairline lg:[&>*]:border-t-0',
         className,
       )}
     >
@@ -65,17 +65,25 @@ export function TrustStrip({
         const Icon = claim.icon;
 
         return (
-          <div key={claim.title} className="flex gap-3 px-0 py-5 sm:px-6 sm:py-4 lg:first:pl-0">
+          <div
+            key={claim.title}
+            className={cn(
+              'flex flex-col gap-1 rounded-lg p-1 sm:flex-row sm:gap-3 sm:rounded-none sm:p-0 sm:px-6 sm:py-4 lg:first:pl-0',
+              dark ? 'bg-white/[0.04] sm:bg-transparent' : 'bg-surface-raised/60 sm:bg-transparent',
+            )}
+          >
             <Icon
-              size={17}
-              strokeWidth={1.5}
+              strokeWidth={1.75}
               aria-hidden="true"
-              className={cn('mt-0.5 shrink-0', dark ? 'text-gold-light' : 'text-forest')}
+              className={cn(
+                'h-2.5 w-2.5 shrink-0 sm:h-[17px] sm:w-[17px] sm:mt-0.5',
+                dark ? 'text-gold-light' : 'text-forest',
+              )}
             />
             <div className="min-w-0">
               <p
                 className={cn(
-                  'text-[13px] font-semibold leading-5',
+                  'text-[6.5px] font-semibold leading-tight sm:text-[13px] sm:leading-5',
                   dark ? 'text-white' : 'text-ink',
                 )}
               >
@@ -83,7 +91,7 @@ export function TrustStrip({
               </p>
               <p
                 className={cn(
-                  'mt-1 text-[12px] leading-5',
+                  'mt-0.5 text-[5.5px] leading-tight line-clamp-4 sm:mt-1 sm:line-clamp-none sm:text-[12px] sm:leading-5',
                   dark ? 'text-white/55' : 'text-muted',
                 )}
               >

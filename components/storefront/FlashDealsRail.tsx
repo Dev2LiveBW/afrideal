@@ -44,10 +44,10 @@ function useCountdown(target: string | undefined) {
 function Segment({ value, label }: { value: number; label: string }) {
   return (
     <span className="flex flex-col items-center">
-      <span className="flex h-7 min-w-[28px] items-center justify-center rounded bg-ink px-1.5 font-mono text-[13px] font-semibold tabular-nums text-gold-light">
+      <span className="flex h-6 min-w-[24px] items-center justify-center rounded bg-ink px-1 font-mono text-[11px] font-semibold tabular-nums text-gold-light sm:h-7 sm:min-w-[28px] sm:px-1.5 sm:text-[13px]">
         {String(value).padStart(2, '0')}
       </span>
-      <span className="mt-1 font-mono text-[9px] uppercase tracking-[0.14em] text-muted">
+      <span className="mt-0.5 font-mono text-[8px] uppercase tracking-[0.14em] text-muted sm:mt-1 sm:text-[9px]">
         {label}
       </span>
     </span>
@@ -76,39 +76,40 @@ export function FlashDealsRail({
   const seconds = remaining === null ? 0 : Math.floor((remaining % 60_000) / 1000);
 
   return (
-    <section className="rounded-lg border border-gold/25 bg-gold-50/50 p-6">
-      <div className="mb-5 flex flex-wrap items-center justify-between gap-4">
-        <div className="flex items-center gap-3">
-          <span className="flex h-9 w-9 items-center justify-center rounded-full bg-gold text-ink">
-            <Zap size={17} strokeWidth={2} />
+    <section className="rounded-lg border border-gold/25 bg-gold-50/50 p-3 sm:p-6">
+      <div className="mb-3 sm:mb-5 flex flex-wrap items-center justify-between gap-2.5 sm:gap-4">
+        <div className="flex items-center gap-2 sm:gap-3">
+          <span className="flex h-7 w-7 sm:h-9 sm:w-9 items-center justify-center rounded-full bg-gold text-ink">
+            <Zap size={14} className="sm:hidden" strokeWidth={2} />
+            <Zap size={17} className="hidden sm:block" strokeWidth={2} />
           </span>
           <div>
-            <h2 className="font-display text-headline-md font-semibold text-ink">Flash deals</h2>
-            <p className="text-[12.5px] text-body">Ends when the clock does, not before</p>
+            <h2 className="font-display text-[16px] sm:text-headline-md font-semibold text-ink">Flash deals</h2>
+            <p className="text-[11px] sm:text-[12.5px] text-body">Ends when the clock does, not before</p>
           </div>
         </div>
 
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-2 sm:gap-3">
           {/* Rendered only after mount, so server and client agree on first paint. */}
           {remaining !== null && (
-            <div className="flex items-start gap-1.5">
+            <div className="flex items-start gap-1 sm:gap-1.5">
               <Segment value={hours} label="hrs" />
-              <span className="pt-1 font-mono text-[13px] text-muted">:</span>
+              <span className="pt-0.5 sm:pt-1 font-mono text-[11px] sm:text-[13px] text-muted">:</span>
               <Segment value={minutes} label="min" />
-              <span className="pt-1 font-mono text-[13px] text-muted">:</span>
+              <span className="pt-0.5 sm:pt-1 font-mono text-[11px] sm:text-[13px] text-muted">:</span>
               <Segment value={seconds} label="sec" />
             </div>
           )}
 
           <Link href="/browse">
-            <ActionButton variant="ink" size="sm">
+            <ActionButton variant="ink" size="sm" className="h-7 sm:h-9 px-2.5 sm:px-4 text-[11px] sm:text-[13px]">
               See all
             </ActionButton>
           </Link>
         </div>
       </div>
 
-      <div className="no-scrollbar flex gap-4 overflow-x-auto pb-1">
+      <div className="no-scrollbar flex gap-2 sm:gap-4 overflow-x-auto pb-1">
         {products.map((product) => {
           const primary = images.find(
             (image) => image.product_id === product.id && image.sort_order === 0,
@@ -123,13 +124,13 @@ export function FlashDealsRail({
           return (
             <article
               key={product.id}
-              className="group relative shrink-0 snap-start flex flex-col items-center text-center outline-none w-[180px]"
+              className="group relative shrink-0 snap-start flex flex-col items-center text-center outline-none w-[124px] sm:w-[180px]"
             >
               <Link href={`/products/${product.id}`} className="block relative outline-none">
                 <div 
-                  className="relative flex h-[160px] w-[160px] items-center justify-center rounded-full p-[4px] transition-transform duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] group-hover:scale-105 group-hover:shadow-lg bg-gold-50"
+                  className="relative flex h-[96px] w-[96px] sm:h-[160px] sm:w-[160px] items-center justify-center rounded-full p-[3px] sm:p-[4px] transition-transform duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] group-hover:scale-105 group-hover:shadow-lg bg-gold-50"
                 >
-                  <div className="relative flex h-full w-full items-center justify-center overflow-hidden rounded-full border-[3px] border-white bg-white shadow-sm">
+                  <div className="relative flex h-full w-full items-center justify-center overflow-hidden rounded-full border-[2px] sm:border-[3px] border-white bg-white shadow-sm">
                     <Swatch
                       image={primary}
                       fallback={product.swatch}
@@ -143,40 +144,40 @@ export function FlashDealsRail({
                   
                   {product.promotion && (
                     <span 
-                      className="absolute -right-2 top-2 flex h-11 w-11 flex-col items-center justify-center rounded-full border-2 border-white bg-danger font-mono text-[10px] font-bold leading-tight text-white shadow-md transition-transform duration-300 group-hover:scale-110 md:-right-0 md:top-4"
+                      className="absolute -right-1 top-1 flex h-8 w-8 sm:h-11 sm:w-11 flex-col items-center justify-center rounded-full border border-white sm:border-2 bg-danger font-mono text-[8px] sm:text-[10px] font-bold leading-tight text-white shadow-md transition-transform duration-300 group-hover:scale-110 md:-right-0 md:top-4"
                     >
-                      <span>SAVE</span>
+                      <span className="scale-90 sm:scale-100">SAVE</span>
                       <span>{product.promotion.discount_pct}%</span>
                     </span>
                   )}
                 </div>
               </Link>
 
-              <div className="mt-5 flex w-full flex-col items-center px-2">
-                <div className="flex items-center justify-center gap-1 text-[11px] font-bold text-danger mb-1.5 uppercase tracking-wide">
-                  <Flame size={12} className="fill-danger" /> 
+              <div className="mt-2.5 sm:mt-5 flex w-full flex-col items-center px-1 sm:px-2">
+                <div className="flex items-center justify-center gap-1 text-[9.5px] sm:text-[11px] font-bold text-danger mb-1 sm:mb-1.5 uppercase tracking-wide">
+                  <Flame size={11} className="fill-danger sm:w-3 sm:h-3" /> 
                   {sold} claimed
                 </div>
                 
                 <Link href={`/products/${product.id}`} className="block">
-                  <h3 className="line-clamp-2 text-[14px] font-medium leading-tight text-ink transition-colors group-hover:text-gold">
+                  <h3 className="line-clamp-2 text-[11.5px] sm:text-[14px] font-medium leading-tight text-ink transition-colors group-hover:text-gold">
                     {product.name}
                   </h3>
                 </Link>
 
-                <div className="mt-2.5 flex flex-col items-center gap-1.5">
-                  <div className="flex items-center gap-2">
-                    <PriceTag amount={product.price} size="md" tone="ink" />
+                <div className="mt-1.5 sm:mt-2.5 flex flex-col items-center gap-1 sm:gap-1.5">
+                  <div className="flex items-center gap-1 sm:gap-2">
+                    <PriceTag amount={product.price} size="sm" tone="ink" className="text-[12px] sm:text-[14px]" />
                     {product.compare_at_price && (
-                      <span className="font-mono text-[12px] tabular-nums text-muted line-through">
+                      <span className="font-mono text-[10px] sm:text-[12px] tabular-nums text-muted line-through">
                         {pulaTag(product.compare_at_price)}
                       </span>
                     )}
                   </div>
                 </div>
 
-                <div className="mt-3 w-full">
-                  <span className="block h-1.5 w-full overflow-hidden rounded-full bg-ink/[0.08]">
+                <div className="mt-2 sm:mt-3 w-full">
+                  <span className="block h-1 sm:h-1.5 w-full overflow-hidden rounded-full bg-ink/[0.08]">
                     <span
                       className="block h-full rounded-full bg-gradient-to-r from-gold to-gold-light"
                       style={{ width: `${soldPct}%` }}

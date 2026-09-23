@@ -135,12 +135,12 @@ export function ProductCard({
           />
 
           {product.promotion ? (
-            <span className="absolute left-2 top-2 rounded bg-danger px-1.5 py-0.5 font-mono text-[10px] font-semibold text-white">
+            <span className="absolute left-0.5 top-0.5 rounded bg-danger px-0.5 py-0 font-mono text-[5.5px] font-semibold text-white sm:left-2 sm:top-2 sm:px-1.5 sm:py-0.5 sm:text-[10px]">
               −{product.promotion.discount_pct}%
             </span>
           ) : (
             product.featured && (
-              <span className="absolute left-2 top-2 rounded bg-ink/70 px-1.5 py-0.5 font-mono text-[9px] uppercase tracking-[0.14em] text-white backdrop-blur-sm">
+              <span className="absolute left-0.5 top-0.5 rounded bg-ink/70 px-0.5 py-0 font-mono text-[5px] uppercase tracking-[0.08em] text-white backdrop-blur-sm sm:left-2 sm:top-2 sm:px-1.5 sm:py-0.5 sm:text-[9px] sm:tracking-[0.14em]">
                 Featured
               </span>
             )
@@ -150,7 +150,7 @@ export function ProductCard({
             onClick={toggleSave}
             aria-label={saved ? `Remove ${product.name} from your list` : `Save ${product.name} for later`}
             aria-pressed={saved}
-            className="absolute right-2 top-2 flex h-7 w-7 items-center justify-center rounded-full bg-surface-raised/90 backdrop-blur-sm transition-colors hover:bg-surface-raised"
+            className="absolute right-0.5 top-0.5 flex h-4 w-4 items-center justify-center rounded-full bg-surface-raised/90 sm:right-2 sm:top-2 sm:h-7 sm:w-7 backdrop-blur-sm transition-colors hover:bg-surface-raised"
           >
             <Heart
               size={13}
@@ -162,15 +162,15 @@ export function ProductCard({
           <button
             onClick={quickAdd}
             aria-label={`Add ${product.name} to cart`}
-            className="absolute bottom-2 right-2 flex h-8 w-8 items-center justify-center rounded-full bg-[#E67E22] text-white shadow-md transition-colors hover:bg-[#D35400]"
+            className="absolute bottom-0.5 right-0.5 flex h-4 w-4 items-center justify-center rounded-full bg-[#E67E22] sm:bottom-2 sm:right-2 sm:h-8 sm:w-8 text-white shadow-md transition-colors hover:bg-[#D35400]"
           >
-            <Plus size={16} strokeWidth={2.25} />
+            <Plus size={9} strokeWidth={3} className="sm:hidden" /><Plus size={16} strokeWidth={2.25} className="hidden sm:block" />
           </button>
         </div>
 
         {/* ── Four lines, in the benchmark's order ─────────────────────── */}
-        <div className="flex flex-1 flex-col pt-2">
-          <h3 className="line-clamp-2 text-[12px] font-normal leading-[1.35] text-body transition-colors group-hover:text-ink">
+        <div className="flex flex-1 flex-col pt-0.5 sm:pt-2">
+          <h3 className="line-clamp-2 text-[6px] font-normal leading-[1.25] text-body sm:text-[12px] sm:leading-[1.35] transition-colors group-hover:text-ink">
             {product.name}
           </h3>
 
@@ -180,28 +180,28 @@ export function ProductCard({
             card must never show a cheaper headline than the grid was
             filtered to, or the sort order stops matching what is read.
           */}
-          <p className="mt-1 flex flex-wrap items-baseline gap-x-1.5">
+          <p className="mt-0.5 flex flex-wrap items-baseline gap-x-0.5 sm:mt-1 sm:gap-x-1.5">
             <PriceTag
               amount={showingTier ? tierPrice! : product.price}
               size="sm"
               tone={tierByQuotation ? 'muted' : 'ink'}
-              className="text-[14px]"
+              className="text-[7px] sm:text-[14px]"
             />
             {showingTier ? (
               tierPrice! < product.price && (
-                <span className="text-[11px] tabular-nums text-muted line-through">
+                <span className="text-[5.5px] tabular-nums text-muted line-through sm:text-[11px]">
                   {pulaTag(product.price)}
                 </span>
               )
             ) : (
               product.compare_at_price && (
-                <span className="text-[11px] tabular-nums text-muted line-through">
+                <span className="text-[5.5px] tabular-nums text-muted line-through sm:text-[11px]">
                   {pulaTag(product.compare_at_price)}
                 </span>
               )
             )}
             {showingTier && (tierSavingPct ?? 0) > 0 && (
-              <span className="font-mono text-[10.5px] tabular-nums text-forest">
+              <span className="font-mono text-[5.5px] tabular-nums text-forest sm:text-[10.5px]">
                 −{Math.round(tierSavingPct!)}%
               </span>
             )}
@@ -212,13 +212,13 @@ export function ProductCard({
             quotation" replaces the figure on the custom rung, where there is
             no published price to have a minimum for.
           */}
-          <p className="mt-0.5 text-[12px] leading-tight text-body">
+          <p className="mt-0.5 text-[5.5px] leading-tight text-body sm:text-[12px]">
             {tierByQuotation
               ? 'On quotation'
               : <>Min. order: <span className="font-mono tabular-nums text-ink">{showingTier && tierMinQty ? tierMinQty : 1}</span> {showingTier && tierMinQty && tierMinQty > 1 ? 'units' : 'unit'}</>}
           </p>
 
-          <p className="mt-0.5 flex min-w-0 items-center gap-1 text-[11px] leading-tight text-muted">
+          <p className="mt-0.5 flex min-w-0 items-center gap-0.5 text-[5px] leading-tight text-muted sm:gap-1 sm:text-[11px]">
             {supplierCount !== undefined && supplierCount > 0 && (
               <span className="inline-flex shrink-0 items-center gap-0.5 font-semibold text-ocean">
                 <ShieldCheck size={11} strokeWidth={2.25} />

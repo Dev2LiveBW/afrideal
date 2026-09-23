@@ -204,14 +204,14 @@ export default async function LandingPage() {
       <SignInNudge />
 
       {/* ── How the order actually runs ─────────────────────────────────── */}
-      <section id="how-it-works" className="mt-16 py-4">
-        <div className="mx-auto max-w-market px-6 py-16 lg:py-20">
-          <div className="grid gap-8 lg:grid-cols-[minmax(0,0.8fr)_minmax(0,1.2fr)] lg:items-end lg:gap-20">
+      <section id="how-it-works" className="mt-8 sm:mt-16 py-2 sm:py-4">
+        <div className="mx-auto max-w-market px-3 sm:px-6 py-8 sm:py-16 lg:py-20">
+          <div className="grid gap-4 sm:gap-8 lg:grid-cols-[minmax(0,0.8fr)_minmax(0,1.2fr)] lg:items-end lg:gap-20">
             <div className="min-w-0">
-              <h2 className="font-display text-headline-lg font-semibold leading-tight text-ink">
+              <h2 className="font-display text-[20px] sm:text-headline-lg font-semibold leading-tight text-ink">
                 How it works
               </h2>
-              <p className="measure mt-4 text-[14.5px] leading-7 text-body">
+              <p className="measure mt-2 sm:mt-4 text-[12.5px] sm:text-[14.5px] leading-relaxed sm:leading-7 text-body">
                 You are buying from AfriDeal, not from the supplier. We are the merchant on your
                 order rather than an introduction service, so you get one invoice and one number to
                 call — and if the order goes wrong it is ours to fix.
@@ -221,7 +221,7 @@ export default async function LandingPage() {
             <div className="min-w-0 lg:justify-self-end">
               <Link
                 href="/how-it-works"
-                className="inline-flex items-center gap-1.5 text-[13.5px] font-medium text-forest underline-offset-4 hover:underline"
+                className="inline-flex items-center gap-1.5 text-[12px] sm:text-[13.5px] font-medium text-forest underline-offset-4 hover:underline"
               >
                 See both flows, step by step
                 <ArrowRight size={13} strokeWidth={1.75} aria-hidden="true" />
@@ -229,7 +229,7 @@ export default async function LandingPage() {
             </div>
           </div>
 
-          <HowItWorks className="mt-14" />
+          <HowItWorks className="mt-6 sm:mt-14" />
         </div>
       </section>
 
@@ -239,7 +239,7 @@ export default async function LandingPage() {
         under the sequence, not a section making its own case.
       */}
       <section className="bg-forest-deep">
-        <div className="mx-auto max-w-market px-6 py-12">
+        <div className="mx-auto max-w-market px-3 py-6 sm:px-6 sm:py-12">
           <TrustStrip tone="dark" />
         </div>
       </section>

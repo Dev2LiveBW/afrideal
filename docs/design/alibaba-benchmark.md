@@ -9,6 +9,37 @@
 > merchant, Alibaba is an introduction service) the pattern is adapted, not
 > copied - see `docs/research/alibaba-1688-features.md` §1 for the cases.
 
+## Override: phone column counts, 2026-09-22
+
+**The storefront no longer follows the benchmark's phone column counts.** The
+product owner chose *desktop counts at every width* over the measured 2-up:
+each grid carries its widest-breakpoint column count as its base, and type and
+artwork shrink to fit rather than the grid reflowing.
+
+| surface | benchmark (live, 390px) | AfriDeal now (measured, 320px) |
+| --- | --- | --- |
+| catalogue / `/browse` | 2 columns, 179px cards | **4 columns, 69px cards** |
+| home feed | 2 columns, 179px cells | **5 columns, 56px cells** |
+| popular categories | rail of 136px cards | **6 columns, 46px discs** |
+| live deals | rail of 136px cards | **4 columns, 71px cards** |
+| supplier directory | full-width rows | **4 columns, 71px cards** |
+| how it works | not in benchmark | **5 columns, 56px** |
+| trust strip | not in benchmark | **4 columns, 71px** |
+| hero cards | not in benchmark | 2 columns, 144px (unchanged) |
+
+Everything below this line still describes Alibaba and is still the source for
+pattern, colour, type scale and motion. Only the **column counts, and the
+artwork and type sizes that follow from them**, are superseded. §1b's
+"columns | 2, at every phone width" and §3a's rails record what Alibaba does;
+they no longer record what AfriDeal does.
+
+Left stacked on purpose, because they are prose rather than product rows: the
+"How it works" heading block (`app/(store)/page.tsx`) and the footer link
+lists (`components/layout/StorefrontNav.tsx`).
+
+Verified in the Browser pane at 320px with no horizontal overflow
+(`document.documentElement.scrollWidth` 320 = viewport 320).
+
 ## How this document is maintained
 
 Two sources, in order of authority:

@@ -227,7 +227,7 @@ function CategoryChips({
             >
               <div className="mx-auto max-w-market">
                 <p className="text-[13px] font-bold text-[#222]">All categories</p>
-                <ul className="mt-2 grid grid-cols-3 gap-2 sm:grid-cols-4 lg:grid-cols-6">
+                <ul className="mt-2 grid grid-cols-6 gap-1 sm:gap-2">
                   {chips.map((chip) => {
                     const isActive = chip.id === active;
                     return (
@@ -315,7 +315,7 @@ function Feed({
         {items.length === 0 ? (
           <p className="py-10 text-center text-[13px] text-[#767676]">Nothing listed in this category yet.</p>
         ) : (
-          <div className="mt-2 grid grid-cols-2 gap-x-2 gap-y-2 sm:grid-cols-3 sm:gap-x-4 sm:gap-y-5 lg:grid-cols-4 xl:grid-cols-5">
+          <div className="mt-2 grid grid-cols-5 gap-x-1 gap-y-1 sm:gap-x-4 sm:gap-y-5">
             {promos && promos.length > 0 && <PromoCarousel promos={promos} />}
             {items.slice(0, shown).map((product) => (
               <ProductCard

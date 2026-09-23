@@ -267,7 +267,7 @@ export function BrowseClient({
           className="rounded-md border border-hairline bg-surface-raised"
         />
       ) : (
-        <div className="grid grid-cols-2 gap-x-2 gap-y-5 sm:gap-x-4 lg:grid-cols-4 lg:gap-5">
+        <div className="grid grid-cols-4 gap-x-1 gap-y-2 sm:gap-x-4 sm:gap-y-5 lg:gap-5">
           {visible.map((product, index) => (
             <ProductCard
               key={product.id}

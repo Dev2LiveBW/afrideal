@@ -59,12 +59,19 @@ const TONES = {
 export function HowItWorks({ className }: { className?: string }) {
   return (
     <div className={className}>
-      <ol className="grid gap-8 md:grid-cols-5 md:gap-4">
+      <ol className="grid grid-cols-5 gap-1 sm:gap-4">
         {STEPS.map((step, index) => {
           const Icon = step.icon;
+          const isLastOdd = index === STEPS.length - 1;
 
           return (
-            <li key={step.title} className="relative min-w-0 md:text-center">
+            <li
+              key={step.title}
+              className={cn(
+                'relative min-w-0 rounded-xl border border-hairline/60 bg-surface-raised/70 p-2.5 text-center sm:border-0 sm:bg-transparent sm:p-0 md:text-center',
+                isLastOdd && 'col-span-2 sm:col-span-1 max-w-[260px] mx-auto w-full',
+              )}
+            >
               {index < STEPS.length - 1 && (
                 <span
                   aria-hidden="true"
@@ -72,25 +79,25 @@ export function HowItWorks({ className }: { className?: string }) {
                 />
               )}
 
-              <div className="flex items-center gap-4 md:flex-col md:gap-3">
+              <div className="flex flex-col items-center gap-1 text-center md:gap-3">
                 <span
                   aria-hidden="true"
                   className={cn(
-                    'relative z-10 flex h-14 w-14 shrink-0 items-center justify-center rounded-full ring-1 ring-inset',
+                    'relative z-10 flex h-6 w-6 shrink-0 items-center justify-center rounded-full ring-1 ring-inset sm:h-14 sm:w-14',
                     TONES[step.tone],
                   )}
                 >
-                  <Icon size={20} strokeWidth={1.5} />
+                  <Icon className="h-3 w-3 sm:h-5 sm:w-5" strokeWidth={1.75} />
                 </span>
 
                 <div className="min-w-0">
-                  <h3 className="text-[14.5px] font-semibold leading-5 text-ink">
-                    <span className="font-mono text-[12px] tabular-nums text-muted">
+                  <h3 className="text-[7px] font-semibold leading-tight text-ink sm:text-[14.5px] sm:leading-5">
+                    <span className="font-mono text-[6px] tabular-nums text-muted sm:text-[12px]">
                       {index + 1}.
                     </span>{' '}
                     {step.title}
                   </h3>
-                  <p className="mt-1.5 text-[12.5px] leading-5 text-muted md:mx-auto md:max-w-[22ch]">
+                  <p className="mt-0.5 text-[5.5px] leading-snug text-muted line-clamp-3 sm:mt-1.5 sm:line-clamp-none sm:text-[12.5px] sm:leading-5 md:mx-auto md:max-w-[22ch]">
                     {step.body}
                   </p>
                 </div>
