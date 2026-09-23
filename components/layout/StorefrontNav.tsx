@@ -3,10 +3,9 @@
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import { useEffect, useRef, useState } from 'react';
-import { useSession, signOut } from 'next-auth/react';
+import { useSession, useSignOut } from '@/lib/use-session';
 import { AnimatePresence, motion } from 'framer-motion';
 import {
-  ArrowLeftRight,
   ChevronDown,
   ChevronRight,
   Grid2x2,
@@ -22,10 +21,15 @@ import {
 } from 'lucide-react';
 
 import { AfriDealLogo } from '@/components/brand/AfriDealLogo';
+import { markTabNavigation } from '@/components/motion/PageTransition';
 import { CategoryIcon } from '@/components/storefront/CategoryIcon';
-import { ActionButton } from '@/components/brand/ActionButton';
 import { DELIVERY_CITIES, cartCount, useAfriDealStore } from '@/store/useAfriDealStore';
 import type { Category } from '@/types';
+import {
+  DIRECTORY_IN_NAV,
+  DIRECTORY_LABEL,
+  DIRECTORY_ROUTE,
+} from '@/lib/directory-placement';
 import { cn } from '@/lib/utils';
 
 /**
@@ -71,11 +75,13 @@ function DeliverToPicker() {
         onClick={() => setOpen((value) => !value)}
         aria-expanded={open}
         aria-haspopup="listbox"
-        className="flex items-center gap-1.5 text-[12px] text-gray-600 hover:text-gray-900"
+        className="flex max-w-full items-center gap-1.5 text-[11.5px] text-gray-600 hover:text-gray-900 sm:text-[12px]"
       >
-        <MapPin size={13} className="text-[#E67E22]" />
-        <span>
-          Deliver to: <span className="font-semibold text-gray-900">{city}, Botswana</span>
+        <MapPin size={13} className="shrink-0 text-[#E67E22]" />
+        {/* "Deliver to:" and the country are dropped below `sm`; the pin says it. */}
+        <span className="truncate">
+          <span className="hidden sm:inline">Deliver to: </span>
+          <span className="font-semibold text-gray-900">{city}<span className="hidden sm:inline">, Botswana</span></span>
         </span>
         <ChevronDown
           size={13}
@@ -123,10 +129,100 @@ function DeliverToPicker() {
   );
 }
 
-export function StorefrontNav({ categories = [] }: { categories?: Category[] }) {
+/**
+ * The search field. Benchmark §3a, measured live: a 34px pill on `#f4f4f4`
+ * with 16px of left padding, the text at 16px (which is also what stops iOS
+ * zooming the page when the field is tapped), and a 40×26 black pill at the
+ * right end holding a white magnifier - the button dips to 80% while it is
+ * pressed. No border, no ring.
+ *
+ * The placeholder rolls. The benchmark keeps a list of live searches and
+ * drops a new one into the empty field every few seconds (`slideIn`, .3s
+ * ease-in, from above). Submitting the field empty searches for whatever
+ * term is showing, which is what makes the rolling worth doing: the reader
+ * can take the suggestion with one tap.
+ */
+const TICKER_MS = 3000;
+
+function SearchField({ terms }: { terms: string[] }) {
+  const router = useRouter();
+  const [value, setValue] = useState('');
+  const [focused, setFocused] = useState(false);
+  const [index, setIndex] = useState(0);
+
+  useEffect(() => {
+    if (terms.length < 2) return;
+    const id = window.setInterval(() => setIndex((i) => (i + 1) % terms.length), TICKER_MS);
+    return () => window.clearInterval(id);
+  }, [terms.length]);
+
+  const showing = terms[index];
+  const rolling = terms.length > 0 && !focused && value === '';
+
+  function submit(event: React.FormEvent) {
+    event.preventDefault();
+    const term = (value.trim() || showing || '').trim();
+    router.push(term ? `/browse?q=${encodeURIComponent(term)}` : '/browse');
+  }
+
+  return (
+    <form
+      role="search"
+      onSubmit={submit}
+      className="flex h-[34px] min-w-0 flex-1 items-center rounded-full bg-[#f4f4f4] pl-4 pr-1"
+    >
+      <label htmlFor="storefront-search" className="sr-only">
+        Search products
+      </label>
+      <div className="relative h-[22px] min-w-0 flex-1">
+        <input
+          id="storefront-search"
+          type="search"
+          value={value}
+          onChange={(event) => setValue(event.target.value)}
+          onFocus={() => setFocused(true)}
+          onBlur={() => setFocused(false)}
+          placeholder={rolling ? '' : 'Search products'}
+          autoComplete="off"
+          className="h-full w-full bg-transparent p-0 text-[16px] leading-[22px] text-[#222] outline-none placeholder:text-[#b8b8b8] sm:text-[14px]"
+        />
+        {rolling && (
+          <span
+            aria-hidden="true"
+            className="pointer-events-none absolute inset-0 overflow-hidden"
+          >
+            <span
+              key={showing}
+              className="block animate-ticker-in truncate text-[13px] leading-[22px] text-[#b8b8b8]"
+            >
+              {showing}
+            </span>
+          </span>
+        )}
+      </div>
+      <button
+        type="submit"
+        aria-label="Search"
+        className="press ml-1 flex h-[26px] w-10 shrink-0 items-center justify-center rounded-full bg-[#222] text-white"
+      >
+        <Search size={15} strokeWidth={2.5} aria-hidden="true" />
+      </button>
+    </form>
+  );
+}
+
+export function StorefrontNav({
+  categories = [],
+  hotSearches = [],
+}: {
+  categories?: Category[];
+  /** What the search field suggests while it is empty. */
+  hotSearches?: string[];
+}) {
   const pathname = usePathname();
   const router = useRouter();
   const { data: session } = useSession();
+  const signOut = useSignOut();
   const cart = useAfriDealStore((state) => state.cart);
   const pulse = useAfriDealStore((state) => state.cartPulse);
 
@@ -156,37 +252,25 @@ export function StorefrontNav({ categories = [] }: { categories?: Category[] }) 
 
   return (
     <>
-      <header className="sticky top-0 z-40 bg-white shadow-sm">
-        {/* Row 1: Logo | Search | Controls */}
-        <div className="mx-auto flex max-w-[1400px] items-center gap-3 px-4 py-2.5">
+      <header className="sticky top-0 z-40 bg-white shadow-[0_1px_0_rgba(0,0,0,0.12)]">
+        {/*
+          Row 1: Logo | Search | Controls. Benchmark §3a: 50px tall, the
+          logo at the left, the search pill taking the rest. The cart is
+          not up here on a phone - it is a tab on the bottom bar, as on the
+          benchmark - and comes back from `md`, where there is no bar.
+        */}
+        <div className="mx-auto flex h-[50px] max-w-[1400px] items-center gap-2 px-3 sm:h-14 sm:gap-3 sm:px-4">
           <Link href="/" className="shrink-0">
             <AfriDealLogo variant="light" size="sm" />
           </Link>
 
-          <div className="relative flex flex-1 items-center">
-            <Search size={16} className="absolute left-3.5 text-gray-400 pointer-events-none" />
-            <input
-              type="search"
-              placeholder="Search products, brands or categories…"
-              className="h-10 w-full rounded-full border border-gray-200 bg-gray-50 pl-10 pr-4 text-[14px] text-gray-700 outline-none focus:border-[#E67E22] focus:bg-white focus:ring-2 focus:ring-[#E67E22]/20 sm:pr-28"
-            />
-            {/*
-              The button reserved 112px of the field at every width. On a 390px
-              phone that left about one character visible between the icon and
-              the button, so the field could not show what had been typed into
-              it. Below `sm` the magnifier and the placeholder carry the
-              affordance and the whole width goes to the text.
-            */}
-            <button className="absolute right-1 hidden h-8 items-center rounded-full bg-[#E67E22] px-4 text-[13px] font-bold text-white transition-colors hover:bg-[#D35400] sm:flex">
-              Search
-            </button>
-          </div>
+          <SearchField terms={hotSearches} />
 
-          <div className="flex shrink-0 items-center gap-2">
+          <div className="flex shrink-0 items-center gap-1 sm:gap-2">
             <Link
               href="/cart"
               aria-label={`Cart, ${count} item${count === 1 ? '' : 's'}`}
-              className="relative flex h-10 w-10 items-center justify-center rounded-full hover:bg-gray-100 transition-colors"
+              className="relative hidden h-10 w-10 items-center justify-center rounded-full transition-colors hover:bg-gray-100 md:flex"
             >
               <ShoppingCart size={20} strokeWidth={1.75} className="text-gray-700" />
               <AnimatePresence>
@@ -212,19 +296,19 @@ export function StorefrontNav({ categories = [] }: { categories?: Category[] }) 
                   </span>
                   <span className="text-[13px] font-medium text-gray-800">{session.user.name?.split(' ')[0]}</span>
                 </Link>
-                <button onClick={() => signOut({ callbackUrl: '/' })} aria-label="Sign out" className="rounded-full p-2 text-gray-500 hover:bg-gray-100 hover:text-gray-800 transition-colors">
+                <button onClick={() => signOut('/')} aria-label="Sign out" className="rounded-full p-2 text-gray-500 hover:bg-gray-100 hover:text-gray-800 transition-colors">
                   <LogOut size={16} strokeWidth={1.5} />
                 </button>
               </div>
             ) : (
               <div className="hidden items-center gap-2 md:flex">
                 <Link href="/login" className="rounded-full px-4 py-2 text-[13px] font-medium text-gray-700 hover:bg-gray-100 transition-colors">Sign in</Link>
-                <button onClick={() => router.push('/signup')} className="rounded-full bg-[#E67E22] px-4 py-2 text-[13px] font-bold text-white hover:bg-[#D35400] transition-colors">Sign up</button>
+                <button onClick={() => router.push('/signup')} className="press rounded-full bg-[#E67E22] px-4 py-2 text-[13px] font-bold text-white hover:bg-[#D35400] transition-colors">Sign up</button>
               </div>
             )}
 
-            <button onClick={() => setMenuOpen(true)} aria-label="Open menu" className="flex h-10 w-10 items-center justify-center rounded-full hover:bg-gray-100 transition-colors md:hidden">
-              <Menu size={20} strokeWidth={1.75} className="text-gray-700" />
+            <button onClick={() => setMenuOpen(true)} aria-label="Open menu" className="press flex h-9 w-9 items-center justify-center rounded-full md:hidden">
+              <Menu size={22} strokeWidth={1.75} className="text-[#222]" />
             </button>
           </div>
         </div>
@@ -241,11 +325,38 @@ export function StorefrontNav({ categories = [] }: { categories?: Category[] }) 
             compact ? 'max-h-0 overflow-hidden border-t-0 opacity-0' : 'max-h-16 opacity-100',
           )}
         >
-          <div className="mx-auto flex max-w-[1400px] items-center justify-between px-4 py-1.5">
-            <DeliverToPicker />
-            <Link href="/orders" className="text-[12px] font-medium text-[#E67E22] hover:underline">
-              Track order →
-            </Link>
+          {/*
+            A strip. Three links on the right and a city on the left is more
+            than 360px holds at 12px, so nothing here may wrap: the links keep
+            their words, the picker takes what is left and truncates.
+          */}
+          <div className="mx-auto flex max-w-[1400px] items-center justify-between gap-3 px-3 py-1.5 sm:px-4">
+            <div className="min-w-0 flex-1 truncate">
+              <DeliverToPicker />
+            </div>
+            <div className="flex shrink-0 items-center gap-2.5 sm:gap-4">
+              {/*
+                TODO(TICKET-007): temporary entry point. The supplier / product
+                directory's final placement - homepage section, dedicated page or a
+                nav tab of its own - is unconfirmed. Toggle with DIRECTORY_IN_NAV in
+                lib/directory-placement.ts.
+              */}
+              {DIRECTORY_IN_NAV && (
+                <Link
+                  href={DIRECTORY_ROUTE}
+                  className="whitespace-nowrap text-[11.5px] font-medium text-gray-600 hover:text-gray-900 sm:text-[12px]"
+                >
+                  {DIRECTORY_LABEL}
+                </Link>
+              )}
+              {/* The quotation door TICKET-006 took off the front page, restored here. */}
+              <Link href="/rfq" className="whitespace-nowrap text-[11.5px] font-medium text-gray-600 hover:text-gray-900 sm:text-[12px]">
+                Get a quote
+              </Link>
+              <Link href="/orders" className="whitespace-nowrap text-[11.5px] font-medium text-[#E67E22] hover:underline sm:text-[12px]">
+                Track order →
+              </Link>
+            </div>
           </div>
         </div>
       </header>
@@ -270,6 +381,9 @@ export function StorefrontNav({ categories = [] }: { categories?: Category[] }) 
             <nav className="max-h-[calc(100dvh-4rem)] overflow-y-auto px-6 pb-10 pt-6">
               {[
                 { href: '/browse', label: 'Browse' },
+                // TODO(TICKET-007): temporary entry point, see the nav row above.
+                { href: DIRECTORY_ROUTE, label: DIRECTORY_LABEL },
+                { href: '/rfq', label: 'Request a quote' },
                 { href: '/browse?category=hair-weaves-extensions', label: 'Hair & Weaves' },
                 { href: '/request-a-runner', label: 'Request a runner' },
                 { href: '/how-it-works', label: 'How it works' },
@@ -317,7 +431,7 @@ export function StorefrontNav({ categories = [] }: { categories?: Category[] }) 
                 className="pt-8"
               >
                 {session?.user ? (
-                  <button onClick={() => signOut({ callbackUrl: '/' })} className="w-full rounded-full border border-white/25 py-3.5 text-center text-[14px] font-medium text-white hover:bg-white/10 transition-colors">Sign out</button>
+                  <button onClick={() => signOut('/')} className="w-full rounded-full border border-white/25 py-3.5 text-center text-[14px] font-medium text-white hover:bg-white/10 transition-colors">Sign out</button>
                 ) : (
                   <div className="space-y-3">
                     <button onClick={() => router.push('/signup')} className="w-full rounded-full bg-[#E67E22] py-3.5 text-[14px] font-bold text-white hover:bg-[#D35400] transition-colors">Create an account</button>
@@ -334,21 +448,25 @@ export function StorefrontNav({ categories = [] }: { categories?: Category[] }) 
 }
 
 /**
- * The thumb rail.
+ * The thumb rail. Benchmark §3a, measured live: 56px, white, a 1px `#eee`
+ * rule along its top, five equal tabs of a 26px icon over a 12px label, the
+ * active one in the accent. Pinned to the bottom on phones and tablets,
+ * gone from `md` up where the header carries the same links. Padded for
+ * the home indicator through `env(safe-area-inset-bottom)`, which is why
+ * the root viewport export declares `viewport-fit=cover`.
  *
- * Five destinations pinned to the bottom of the viewport on phones and tablets,
- * gone from `md` up where the header carries the same links. Padded for the
- * home indicator through `env(safe-area-inset-bottom)`, which is why the root
- * viewport export declares `viewport-fit=cover`.
+ * `Home | Categories | Cart | Orders | Account` follows the benchmark's
+ * `Home | Categories | Messenger | Cart | My Alibaba` as far as this
+ * marketplace has the screens - we have no messenger, and the cart is the
+ * tab the header gives up on a phone.
  *
- * "Compare" points at the ladder rather than a filtered grid: comparing on this
- * marketplace means comparing what a thing costs at one, ten or fifty units,
- * and that is the page which answers it.
+ * Every tap here tells the page transition it is a tab switch, which the
+ * benchmark performs as an instant swap rather than a push.
  */
 const TABS = [
   { href: '/', label: 'Home', icon: Home },
-  { href: '/browse', label: 'Categories', icon: Grid2x2 },
-  { href: '/how-it-works', label: 'Compare', icon: ArrowLeftRight },
+  { href: '/categories', label: 'Categories', icon: Grid2x2 },
+  { href: '/cart', label: 'Cart', icon: ShoppingCart },
   { href: '/orders', label: 'Orders', icon: Package },
   { href: '/login', label: 'Account', icon: User },
 ];
@@ -356,13 +474,18 @@ const TABS = [
 export function MobileTabBar() {
   const pathname = usePathname();
   const { data: session } = useSession();
+  const cart = useAfriDealStore((state) => state.cart);
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => setMounted(true), []);
+  const count = mounted ? cartCount(cart) : 0;
 
   return (
     <nav
       aria-label="Primary"
-      className="fixed inset-x-0 bottom-0 z-40 border-t border-gray-200 bg-white/95 pb-[env(safe-area-inset-bottom)] backdrop-blur-md md:hidden"
+      className="fixed inset-x-0 bottom-0 z-40 border-t border-[#eee] bg-white pb-[env(safe-area-inset-bottom)] md:hidden"
     >
-      <ul className="mx-auto flex max-w-[1400px]">
+      <ul className="mx-auto flex h-14 max-w-[1400px] px-2">
         {TABS.map((tab) => {
           // Signed in, the account tab is the buyer's own area rather than the
           // sign-in screen they have already been through.
@@ -373,16 +496,22 @@ export function MobileTabBar() {
             <li key={tab.label} className="flex-1">
               <Link
                 href={href}
+                onClick={markTabNavigation}
                 aria-current={active ? 'page' : undefined}
                 className={cn(
-                  'flex flex-col items-center gap-1 py-2.5 transition-colors',
-                  active ? 'text-[#E67E22]' : 'text-gray-400 hover:text-gray-700',
+                  'press-soft relative flex h-full flex-col items-center pt-[5px] outline-none transition-colors',
+                  active ? 'text-[#E67E22]' : 'text-[#222]',
                 )}
               >
-                <tab.icon size={20} strokeWidth={active ? 2 : 1.75} />
-                <span className={cn('text-[10.5px] leading-3', active && 'font-semibold')}>
-                  {tab.label}
+                <span className="relative flex h-[26px] w-[26px] items-center justify-center">
+                  <tab.icon size={24} strokeWidth={active ? 2.25 : 1.75} />
+                  {tab.href === '/cart' && count > 0 && (
+                    <span className="absolute -right-2 -top-1 flex h-4 min-w-[16px] items-center justify-center rounded-full bg-[#E67E22] px-1 font-mono text-[9.5px] font-bold leading-none text-white">
+                      {count}
+                    </span>
+                  )}
                 </span>
+                <span className="mt-px text-[12px] leading-[14px]">{tab.label}</span>
               </Link>
             </li>
           );

@@ -99,7 +99,7 @@ export default async function BrowsePage({
   }));
 
   return (
-    <div className="mx-auto max-w-market px-6 pb-24 pt-28">
+    <div className="mx-auto max-w-market px-4 pb-24 pt-3 sm:px-6 sm:pt-28">
       <BrowseClient
         categories={categories}
         products={enriched}

@@ -4,6 +4,9 @@ import { redirect } from 'next/navigation';
 import { RunnerTabBar, RunnerTopbar } from '@/components/layout/RunnerNav';
 import { auth } from '@/lib/auth';
 
+// auth() is a live-request Clerk call - this segment cannot be prerendered.
+export const dynamic = 'force-dynamic';
+
 /**
  * Runner Portal shell - mobile-first.
  *

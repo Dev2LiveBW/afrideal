@@ -486,14 +486,14 @@ function reasonFor(entry) {
 // ─── Users ───────────────────────────────────────────────────────────────────
 
 const users = [
-  { id: 'u001', name: 'AfriDeal Admin', email: 'admin@afrideal.co.bw', password: 'Admin@2026', role: 'SUPER_ADMIN', avatar: 'AA', status: 'ACTIVE' },
-  { id: 'u002', name: 'Keabetswe Molapo', email: 'ops@afrideal.co.bw', password: 'Ops@2026', role: 'OPERATIONS_ADMIN', avatar: 'KM', status: 'ACTIVE' },
-  { id: 'u003', name: 'Naledi Beauty Supplies', email: 'supplier@naledi.co.bw', password: 'Supplier@2026', role: 'SUPPLIER_OWNER', supplier_id: 's001', avatar: 'NB', status: 'ACTIVE' },
-  { id: 'u004', name: 'GlowUp Distributors', email: 'supplier@glowup.co.za', password: 'Supplier@2026', role: 'SUPPLIER_OWNER', supplier_id: 's002', avatar: 'GU', status: 'ACTIVE' },
-  { id: 'u005', name: 'Kagiso Sithole', email: 'runner@afrideal.co.bw', password: 'Runner@2026', role: 'RUNNER', runner_id: 'r001', avatar: 'KS', status: 'ACTIVE' },
-  { id: 'u006', name: 'Thabo Modise', email: 'thabo@gmail.com', password: 'Customer@2026', role: 'CUSTOMER', avatar: 'TM', status: 'ACTIVE' },
-  { id: 'u007', name: 'Kefilwe Dithebe', email: 'kefilwe@gmail.com', password: 'Customer@2026', role: 'CUSTOMER', avatar: 'KD', status: 'ACTIVE' },
-  { id: 'u008', name: 'Finance Admin', email: 'finance@afrideal.co.bw', password: 'Finance@2026', role: 'FINANCE_ADMIN', avatar: 'FA', status: 'ACTIVE' },
+  { id: 'u001', name: 'AfriDeal Admin', email: 'admin@afrideal.co.bw', role: 'SUPER_ADMIN', avatar: 'AA', status: 'ACTIVE' },
+  { id: 'u002', name: 'Keabetswe Molapo', email: 'ops@afrideal.co.bw', role: 'OPERATIONS_ADMIN', avatar: 'KM', status: 'ACTIVE' },
+  { id: 'u003', name: 'Naledi Beauty Supplies', email: 'supplier@naledi.co.bw', role: 'SUPPLIER_OWNER', supplier_id: 's001', avatar: 'NB', status: 'ACTIVE' },
+  { id: 'u004', name: 'GlowUp Distributors', email: 'supplier@glowup.co.za', role: 'SUPPLIER_OWNER', supplier_id: 's002', avatar: 'GU', status: 'ACTIVE' },
+  { id: 'u005', name: 'Kagiso Sithole', email: 'runner@afrideal.co.bw', role: 'RUNNER', runner_id: 'r001', avatar: 'KS', status: 'ACTIVE' },
+  { id: 'u006', name: 'Thabo Modise', email: 'thabo@gmail.com', role: 'CUSTOMER', avatar: 'TM', status: 'ACTIVE' },
+  { id: 'u007', name: 'Kefilwe Dithebe', email: 'kefilwe@gmail.com', role: 'CUSTOMER', avatar: 'KD', status: 'ACTIVE' },
+  { id: 'u008', name: 'Finance Admin', email: 'finance@afrideal.co.bw', role: 'FINANCE_ADMIN', avatar: 'FA', status: 'ACTIVE' },
 ];
 
 // ─── Runners ─────────────────────────────────────────────────────────────────
@@ -1596,3 +1596,13 @@ if (problems.length > 0) {
   for (const problem of problems) console.warn(`    - ${problem}`);
 }
 console.log('\n✓ integrity checks complete');
+
+// When the app reads from Postgres, the regenerated files are only half the
+// reset - push them there too so `npm run seed` still means "clean slate".
+const { default: nextEnv } = await import('@next/env');
+nextEnv.loadEnvConfig(ROOT_DIR);
+if (process.env.DB_DRIVER === 'postgres') {
+  const { loadAll } = await import('./db-load.mjs');
+  const loaded = await loadAll();
+  console.log(`✓ ${loaded.length} collections loaded into Postgres`);
+}

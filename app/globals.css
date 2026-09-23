@@ -34,6 +34,12 @@
   html {
     -webkit-text-size-adjust: 100%;
     scroll-behavior: smooth;
+    /*
+     * The grey flash Android and iOS paint over a tapped link. The benchmark
+     * (Alibaba's buyer app) has none - a tap darkens the control it landed
+     * on by a few percent, see `.press` below - so it goes here too.
+     */
+    -webkit-tap-highlight-color: transparent;
   }
 
   body {
@@ -175,6 +181,48 @@
 @layer utilities {
   .text-balance {
     text-wrap: balance;
+  }
+
+  /*
+   * ── Press states, from the benchmark ──────────────────────────────
+   *
+   * Alibaba's buyer app gives every tappable thing the same acknowledgement:
+   * a short drop in opacity while the finger is down, nothing else. Measured
+   * in its stylesheets (docs/design/alibaba-benchmark.md §4b):
+   *   buttons      transition: opacity .15s ease;  :active { opacity: .8 }
+   *   cards/tiles  :active { opacity: .9 }
+   * `.press` is for buttons and links that look like buttons; `.press-soft`
+   * for cards, tiles and rows, where a full 20% drop on a photograph reads as
+   * a flicker.
+   */
+  .press {
+    transition: opacity 150ms ease;
+  }
+
+  .press:active {
+    opacity: 0.8;
+  }
+
+  .press-soft {
+    transition: opacity 150ms ease;
+  }
+
+  .press-soft:active {
+    opacity: 0.9;
+  }
+
+  /*
+   * The 4% film. Every product photograph on the benchmark's rails sits
+   * under `rgba(0,0,0,.04)`, which pulls a hundred suppliers' pure-white
+   * grounds to one grey so the rail reads as one row rather than a row of
+   * holes. Applied to the image's wrapper, which must be `relative`.
+   */
+  .film::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    background-color: rgba(0, 0, 0, 0.04);
   }
 
   .measure {

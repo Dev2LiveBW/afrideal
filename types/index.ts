@@ -26,7 +26,13 @@ export interface User {
   id: string;
   name: string;
   email: string;
-  password: string;
+  /**
+   * Legacy demo credential. Clerk holds passwords now; this stays optional so
+   * old seed rows still type-check and is never written by the app.
+   */
+  password?: string;
+  /** The Clerk account this profile belongs to, stamped on first sign-in. */
+  clerk_user_id?: string;
   role: Role;
   avatar: string;
   status: UserStatus;

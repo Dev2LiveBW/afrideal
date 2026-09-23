@@ -7,6 +7,9 @@ import { ConsoleTopbar } from '@/components/layout/ConsoleTopbar';
 import { auth, ROLE_LABELS } from '@/lib/auth';
 import { getNotifications } from '@/lib/queries';
 
+// auth() is a live-request Clerk call - this segment cannot be prerendered.
+export const dynamic = 'force-dynamic';
+
 /**
  * Supplier Portal shell.
  *

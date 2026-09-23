@@ -48,7 +48,8 @@ export function TierSwitch({
 }) {
   return (
     <div
-      className={cn('flex flex-wrap items-center gap-1.5', className)}
+      // A strip: one row that scrolls sideways on a phone, wraps only from `sm`.
+      className={cn('no-scrollbar flex items-center gap-1.5 overflow-x-auto sm:flex-wrap sm:overflow-visible', className)}
       role="group"
       aria-label="Price the catalogue by quantity"
     >

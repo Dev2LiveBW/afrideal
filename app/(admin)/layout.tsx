@@ -1,4 +1,10 @@
 import { redirect } from 'next/navigation';
+
+// The admin layout calls Clerk's auth() on every render - a live-request
+// operation. Prerendering it at build time either throws (no Clerk key) or
+// produces a shell that would immediately redirect to /login on every visit.
+// Force-dynamic opts the entire /(admin) segment out of static generation.
+export const dynamic = 'force-dynamic';
 import {
   AlertTriangle,
   BarChart3,

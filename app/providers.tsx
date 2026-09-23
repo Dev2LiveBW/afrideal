@@ -1,11 +1,10 @@
 'use client';
 
-import { SessionProvider } from 'next-auth/react';
 import { Toaster } from 'react-hot-toast';
 
 export function Providers({ children }: { children: React.ReactNode }) {
   return (
-    <SessionProvider>
+    <>
       {children}
       <Toaster
         position="bottom-right"
@@ -25,6 +24,6 @@ export function Providers({ children }: { children: React.ReactNode }) {
           error: { iconTheme: { primary: '#C0392B', secondary: '#ffffff' } },
         }}
       />
-    </SessionProvider>
+    </>
   );
 }

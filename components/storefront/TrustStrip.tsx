@@ -23,21 +23,26 @@ const CLAIMS = [
     icon: Landmark,
     title: 'Payments handled by licensed partners',
     body: 'Processed through DPO Pay, Orange Money or PayGate. AfriDeal never sees your card details.',
+    /* A disclosure, not elaboration - see the note above. Never folds away. */
+    legal: true,
   },
   {
     icon: BadgeCheck,
     title: 'Suppliers verified before they list',
     body: 'Registration, tax and banking details are checked, and orders route on reliability.',
+    legal: false,
   },
   {
     icon: Truck,
     title: 'Delivery you can follow',
     body: 'Pickup and drop-off are tracked against the order, across Botswana and South Africa.',
+    legal: false,
   },
   {
     icon: RotateCcw,
     title: 'A wrong order is ours to fix',
     body: 'You buy from AfriDeal, so a late, short or incorrect order is ours to replace or refund.',
+    legal: false,
   },
 ];
 
@@ -54,10 +59,10 @@ export function TrustStrip({
   return (
     <div
       className={cn(
-        'grid divide-y sm:grid-cols-2 sm:divide-y-0 lg:grid-cols-4',
+        'grid grid-cols-4 gap-1 sm:gap-4',
         dark
-          ? 'divide-white/10 sm:divide-x sm:[&>*:nth-child(3)]:border-t sm:[&>*:nth-child(3)]:border-white/10 sm:[&>*:nth-child(4)]:border-t sm:[&>*:nth-child(4)]:border-white/10 lg:[&>*]:border-t-0'
-          : 'divide-hairline sm:divide-x sm:[&>*:nth-child(3)]:border-t sm:[&>*:nth-child(3)]:border-hairline sm:[&>*:nth-child(4)]:border-t sm:[&>*:nth-child(4)]:border-hairline lg:[&>*]:border-t-0',
+          ? 'sm:divide-x sm:divide-white/10 sm:[&>*:nth-child(3)]:border-t sm:[&>*:nth-child(3)]:border-white/10 sm:[&>*:nth-child(4)]:border-t sm:[&>*:nth-child(4)]:border-white/10 lg:[&>*]:border-t-0'
+          : 'sm:divide-x sm:divide-hairline sm:[&>*:nth-child(3)]:border-t sm:[&>*:nth-child(3)]:border-hairline sm:[&>*:nth-child(4)]:border-t sm:[&>*:nth-child(4)]:border-hairline lg:[&>*]:border-t-0',
         className,
       )}
     >
@@ -65,25 +70,42 @@ export function TrustStrip({
         const Icon = claim.icon;
 
         return (
-          <div key={claim.title} className="flex gap-3 px-0 py-5 sm:px-6 sm:py-4 lg:first:pl-0">
+          <div
+            key={claim.title}
+            className={cn(
+              'flex flex-col items-center gap-1 rounded-lg p-1 text-center sm:flex-row sm:items-start sm:gap-3 sm:rounded-none sm:p-0 sm:px-6 sm:py-4 sm:text-left lg:first:pl-0',
+              dark ? 'bg-white/[0.04] sm:bg-transparent' : 'bg-surface-raised/60 sm:bg-transparent',
+            )}
+          >
             <Icon
-              size={17}
-              strokeWidth={1.5}
+              strokeWidth={1.75}
               aria-hidden="true"
-              className={cn('mt-0.5 shrink-0', dark ? 'text-gold-light' : 'text-forest')}
+              className={cn(
+                'h-4 w-4 shrink-0 sm:h-[17px] sm:w-[17px] sm:mt-0.5',
+                dark ? 'text-gold-light' : 'text-forest',
+              )}
             />
             <div className="min-w-0">
               <p
                 className={cn(
-                  'text-[13px] font-semibold leading-5',
+                  'text-[0.53125rem] font-semibold leading-tight sm:text-[0.8125rem] sm:leading-5',
                   dark ? 'text-white' : 'text-ink',
                 )}
               >
                 {claim.title}
               </p>
+              {/*
+               * No line-clamp here, deliberately. Tailwind's `line-clamp-none`
+               * sets `display: block`, so tailwind-merge puts line-clamp and
+               * display in the same conflict group and keeps whichever comes
+               * last - which silently dropped `hidden` and `sm:block` and left
+               * the body visible at 320px. The clamp is redundant anyway now
+               * that the body is hidden below sm.
+               */}
               <p
                 className={cn(
-                  'mt-1 text-[12px] leading-5',
+                  'mt-0.5 text-[0.34375rem] leading-tight sm:mt-1 sm:text-[0.75rem] sm:leading-5',
+                  claim.legal ? 'block' : 'hidden sm:block',
                   dark ? 'text-white/55' : 'text-muted',
                 )}
               >

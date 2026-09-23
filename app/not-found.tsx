@@ -1,3 +1,7 @@
+// Rendered under the root ClerkProvider — prerendering throws when
+// NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY is absent at build time.
+export const dynamic = 'force-dynamic';
+
 import Link from 'next/link';
 
 import { AfriDealLogo } from '@/components/brand/AfriDealLogo';

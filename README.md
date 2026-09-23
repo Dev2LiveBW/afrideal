@@ -11,12 +11,16 @@ This is a working MVP, not a clickable prototype. Every screen reads real data, 
 ```bash
 cd afrideal
 npm install
+cp .env.example .env.local        # then fill in the Clerk keys
+node scripts/sync-users-to-clerk.mjs
 npm run dev
 ```
 
 Open http://localhost:3000.
 
-Node 18.17 or later. No database, no external services, no API keys. The whole platform runs off JSON files in `data/`.
+Node 18.17 or later. Two external services: **Clerk** for sign-in (a free development instance; `clerk init` or the dashboard gives you the two keys) and, when `CATALOGUE_SOURCE=sanity`, the **Sanity Studio** in `../../../studio` for the catalogue. Everything else - orders, payables, inventory, the people directory's profile rows - lives in **Neon Postgres** when `DB_DRIVER=postgres` (`DATABASE_URL` from the Neon console; `npm run db:migrate` then `npm run db:load` once), or in JSON files under `data/` when `DB_DRIVER=json`.
+
+`node scripts/sync-users-to-clerk.mjs` creates the eight demo accounts on your Clerk instance from the Sanity people directory, with their roles, and stamps each one onto its profile row. Run it once after setting the keys, and again whenever the directory changes.
 
 | Command | What it does |
 |---|---|
@@ -32,22 +36,22 @@ Node 18.17 or later. No database, no external services, no API keys. The whole p
 
 ## Logins
 
-Eight seeded accounts. The login page has a one-click card for each of them, so nobody has to type these during a demo.
+Eight seeded accounts. The sign-in page has a one-click card for each of them, so nobody has to type these during a demo.
 
 | Email | Password | Role | Lands on |
 |---|---|---|---|
-| admin@afrideal.co.bw | `Admin@2026` | Super Admin | `/admin/dashboard` |
-| ops@afrideal.co.bw | `Ops@2026` | Operations | `/admin/dashboard` |
-| finance@afrideal.co.bw | `Finance@2026` | Finance | `/admin/analytics` |
-| supplier@naledi.co.bw | `Supplier@2026` | Supplier (Naledi Beauty) | `/supplier/dashboard` |
-| supplier@glowup.co.za | `Supplier@2026` | Supplier (GlowUp) | `/supplier/dashboard` |
-| runner@afrideal.co.bw | `Runner@2026` | Runner | `/runner/dashboard` |
-| thabo@gmail.com | `Customer@2026` | Customer | `/` |
-| kefilwe@gmail.com | `Customer@2026` | Customer | `/` |
+| admin@afrideal.co.bw | `Admin-AfriDeal-2026!` | Super Admin | `/admin/dashboard` |
+| ops@afrideal.co.bw | `Ops-AfriDeal-2026!` | Operations | `/admin/dashboard` |
+| finance@afrideal.co.bw | `Finance-AfriDeal-2026!` | Finance | `/admin/analytics` |
+| supplier@naledi.co.bw | `Naledi-AfriDeal-2026!` | Supplier (Naledi Beauty) | `/supplier/dashboard` |
+| supplier@glowup.co.za | `GlowUp-AfriDeal-2026!` | Supplier (GlowUp) | `/supplier/dashboard` |
+| runner@afrideal.co.bw | `Runner-AfriDeal-2026!` | Runner | `/runner/dashboard` |
+| thabo@gmail.com | `Thabo-AfriDeal-2026!` | Customer | `/` |
+| kefilwe@gmail.com | `Kefilwe-AfriDeal-2026!` | Customer | `/` |
 
-Buyers can also open their own account at `/signup`. Registration is deliberately narrow: it creates a `CUSTOMER` on the `RETAIL` tier and nothing else. Supplier and runner accounts carry consequences a form should not be able to grant - a supplier can be routed real orders, a runner can mark a delivery complete - so those stay behind admin creation and verification. The duplicate-email check and the insert share one `mutate` pass, so two simultaneous signups cannot both find an address free.
+Buyers can also open their own account at `/sign-up`, which is Clerk's form. A new account gets a profile row on first sight - `CUSTOMER` on the `RETAIL` tier and nothing else. Supplier and runner accounts carry consequences a form should not be able to grant - a supplier can be routed real orders, a runner can mark a delivery complete - so those roles are only ever written by `scripts/sync-users-to-clerk.mjs` from the people directory.
 
-Passwords sit in plain text in `data/users.json`. That is deliberate for a demo whose main feature is switching roles in one click, and it is the first thing to change before this touches a real user. Hash on write, compare with a constant-time check in `lib/auth.ts` - and in `app/api/auth/register/route.ts`, which writes them. The two changes are the same edit and belong together.
+Credentials live in Clerk, never here. `lib/auth.ts` turns a Clerk session into the app's session - the profile row from `data/users.json` (found by `clerk_user_id`, then by e-mail) plus the role, supplier, runner and customer type from the Clerk user's public metadata. `middleware.ts` reads the same fields from the session token to bounce a finance login off the settings page before the request reaches a page; for that it needs the Clerk dashboard set to include `{"metadata": "{{user.public_metadata}}"}` in the session token (Sessions → Customize session token). Without it, the portal layouts still enforce the rules one hop later.
 
 ## What each role can reach
 
@@ -67,17 +71,21 @@ Supplier isolation is the one worth checking. A supplier reading `/api/orders` g
 
 ## Tech
 
-Next.js 14 (App Router), React 18, TypeScript in strict mode, Tailwind 3.4, NextAuth 4 with a credentials provider, Zustand for the cart, Framer Motion, Recharts, Lucide icons, React Hook Form with Zod.
+Next.js 14 (App Router), React 18, TypeScript in strict mode, Tailwind 3.4, Clerk for authentication, Sanity for the catalogue, Zustand for the cart, Framer Motion, Recharts, Lucide icons, React Hook Form with Zod.
 
-Two notes on version choices. NextAuth is pinned to 4.x because 5.x is still beta and its docs describe an API that the stable release does not have. Tailwind is pinned to 3.4 rather than 4.x because 4 changes configuration to a CSS-first model, and there was nothing to gain here by taking that on.
+Two notes on version choices. `@clerk/nextjs` is pinned to the 6.x line because 7.x requires Next.js 15.2 or later; moving to 7 is part of a Next 15 upgrade, not a package bump. Tailwind is pinned to 3.4 rather than 4.x because 4 changes configuration to a CSS-first model, and there was nothing to gain here by taking that on.
 
 Pages are server components that read `lib/db` directly. Only mutations go through HTTP. That avoids a fetch waterfall on every screen and means a write is visible on the next render without cache juggling.
 
 ## How the data store works
 
-`lib/db.ts` wraps 17 JSON files with typed read and write helpers. Reads are uncached so a write from one request is visible to the next.
+`lib/db.ts` wraps the 25 collections with typed read and write helpers and routes each by name: the six catalogue collections to Sanity when `CATALOGUE_SOURCE=sanity`, everything else to Postgres when `DB_DRIVER=postgres`, and otherwise to the JSON file of the same name. Reads are uncached so a write from one request is visible to the next.
+
+In Postgres each collection is a document table in the `afrideal` schema - `id`, a `seq` that preserves insertion order, and the row itself as `jsonb` - so the types in `types/` and every caller are unchanged. Hot fields can be promoted to indexed generated columns later without touching a caller. Schema lives in `lib/postgres/schema.ts`; migrations are generated with `npm run db:generate` into `drizzle/` and applied with `npm run db:migrate`.
 
 Writes go through `mutate()`, which serialises them per collection. Node is single threaded, but an `await` inside a read-modify-write is a yield point, so two concurrent POSTs to the same file can interleave and lose an update. Every write in the app takes that lock, and writes land on a temp file that is then renamed, so a crash mid-write cannot leave a half-written JSON file.
+
+On Postgres that lock is `pg_advisory_xact_lock` on the collection name, taken inside the transaction that reads, runs the mutation and writes the diff, so one-writer-per-collection also holds across server instances. Reads use Neon's HTTP driver, writes the WebSocket driver; both retry on a dropped connection.
 
 Regenerating the seed runs integrity checks and exits non-zero if any fail: every product priced above its highest supplier cost, every order subtotal equal to the sum of its own line items, exactly one supplier invoice per supplier order, and the status and supplier mixes the brief specifies.
 
@@ -218,9 +226,9 @@ npm run dev      # one terminal
 npm run verify   # another
 ```
 
-`scripts/verify.mjs` signs in over the real NextAuth flow and drives the HTTP API, so it exercises the actual engines rather than a copy of their rules. 104 checks across 16 sections:
+`scripts/verify.mjs` mints a Clerk session for each seeded account with `CLERK_SECRET_KEY` and drives the HTTP API as that user, so it exercises the actual middleware, guards and engines rather than a copy of their rules. 110 checks across 16 sections:
 
-- all eight logins land on the right role, and bad credentials are rejected
+- all eight accounts resolve to the right role, and a missing, forged or unknown session is refused
 - pricing arithmetic, and no product sells below its highest supplier cost
 - composite ranking, including that the cheapest offer does not win
 - an illegal supplier-payable transition is refused with a 409
@@ -243,7 +251,8 @@ Do not run `npm run build` while `npm run dev` is running. Both write to `.next`
 ```
 afrideal/
 ├── app/
-│   ├── (auth)/login/         login and the quick-login cards
+│   ├── (auth)/               /login and /signup redirects, /after-sign-in landing
+│   ├── sign-in/, sign-up/    Clerk's pages; sign-in carries the quick-login cards
 │   ├── (admin)/admin/        operations console
 │   ├── (supplier)/supplier/  supplier workspace
 │   ├── (runner)/runner/      runner app, mobile first
@@ -318,7 +327,7 @@ Satoshi loads from Fontshare over the network. Geist is bundled through its npm 
 
 Worth saying out loud before a demo.
 
-Passwords are plain text, as described above. Payment gateways are represented but not integrated, so no money moves.
+Payment gateways are represented but not integrated, so no money moves. The demo accounts' passwords are documented above and set on a development Clerk instance only; a production instance must not get them.
 
 Product photography is stock, not the actual goods. It is accurate to the product type and legally clear for commercial use, but a live marketplace takes its images from suppliers at listing time. Treat `public/products` as scaffolding.
 
@@ -326,7 +335,7 @@ Supplier self-service listing management is out of scope by design: Phase 1 is A
 
 Product matching on barcode or GTIN is modelled but not implemented, because nothing in this build ingests a supplier catalogue yet. The `brands` table and the one-product-many-offers shape are the parts that had to exist now so that adding it later is not a migration.
 
-The JSON store is single writer and fine for a demo or a pilot. A real deployment moves `lib/db.ts` behind Firestore or Postgres, which is why every read and write already goes through it rather than touching `fs` directly.
+The JSON store is single writer and fine for a demo. Production runs `DB_DRIVER=postgres`; the JSON adapter stays as the rollback flag until the Postgres path has run through a pilot.
 
 One consequence of the flat ladder is worth flagging rather than burying. A single 60% markup across the catalogue is right for hair, which is what the platform sells, and is optimistic for consumer electronics, where thin margins are the normal condition of the trade rather than a fault. The ladder is deliberately the default and not the ceiling: `data/pricing-rules.json` still holds a rule per category, editable from `/admin/pricing`, so Electronics can be tuned down without touching code. Nothing enforces the platform figure once someone decides otherwise.
 

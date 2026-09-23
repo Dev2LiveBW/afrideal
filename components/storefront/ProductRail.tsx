@@ -34,7 +34,7 @@ export function ProductRail({
   title,
   description,
   action,
-  cardWidth = 'w-[228px]',
+  cardWidth = 'w-[130px] sm:w-[180px] md:w-[228px]',
 }: {
   products: RailProduct[];
   images: ProductImage[];
@@ -92,10 +92,10 @@ export function ProductRail({
 
   return (
     <section>
-      <div className="mb-5 flex flex-wrap items-end justify-between gap-4">
+      <div className="mb-3 sm:mb-5 flex flex-wrap items-end justify-between gap-2 sm:gap-4">
         <div>
-          <h2 className="font-display text-headline-md font-semibold text-ink">{title}</h2>
-          {description && <p className="mt-1 text-[13.5px] text-body">{description}</p>}
+          <h2 className="font-display text-[1.0625rem] sm:text-headline-md font-semibold text-ink">{title}</h2>
+          {description && <p className="mt-0.5 sm:mt-1 text-[0.71875rem] sm:text-[0.84375rem] text-body">{description}</p>}
         </div>
 
         <div className="flex items-center gap-2">
@@ -121,7 +121,7 @@ export function ProductRail({
 
       <div
         ref={scroller}
-        className="no-scrollbar -mx-1 flex snap-x snap-mandatory gap-4 overflow-x-auto px-1 pb-2"
+        className="no-scrollbar -mx-1 flex snap-x snap-mandatory gap-2 sm:gap-4 overflow-x-auto px-1 pb-2"
       >
         {products.map((product) => {
           const primary = images.find(
@@ -146,10 +146,10 @@ export function ProductRail({
             >
               <Link href={`/products/${product.id}`} className="block relative outline-none">
                 <div 
-                  className="relative flex h-[140px] w-[140px] items-center justify-center rounded-full p-[4px] transition-transform duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] group-hover:scale-105 group-hover:shadow-lg md:h-[180px] md:w-[180px]"
+                  className="relative flex h-[90px] w-[90px] sm:h-[140px] sm:w-[140px] items-center justify-center rounded-full p-[3px] sm:p-[4px] transition-transform duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] group-hover:scale-105 group-hover:shadow-lg md:h-[180px] md:w-[180px]"
                   style={{ backgroundColor: palette.wash }}
                 >
-                  <div className="relative flex h-full w-full items-center justify-center overflow-hidden rounded-full border-[3px] border-white bg-white shadow-sm">
+                  <div className="relative flex h-full w-full items-center justify-center overflow-hidden rounded-full border-[2px] sm:border-[3px] border-white bg-white shadow-sm">
                     <Swatch
                       image={primary}
                       fallback={product.swatch}
@@ -163,7 +163,7 @@ export function ProductRail({
                   
                   {product.promotion && (
                     <span 
-                      className="absolute -right-2 top-2 flex h-10 w-10 items-center justify-center rounded-full border-2 border-white bg-[#E67E22] font-mono text-[11px] font-bold text-white shadow-md transition-transform duration-300 group-hover:scale-110 md:-right-0 md:top-4"
+                      className="absolute -right-1 top-1 flex h-7 w-7 sm:h-10 sm:w-10 items-center justify-center rounded-full border border-white sm:border-2 bg-[#E67E22] font-mono text-[0.5625rem] sm:text-[0.6875rem] font-bold text-white shadow-md transition-transform duration-300 group-hover:scale-110 md:-right-0 md:top-4"
                     >
                       -{product.promotion.discount_pct}%
                     </span>
@@ -171,18 +171,18 @@ export function ProductRail({
                 </div>
               </Link>
 
-              <div className="mt-5 flex w-full flex-col items-center px-2">
+              <div className="mt-2.5 sm:mt-5 flex w-full flex-col items-center px-1 sm:px-2">
                 <Link href={`/products/${product.id}`} className="block">
-                  <h3 className="line-clamp-2 text-[14px] font-medium leading-tight text-ink transition-colors group-hover:text-[#E67E22]">
+                  <h3 className="line-clamp-2 text-[0.71875rem] sm:text-[0.875rem] font-medium leading-tight text-ink transition-colors group-hover:text-[#E67E22]">
                     {product.name}
                   </h3>
                 </Link>
 
-                <div className="mt-2.5 flex flex-col items-center gap-1.5">
-                  <div className="flex items-center gap-2">
-                    <PriceTag amount={product.price} size="md" tone="ink" />
+                <div className="mt-1.5 sm:mt-2.5 flex flex-col items-center gap-1 sm:gap-1.5">
+                  <div className="flex items-center gap-1.5 sm:gap-2">
+                    <PriceTag amount={product.price} size="sm" tone="ink" className="text-[0.75rem] sm:text-[0.875rem]" />
                     {product.compare_at_price && (
-                      <span className="text-[12.5px] tabular-nums text-muted line-through">
+                      <span className="text-[0.625rem] sm:text-[0.78125rem] tabular-nums text-muted line-through">
                         {pulaTag(product.compare_at_price)}
                       </span>
                     )}
@@ -191,9 +191,9 @@ export function ProductRail({
                   <button
                     onClick={() => quickAdd(product)}
                     aria-label={`Add ${product.name} to cart`}
-                    className="mt-2 flex h-9 items-center justify-center gap-1.5 rounded-full bg-white px-5 text-[13px] font-bold text-gray-800 shadow-sm ring-1 ring-inset ring-gray-200 transition-all hover:bg-[#E67E22] hover:text-white hover:ring-[#E67E22]"
+                    className="mt-1 sm:mt-2 flex h-7 sm:h-9 items-center justify-center gap-1 sm:gap-1.5 rounded-full bg-white px-3 sm:px-5 text-[0.6875rem] sm:text-[0.8125rem] font-bold text-gray-800 shadow-sm ring-1 ring-inset ring-gray-200 transition-all hover:bg-[#E67E22] hover:text-white hover:ring-[#E67E22]"
                   >
-                    <Plus size={14} strokeWidth={2} />
+                    <Plus size={13} strokeWidth={2} />
                     Add
                   </button>
                 </div>
