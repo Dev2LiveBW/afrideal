@@ -25,6 +25,7 @@ artwork shrink to fit rather than the grid reflowing.
 | supplier directory | full-width rows | **4 columns, 71px cards** |
 | how it works | not in benchmark | **5 columns, 56px** |
 | trust strip | not in benchmark | **4 columns, 71px** |
+| tool floor | rail of 128px tiles, scrolls past the right edge | **5 equal columns filling the container**, 56px at 320 / 254px at 1347 |
 | hero cards | not in benchmark | 2 columns, 144px (unchanged) |
 
 Everything below this line still describes Alibaba and is still the source for
@@ -32,6 +33,12 @@ pattern, colour, type scale and motion. Only the **column counts, and the
 artwork and type sizes that follow from them**, are superseded. §1b's
 "columns | 2, at every phone width" and §3a's rails record what Alibaba does;
 they no longer record what AfriDeal does.
+
+Two further instructions, 2026-09-23: the tool floor stops being a scrolling
+rail and becomes five equal columns that fill the container at every width
+(it was clumping into the left 45% of a wide screen with 744px of dead
+band); and the "how it works" steps drop their explanatory paragraph below
+`sm`, showing icon and header only.
 
 Left stacked on purpose, because they are prose rather than product rows: the
 "How it works" heading block (`app/(store)/page.tsx`) and the footer link

@@ -83,21 +83,21 @@ export function HowItWorks({ className }: { className?: string }) {
                 <span
                   aria-hidden="true"
                   className={cn(
-                    'relative z-10 flex h-6 w-6 shrink-0 items-center justify-center rounded-full ring-1 ring-inset sm:h-14 sm:w-14',
+                    'relative z-10 flex h-8 w-8 shrink-0 items-center justify-center rounded-full ring-1 ring-inset sm:h-14 sm:w-14',
                     TONES[step.tone],
                   )}
                 >
-                  <Icon className="h-3 w-3 sm:h-5 sm:w-5" strokeWidth={1.75} />
+                  <Icon className="h-4 w-4 sm:h-5 sm:w-5" strokeWidth={1.75} />
                 </span>
 
                 <div className="min-w-0">
-                  <h3 className="text-[7px] font-semibold leading-tight text-ink sm:text-[14.5px] sm:leading-5">
-                    <span className="font-mono text-[6px] tabular-nums text-muted sm:text-[12px]">
+                  <h3 className="text-[9px] font-semibold leading-tight text-ink sm:text-[14.5px] sm:leading-5">
+                    <span className="font-mono text-[7.5px] tabular-nums text-muted sm:text-[12px]">
                       {index + 1}.
                     </span>{' '}
                     {step.title}
                   </h3>
-                  <p className="mt-0.5 text-[5.5px] leading-snug text-muted line-clamp-3 sm:mt-1.5 sm:line-clamp-none sm:text-[12.5px] sm:leading-5 md:mx-auto md:max-w-[22ch]">
+                  <p className="hidden mt-0.5 text-[5.5px] leading-snug text-muted line-clamp-3 sm:block sm:mt-1.5 sm:line-clamp-none sm:text-[12.5px] sm:leading-5 md:mx-auto md:max-w-[22ch]">
                     {step.body}
                   </p>
                 </div>
