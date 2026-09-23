@@ -23,21 +23,26 @@ const CLAIMS = [
     icon: Landmark,
     title: 'Payments handled by licensed partners',
     body: 'Processed through DPO Pay, Orange Money or PayGate. AfriDeal never sees your card details.',
+    /* A disclosure, not elaboration - see the note above. Never folds away. */
+    legal: true,
   },
   {
     icon: BadgeCheck,
     title: 'Suppliers verified before they list',
     body: 'Registration, tax and banking details are checked, and orders route on reliability.',
+    legal: false,
   },
   {
     icon: Truck,
     title: 'Delivery you can follow',
     body: 'Pickup and drop-off are tracked against the order, across Botswana and South Africa.',
+    legal: false,
   },
   {
     icon: RotateCcw,
     title: 'A wrong order is ours to fix',
     body: 'You buy from AfriDeal, so a late, short or incorrect order is ours to replace or refund.',
+    legal: false,
   },
 ];
 
@@ -83,7 +88,7 @@ export function TrustStrip({
             <div className="min-w-0">
               <p
                 className={cn(
-                  'text-[8.5px] font-semibold leading-tight sm:text-[13px] sm:leading-5',
+                  'text-[0.53125rem] font-semibold leading-tight sm:text-[0.8125rem] sm:leading-5',
                   dark ? 'text-white' : 'text-ink',
                 )}
               >
@@ -99,7 +104,8 @@ export function TrustStrip({
                */}
               <p
                 className={cn(
-                  'hidden mt-0.5 text-[5.5px] leading-tight sm:block sm:mt-1 sm:text-[12px] sm:leading-5',
+                  'mt-0.5 text-[0.34375rem] leading-tight sm:mt-1 sm:text-[0.75rem] sm:leading-5',
+                  claim.legal ? 'block' : 'hidden sm:block',
                   dark ? 'text-white/55' : 'text-muted',
                 )}
               >

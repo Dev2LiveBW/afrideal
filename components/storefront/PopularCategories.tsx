@@ -105,10 +105,10 @@ export function PopularCategories({ className }: { className?: string }) {
                   className="object-cover object-center"
                 />
               </div>
-              <span className="mt-0.5 line-clamp-1 text-[7.5px] font-semibold text-[#222] transition-colors group-hover:text-[#E67E22] sm:text-[12.5px]">
+              <span className="mt-0.5 line-clamp-1 text-[0.46875rem] font-semibold text-[#222] transition-colors group-hover:text-[#E67E22] sm:text-[0.78125rem]">
                 {category.name}
               </span>
-              <span className="hidden text-[10px] text-[#767676] sm:block">
+              <span className="hidden text-[0.625rem] text-[#767676] sm:block">
                 {category.href === '/browse' ? 'Coming soon' : 'Shop'}
               </span>
             </Link>

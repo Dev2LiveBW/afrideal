@@ -57,7 +57,7 @@ export function ToolFloor({ className }: { className?: string }) {
               >
                 <Icon className="h-3 w-3 sm:h-[18px] sm:w-[18px]" strokeWidth={2} aria-hidden="true" />
               </span>
-              <span className="line-clamp-2 text-[6.5px] font-bold leading-[7.5px] text-[#222] sm:text-[11px] sm:leading-[13px]">
+              <span className="line-clamp-2 text-[0.40625rem] font-bold leading-[0.46875rem] text-[#222] sm:text-[0.6875rem] sm:leading-[0.8125rem]">
                 {label}
               </span>
             </Link>

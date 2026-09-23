@@ -150,18 +150,18 @@ function DoorCard({ door, compact }: { door: Door; compact: boolean }) {
         <h3
           className={cn(
             'font-display font-bold leading-none text-ink',
-            compact ? 'text-[12px] sm:text-[18px]' : 'text-[13px] sm:text-[22px]',
+            compact ? 'text-[0.75rem] sm:text-[1.125rem]' : 'text-[0.8125rem] sm:text-[1.375rem]',
           )}
         >
           {door.title}
         </h3>
-        <p className={cn('font-bold text-ink leading-tight', compact ? 'mt-1 text-[8.5px] sm:text-[13px]' : 'mt-1 text-[9.5px] sm:text-[14px]')}>
+        <p className={cn('font-bold text-ink leading-tight', compact ? 'mt-1 text-[0.53125rem] sm:text-[0.8125rem]' : 'mt-1 text-[0.59375rem] sm:text-[0.875rem]')}>
           {door.band}
         </p>
         <p
           className={cn(
             'max-w-[30ch] text-muted hidden sm:block',
-            compact ? 'mt-1 text-[11px] leading-4' : 'mt-1.5 text-[13px] leading-5',
+            compact ? 'mt-1 text-[0.6875rem] leading-4' : 'mt-1.5 text-[0.8125rem] leading-5',
           )}
         >
           {door.blurb}
@@ -172,7 +172,7 @@ function DoorCard({ door, compact }: { door: Door; compact: boolean }) {
           {door.points.slice(0, 2).map((point) => (
             <li
               key={point}
-              className={cn('flex items-center gap-1 text-ink leading-tight', compact ? 'text-[7.5px] sm:text-[11.5px]' : 'text-[8.5px] sm:text-[13px]')}
+              className={cn('flex items-center gap-1 text-ink leading-tight', compact ? 'text-[0.46875rem] sm:text-[0.71875rem]' : 'text-[0.53125rem] sm:text-[0.8125rem]')}
             >
               <CheckCircle2
                 size={10}
@@ -195,8 +195,8 @@ function DoorCard({ door, compact }: { door: Door; compact: boolean }) {
           className={cn(
             'inline-flex w-full items-center justify-center gap-1 rounded-lg px-1 font-bold transition-colors',
             compact
-              ? 'mt-2 h-6 text-[8px] sm:mt-4 sm:h-9 sm:text-[12px] sm:px-3 sm:w-auto sm:self-start'
-              : 'mt-2.5 h-7 text-[9px] sm:mt-6 sm:h-11 sm:text-[14px] sm:px-5 sm:w-auto sm:self-start',
+              ? 'mt-2 h-6 text-[0.5rem] sm:mt-4 sm:h-9 sm:text-[0.75rem] sm:px-3 sm:w-auto sm:self-start'
+              : 'mt-2.5 h-7 text-[0.5625rem] sm:mt-6 sm:h-11 sm:text-[0.875rem] sm:px-5 sm:w-auto sm:self-start',
             door.button,
           )}
         >
@@ -263,16 +263,16 @@ export function PathChooser({
     <section className={cn(className)} aria-labelledby="buying-options">
       {heading && (
         <div className="mb-4 sm:mb-6">
-          <p className="text-[11px] font-bold uppercase tracking-[0.14em] text-[#27AE60] sm:text-[12px]">
+          <p className="text-[0.6875rem] font-bold uppercase tracking-[0.14em] text-[#27AE60] sm:text-[0.75rem]">
             Buying options
           </p>
           <h2
             id="buying-options"
-            className="mt-1 font-display text-[22px] font-bold leading-tight text-ink sm:text-[34px]"
+            className="mt-1 font-display text-[1.375rem] font-bold leading-tight text-ink sm:text-[2.125rem]"
           >
             Choose how you want to buy
           </h2>
-          <p className="mt-1 text-[12.5px] text-muted sm:text-[14.5px]">
+          <p className="mt-1 text-[0.78125rem] text-muted sm:text-[0.90625rem]">
             Same product. Different quantities. Better prices.
           </p>
         </div>

@@ -26,20 +26,20 @@ export function MockupHero({ badges = true }: { badges?: boolean }) {
             <div className="relative z-10 max-w-full sm:max-w-[280px] lg:max-w-[320px]">
               <div className="inline-flex items-center gap-1 rounded-md border border-white/20 bg-white/10 px-1.5 py-0.5 mb-1.5 sm:gap-1.5 sm:px-3 sm:py-1 sm:mb-5">
                 <ShoppingBag className="h-2.5 w-2.5 shrink-0 text-white/80 sm:h-3.5 sm:w-3.5" />
-                <span className="text-[7px] font-bold tracking-wide text-white/90 sm:text-[11px] sm:tracking-wider">SHOP THE MARKETPLACE</span>
+                <span className="text-[0.4375rem] font-bold tracking-wide text-white/90 sm:text-[0.6875rem] sm:tracking-wider">SHOP THE MARKETPLACE</span>
               </div>
               
-              <h1 className="font-display text-[14px] leading-[1.1] font-bold mb-1 sm:text-[24px] sm:mb-3 lg:text-[40px] lg:leading-[1.1]">
+              <h1 className="font-display text-[0.875rem] leading-[1.1] font-bold mb-1 sm:text-[1.5rem] sm:mb-3 lg:text-[2.5rem] lg:leading-[1.1]">
                 Compare. Buy.<br/>Save more.
               </h1>
               
-              <p className="hidden text-[13px] text-white/70 leading-relaxed mb-4 sm:block lg:text-[14px] lg:mb-6">
+              <p className="hidden text-[0.8125rem] text-white/70 leading-relaxed mb-4 sm:block lg:text-[0.875rem] lg:mb-6">
                 Compare prices from trusted local and international suppliers. Retail, bulk or wholesale - you choose.
               </p>
               
               <ul className="space-y-1 mb-2 sm:space-y-2 sm:mb-6">
                 {['Best prices', 'Verified suppliers', 'Secure payments', 'Fast delivery'].map(item => (
-                  <li key={item} className="flex items-center gap-1 text-[9px] font-medium text-white/90 sm:gap-2 sm:text-[13px]">
+                  <li key={item} className="flex items-center gap-1 text-[0.5625rem] font-medium text-white/90 sm:gap-2 sm:text-[0.8125rem]">
                     <CheckCircle2 className="h-2.5 w-2.5 shrink-0 text-[#0e0701] fill-[#E67E22] sm:h-4 sm:w-4" />
                     {item}
                   </li>
@@ -63,7 +63,7 @@ export function MockupHero({ badges = true }: { badges?: boolean }) {
               </div>
               <Link
                 href="/browse"
-                className="mt-1.5 flex h-7 sm:h-10 w-full items-center justify-center gap-1 whitespace-nowrap rounded-full bg-gold px-2 text-[9px] font-bold text-black transition-colors hover:bg-gold-light sm:gap-2 sm:px-4 sm:text-[13px]"
+                className="mt-1.5 flex h-7 sm:h-10 w-full items-center justify-center gap-1 whitespace-nowrap rounded-full bg-gold px-2 text-[0.5625rem] font-bold text-black transition-colors hover:bg-gold-light sm:gap-2 sm:px-4 sm:text-[0.8125rem]"
               >
                 Browse products
                 <ArrowRight className="h-3 w-3 shrink-0 sm:h-4 sm:w-4" />
@@ -84,7 +84,7 @@ export function MockupHero({ badges = true }: { badges?: boolean }) {
             <div className="pointer-events-none absolute inset-y-0 right-0 z-0 hidden w-full bg-gradient-to-r from-[#0e0701] via-[#0e0701]/40 to-transparent lg:block" />
             <Link
               href="/browse"
-              className="relative z-10 mt-auto hidden h-14 items-center justify-center gap-2 self-start whitespace-nowrap rounded-full bg-gold px-8 text-[16px] font-bold text-black transition-colors hover:bg-gold-light lg:inline-flex"
+              className="relative z-10 mt-auto hidden h-14 items-center justify-center gap-2 self-start whitespace-nowrap rounded-full bg-gold px-8 text-[1rem] font-bold text-black transition-colors hover:bg-gold-light lg:inline-flex"
             >
               Browse products
               <ArrowRight className="h-[18px] w-[18px] shrink-0" />
@@ -96,20 +96,20 @@ export function MockupHero({ badges = true }: { badges?: boolean }) {
             <div className="relative z-10 max-w-full sm:max-w-[280px] lg:max-w-[300px]">
               <div className="inline-flex items-center gap-1 rounded-md bg-orange-100 px-1.5 py-0.5 mb-1.5 sm:gap-1.5 sm:px-3 sm:py-1 sm:mb-5">
                 <Truck className="h-2.5 w-2.5 shrink-0 text-[#D35400] sm:h-3.5 sm:w-3.5" />
-                <span className="text-[7px] font-bold tracking-wide text-[#D35400] sm:text-[11px] sm:tracking-wider">RUNNER SERVICE</span>
+                <span className="text-[0.4375rem] font-bold tracking-wide text-[#D35400] sm:text-[0.6875rem] sm:tracking-wider">RUNNER SERVICE</span>
               </div>
               
-              <h1 className="font-display text-[14px] leading-[1.1] font-bold text-ink mb-1 sm:text-[24px] sm:mb-2 lg:text-[40px] lg:leading-[1.1]">
+              <h1 className="font-display text-[0.875rem] leading-[1.1] font-bold text-ink mb-1 sm:text-[1.5rem] sm:mb-2 lg:text-[2.5rem] lg:leading-[1.1]">
                 Can&apos;t find it listed?
               </h1>
               
-              <p className="text-[9px] font-semibold text-[#D35400] leading-snug mb-1.5 sm:text-[14px] sm:mb-4 lg:text-[20px]">
+              <p className="text-[0.5625rem] font-semibold text-[#D35400] leading-snug mb-1.5 sm:text-[0.875rem] sm:mb-4 lg:text-[1.25rem]">
                 Our verified runners will source it for you.
               </p>
               
               <ul className="space-y-1 mb-2 sm:space-y-2 sm:mb-6">
                 {['Find anything', 'Inspect & negotiate', 'Buy on your behalf', 'Personal tasks'].map(item => (
-                  <li key={item} className="flex items-center gap-1 text-[9px] font-medium text-ink sm:gap-2 sm:text-[13px]">
+                  <li key={item} className="flex items-center gap-1 text-[0.5625rem] font-medium text-ink sm:gap-2 sm:text-[0.8125rem]">
                     <CheckCircle2 className="h-2.5 w-2.5 shrink-0 text-[#27AE60] sm:h-4 sm:w-4" />
                     {item}
                   </li>
@@ -133,7 +133,7 @@ export function MockupHero({ badges = true }: { badges?: boolean }) {
               </div>
               <Link
                 href="/request-a-runner"
-                className="mt-1.5 flex h-7 sm:h-10 w-full items-center justify-center gap-1 whitespace-nowrap rounded-full bg-[#E67E22] px-2 text-[9px] font-bold text-white transition-colors hover:bg-[#D35400] sm:gap-2 sm:px-4 sm:text-[13px]"
+                className="mt-1.5 flex h-7 sm:h-10 w-full items-center justify-center gap-1 whitespace-nowrap rounded-full bg-[#E67E22] px-2 text-[0.5625rem] font-bold text-white transition-colors hover:bg-[#D35400] sm:gap-2 sm:px-4 sm:text-[0.8125rem]"
               >
                 Request a runner
                 <ArrowRight className="h-3 w-3 shrink-0 sm:h-4 sm:w-4" />
@@ -152,7 +152,7 @@ export function MockupHero({ badges = true }: { badges?: boolean }) {
             </div>
             <Link
               href="/request-a-runner"
-              className="relative z-10 mt-auto hidden h-14 w-[80%] items-center justify-center gap-2 whitespace-nowrap rounded-xl bg-[#E67E22] px-8 text-[16px] font-bold text-white transition-colors hover:bg-[#D35400] lg:flex"
+              className="relative z-10 mt-auto hidden h-14 w-[80%] items-center justify-center gap-2 whitespace-nowrap rounded-xl bg-[#E67E22] px-8 text-[1rem] font-bold text-white transition-colors hover:bg-[#D35400] lg:flex"
             >
               Request a runner
               <ArrowRight className="h-[18px] w-[18px] shrink-0" />
@@ -178,8 +178,8 @@ export function MockupHero({ badges = true }: { badges?: boolean }) {
                   <badge.icon className={cn('h-3.5 w-3.5 sm:h-[22px] sm:w-[22px]', badge.color)} />
                 </div>
                 <div className="min-w-0">
-                  <h4 className="text-[8.5px] font-bold leading-tight text-ink sm:text-[13px]">{badge.title}</h4>
-                  <p className="hidden text-[11px] leading-tight text-muted sm:block">{badge.sub}</p>
+                  <h4 className="text-[0.53125rem] font-bold leading-tight text-ink sm:text-[0.8125rem]">{badge.title}</h4>
+                  <p className="hidden text-[0.6875rem] leading-tight text-muted sm:block">{badge.sub}</p>
                 </div>
               </>
             );

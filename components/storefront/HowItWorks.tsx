@@ -91,13 +91,13 @@ export function HowItWorks({ className }: { className?: string }) {
                 </span>
 
                 <div className="min-w-0">
-                  <h3 className="text-[9px] font-semibold leading-tight text-ink sm:text-[14.5px] sm:leading-5">
-                    <span className="font-mono text-[7.5px] tabular-nums text-muted sm:text-[12px]">
+                  <h3 className="text-[0.5625rem] font-semibold leading-tight text-ink sm:text-[0.90625rem] sm:leading-5">
+                    <span className="font-mono text-[0.46875rem] tabular-nums text-muted sm:text-[0.75rem]">
                       {index + 1}.
                     </span>{' '}
                     {step.title}
                   </h3>
-                  <p className="hidden mt-0.5 text-[5.5px] leading-snug text-muted sm:block sm:mt-1.5 sm:text-[12.5px] sm:leading-5 md:mx-auto md:max-w-[22ch]">
+                  <p className="hidden mt-0.5 text-[0.34375rem] leading-snug text-muted sm:block sm:mt-1.5 sm:text-[0.78125rem] sm:leading-5 md:mx-auto md:max-w-[22ch]">
                     {step.body}
                   </p>
                 </div>

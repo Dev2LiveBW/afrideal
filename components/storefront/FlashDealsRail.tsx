@@ -44,10 +44,10 @@ function useCountdown(target: string | undefined) {
 function Segment({ value, label }: { value: number; label: string }) {
   return (
     <span className="flex flex-col items-center">
-      <span className="flex h-6 min-w-[24px] items-center justify-center rounded bg-ink px-1 font-mono text-[11px] font-semibold tabular-nums text-gold-light sm:h-7 sm:min-w-[28px] sm:px-1.5 sm:text-[13px]">
+      <span className="flex h-6 min-w-[24px] items-center justify-center rounded bg-ink px-1 font-mono text-[0.6875rem] font-semibold tabular-nums text-gold-light sm:h-7 sm:min-w-[28px] sm:px-1.5 sm:text-[0.8125rem]">
         {String(value).padStart(2, '0')}
       </span>
-      <span className="mt-0.5 font-mono text-[8px] uppercase tracking-[0.14em] text-muted sm:mt-1 sm:text-[9px]">
+      <span className="mt-0.5 font-mono text-[0.5rem] uppercase tracking-[0.14em] text-muted sm:mt-1 sm:text-[0.5625rem]">
         {label}
       </span>
     </span>
@@ -84,8 +84,8 @@ export function FlashDealsRail({
             <Zap size={17} className="hidden sm:block" strokeWidth={2} />
           </span>
           <div>
-            <h2 className="font-display text-[16px] sm:text-headline-md font-semibold text-ink">Flash deals</h2>
-            <p className="text-[11px] sm:text-[12.5px] text-body">Ends when the clock does, not before</p>
+            <h2 className="font-display text-[1rem] sm:text-headline-md font-semibold text-ink">Flash deals</h2>
+            <p className="text-[0.6875rem] sm:text-[0.78125rem] text-body">Ends when the clock does, not before</p>
           </div>
         </div>
 
@@ -94,15 +94,15 @@ export function FlashDealsRail({
           {remaining !== null && (
             <div className="flex items-start gap-1 sm:gap-1.5">
               <Segment value={hours} label="hrs" />
-              <span className="pt-0.5 sm:pt-1 font-mono text-[11px] sm:text-[13px] text-muted">:</span>
+              <span className="pt-0.5 sm:pt-1 font-mono text-[0.6875rem] sm:text-[0.8125rem] text-muted">:</span>
               <Segment value={minutes} label="min" />
-              <span className="pt-0.5 sm:pt-1 font-mono text-[11px] sm:text-[13px] text-muted">:</span>
+              <span className="pt-0.5 sm:pt-1 font-mono text-[0.6875rem] sm:text-[0.8125rem] text-muted">:</span>
               <Segment value={seconds} label="sec" />
             </div>
           )}
 
           <Link href="/browse">
-            <ActionButton variant="ink" size="sm" className="h-7 sm:h-9 px-2.5 sm:px-4 text-[11px] sm:text-[13px]">
+            <ActionButton variant="ink" size="sm" className="h-7 sm:h-9 px-2.5 sm:px-4 text-[0.6875rem] sm:text-[0.8125rem]">
               See all
             </ActionButton>
           </Link>
@@ -144,7 +144,7 @@ export function FlashDealsRail({
                   
                   {product.promotion && (
                     <span 
-                      className="absolute -right-1 top-1 flex h-8 w-8 sm:h-11 sm:w-11 flex-col items-center justify-center rounded-full border border-white sm:border-2 bg-danger font-mono text-[8px] sm:text-[10px] font-bold leading-tight text-white shadow-md transition-transform duration-300 group-hover:scale-110 md:-right-0 md:top-4"
+                      className="absolute -right-1 top-1 flex h-8 w-8 sm:h-11 sm:w-11 flex-col items-center justify-center rounded-full border border-white sm:border-2 bg-danger font-mono text-[0.5rem] sm:text-[0.625rem] font-bold leading-tight text-white shadow-md transition-transform duration-300 group-hover:scale-110 md:-right-0 md:top-4"
                     >
                       <span className="scale-90 sm:scale-100">SAVE</span>
                       <span>{product.promotion.discount_pct}%</span>
@@ -154,22 +154,22 @@ export function FlashDealsRail({
               </Link>
 
               <div className="mt-2.5 sm:mt-5 flex w-full flex-col items-center px-1 sm:px-2">
-                <div className="flex items-center justify-center gap-1 text-[9.5px] sm:text-[11px] font-bold text-danger mb-1 sm:mb-1.5 uppercase tracking-wide">
+                <div className="flex items-center justify-center gap-1 text-[0.59375rem] sm:text-[0.6875rem] font-bold text-danger mb-1 sm:mb-1.5 uppercase tracking-wide">
                   <Flame size={11} className="fill-danger sm:w-3 sm:h-3" /> 
                   {sold} claimed
                 </div>
                 
                 <Link href={`/products/${product.id}`} className="block">
-                  <h3 className="line-clamp-2 text-[11.5px] sm:text-[14px] font-medium leading-tight text-ink transition-colors group-hover:text-gold">
+                  <h3 className="line-clamp-2 text-[0.71875rem] sm:text-[0.875rem] font-medium leading-tight text-ink transition-colors group-hover:text-gold">
                     {product.name}
                   </h3>
                 </Link>
 
                 <div className="mt-1.5 sm:mt-2.5 flex flex-col items-center gap-1 sm:gap-1.5">
                   <div className="flex items-center gap-1 sm:gap-2">
-                    <PriceTag amount={product.price} size="sm" tone="ink" className="text-[12px] sm:text-[14px]" />
+                    <PriceTag amount={product.price} size="sm" tone="ink" className="text-[0.75rem] sm:text-[0.875rem]" />
                     {product.compare_at_price && (
-                      <span className="font-mono text-[10px] sm:text-[12px] tabular-nums text-muted line-through">
+                      <span className="font-mono text-[0.625rem] sm:text-[0.75rem] tabular-nums text-muted line-through">
                         {pulaTag(product.compare_at_price)}
                       </span>
                     )}

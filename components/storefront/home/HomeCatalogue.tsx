@@ -155,7 +155,7 @@ function CategoryChips({
                   onClick={() => pick(chip.id)}
                   aria-pressed={isActive}
                   className={cn(
-                    'press-soft mx-2 shrink-0 whitespace-nowrap text-[13px] leading-[19px] text-[#222] outline-none',
+                    'press-soft mx-2 shrink-0 whitespace-nowrap text-[0.8125rem] leading-[1.1875rem] text-[#222] outline-none',
                     isActive && 'font-bold',
                   )}
                 >
@@ -226,7 +226,7 @@ function CategoryChips({
               className="absolute inset-x-0 top-0 rounded-b-[12px] bg-surface-raised px-3 pb-4 pt-3 shadow-[0_8px_24px_rgba(0,0,0,0.12)] will-change-transform sm:px-4"
             >
               <div className="mx-auto max-w-market">
-                <p className="text-[13px] font-bold text-[#222]">All categories</p>
+                <p className="text-[0.8125rem] font-bold text-[#222]">All categories</p>
                 <ul className="mt-2 grid grid-cols-6 gap-1 sm:gap-2">
                   {chips.map((chip) => {
                     const isActive = chip.id === active;
@@ -237,7 +237,7 @@ function CategoryChips({
                           onClick={() => pick(chip.id)}
                           aria-pressed={isActive}
                           className={cn(
-                            'press-soft line-clamp-2 flex h-[38px] w-full items-center justify-center rounded-[4px] px-1.5 text-center text-[12px] leading-[14px] outline-none',
+                            'press-soft line-clamp-2 flex h-[38px] w-full items-center justify-center rounded-[4px] px-1.5 text-center text-[0.75rem] leading-[0.875rem] outline-none',
                             isActive ? 'bg-[#222] font-bold text-white' : 'bg-[#f4f4f4] text-[#222]',
                           )}
                         >
@@ -258,7 +258,19 @@ function CategoryChips({
 
 /* ───────────────────────── Feed ───────────────────────── */
 
-const BATCH = 8;
+/*
+ * Five complete rows at the feed's column count.
+ *
+ * This was 8, which spanned four rows when the feed was two columns wide -
+ * taller than a phone screen, so one batch mounted and the observer waited.
+ * At five columns the same 8 cards are two short rows, well inside the
+ * observer's viewport + 160px trigger zone, so it re-armed and fired again
+ * immediately, chaining four or five setShown calls and re-rendering a
+ * growing grid each time. Self-limiting, but the jank landed on exactly the
+ * small screens the density change was for. Keep this a multiple of the
+ * column count so a batch never ends mid-row.
+ */
+const BATCH = 25;
 
 /**
  * Benchmark §1b/§3a: white, 12px margins, two 179px columns with an 8px
@@ -303,17 +315,17 @@ function Feed({
     <section className="bg-surface-raised px-3 pb-2 pt-3 sm:px-4" aria-labelledby="home-feed">
       <div className="mx-auto max-w-market">
         <div className="flex items-baseline justify-between gap-3">
-          <h2 id="home-feed" className="font-sans text-[16px] font-bold leading-5 tracking-normal text-[#222]">
+          <h2 id="home-feed" className="font-sans text-[1rem] font-bold leading-5 tracking-normal text-[#222]">
             {title}
           </h2>
-          <p className="text-[11px] text-[#767676]">
+          <p className="text-[0.6875rem] text-[#767676]">
             <span className="font-mono tabular-nums">{items.length}</span>{' '}
             {items.length === 1 ? 'product' : 'products'}
           </p>
         </div>
 
         {items.length === 0 ? (
-          <p className="py-10 text-center text-[13px] text-[#767676]">Nothing listed in this category yet.</p>
+          <p className="py-10 text-center text-[0.8125rem] text-[#767676]">Nothing listed in this category yet.</p>
         ) : (
           <div className="mt-2 grid grid-cols-5 gap-x-1 gap-y-1 sm:gap-x-4 sm:gap-y-5">
             {promos && promos.length > 0 && <PromoCarousel promos={promos} />}

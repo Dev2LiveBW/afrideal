@@ -104,32 +104,32 @@ export function LiveDeals({ rows, className }: { rows: LiveDealRow[]; className?
                     emoji={product.emoji}
                     label={product.name}
                     className="h-full w-full"
-                    glyphClassName="text-[16px] sm:text-[34px] bottom-1 right-2"
+                    glyphClassName="text-[1rem] sm:text-[2.125rem] bottom-1 right-2"
                     zoomOnHover={false}
                   />
-                  <span className="absolute bottom-0.5 left-0.5 z-10 max-w-[calc(100%-4px)] truncate rounded-[3px] bg-[#222]/70 px-0.5 py-0 font-mono text-[5.5px] font-bold text-white sm:px-1.5 sm:text-[10px]">
+                  <span className="absolute bottom-0.5 left-0.5 z-10 max-w-[calc(100%-4px)] truncate rounded-[3px] bg-[#222]/70 px-0.5 py-0 font-mono text-[0.34375rem] font-bold text-white sm:px-1.5 sm:text-[0.625rem]">
                     −{pct.toFixed(0)}% at {floor}+
                   </span>
                   <button
                     type="button"
                     onClick={(event) => quickAdd(event, row)}
                     aria-label={`Add ${product.name} to cart`}
-                    className="press absolute right-1.5 top-1.5 z-10 flex h-4 w-4 items-center justify-center rounded-full bg-[#E67E22] text-white shadow-md sm:h-7 sm:w-7"
+                    className="press absolute right-1.5 top-1.5 z-10 flex h-6 w-6 items-center justify-center rounded-full bg-[#E67E22] text-white shadow-md sm:h-7 sm:w-7"
                   >
-                    <Plus size={9} strokeWidth={3} aria-hidden="true" className="sm:hidden" />
+                    <Plus size={13} strokeWidth={2.75} aria-hidden="true" className="sm:hidden" />
                     <Plus size={14} strokeWidth={2.5} aria-hidden="true" className="hidden sm:block" />
                   </button>
                 </div>
                 <div className="mt-0.5 px-0">
                   <div className="flex flex-wrap items-baseline gap-1">
-                    <span className="font-mono text-[8px] font-bold tabular-nums text-[#1E8449] sm:text-[14px]">
+                    <span className="font-mono text-[0.5rem] font-bold tabular-nums text-[#1E8449] sm:text-[0.875rem]">
                       {pulaTag(to)}
                     </span>
-                    <span className="font-mono text-[6px] font-normal tabular-nums text-[#888] line-through sm:text-[11px]">
+                    <span className="font-mono text-[0.375rem] font-normal tabular-nums text-muted line-through sm:text-[0.6875rem]">
                       {pulaTag(from)}
                     </span>
                   </div>
-                  <div className="mt-0 line-clamp-1 text-[7.5px] font-medium text-[#222] transition-colors group-hover:text-[#E67E22] sm:text-[12px]">
+                  <div className="mt-0 line-clamp-1 text-[0.46875rem] font-medium text-[#222] transition-colors group-hover:text-[#E67E22] sm:text-[0.75rem]">
                     {product.name}
                   </div>
                 </div>
