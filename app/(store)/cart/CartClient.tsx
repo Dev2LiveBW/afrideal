@@ -74,9 +74,9 @@ export function CartClient({
 
   if (!mounted) {
     return (
-      <div className="mx-auto max-w-market px-6 pb-24 pt-28">
+      <div className="mx-auto max-w-market px-3 pb-[100px] pt-[50px] lg:px-6 lg:pb-24 lg:pt-28">
         <div className="skeleton h-9 w-48" />
-        <div className="mt-8 grid gap-8 lg:grid-cols-[minmax(0,1fr)_minmax(0,360px)]">
+        <div className="mt-6 grid gap-6 lg:mt-8 lg:gap-8 lg:grid-cols-[minmax(0,1fr)_minmax(0,360px)]">
           <div className="space-y-3">
             {[0, 1].map((index) => (
               <div key={index} className="skeleton h-28 rounded-md" />
@@ -89,7 +89,7 @@ export function CartClient({
   }
 
   return (
-    <div className="mx-auto max-w-market px-6 pb-24 pt-28">
+    <div className="mx-auto max-w-market px-3 pb-[100px] pt-[50px] lg:px-6 lg:pb-24 lg:pt-28">
       <h1 className="font-display text-headline-lg font-semibold text-ink">
         {cart.length === 0
           ? 'Your cart'
@@ -111,7 +111,7 @@ export function CartClient({
           className="mt-8 rounded-md border border-hairline bg-surface-raised"
         />
       ) : (
-        <div className="mt-8 grid gap-8 lg:grid-cols-[minmax(0,1fr)_minmax(0,360px)] lg:gap-12">
+        <div className="mt-6 grid gap-6 lg:mt-8 lg:grid-cols-[minmax(0,1fr)_minmax(0,360px)] lg:gap-12">
           {/* Lines */}
           <ul className="space-y-3">
             {cart.map((line) => {
@@ -146,11 +146,11 @@ export function CartClient({
                 <div className="min-w-0 flex-1">
                   <Link
                     href={`/products/${line.product_id}`}
-                    className="text-[14.5px] font-semibold text-ink transition-colors hover:text-forest"
+                    className="block truncate text-[14.5px] font-semibold text-ink transition-colors hover:text-forest"
                   >
                     {line.name}
                   </Link>
-                  <p className="mt-0.5 text-[12.5px] text-body">{line.variant_label}</p>
+                  <p className="mt-0.5 truncate text-[12.5px] text-body">{line.variant_label}</p>
                   <p className="mt-1">
                     <MoneyText amount={unitPriceFor(line)} size="sm" tone="muted" />
                     <span className="ml-1 text-[12.5px] text-muted">each</span>
@@ -161,7 +161,7 @@ export function CartClient({
                     )}
                   </p>
 
-                  <div className="mt-3 flex flex-wrap items-center gap-3">
+                  <div className="mt-3 flex flex-nowrap items-center gap-3">
                     <div className="flex items-center rounded-full ring-1 ring-inset ring-hairline-strong">
                       <button
                         onClick={() => setQty(line.product_id, line.variant_id, line.qty - 1)}
@@ -219,8 +219,21 @@ export function CartClient({
             })}
           </ul>
 
-          {/* Summary */}
-          <div className="lg:sticky lg:top-24 lg:self-start">
+          {/* ── Mobile sticky checkout bar ─────────────────────────── */}
+          <div className="fixed bottom-[calc(56px+env(safe-area-inset-bottom))] left-0 right-0 z-[60] border-t border-hairline bg-white p-3 shadow-[0_-4px_12px_rgba(0,0,0,0.05)] lg:hidden">
+            <div className="flex items-center justify-between gap-4 pb-2">
+              <span className="text-[13px] text-body">Total</span>
+              <MoneyText amount={total} size="lg" tone="ink" />
+            </div>
+            <Link href="/checkout" className="block">
+              <ActionButton size="lg" className="w-full" withArrow>
+                Checkout
+              </ActionButton>
+            </Link>
+          </div>
+
+          {/* ── Desktop order summary (hidden on mobile) ─────────────── */}
+          <div className="hidden lg:block lg:sticky lg:top-24 lg:self-start">
             <Enclosure>
               <div className="p-5">
                 <h2 className="text-[15px] font-semibold text-ink">Order summary</h2>
