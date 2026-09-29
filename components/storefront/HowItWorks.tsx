@@ -1,5 +1,4 @@
 import { ClipboardList, CreditCard, FileText, PackageSearch, Truck } from 'lucide-react';
-
 import { cn } from '@/lib/utils';
 
 /**
@@ -62,15 +61,11 @@ export function HowItWorks({ className }: { className?: string }) {
       <ol className="grid grid-cols-5 gap-1 sm:gap-4">
         {STEPS.map((step, index) => {
           const Icon = step.icon;
-          const isLastOdd = index === STEPS.length - 1;
 
           return (
             <li
               key={step.title}
-              className={cn(
-                'relative min-w-0 rounded-xl border border-hairline/60 bg-surface-raised/70 p-2.5 text-center sm:border-0 sm:bg-transparent sm:p-0 md:text-center',
-                isLastOdd && 'col-span-2 sm:col-span-1 max-w-[260px] mx-auto w-full',
-              )}
+              className="relative min-w-0 rounded-xl border border-hairline/60 bg-surface-raised/70 p-2.5 text-center sm:border-0 sm:bg-transparent sm:p-0 md:text-center"
             >
               {index < STEPS.length - 1 && (
                 <span
