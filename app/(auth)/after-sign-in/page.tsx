@@ -11,6 +11,17 @@ import { landingFor } from '@/lib/roles';
 export const dynamic = 'force-dynamic';
 
 export default async function AfterSignInPage() {
-  const session = await auth();
-  redirect(session?.user ? landingFor(session.user.role) : '/');
+  try {
+    const session = await auth();
+    redirect(session?.user ? landingFor(session.user.role) : '/');
+  } catch (err: unknown) {
+    // Next.js redirect() works by throwing — must be re-thrown.
+    // Any other error (e.g. missing DATABASE_URL on Vercel) falls back to home.
+    const isRedirect =
+      typeof err === 'object' && err !== null && 'digest' in err &&
+      typeof (err as { digest?: unknown }).digest === 'string' &&
+      (err as { digest: string }).digest.startsWith('NEXT_REDIRECT');
+    if (isRedirect) throw err;
+    redirect('/');
+  }
 }
