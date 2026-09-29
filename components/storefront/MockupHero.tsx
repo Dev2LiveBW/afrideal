@@ -8,6 +8,10 @@ import { cn } from '@/lib/utils';
  * (2026-09-11). On the home page it stands where the benchmark's banner
  * would, as the first floor after the tools.
  *
+ * Both cards always sit side by side (grid-cols-2 at every width) with the
+ * photograph and button visible at every breakpoint — no separate mobile/desktop
+ * image slots. The photo height scales: h-20 → sm:h-32 → lg:h-44.
+ *
  * `badges` - the six-tile strip under the cards. Off on the home page,
  * where the benchmark's tool floor (`ToolFloor`) now does the same job one
  * floor higher: the strip's two real doors (Request a Quote, Become a
@@ -17,10 +21,10 @@ export function MockupHero({ badges = true }: { badges?: boolean }) {
   return (
     <section className={cn('bg-surface-raised pt-3 sm:pt-6', badges ? 'pb-8 sm:pb-12' : 'pb-4 sm:pb-8')}>
       <div className="mx-auto max-w-market px-3 sm:px-6">
-        
-        {/* Two Big Cards */}
+
+        {/* Two Big Cards — side by side at every width */}
         <div className="grid grid-cols-2 gap-2 sm:gap-4 lg:gap-6">
-          
+
           {/* Left Card: Marketplace */}
           <div className="relative overflow-hidden rounded-2xl bg-[#0e0701] text-white p-2.5 sm:p-6 lg:p-10 shadow-lg min-h-[260px] sm:min-h-[380px] lg:min-h-[460px] flex flex-col justify-between isolate sm:rounded-[24px]">
             <div className="relative z-10 max-w-full sm:max-w-[280px] lg:max-w-[320px]">
@@ -28,15 +32,15 @@ export function MockupHero({ badges = true }: { badges?: boolean }) {
                 <ShoppingBag className="h-2.5 w-2.5 shrink-0 text-white/80 sm:h-3.5 sm:w-3.5" />
                 <span className="text-[0.4375rem] font-bold tracking-wide text-white/90 sm:text-[0.6875rem] sm:tracking-wider">SHOP THE MARKETPLACE</span>
               </div>
-              
+
               <h1 className="font-display text-[0.875rem] leading-[1.1] font-bold mb-1 sm:text-[1.5rem] sm:mb-3 lg:text-[2.5rem] lg:leading-[1.1]">
                 Compare. Buy.<br/>Save more.
               </h1>
-              
+
               <p className="hidden text-[0.8125rem] text-white/70 leading-relaxed mb-4 sm:block lg:text-[0.875rem] lg:mb-6">
                 Compare prices from trusted local and international suppliers. Retail, bulk or wholesale - you choose.
               </p>
-              
+
               <ul className="space-y-1 mb-2 sm:space-y-2 sm:mb-6">
                 {['Best prices', 'Verified suppliers', 'Secure payments', 'Fast delivery'].map(item => (
                   <li key={item} className="flex items-center gap-1 text-[0.5625rem] font-medium text-white/90 sm:gap-2 sm:text-[0.8125rem]">
@@ -46,49 +50,26 @@ export function MockupHero({ badges = true }: { badges?: boolean }) {
                 ))}
               </ul>
             </div>
-            
-            {/*
-              Below `lg`: Dedicated image slot and clean button row.
-              Image is positioned above the button so it is never covered or clipped.
-            */}
-            <div className="relative mt-auto flex flex-col items-center w-full z-10 lg:hidden">
-              <div className="relative h-20 sm:h-32 w-full shrink-0">
+
+            {/* Photo + button — visible at every width */}
+            <div className="relative mt-auto flex flex-col items-center w-full z-10">
+              <div className="relative h-20 sm:h-32 lg:h-44 w-full shrink-0">
                 <Image
                   src="/images/hero/mockup.jpg"
                   alt="Marketplace products"
                   fill
-                  sizes="(max-width: 640px) 45vw, 240px"
+                  sizes="(max-width: 640px) 45vw, (max-width: 1024px) 45vw, 640px"
                   className="object-contain object-bottom"
                 />
               </div>
               <Link
                 href="/browse"
-                className="mt-1.5 flex h-7 sm:h-10 w-full items-center justify-center gap-1 whitespace-nowrap rounded-full bg-gold px-2 text-[0.5625rem] font-bold text-black transition-colors hover:bg-gold-light sm:gap-2 sm:px-4 sm:text-[0.8125rem]"
+                className="mt-1.5 flex h-7 sm:h-10 lg:h-14 w-full items-center justify-center gap-1 whitespace-nowrap rounded-full bg-gold px-2 text-[0.5625rem] font-bold text-black transition-colors hover:bg-gold-light sm:gap-2 sm:px-4 sm:text-[0.8125rem] lg:text-[1rem]"
               >
                 Browse products
                 <ArrowRight className="h-3 w-3 shrink-0 sm:h-4 sm:w-4" />
               </Link>
             </div>
-
-            {/*
-              From `lg`: the full-bleed treatment, masked into the
-              card's black on its left edge so the copy keeps its contrast,
-              and the button pinned to the card's foot.
-            */}
-            <div
-              className="pointer-events-none absolute bottom-0 right-0 top-0 z-0 hidden w-[95%] lg:block"
-              style={{ maskImage: 'linear-gradient(to right, transparent 0%, black 45%)', WebkitMaskImage: 'linear-gradient(to right, transparent 0%, black 45%)' }}
-            >
-              <Image src="/images/hero/mockup.jpg" alt="" fill sizes="640px" className="object-cover object-right" />
-            </div>
-            <div className="pointer-events-none absolute inset-y-0 right-0 z-0 hidden w-full bg-gradient-to-r from-[#0e0701] via-[#0e0701]/40 to-transparent lg:block" />
-            <Link
-              href="/browse"
-              className="relative z-10 mt-auto hidden h-14 items-center justify-center gap-2 self-start whitespace-nowrap rounded-full bg-gold px-8 text-[1rem] font-bold text-black transition-colors hover:bg-gold-light lg:inline-flex"
-            >
-              Browse products
-              <ArrowRight className="h-[18px] w-[18px] shrink-0" />
-            </Link>
           </div>
 
           {/* Right Card: Runner Service */}
@@ -98,15 +79,15 @@ export function MockupHero({ badges = true }: { badges?: boolean }) {
                 <Truck className="h-2.5 w-2.5 shrink-0 text-[#D35400] sm:h-3.5 sm:w-3.5" />
                 <span className="text-[0.4375rem] font-bold tracking-wide text-[#D35400] sm:text-[0.6875rem] sm:tracking-wider">RUNNER SERVICE</span>
               </div>
-              
+
               <h1 className="font-display text-[0.875rem] leading-[1.1] font-bold text-ink mb-1 sm:text-[1.5rem] sm:mb-2 lg:text-[2.5rem] lg:leading-[1.1]">
                 Can&apos;t find it listed?
               </h1>
-              
+
               <p className="text-[0.5625rem] font-semibold text-[#D35400] leading-snug mb-1.5 sm:text-[0.875rem] sm:mb-4 lg:text-[1.25rem]">
                 Our verified runners will source it for you.
               </p>
-              
+
               <ul className="space-y-1 mb-2 sm:space-y-2 sm:mb-6">
                 {['Find anything', 'Inspect & negotiate', 'Buy on your behalf', 'Personal tasks'].map(item => (
                   <li key={item} className="flex items-center gap-1 text-[0.5625rem] font-medium text-ink sm:gap-2 sm:text-[0.8125rem]">
@@ -116,47 +97,26 @@ export function MockupHero({ badges = true }: { badges?: boolean }) {
                 ))}
               </ul>
             </div>
-            
-            {/*
-              Below `lg`: Dedicated image slot and clean button row.
-              Runner image is positioned above the button so it is never covered or clipped.
-            */}
-            <div className="relative mt-auto flex flex-col items-center w-full z-10 lg:hidden">
-              <div className="relative h-20 sm:h-32 w-full shrink-0">
+
+            {/* Photo + button — visible at every width */}
+            <div className="relative mt-auto flex flex-col items-center w-full z-10">
+              <div className="relative h-20 sm:h-32 lg:h-44 w-full shrink-0">
                 <Image
                   src="/images/hero/runner.jpg"
                   alt="Verified runner"
                   fill
-                  sizes="(max-width: 640px) 40vw, 220px"
+                  sizes="(max-width: 640px) 40vw, (max-width: 1024px) 45vw, 560px"
                   className="object-contain object-bottom"
                 />
               </div>
               <Link
                 href="/request-a-runner"
-                className="mt-1.5 flex h-7 sm:h-10 w-full items-center justify-center gap-1 whitespace-nowrap rounded-full bg-[#E67E22] px-2 text-[0.5625rem] font-bold text-white transition-colors hover:bg-[#D35400] sm:gap-2 sm:px-4 sm:text-[0.8125rem]"
+                className="mt-1.5 flex h-7 sm:h-10 lg:h-14 w-full items-center justify-center gap-1 whitespace-nowrap rounded-full bg-[#E67E22] px-2 text-[0.5625rem] font-bold text-white transition-colors hover:bg-[#D35400] sm:gap-2 sm:px-4 sm:text-[0.8125rem] lg:text-[1rem]"
               >
                 Request a runner
                 <ArrowRight className="h-3 w-3 shrink-0 sm:h-4 sm:w-4" />
               </Link>
             </div>
-
-            {/* From `lg`: the original bottom-right runner and the button at the card's foot. */}
-            <div className="pointer-events-none absolute -right-12 bottom-0 z-0 hidden h-[95%] w-[80%] lg:block">
-              <Image
-                src="/images/hero/runner.jpg"
-                alt=""
-                fill
-                sizes="560px"
-                className="object-contain object-right-bottom"
-              />
-            </div>
-            <Link
-              href="/request-a-runner"
-              className="relative z-10 mt-auto hidden h-14 w-[80%] items-center justify-center gap-2 whitespace-nowrap rounded-xl bg-[#E67E22] px-8 text-[1rem] font-bold text-white transition-colors hover:bg-[#D35400] lg:flex"
-            >
-              Request a runner
-              <ArrowRight className="h-[18px] w-[18px] shrink-0" />
-            </Link>
           </div>
 
         </div>
@@ -184,7 +144,6 @@ export function MockupHero({ badges = true }: { badges?: boolean }) {
               </>
             );
             const cls = 'flex flex-col items-center gap-1 text-center sm:gap-2';
-            // A badge with somewhere to go is a link; the rest are labels.
             return 'href' in badge && badge.href ? (
               <Link key={i} href={badge.href} className={cn(cls, 'group outline-none')}>
                 {body}

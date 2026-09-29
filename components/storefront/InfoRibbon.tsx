@@ -1,48 +1,45 @@
-import { CreditCard, MapPin, ShieldCheck } from 'lucide-react';
+import { CreditCard, MapPin, Package, ShieldCheck, Truck, Users } from 'lucide-react';
 
 import { cn } from '@/lib/utils';
 
 /**
  * The service guarantees, as a ribbon. (TICKET-005)
  *
- * This replaces the large boxed `TrustPaymentStrip`: a padded white card with
- * 40px icon discs and a two-line entry per column, which cost roughly 130px of
- * page height to say three things nobody reads twice. The ribbon says the same
- * three things in a single hairline row, and the height it gives back is spent
- * on the supplier and product listings that now sit above the fold.
- *
- * Three columns at every width above `sm`, because the point of the component
- * is that it is one row - stacking it on a phone would rebuild the tall box it
- * was made to remove. Below `sm` the sub-labels drop instead, which keeps the
- * row honest on a 375px screen without wrapping it.
+ * Four columns at every width — one row always. Below `sm` the sub-labels
+ * drop to keep the row honest on a 375px screen without wrapping.
  */
 
-/* One colour per guarantee, matching the product owner's ribbon reference. */
 const ITEMS = [
   {
-    icon: CreditCard,
-    title: 'Multiple Payment Options',
-    sub: 'Pay how you like',
+    icon: Users,
+    title: 'Verified Suppliers',
+    sub: '100+ trusted partners',
+    tone: 'bg-[#E8F6EE] text-[#1E8449]',
+  },
+  {
+    icon: Package,
+    title: '1000+ Products',
+    sub: 'Across all categories',
     tone: 'bg-blue-50 text-blue-600',
   },
   {
     icon: ShieldCheck,
-    title: 'Buyer Protection',
-    sub: "We've got you covered",
-    tone: 'bg-[#E8F6EE] text-[#1E8449]',
+    title: 'Secure Payment',
+    sub: 'Buyer protected',
+    tone: 'bg-[#FDF0E4] text-[#E67E22]',
   },
   {
-    icon: MapPin,
-    title: 'Easy Order Tracking',
-    sub: 'Track every step',
-    tone: 'bg-[#FDF0E4] text-[#E67E22]',
+    icon: Truck,
+    title: 'Faster Delivery',
+    sub: 'Cross-border, fast',
+    tone: 'bg-purple-50 text-purple-600',
   },
 ];
 
 export function InfoRibbon({ className }: { className?: string }) {
   return (
     <div className={cn('mx-auto max-w-market px-4', className)}>
-      <ul className="grid grid-cols-3 divide-x divide-hairline rounded-lg border border-hairline bg-surface-raised">
+      <ul className="grid grid-cols-4 divide-x divide-hairline rounded-lg border border-hairline bg-surface-raised">
         {/*
           Icon over label below `sm`, side by side above it. Three columns of
           icon-beside-text on a 320px phone left about 29px for the label and

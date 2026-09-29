@@ -8,7 +8,6 @@ import { SignInNudge } from '@/components/storefront/home/SignInNudge';
 import { ToolFloor } from '@/components/storefront/home/ToolFloor';
 import { HowItWorks } from '@/components/storefront/HowItWorks';
 import { InfoRibbon } from '@/components/storefront/InfoRibbon';
-import { LiveDeals, type LiveDealRow } from '@/components/storefront/LiveDeals';
 import { StatsBanner } from '@/components/storefront/HomePromoSections';
 import { MockupHero } from '@/components/storefront/MockupHero';
 import { PopularCategories } from '@/components/storefront/PopularCategories';
@@ -83,39 +82,6 @@ export default async function LandingPage() {
     products[0];
 
 
-  /*
-   * Biggest saving in Pula first, not the deepest percentage.
-   *
-   * The ladder is one rule applied to the whole catalogue, so every product
-   * that is not on promotion drops by the same percentage between the retail
-   * rung and the cheapest one - sorting on `pct` puts four identical −24%
-   * badges on screen in arbitrary order and the section reads as a rendering
-   * bug. What actually differs between products is what the drop is worth,
-   * and that is the number a buyer is choosing on.
-   *
-   * The product the pricing explainer is priced against is excluded: it is
-   * already on the page with its full ladder shown.
-   */
-  const dealRows: LiveDealRow[] = spreads
-    .filter(({ product }) => product.id !== featured?.id)
-    .sort((a, b) => b.spread.from - b.spread.to - (a.spread.from - a.spread.to))
-    .slice(0, 4)
-    .map(({ product, spread }) => ({
-      product,
-      image: primaryImage.get(product.id),
-      categoryName: categoryName.get(product.category_id),
-      /*
-       * Quick-add on a deal card has to book against a real supplier, or the
-       * cart line carries an empty supplier_id and the routing engine has
-       * nothing to fulfil it with.
-       */
-      primarySupplierId:
-        rankOffers(
-          offers.filter((offer) => offer.product_id === product.id),
-          suppliers,
-        ).primary?.supplier.id ?? '',
-      ...spread,
-    }));
 
   /*
    * The feed: every listed product, in the benchmark's 2-column grid, with
@@ -171,10 +137,6 @@ export default async function LandingPage() {
         */}
         <PopularCategories className="border-t border-[#f5f5f5]" />
 
-        {/* ── Live Deals ──────────────────────────────────────────────
-          TICKET-004. Each card carries the drop and the quantity that earns it.
-        */}
-        <LiveDeals rows={dealRows} className="border-t border-[#f5f5f5]" />
 
         {/* ── Supplier / product directory ────────────────────────────
           TICKET-007. TODO(TICKET-007): this homepage placement is temporary.
