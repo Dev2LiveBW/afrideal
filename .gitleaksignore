@@ -1,0 +1,8 @@
+# Triaged Gitleaks findings (false positives). One fingerprint per line.
+# d332d97: curl examples in the vendored Clerk skill docs, placeholder YOUR_SECRET_KEY.
+d332d9712ee15e83dbaee19c6e4163d093a042b9:.agents/skills/clerk-chrome-extension-patterns/references/headless-extension.md:curl-auth-header:109
+d332d9712ee15e83dbaee19c6e4163d093a042b9:.agents/skills/clerk-chrome-extension-patterns/references/sync-host.md:curl-auth-header:91
+d332d9712ee15e83dbaee19c6e4163d093a042b9:.agents/skills/clerk-chrome-extension-patterns/SKILL.md:curl-auth-header:154
+d332d9712ee15e83dbaee19c6e4163d093a042b9:.claude/skills/clerk-chrome-extension-patterns/references/headless-extension.md:curl-auth-header:109
+d332d9712ee15e83dbaee19c6e4163d093a042b9:.claude/skills/clerk-chrome-extension-patterns/references/sync-host.md:curl-auth-header:91
+d332d9712ee15e83dbaee19c6e4163d093a042b9:.claude/skills/clerk-chrome-extension-patterns/SKILL.md:curl-auth-header:154
