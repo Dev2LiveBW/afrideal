@@ -11,9 +11,25 @@
  * This loads every route as a role entitled to see it and checks three things:
  * the response is 200, the HTML carries no Next error boundary, and a phrase
  * that only appears when the page actually rendered its own content is present.
+ *
+ * Sessions are Clerk sessions minted with CLERK_SECRET_KEY for the seeded
+ * accounts and sent as a bearer token, the same way `npm run verify` does.
  */
+import nextEnv from '@next/env';
+import { createClerkClient } from '@clerk/backend';
+
+import { allowSlowHandshakes } from '../lib/postgres/network.mjs';
+
+nextEnv.loadEnvConfig(process.cwd());
+allowSlowHandshakes();
 
 const BASE = process.env.AUDIT_BASE ?? 'http://localhost:3000';
+
+if (!process.env.CLERK_SECRET_KEY) {
+  console.error('CLERK_SECRET_KEY is not set in .env.local - the audit cannot mint sessions.');
+  process.exit(1);
+}
+const clerk = createClerkClient({ secretKey: process.env.CLERK_SECRET_KEY });
 
 let passed = 0;
 const failures = [];
@@ -36,20 +52,24 @@ async function request(jar, path, init = {}) {
   const response = await fetch(`${BASE}${path}`, {
     ...init,
     redirect: 'manual',
-    headers: { cookie: jar.header(), ...(init.headers ?? {}) },
+    headers: {
+      cookie: jar.header(),
+      ...(jar.token ? { authorization: `Bearer ${jar.token}` } : {}),
+      ...(init.headers ?? {}),
+    },
   });
   jar.absorb(response);
   return response;
 }
 
-async function signIn(email, password) {
+async function signIn(email) {
   const jar = makeJar();
-  const { csrfToken } = await (await request(jar, '/api/auth/csrf')).json();
-  await request(jar, '/api/auth/callback/credentials', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-    body: new URLSearchParams({ csrfToken, email, password, json: 'true' }).toString(),
-  });
+  const { data } = await clerk.users.getUserList({ emailAddress: [email], limit: 1 });
+  const account = data[0];
+  if (!account) throw new Error(`${email} does not exist in Clerk - run scripts/sync-users-to-clerk.mjs`);
+  const created = await clerk.sessions.createSession({ userId: account.id });
+  const { jwt } = await clerk.sessions.getToken(created.id, undefined, 600);
+  jar.token = jwt;
   return jar;
 }
 
@@ -120,7 +140,7 @@ section('Public (signed out)');
   await auditPage(jar, '/browse', ['Marketplace', 'Sort'], '/browse');
   await auditPage(jar, '/products/p001', ['Shea Butter', 'Who can supply this'], '/products/p001');
   await auditPage(jar, '/products/p006', ['Portland Cement', 'Specification'], '/products/p006');
-  await auditPage(jar, '/login', ['Sign in', 'Thabo Modise', 'Kagiso Sithole'], '/login');
+  await auditPage(jar, '/sign-in', ['Sign in', 'Thabo Modise', 'Kagiso Sithole'], '/sign-in');
   await auditPage(jar, '/cart', ['cart'], '/cart');
 }
 
@@ -128,7 +148,7 @@ section('Public (signed out)');
 
 section('Customer (thabo@gmail.com)');
 {
-  const jar = await signIn('thabo@gmail.com', 'Customer@2026');
+  const jar = await signIn('thabo@gmail.com');
   await auditPage(jar, '/orders', ['Your orders'], '/orders');
   await auditPage(jar, '/orders/o001', ['AFD-', 'Payment', 'Delivery'], '/orders/o001');
   await auditPage(jar, '/orders/o013', ['AFD-'], '/orders/o013 (disputed)');
@@ -142,7 +162,7 @@ section('Customer (thabo@gmail.com)');
 
 section('Admin console (admin@afrideal.co.bw)');
 {
-  const jar = await signIn('admin@afrideal.co.bw', 'Admin@2026');
+  const jar = await signIn('admin@afrideal.co.bw');
 
   await auditPage(jar, '/admin/dashboard', ['GMV', 'ayable'], '/admin/dashboard');
   await auditPage(jar, '/admin/products', ['Shea Butter'], '/admin/products');
@@ -165,7 +185,7 @@ section('Admin console (admin@afrideal.co.bw)');
 
 section('Finance scoping (finance@afrideal.co.bw)');
 {
-  const jar = await signIn('finance@afrideal.co.bw', 'Finance@2026');
+  const jar = await signIn('finance@afrideal.co.bw');
   await auditPage(jar, '/admin/analytics', ['evenue'], '/admin/analytics');
   await auditPage(jar, '/admin/payables', ['ayable'], '/admin/payables');
 
@@ -185,7 +205,7 @@ section('Finance scoping (finance@afrideal.co.bw)');
 
 section('Supplier portal (supplier@naledi.co.bw)');
 {
-  const jar = await signIn('supplier@naledi.co.bw', 'Supplier@2026');
+  const jar = await signIn('supplier@naledi.co.bw');
   await auditPage(jar, '/supplier/dashboard', ['Naledi'], '/supplier/dashboard');
   await auditPage(jar, '/supplier/products', ['Shea Butter'], '/supplier/products');
   await auditPage(jar, '/supplier/quotes', ['uote'], '/supplier/quotes');
@@ -207,7 +227,7 @@ section('Supplier portal (supplier@naledi.co.bw)');
 
 section('Runner portal (runner@afrideal.co.bw)');
 {
-  const jar = await signIn('runner@afrideal.co.bw', 'Runner@2026');
+  const jar = await signIn('runner@afrideal.co.bw');
   await auditPage(jar, '/runner/dashboard', ['Kagiso'], '/runner/dashboard');
   await auditPage(jar, '/runner/jobs', ['ob'], '/runner/jobs');
   await auditPage(jar, '/runner/earnings', ['arning'], '/runner/earnings');

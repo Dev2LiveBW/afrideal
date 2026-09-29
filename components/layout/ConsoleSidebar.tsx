@@ -2,12 +2,12 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { signOut } from 'next-auth/react';
 import { AnimatePresence, motion } from 'framer-motion';
 import { ChevronLeft, LogOut } from 'lucide-react';
 
 import { AfriDealLogo, AfriDealMark } from '@/components/brand/AfriDealLogo';
 import { useAfriDealStore } from '@/store/useAfriDealStore';
+import { useSignOut } from '@/lib/use-session';
 import { cn } from '@/lib/utils';
 
 /**
@@ -47,6 +47,7 @@ export function ConsoleSidebar({
   portalLabel: string;
   user: { name: string; avatar: string; roleLabel: string };
 }) {
+  const signOut = useSignOut();
   const pathname = usePathname();
   const collapsed = useAfriDealStore((state) => state.sidebarCollapsed);
   const toggle = useAfriDealStore((state) => state.toggleSidebar);
@@ -199,7 +200,7 @@ export function ConsoleSidebar({
 
           {!collapsed && (
             <button
-              onClick={() => signOut({ callbackUrl: '/login' })}
+              onClick={() => signOut('/login')}
               title="Sign out"
               className={cn(
                 'shrink-0 rounded p-1.5 transition-colors',

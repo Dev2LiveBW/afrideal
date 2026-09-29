@@ -1,3 +1,6 @@
+// Rendered under the root ClerkProvider — cannot prerender without the key.
+export const dynamic = 'force-dynamic';
+
 import React from "react";
 import { V5Header } from "@/components/v5/v5-header";
 import { HeroEditorial } from "@/components/v5/hero-editorial";

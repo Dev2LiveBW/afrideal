@@ -2,11 +2,11 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { signOut } from 'next-auth/react';
 import { motion } from 'framer-motion';
 import { Briefcase, LayoutDashboard, LogOut, PackageSearch, Wallet } from 'lucide-react';
 
 import { AfriDealLogo } from '@/components/brand/AfriDealLogo';
+import { useSignOut } from '@/lib/use-session';
 import { cn } from '@/lib/utils';
 
 /**
@@ -25,6 +25,7 @@ const TABS = [
 ];
 
 export function RunnerTopbar({ name, avatar }: { name: string; avatar: string }) {
+  const signOut = useSignOut();
   return (
     <header className="sticky top-0 z-30 flex h-16 items-center justify-between border-b border-white/[0.08] bg-ink px-5">
       <AfriDealLogo variant="dark" size="sm" />
@@ -38,7 +39,7 @@ export function RunnerTopbar({ name, avatar }: { name: string; avatar: string })
           {avatar}
         </span>
         <button
-          onClick={() => signOut({ callbackUrl: '/login' })}
+          onClick={() => signOut('/login')}
           aria-label="Sign out"
           className="rounded-full p-2 text-white/45 transition-colors hover:bg-white/10 hover:text-white"
         >

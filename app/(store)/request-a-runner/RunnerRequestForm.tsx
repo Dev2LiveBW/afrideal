@@ -32,7 +32,14 @@ type Values = z.infer<typeof Schema>;
  * the budget and the deadline are optional and say so — a buyer who does not
  * know what something should cost is exactly the buyer this service is for.
  */
-export function RunnerRequestForm({ defaultCity }: { defaultCity?: string }) {
+export function RunnerRequestForm({
+  defaultCity,
+  defaultItem,
+}: {
+  defaultCity?: string;
+  /** What the buyer typed on the /rfq landing, carried in as the item. */
+  defaultItem?: string;
+}) {
   const router = useRouter();
   const [serverError, setServerError] = useState<string | null>(null);
 
@@ -43,7 +50,7 @@ export function RunnerRequestForm({ defaultCity }: { defaultCity?: string }) {
     formState: { errors, isSubmitting },
   } = useForm<Values>({
     resolver: zodResolver(Schema),
-    defaultValues: { quantity: 1, delivery_city: defaultCity ?? '' },
+    defaultValues: { quantity: 1, delivery_city: defaultCity ?? '', item: defaultItem ?? '' },
   });
 
   const quantity = watch('quantity');

@@ -75,7 +75,7 @@ export default async function ProductPage({ params }: { params: { id: string } }
     );
 
   return (
-    <div className="mx-auto max-w-market px-6 pb-24 pt-32">
+    <div className="mx-auto max-w-market px-3 pb-[100px] pt-[50px] lg:px-6 lg:pb-24 lg:pt-32">
       <Breadcrumb
         trail={[
           { label: 'Home', href: '/' },
@@ -84,7 +84,7 @@ export default async function ProductPage({ params }: { params: { id: string } }
         ]}
       />
 
-      <div className="grid gap-10 lg:grid-cols-[minmax(0,1fr)_minmax(0,420px)] lg:gap-14">
+      <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_minmax(0,420px)] lg:gap-14">
         {/* ── Gallery ──────────────────────────────────────────────────── */}
         <div>
           <ProductGallery product={product} images={images} />

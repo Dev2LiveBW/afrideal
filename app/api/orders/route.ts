@@ -1,7 +1,7 @@
 import { z } from 'zod';
 
 import { fail, guard, handled, ok } from '@/lib/api';
-import { insert, insertMany, nextId, readAll } from '@/lib/db';
+import { insert, insertMany, nextId, nextIds, readAll } from '@/lib/db';
 import { EVENTS, audit, notify } from '@/lib/notifications';
 import { resolvePrice } from '@/lib/pricing-tiers';
 import { selectSupplier } from '@/lib/supplier-selection';
@@ -96,7 +96,7 @@ export const POST = handled(async (request: Request) => {
   const now = new Date().toISOString();
 
   // 1 + 2 - resolve and route every line.
-  let itemSeq = Number.parseInt((await nextId('order-items', 'oi')).slice(2), 10);
+  const itemIds = await nextIds('order-items', 'oi', lines.length);
   const items: OrderItem[] = [];
 
   for (const line of lines) {
@@ -136,7 +136,7 @@ export const POST = handled(async (request: Request) => {
     const unitPrice = Math.ceil(tiered.unit_price * variantRatio);
 
     items.push({
-      id: `oi${String(itemSeq++).padStart(3, '0')}`,
+      id: itemIds[items.length],
       order_id: orderId,
       product_id: product.id,
       variant_id: variant.id,
@@ -158,11 +158,12 @@ export const POST = handled(async (request: Request) => {
     { status: 'PAID', label: 'Payment confirmed', at: now },
   ];
 
-  // 3 - the customer-facing order.
-  const orderCount = (await readAll('orders')).length;
+  // 3 - the customer-facing order. The reference follows the id (the seed
+  // numbers o001 as AFD-24810), so it is unique for the same reason the id is;
+  // a row count would repeat under concurrent checkouts.
   const order: Order = {
     id: orderId,
-    reference: `AFD-${24810 + orderCount}`,
+    reference: `AFD-${24809 + Number.parseInt(orderId.slice(1), 10)}`,
     customer_id: actor.id,
     customer_name: actor.name,
     status: 'PROCESSING',
@@ -188,14 +189,14 @@ export const POST = handled(async (request: Request) => {
     bySupplier.set(item.supplier_id, [...(bySupplier.get(item.supplier_id) ?? []), item]);
   }
 
-  let supSeq = Number.parseInt((await nextId('supplier-orders', 'sup')).slice(3), 10);
-  let payableSeq = Number.parseInt((await nextId('supplier-payables', 'pay')).slice(3), 10);
+  const supplierOrderIds = await nextIds('supplier-orders', 'sup', bySupplier.size);
+  const payableIds = await nextIds('supplier-payables', 'pay', bySupplier.size);
 
   const supplierOrders: SupplierOrder[] = [];
   const payableRecords: SupplierPayable[] = [];
 
   for (const [supplierId, supplierItems] of bySupplier) {
-    const supplierOrderId = `sup${String(supSeq++).padStart(3, '0')}`;
+    const supplierOrderId = supplierOrderIds[supplierOrders.length];
     const gross = supplierItems.reduce((sum, item) => sum + item.line_total, 0);
     const cost = supplierItems.reduce((sum, item) => sum + item.supplier_cost * item.qty, 0);
 
@@ -219,7 +220,7 @@ export const POST = handled(async (request: Request) => {
     });
 
     payableRecords.push({
-      id: `pay${String(payableSeq++).padStart(3, '0')}`,
+      id: payableIds[payableRecords.length],
       order_id: orderId,
       supplier_order_id: supplierOrderId,
       supplier_id: supplierId,

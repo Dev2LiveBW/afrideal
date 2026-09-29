@@ -1,25 +1,9 @@
-import type { Metadata } from 'next';
 import { redirect } from 'next/navigation';
 
-import { auth } from '@/lib/auth';
-import { landingFor } from '@/lib/roles';
-
-import { SignupClient } from './SignupClient';
-
-export const metadata: Metadata = {
-  title: 'Create an account',
-  description:
-    'Open an AfriDeal buyer account. Published prices at every quantity, verified suppliers, and delivery you can follow.',
-};
-
+/** The old sign-up URL. Clerk's page lives at /sign-up. */
 export const dynamic = 'force-dynamic';
 
-export default async function SignupPage() {
-  const session = await auth();
-
-  // Already signed in: the form would only sign them out of context. Mirrors
-  // the same guard on /login.
-  if (session?.user) redirect(landingFor(session.user.role));
-
-  return <SignupClient />;
+export default function SignupPage({ searchParams }: { searchParams: { next?: string } }) {
+  const next = searchParams.next;
+  redirect(next ? `/sign-up?redirect_url=${encodeURIComponent(next)}` : '/sign-up');
 }

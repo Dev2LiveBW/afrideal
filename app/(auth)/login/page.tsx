@@ -1,20 +1,13 @@
-import type { Metadata } from 'next';
 import { redirect } from 'next/navigation';
 
-import { auth } from '@/lib/auth';
-import { landingFor } from '@/lib/roles';
-
-import { LoginClient } from './LoginClient';
-
-export const metadata: Metadata = { title: 'Sign in' };
+/**
+ * The old NextAuth sign-in URL. Clerk's page lives at /sign-in; this keeps
+ * every `/login` link and bookmark in the app working and carries the `next`
+ * destination across as Clerk's `redirect_url`.
+ */
 export const dynamic = 'force-dynamic';
 
-export default async function LoginPage() {
-  const session = await auth();
-
-  // Already signed in: send them where they belong rather than showing a form
-  // they do not need.
-  if (session?.user) redirect(landingFor(session.user.role));
-
-  return <LoginClient />;
+export default function LoginPage({ searchParams }: { searchParams: { next?: string } }) {
+  const next = searchParams.next;
+  redirect(next ? `/sign-in?redirect_url=${encodeURIComponent(next)}` : '/sign-in');
 }

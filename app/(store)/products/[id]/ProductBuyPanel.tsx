@@ -175,10 +175,10 @@ export function ProductBuyPanel({
           </div>
         </div>
 
-        <div className="mt-6 space-y-2.5">
+        <div className="fixed bottom-[calc(56px+env(safe-area-inset-bottom))] left-0 right-0 z-[60] flex flex-row-reverse gap-2 border-t border-hairline bg-white p-3 shadow-[0_-4px_12px_rgba(0,0,0,0.05)] md:bottom-0 lg:static lg:mt-6 lg:flex lg:flex-col lg:border-0 lg:bg-transparent lg:p-0 lg:shadow-none">
           <ActionButton
             size="lg"
-            className="w-full"
+            className="flex-1 lg:w-full"
             onClick={add}
             disabled={!inStock || !variant || resolved.requires_rfq}
             icon={<ShoppingBag size={16} strokeWidth={1.5} />}
@@ -189,16 +189,16 @@ export function ProductBuyPanel({
           {resolved.requires_rfq ? (
             <ActionButton
               variant="ghost"
-              size="md"
-              className="w-full"
+              size="lg"
+              className="flex-1 lg:w-full"
               icon={<FileText size={15} strokeWidth={1.5} />}
               onClick={() => setRfqOpen(true)}
             >
               Request a quotation
             </ActionButton>
           ) : (
-            <Link href="/cart" className="block">
-              <ActionButton variant="ghost" size="md" className="w-full">
+            <Link href="/cart" className="flex-1 lg:block lg:w-full">
+              <ActionButton variant="ghost" size="lg" className="w-full">
                 View cart
               </ActionButton>
             </Link>

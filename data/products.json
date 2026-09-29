@@ -54,7 +54,7 @@
     "rating": 4.8,
     "review_count": 214,
     "featured": true,
-    "created_at": "2026-04-27T08:00:00.000Z",
+    "created_at": "2026-05-23T08:00:00.000Z",
     "brand_id": "b001",
     "product_type": "PHYSICAL",
     "country_of_origin": "ZA"
@@ -120,14 +120,14 @@
     "rating": 4.6,
     "review_count": 388,
     "featured": true,
-    "created_at": "2026-05-03T08:18:00.000Z",
+    "created_at": "2026-05-29T08:18:00.000Z",
     "brand_id": "b001",
     "product_type": "PHYSICAL",
     "country_of_origin": "ZA",
     "compare_at_price": 93,
     "promotion": {
       "discount_pct": 9,
-      "ends_at": "2026-08-28T15:00:00.000Z",
+      "ends_at": "2026-09-23T15:00:00.000Z",
       "stock_allocated": 43,
       "stock_sold": 7
     }
@@ -181,7 +181,7 @@
     "rating": 4.5,
     "review_count": 156,
     "featured": false,
-    "created_at": "2026-05-09T08:36:00.000Z",
+    "created_at": "2026-06-04T08:36:00.000Z",
     "brand_id": "b001",
     "product_type": "PHYSICAL",
     "country_of_origin": "ZA"
@@ -245,7 +245,7 @@
     "rating": 4.4,
     "review_count": 92,
     "featured": true,
-    "created_at": "2026-05-15T08:54:00.000Z",
+    "created_at": "2026-06-10T08:54:00.000Z",
     "brand_id": "b002",
     "product_type": "PHYSICAL",
     "country_of_origin": "ZA"
@@ -303,7 +303,7 @@
     "rating": 4.2,
     "review_count": 141,
     "featured": false,
-    "created_at": "2026-05-21T08:12:00.000Z",
+    "created_at": "2026-06-16T08:12:00.000Z",
     "brand_id": "b002",
     "product_type": "PHYSICAL",
     "country_of_origin": "ZA"
@@ -363,7 +363,7 @@
     "rating": 4.9,
     "review_count": 67,
     "featured": true,
-    "created_at": "2026-05-27T08:30:00.000Z",
+    "created_at": "2026-06-22T08:30:00.000Z",
     "brand_id": "b003",
     "product_type": "PHYSICAL",
     "country_of_origin": "BW"
@@ -427,7 +427,7 @@
     "rating": 4.7,
     "review_count": 44,
     "featured": false,
-    "created_at": "2026-06-02T08:48:00.000Z",
+    "created_at": "2026-06-28T08:48:00.000Z",
     "brand_id": "b003",
     "product_type": "PHYSICAL",
     "country_of_origin": "BW"
@@ -481,14 +481,14 @@
     "rating": 4.6,
     "review_count": 302,
     "featured": true,
-    "created_at": "2026-06-08T08:06:00.000Z",
+    "created_at": "2026-07-04T08:06:00.000Z",
     "brand_id": "b004",
     "product_type": "PHYSICAL",
     "country_of_origin": "BW",
     "compare_at_price": 154,
     "promotion": {
       "discount_pct": 9,
-      "ends_at": "2026-08-27T15:00:00.000Z",
+      "ends_at": "2026-09-22T15:00:00.000Z",
       "stock_allocated": 43,
       "stock_sold": 7
     }
@@ -546,7 +546,7 @@
     "rating": 4.8,
     "review_count": 38,
     "featured": false,
-    "created_at": "2026-06-14T08:24:00.000Z",
+    "created_at": "2026-07-10T08:24:00.000Z",
     "brand_id": "b004",
     "product_type": "PHYSICAL",
     "country_of_origin": "BW"
@@ -604,7 +604,7 @@
     "rating": 4.3,
     "review_count": 89,
     "featured": false,
-    "created_at": "2026-06-20T08:42:00.000Z",
+    "created_at": "2026-07-16T08:42:00.000Z",
     "brand_id": "b005",
     "product_type": "PHYSICAL",
     "country_of_origin": "ZA"
@@ -668,7 +668,7 @@
     "rating": 4.5,
     "review_count": 73,
     "featured": false,
-    "created_at": "2026-06-26T08:00:00.000Z",
+    "created_at": "2026-07-22T08:00:00.000Z",
     "brand_id": "b006",
     "product_type": "PHYSICAL",
     "country_of_origin": "ZA"
@@ -728,14 +728,14 @@
     "rating": 4.4,
     "review_count": 218,
     "featured": true,
-    "created_at": "2026-07-02T08:18:00.000Z",
+    "created_at": "2026-07-28T08:18:00.000Z",
     "brand_id": "b006",
     "product_type": "PHYSICAL",
     "country_of_origin": "ZA",
     "compare_at_price": 247,
     "promotion": {
       "discount_pct": 8,
-      "ends_at": "2026-08-31T15:00:00.000Z",
+      "ends_at": "2026-09-26T15:00:00.000Z",
       "stock_allocated": 96,
       "stock_sold": 30
     }
@@ -799,14 +799,14 @@
     "rating": 4.8,
     "review_count": 412,
     "featured": true,
-    "created_at": "2026-07-08T08:36:00.000Z",
+    "created_at": "2026-08-03T08:36:00.000Z",
     "brand_id": null,
     "product_type": "PHYSICAL",
     "country_of_origin": "ZA",
     "compare_at_price": 872,
     "promotion": {
       "discount_pct": 8,
-      "ends_at": "2026-08-30T15:00:00.000Z",
+      "ends_at": "2026-09-25T15:00:00.000Z",
       "stock_allocated": 96,
       "stock_sold": 30
     }
@@ -870,7 +870,7 @@
     "rating": 4.7,
     "review_count": 236,
     "featured": true,
-    "created_at": "2026-07-14T08:54:00.000Z",
+    "created_at": "2026-08-09T08:54:00.000Z",
     "brand_id": null,
     "product_type": "PHYSICAL",
     "country_of_origin": "ZA"
@@ -934,7 +934,7 @@
     "rating": 4.6,
     "review_count": 318,
     "featured": true,
-    "created_at": "2026-07-20T08:12:00.000Z",
+    "created_at": "2026-08-15T08:12:00.000Z",
     "brand_id": null,
     "product_type": "PHYSICAL",
     "country_of_origin": "ZA"
@@ -1004,14 +1004,14 @@
     "rating": 4.5,
     "review_count": 527,
     "featured": true,
-    "created_at": "2026-07-26T08:30:00.000Z",
+    "created_at": "2026-08-21T08:30:00.000Z",
     "brand_id": null,
     "product_type": "PHYSICAL",
     "country_of_origin": "ZA",
     "compare_at_price": 148,
     "promotion": {
       "discount_pct": 9,
-      "ends_at": "2026-08-28T15:00:00.000Z",
+      "ends_at": "2026-09-23T15:00:00.000Z",
       "stock_allocated": 43,
       "stock_sold": 7
     }
@@ -1075,7 +1075,7 @@
     "rating": 4.6,
     "review_count": 189,
     "featured": true,
-    "created_at": "2026-08-01T08:48:00.000Z",
+    "created_at": "2026-08-27T08:48:00.000Z",
     "brand_id": null,
     "product_type": "PHYSICAL",
     "country_of_origin": "ZA"
