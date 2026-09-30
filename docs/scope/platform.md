@@ -34,6 +34,9 @@ Two hosted environments with separate secrets and databases, staging deploying f
 spec [0002](../specs/0002-staging-production-environments/index.md)
 - [x] Design it (spec): `/architect staging & production environments`
 - [ ] Build it: `/develop staging & production environments`
+  - [ ] Data isolation: load guard, Neon `staging` + `dev` branches, staging Sanity project, local moved off production (AC-3, AC-4)
+  - [ ] Staging live: renamed Vercel project, `main` only builds, `npm run verify` green against it (AC-1, AC-4, AC-5, AC-6)
+  - [ ] Production dark: Clerk production instance, protected `afrideal-production` project, tag deploy workflow, first `v0.1.0` release (AC-2, AC-3, AC-4, AC-7)
 - [ ] Verify it: `/check verify staging & production environments`
 - [ ] Test it: `/test staging & production environments`
 - [ ] Review it (fresh model): `/check review staging & production environments`
