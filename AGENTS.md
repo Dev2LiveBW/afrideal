@@ -23,9 +23,16 @@ npm run build
 npm run lint
 npm run typecheck    # tsc --noEmit
 npm run seed         # regenerate data/ and reload Postgres
+npm run db:generate  # generate drizzle migrations from lib/postgres/schema.ts
+npm run db:migrate   # apply drizzle migrations
+npm run db:load      # reload Postgres from data/*.json
 npm run verify       # API checks against VERIFY_BASE
 npm run audit        # page checks against AUDIT_BASE
 ```
+
+## Specs
+
+Stored in `docs/specs/`. Format: `docs/specs/NNNN-title.md`.
 
 ## The UI benchmark is Alibaba
 
@@ -213,4 +220,5 @@ from the Sanity people directory - never by hand in the Clerk dashboard.
 
 ## Context files
 
-<!-- Nested AGENTS.md files are listed here as they are created -->
+- [lib/AGENTS.md](lib/AGENTS.md): Core business logic, pricing tier ladder, payables ledger, and database access routing
+

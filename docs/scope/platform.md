@@ -15,23 +15,29 @@ Clerk sign in with eight demo accounts; roles from Clerk public metadata, synced
 
 ### D. Catalogue admin (Sanity Studio) · in-progress
 The product owner's admin for products, images, categories, brands, suppliers and offers; the app reads it with `CATALOGUE_SOURCE=sanity`. The Studio is moving into this repo as `studio/`, and that copy still lacks the product, category, brand and runner schemas. code in `lib/sanity/`, `studio/` (working copy still `Tshego/studio/`)
-- [ ] Finish moving the Studio into this repo: `/develop catalogue admin`
+- [x] Finish moving the Studio into this repo: `/develop catalogue admin`
 
 ## Foundations
 
-### 1. Coding standards & CI · in-progress
+### 1. Coding standards & CI · done
 Capture conventions, then make every PR prove itself: typecheck, lint, build, verify against a real server, and a secret scan. Clear the repo of scratch files and the stale sibling clone while here.
 **Done when:** root `AGENTS.md` reflects the real stack; CI goes red on a deliberate lint error and green on `main`; no `scratch_*.py` or `fix_btn*.py` left in the app root.
-spec [0001](../specs/0001-coding-standards-ci.md) (assumed decision, spec 0001) · code in `.github/workflows/ci.yml`
+spec [0001](../specs/0001-coding-standards-ci.md) · code in `.github/workflows/ci.yml`
 - [x] Capture conventions + tooling choices: `/audit`
 - [x] Install the tooling: `/develop tooling`
-- [ ] Prove it on GitHub: add the two Clerk secrets, push, see CI red on a lint error and green on `main`
-- [ ] Ratify the tooling choices (optional): `/architect coding standards & CI`
+- [x] Prove it on GitHub: add the two Clerk secrets, push, see CI red on a lint error and green on `main`
+- [x] Ratify the tooling choices (optional): `/architect coding standards & CI`
 
-### 2. Staging & production environments · needs a decision
+### 2. Staging & production environments · in-progress
 Two hosted environments with separate secrets and databases, staging deploying from `main` and production from tags, on `afrideal.co.bw`. The payment gateway needs a stable callback domain, so this comes before slice 1.
 **Done when:** a staging URL the client can open runs against its own Postgres branch; production is set up but dark; secrets differ per environment; `npm run verify` passes against staging.
-- [ ] Design it (spec): `/architect staging & production environments`
+spec [0002](../specs/0002-staging-production-environments/index.md)
+- [x] Design it (spec): `/architect staging & production environments`
+- [ ] Build it: `/develop staging & production environments`
+- [ ] Verify it: `/check verify staging & production environments`
+- [ ] Test it: `/test staging & production environments`
+- [ ] Review it (fresh model): `/check review staging & production environments`
+- [ ] Document it: `/document staging & production environments`
 
 ## Slice 2: The buy decision on a phone
 
@@ -63,3 +69,4 @@ Switch on the real thing: live gateway keys, live DNS, Company owned repo, host 
 Out of scope for the current build pass, kept so the plan stays honest.
 - **Removing the JSON store adapter**: once staging has run on Postgres through launch
 - **Neon Auth, the uploads bucket and the hello function**: declared in `neon.ts`, unused; remove or adopt later
+- **Prettier adoption**: once foundational marketplace features are complete
