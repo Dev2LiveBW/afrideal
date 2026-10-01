@@ -8,13 +8,15 @@ import toast from 'react-hot-toast';
 
 import { cn } from '@/lib/utils';
 
+import { demoSignInTicket } from './actions';
 import { DEMO_GROUPS, type DemoAccount } from './demo-accounts';
 
 /**
  * One-click sign-in as any of the eight seeded roles.
  *
- * Signs in through Clerk's client SDK exactly as the form beside it does; the
- * only shortcut is that the credentials are pre-filled. If another demo
+ * Signs in with a one-time ticket the server issues (`demoSignInTicket`), not
+ * the password: a password sign-in from a device Clerk has not seen before
+ * asks for an emailed code, which nobody watching a demo can read. If another demo
  * account is already signed in, it is signed out first so a presenter can hop
  * between roles without visiting the nav.
  */
@@ -32,7 +34,14 @@ export function DemoAccounts() {
     try {
       if (isSignedIn) await signOut();
 
-      const attempt = await signIn.create({ identifier: account.email, password: account.password });
+      const issued = await demoSignInTicket(account.email);
+      if ('error' in issued) {
+        toast.error(issued.error);
+        setPendingEmail(null);
+        return;
+      }
+
+      const attempt = await signIn.create({ strategy: 'ticket', ticket: issued.ticket });
 
       if (attempt.status !== 'complete' || !attempt.createdSessionId) {
         const factors = (attempt.supportedSecondFactors ?? attempt.supportedFirstFactors ?? [])
