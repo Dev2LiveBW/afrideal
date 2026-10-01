@@ -125,6 +125,28 @@ async function resolveProfile(
 }
 
 /**
+ * `currentUser()` with up to two retries.
+ *
+ * It is a Clerk API round trip on every request, and from Botswana one now and
+ * then fails ("fetch failed") or times out; without a retry that one blip turns
+ * the whole page into the error screen. Only transient failures are retried
+ * (no HTTP status, 429, or 5xx); a 4xx answer is real and is thrown at once.
+ */
+async function currentUserWithRetry(): Promise<Awaited<ReturnType<typeof currentUser>>> {
+  const delays = [250, 750];
+  for (let attempt = 0; ; attempt++) {
+    try {
+      return await currentUser();
+    } catch (error) {
+      const status = (error as { status?: number })?.status;
+      const transient = !status || status === 429 || status >= 500;
+      if (!transient || attempt >= delays.length) throw error;
+      await new Promise((resolve) => setTimeout(resolve, delays[attempt]));
+    }
+  }
+}
+
+/**
  * Server-side session helper. Null when nobody is signed in.
  *
  * Wrapped in React's `cache` so the layout, the page and every component under
@@ -134,7 +156,7 @@ export const auth = cache(async (): Promise<Session | null> => {
   const { userId } = await clerkAuth();
   if (!userId) return null;
 
-  const account = await currentUser();
+  const account = await currentUserWithRetry();
   if (!account) return null;
 
   const metadata = (account.publicMetadata ?? {}) as AfriDealMetadata;
