@@ -12,8 +12,8 @@ _These are recommendations to keep your build orderly, not requirements. Skip an
 ## Epics
 
 - [platform.md](platform.md): stack, data, sign in, catalogue admin, environments, CI, monitoring, launch. 4 already built, 6 planned.
-- [buying.md](buying.md): storefront, pricing, the buy funnel, payments and money operations. 5 already built, 9 planned.
-- [delivery.md](delivery.md): runners, suppliers, customs, collection point, emails and SMS. 3 already built, 4 planned.
+- [buying.md](buying.md): storefront, pricing, the buy funnel, payments and money operations. 5 already built, 12 planned.
+- [delivery.md](delivery.md): runners, suppliers, the team console, customs, collection point, emails and SMS. 3 already built, 9 planned.
 - [reach.md](reach.md): SEO, Setswana, legal pages, real catalogue content. 4 planned.
 
 ## At a glance
@@ -55,8 +55,30 @@ _These are recommendations to keep your build orderly, not requirements. Skip an
 | 21 | Real catalogue & photography | reach | Slice 8 | planned |
 | 22 | Launch checks | platform | Slice 8 | planned |
 | 23 | Production go live | platform | Slice 8 | planned |
+| 24 | Chosen quote becomes an order | buying | Close out | planned |
+| 25 | Buyer account & checkout extras | buying | Close out | planned |
+| 26 | Browse extras | buying | Close out | planned |
+| 27 | Supplier onboarding & self service | delivery | Close out | planned |
+| 28 | Runner onboarding & profile | delivery | Close out | planned |
+| 29 | Team console gaps | delivery | Close out | planned |
+| 30 | Team user management | delivery | Close out | planned |
+| 31 | What a supplier sees on an order | delivery | Close out | planned |
 
 Deferred features are listed at the end of each epic file.
+
+## Phase 1 close out
+
+Closing the client's Phase 1 feature list, working on what you can build alone, in this order. Details and the "waiting on others" list: [docs/phase1-closeout-plan.md](../phase1-closeout-plan.md).
+
+| Package | Features |
+|---|---|
+| 1. Close the open loops | 2 (staging milestones), 24 |
+| 2. An honest payment flow, without the gateway | 3, 13, 4 (against the mock gateway) |
+| 3. Buyer checkout and account | 5, 25 |
+| 4. Supplier and runner onboarding | 27, 28 |
+| 5. Team console gaps | 29, 30 |
+| 6. Alerts, ready to switch on | 11, 12 (test mode until the client's domain and sender name arrive) |
+| 7. Polish | 26, 31 |
 
 ## Legend
 

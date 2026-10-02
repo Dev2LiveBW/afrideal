@@ -74,11 +74,30 @@ Fix the stray `Â·` characters in the orders list and collapse each row's meta 
 **Done when:** no mojibake anywhere in the orders list; each order row is 120px or less at 390px.
 - [ ] Build it: `/develop orders list clean up`
 
+## Phase 1 close out
+
+Gaps against the client's Phase 1 feature list that you can build alone. Order and packages: [docs/phase1-closeout-plan.md](../phase1-closeout-plan.md).
+
+### 24. Chosen quote becomes an order · needs a decision
+Today a buyer can choose a supplier's quote, but nothing happens next. Choosing a quote should create an order at the quoted price, ready to pay like any other.
+**Done when:** selecting a quote creates one order linked to the request for quote, at the quoted price, in the same payment state as a checkout order; the request shows "ordered"; `npm run verify` covers it.
+- [ ] Design it (spec): `/architect chosen quote becomes an order`
+
+### 25. Buyer account & checkout extras · needs a decision
+The account and checkout pieces on the Phase 1 list: saved addresses chosen at checkout, a review step with delivery instructions and terms, promo codes, reorder, a map link on tracking, a mini cart, saved items, alert settings, and a welcome step after sign up. Builds on 5 (phone checkout).
+**Done when:** a buyer can save addresses and pick one at checkout; checkout has a review step with delivery instructions and a terms checkbox; a promo code changes the total; a delivered order can be reordered; saved items and alert settings are live in the account (no longer dimmed).
+- [ ] Design it (spec): `/architect buyer account & checkout extras`
+
+### 26. Browse extras · needs a decision
+The browsing pieces still missing from the Phase 1 list: a price range filter, load more on long result lists, and recently viewed products.
+**Done when:** results can be narrowed by a price range; long lists load more on demand; a product page shows the buyer's recently viewed products.
+- [ ] Design it (spec): `/architect browse extras`
+
 ## Deferred
 Out of scope for the current build pass, kept so the plan stays honest.
 - **Browse and search results at phone parity**: rows with tier pills that do not wrap · needs a decision
 - **Orders list rebuilt to the benchmark** · needs a decision
-- **Account screen**: the account tab currently links to orders · needs a decision
+- **Account screen**: the account tab currently links to orders · needs a decision (now part of 25)
 - **Progressive three screen sign in and create account** · needs a decision
 - **Cart full rebuild** · needs a decision
 - **More payment methods**: other card gateways and mobile money · needs a decision
