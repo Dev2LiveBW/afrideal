@@ -90,6 +90,7 @@ function CategoryChips({
   const [sheetTop, setSheetTop] = useState(0);
 
   const rowRef = useRef<HTMLDivElement>(null);
+  const sheetRef = useRef<HTMLDivElement>(null);
   const scrollerRef = useRef<HTMLDivElement>(null);
   const chipRefs = useRef<Record<string, HTMLButtonElement | null>>({});
 
@@ -124,6 +125,16 @@ function CategoryChips({
     const onKey = (event: KeyboardEvent) => event.key === 'Escape' && setOpen(false);
     document.addEventListener('keydown', onKey);
     return () => document.removeEventListener('keydown', onKey);
+  }, [open]);
+
+  // The sheet covers the page, so focus has to come with it and go back to the
+  // chip that opened it - otherwise a keyboard shopper is tabbing the home page
+  // underneath a sheet they cannot reach.
+  useEffect(() => {
+    if (!open) return;
+    const previouslyFocused = document.activeElement as HTMLElement | null;
+    sheetRef.current?.focus();
+    return () => previouslyFocused?.focus();
   }, [open]);
 
   function toggle() {
@@ -205,7 +216,10 @@ function CategoryChips({
             className="fixed inset-x-0 bottom-0 z-40 overflow-hidden"
             style={{ top: sheetTop }}
             role="dialog"
+            aria-modal="true"
             aria-label="All categories"
+            ref={sheetRef}
+            tabIndex={-1}
           >
             <motion.button
               type="button"

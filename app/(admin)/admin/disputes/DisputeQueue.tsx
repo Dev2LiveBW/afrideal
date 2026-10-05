@@ -217,6 +217,7 @@ export function DisputeQueue({ rows, canResolve }: { rows: DisputeRow[]; canReso
           <textarea
             value={note}
             onChange={(event) => setNote(event.target.value)}
+            aria-label="Resolution note, optional"
             placeholder="Resolution note (optional) - what tipped the decision…"
             rows={3}
             className="w-full rounded border border-hairline-strong bg-surface px-3 py-2 text-[13px] text-ink outline-none focus:border-gold"
