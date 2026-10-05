@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useId, useRef, useState } from 'react';
 import { AlertTriangle, Clock, MapPin, Navigation, X } from 'lucide-react';
 
 import { ActionButton } from '@/components/brand/ActionButton';
@@ -36,6 +36,47 @@ export function JobAlertModal({
   onExpire: () => void;
 }) {
   const [secondsLeft, setSecondsLeft] = useState(ALERT_WINDOW_SECONDS);
+  const panelRef = useRef<HTMLDivElement>(null);
+  const titleId = useId();
+  const jobId = job?.id;
+
+  /*
+   * A runner who cannot see the countdown has to be told about it. The visible
+   * timer is hidden from screen readers - one announcement a second would bury
+   * the job details under its own ticking - and this message takes its place,
+   * changing only at the milestones below so the live region fires four times,
+   * not forty-five.
+   */
+  const spokenCountdown =
+    secondsLeft > 30
+      ? `${ALERT_WINDOW_SECONDS} seconds to respond`
+      : secondsLeft > 15
+        ? '30 seconds left'
+        : secondsLeft > 5
+          ? '15 seconds left'
+          : '5 seconds left';
+
+  // Move focus into the alert when a job arrives and hand it back on the way
+  // out, so a keyboard runner is not left on whatever was behind the overlay.
+  // Keyed on the id for the same reason the countdown is: an equal-but-new
+  // `job` object must not yank focus back to the top mid-read.
+  useEffect(() => {
+    if (!jobId) return;
+    const previouslyFocused = document.activeElement as HTMLElement | null;
+    panelRef.current?.focus();
+    return () => previouslyFocused?.focus();
+  }, [jobId]);
+
+  // Escape declines: the same thing the X button does, so the alert is never a
+  // trap for someone who cannot reach it with a mouse.
+  useEffect(() => {
+    if (!job) return;
+    const onKey = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') onDecline();
+    };
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, [job, onDecline]);
 
   useEffect(() => {
     if (!job) return;
@@ -65,10 +106,29 @@ export function JobAlertModal({
 
   return (
     <div className="fixed inset-0 z-50 flex items-end justify-center bg-ink/60 p-4 backdrop-blur-sm sm:items-center">
-      <div className="w-full max-w-sm animate-shake overflow-hidden rounded-lg border-2 border-danger bg-surface-raised shadow-lift">
+      <div
+        ref={panelRef}
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby={titleId}
+        tabIndex={-1}
+        className="w-full max-w-sm animate-shake overflow-hidden rounded-lg border-2 border-danger bg-surface-raised shadow-lift"
+      >
+        {/*
+          The spoken half of the countdown. Assertive because the window is 45
+          seconds and a polite announcement would queue behind whatever else is
+          being read, which on this screen is the job that is expiring.
+        */}
+        <p role="status" aria-live="assertive" className="sr-only">
+          New job alert, {job.pickup_name} to {job.dropoff_name}. {spokenCountdown}.
+        </p>
+
         <div className="flex items-center justify-between gap-2 bg-danger px-4 py-2.5">
-          <p className="flex items-center gap-1.5 text-[12px] font-semibold uppercase tracking-[0.08em] text-white">
-            <AlertTriangle size={14} strokeWidth={1.75} />
+          <p
+            id={titleId}
+            className="flex items-center gap-1.5 text-[12px] font-semibold uppercase tracking-[0.08em] text-white"
+          >
+            <AlertTriangle size={14} strokeWidth={1.75} aria-hidden="true" />
             New job alert
           </p>
           <button
@@ -84,7 +144,10 @@ export function JobAlertModal({
         <div className="p-4">
           <div className="mb-3 flex items-center justify-between gap-3">
             <MoneyText amount={job.payout} size="xl" tone="gold" />
-            <div className="flex items-center gap-1.5 rounded-full bg-danger-wash px-3 py-1.5 text-danger-ink">
+            <div
+              aria-hidden="true"
+              className="flex items-center gap-1.5 rounded-full bg-danger-wash px-3 py-1.5 text-danger-ink"
+            >
               <Clock size={13} strokeWidth={1.5} />
               <span className="font-mono text-[13px] font-semibold tabular-nums">{secondsLeft}s</span>
             </div>
