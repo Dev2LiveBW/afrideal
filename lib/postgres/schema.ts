@@ -43,6 +43,7 @@ export const marginRules = docTable('margin_rules');
 export const notifications = docTable('notifications');
 export const orderItems = docTable('order_items');
 export const orders = docTable('orders');
+export const payments = docTable('payments');
 export const pricingRules = docTable('pricing_rules');
 export const productImages = docTable('product_images');
 export const products = docTable('products');
@@ -50,6 +51,7 @@ export const rfqResponses = docTable('rfq_responses');
 export const rfqs = docTable('rfqs');
 export const runnerRequests = docTable('runner_requests');
 export const runners = docTable('runners');
+export const settings = docTable('settings');
 export const settlements = docTable('settlements');
 export const shipments = docTable('shipments');
 export const supplierOffers = docTable('supplier_offers');
@@ -71,6 +73,7 @@ export const tables = {
   notifications,
   'order-items': orderItems,
   orders,
+  payments,
   'pricing-rules': pricingRules,
   'product-images': productImages,
   products,
@@ -78,6 +81,7 @@ export const tables = {
   rfqs,
   'runner-requests': runnerRequests,
   runners,
+  settings,
   settlements,
   shipments,
   'supplier-offers': supplierOffers,

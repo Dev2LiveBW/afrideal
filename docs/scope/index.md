@@ -34,7 +34,7 @@ _These are recommendations to keep your build orderly, not requirements. Skip an
 | L | Admin portal | delivery | Foundation | existing |
 | 1 | Coding standards & CI | platform | Foundation | done |
 | 2 | Staging & production environments | platform | Foundation | in-progress |
-| 3 | Order payment states | buying | Foundation | planned |
+| 3 | Order payment states | buying | Foundation | in-progress |
 | 4 | Card payment gateway | buying | Slice 1 | planned |
 | 5 | Phone checkout | buying | Slice 1 | planned |
 | 6 | Product detail at phone parity | buying | Slice 2 | planned |

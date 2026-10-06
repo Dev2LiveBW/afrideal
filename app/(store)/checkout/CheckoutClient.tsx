@@ -22,7 +22,10 @@ const DELIVERY_FEE = 45;
 const CheckoutSchema = z.object({
   delivery_address: z.string().min(4, 'Enter a street address or plot number.'),
   delivery_city: z.string().min(2, 'Enter a city or town.'),
-  payment_method: z.enum(['DPO_PAY', 'ORANGE_MONEY', 'PAYGATE']),
+  // `EFT` is accepted but has no card in GATEWAYS yet, so a buyer cannot pick it
+  // here. Spec 0003 needs the method to exist so finance can raise and confirm a
+  // bank transfer order; the checkout card for it comes with the phone checkout.
+  payment_method: z.enum(['DPO_PAY', 'ORANGE_MONEY', 'PAYGATE', 'EFT']),
 });
 
 type CheckoutValues = z.infer<typeof CheckoutSchema>;

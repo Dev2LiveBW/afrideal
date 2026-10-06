@@ -382,27 +382,27 @@ section('9. Checkout — the order split engine');
   if (result?.order) {
     check('one customer-facing order', result.order.id != null);
     check('two line items', result.items?.length === 2, `got ${result.items?.length}`);
+    // Spec 0003: checkout no longer raises supplier legs or payables, and the
+    // order is not paid. Those assertions moved to the confirmation path; what
+    // checkout must prove now is that none of it happened yet.
     check(
-      'split into two supplier orders',
-      result.supplier_orders?.length === 2,
-      `got ${result.supplier_orders?.length}`,
+      'order starts awaiting payment',
+      result.order.status === 'AWAITING_PAYMENT',
+      `got ${result.order.status}`,
     );
-    check(
-      'one supplier invoice per supplier order',
-      result.payables?.length === result.supplier_orders?.length,
-      `${result.payables?.length} invoices vs ${result.supplier_orders?.length} legs`,
-    );
-    check('every supplier invoice starts PENDING', result.payables?.every((e) => e.status === 'PENDING'));
+    check('order carries a payment deadline', typeof result.order.payment_expires_at === 'string');
+    check('no payment reference before payment', result.order.payment_reference === null);
+    check('a payment attempt was opened', result.payment?.id != null, JSON.stringify(result.payment));
+    check('no supplier order exists yet', result.supplier_orders === undefined);
+    check('no supplier invoice exists yet', result.payables === undefined);
+
+    // The database-level AC-2 assertion needs a staff session and the payAs()
+    // helper, so it lands with the confirmation checks.
 
     const lineSum = result.items.reduce((s, i) => s + i.line_total, 0);
     check('subtotal equals the sum of its lines', result.order.subtotal === lineSum,
       `${result.order.subtotal} vs ${lineSum}`);
     check('total = subtotal + delivery', result.order.total === result.order.subtotal + result.order.delivery_fee);
-
-    const payableSum = result.payables.reduce((s, e) => s + e.amount, 0);
-    check('supplier invoices sum to the order subtotal', payableSum === lineSum, `${payableSum} vs ${lineSum}`);
-
-    check('emits the three documented events', result.events?.length === 3, JSON.stringify(result.events));
     check('order belongs to the buyer', result.order.customer_id === session.user.id);
 
     const after = (await json(jar, '/api/orders')).body?.length ?? 0;

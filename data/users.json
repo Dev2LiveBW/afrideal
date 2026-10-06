@@ -5,7 +5,8 @@
     "email": "admin@afrideal.co.bw",
     "role": "SUPER_ADMIN",
     "avatar": "AA",
-    "status": "ACTIVE"
+    "status": "ACTIVE",
+    "clerk_user_id": "user_3JSAzg1OHo9L04RiAUqTRrzB94O"
   },
   {
     "id": "u002",
@@ -13,7 +14,8 @@
     "email": "ops@afrideal.co.bw",
     "role": "OPERATIONS_ADMIN",
     "avatar": "KM",
-    "status": "ACTIVE"
+    "status": "ACTIVE",
+    "clerk_user_id": "user_3JSB02Cl3DuNYpTHWeEV09VFvs4"
   },
   {
     "id": "u003",
@@ -22,7 +24,8 @@
     "role": "SUPPLIER_OWNER",
     "supplier_id": "s001",
     "avatar": "NB",
-    "status": "ACTIVE"
+    "status": "ACTIVE",
+    "clerk_user_id": "user_3JSB0GW6eOCauuOrmeE46AcJ4EF"
   },
   {
     "id": "u004",
@@ -31,7 +34,8 @@
     "role": "SUPPLIER_OWNER",
     "supplier_id": "s002",
     "avatar": "GU",
-    "status": "ACTIVE"
+    "status": "ACTIVE",
+    "clerk_user_id": "user_3JSAzwSydz35lcHj6JmOiwMz8ms"
   },
   {
     "id": "u005",
@@ -40,7 +44,8 @@
     "role": "RUNNER",
     "runner_id": "r001",
     "avatar": "KS",
-    "status": "ACTIVE"
+    "status": "ACTIVE",
+    "clerk_user_id": "user_3JSAzvJc0p7BF99KPW9xvdzEv9W"
   },
   {
     "id": "u006",
@@ -49,7 +54,8 @@
     "role": "CUSTOMER",
     "avatar": "TM",
     "status": "ACTIVE",
-    "customer_type": "RETAIL"
+    "customer_type": "RETAIL",
+    "clerk_user_id": "user_3JSB0KZtCOAfnIKjo8pCtYeJ3JZ"
   },
   {
     "id": "u007",
@@ -58,7 +64,8 @@
     "role": "CUSTOMER",
     "avatar": "KD",
     "status": "ACTIVE",
-    "customer_type": "BUSINESS"
+    "customer_type": "BUSINESS",
+    "clerk_user_id": "user_3JSB0AQe61AXdrO5dgRJCzousKf"
   },
   {
     "id": "u008",
@@ -66,6 +73,7 @@
     "email": "finance@afrideal.co.bw",
     "role": "FINANCE_ADMIN",
     "avatar": "FA",
-    "status": "ACTIVE"
+    "status": "ACTIVE",
+    "clerk_user_id": "user_3JSAzooaZMk5ctuRDK95Nx1Yh8Q"
   }
 ]
