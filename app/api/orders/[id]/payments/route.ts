@@ -1,5 +1,5 @@
 import { fail, guard, handled, ok } from '@/lib/api';
-import { findById, insert, nextIds, readAll } from '@/lib/db';
+import { findById, insert, nextIds, readAll, update } from '@/lib/db';
 import { startPayment } from '@/lib/payments/adapters';
 import { windowHasClosed } from '@/lib/payments/policy';
 import type { Payment } from '@/types';
@@ -39,7 +39,27 @@ export const POST = handled(async (_request: Request, { params }: { params: { id
 
   // The deadline is the whole point of the window. Reopening past it would let a
   // buyer pay for an order the clock has already released.
+  //
+  // AC-5: this is also where the expiry stops being merely implied and gets
+  // written down. Reads compute it, a payment path records it, which is how the
+  // database catches up without turning every GET into a writer.
   if (windowHasClosed(order)) {
+    const now = new Date().toISOString();
+    await update('orders', order.id, {
+      status: 'CANCELLED',
+      cancel_reason: 'EXPIRED',
+      updated_at: now,
+      timeline: [
+        ...order.timeline,
+        {
+          status: 'CANCELLED',
+          label: 'Cancelled, payment window closed',
+          at: now,
+          actor: 'System',
+        },
+      ],
+    });
+
     return fail('The payment window for that order has closed.', 409);
   }
 

@@ -2,6 +2,7 @@ import { PageHeader } from '@/components/brand/Panel';
 import { ConsoleTopbar } from '@/components/layout/ConsoleTopbar';
 import { auth } from '@/lib/auth';
 import { readAll } from '@/lib/db';
+import { allAsDisplayed } from '@/lib/payments/status';
 import { getNotifications } from '@/lib/queries';
 
 import { OrdersTable, type OrderRow } from './OrdersTable';
@@ -9,14 +10,19 @@ import { OrdersTable, type OrderRow } from './OrdersTable';
 export const dynamic = 'force-dynamic';
 
 export default async function AdminOrdersPage() {
-  const [session, orders, items, legs, payableRecords, suppliers] = await Promise.all([
+  const [session, storedOrders, items, legs, payableRecords, suppliers, payments] = await Promise.all([
     auth(),
     readAll('orders'),
     readAll('order-items'),
     readAll('supplier-orders'),
     readAll('supplier-payables'),
     readAll('suppliers'),
+    readAll('payments'),
   ]);
+
+  // Spec 0003, AC-5: operations sees the same cancelled state a buyer does, so a
+  // closed payment window is not mistaken for an order still worth chasing.
+  const orders = allAsDisplayed(storedOrders, payments);
 
   const notifications = session?.user ? await getNotifications(session.user.id) : [];
 

@@ -1,6 +1,7 @@
 import 'server-only';
 
 import { readAll } from '@/lib/db';
+import { asDisplayed } from '@/lib/payments/status';
 import { rankOffers } from '@/lib/supplier-selection';
 import type {
   SupplierPayable,
@@ -28,16 +29,22 @@ export interface OrderDetail {
 }
 
 export async function getOrderDetail(orderId: string): Promise<OrderDetail | null> {
-  const [orders, items, legs, payableRecords, suppliers] = await Promise.all([
+  const [orders, items, legs, payableRecords, suppliers, payments] = await Promise.all([
     readAll('orders'),
     readAll('order-items'),
     readAll('supplier-orders'),
     readAll('supplier-payables'),
     readAll('suppliers'),
+    readAll('payments'),
   ]);
 
-  const order = orders.find((candidate) => candidate.id === orderId);
-  if (!order) return null;
+  const stored = orders.find((candidate) => candidate.id === orderId);
+  if (!stored) return null;
+
+  // Spec 0003, AC-5: an unpaid order past its deadline reads as cancelled before
+  // anything has written that down. Applied here so the three screens using this
+  // read model all agree, and so no GET has to become a writer.
+  const order = asDisplayed(stored, payments);
 
   const orderItems = items.filter((item) => item.order_id === orderId);
   const orderPayables = payableRecords.filter((record) => record.order_id === orderId);

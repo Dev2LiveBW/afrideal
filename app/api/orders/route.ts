@@ -6,6 +6,7 @@ import { EVENTS, audit, notify } from '@/lib/notifications';
 import { resolvePrice } from '@/lib/pricing-tiers';
 import { selectSupplier } from '@/lib/supplier-selection';
 import { startPayment } from '@/lib/payments/adapters';
+import { allAsDisplayed } from '@/lib/payments/status';
 import { paymentExpiresAt } from '@/lib/payments/policy';
 import type { Order, OrderItem, OrderTimelineEntry, Payment } from '@/types';
 
@@ -34,7 +35,10 @@ export const GET = handled(async (request: Request) => {
   const { actor, response } = await guard();
   if (response) return response;
 
-  const orders = await readAll('orders');
+  // Spec 0003, AC-5: the list agrees with the detail screens about what is still
+  // payable, so a closed window shows as cancelled here too.
+  const [storedOrders, payments] = await Promise.all([readAll('orders'), readAll('payments')]);
+  const orders = allAsDisplayed(storedOrders, payments);
   const status = new URL(request.url).searchParams.get('status');
 
   // Customers only ever see their own orders; suppliers see the orders they

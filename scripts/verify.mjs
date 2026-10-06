@@ -530,6 +530,71 @@ section('9. Checkout — the order split engine');
   check('an empty cart is refused', empty.status === 422, `got ${empty.status}`);
 }
 
+// ── Spec 0003 AC-5: a closed payment window reads as cancelled ────────────────
+section('9b. Payment expiry — a closed window reads as cancelled');
+{
+  const ops = sessions['ops@afrideal.co.bw'].jar;
+
+  // The seed gives both cases without touching the clock: o011 was placed a day
+  // ago paying by card (a 30 minute window, so long gone) and o012 was placed
+  // today paying by bank transfer (7 days, so still open).
+  const expired = (await json(ops, '/api/orders/o011')).body;
+  const open = (await json(ops, '/api/orders/o012')).body;
+
+  check(
+    'AC-5: an order past its window reads as CANCELLED',
+    expired?.order?.status === 'CANCELLED',
+    `got ${expired?.order?.status}`,
+  );
+  check(
+    'AC-5: and says it was the clock, not a person',
+    expired?.order?.cancel_reason === 'EXPIRED',
+    `got ${expired?.order?.cancel_reason}`,
+  );
+  check(
+    'AC-5: an order inside its window still reads as awaiting payment',
+    open?.order?.status === 'AWAITING_PAYMENT',
+    `got ${open?.order?.status}`,
+  );
+  check(
+    'an expired order never gained supplier legs',
+    (expired?.legs?.length ?? 0) === 0,
+    `${expired?.legs?.length} leg(s)`,
+  );
+
+  // The list must agree with the detail, or operations chases an order the buyer
+  // has already been told is dead.
+  const list = (await json(ops, '/api/orders')).body ?? [];
+  const inList = Array.isArray(list) ? list.find((o) => o.id === 'o011') : null;
+  check(
+    'AC-5: the order list agrees with the detail screen',
+    inList ? inList.status === 'CANCELLED' : true,
+    `got ${inList?.status}`,
+  );
+
+  // Revenue must not count it. This is the bug the cross check found: billable
+  // excluded CANCELLED but not AWAITING_PAYMENT.
+  // Computed rather than hardcoded: earlier sections place orders of their own, so
+  // any fixed number here would rot. The list already carries effective statuses.
+  const analytics = (await json(ops, '/api/analytics?days=3650')).body;
+  const everyOrder = Array.isArray(list) ? list : [];
+  const expectedBillable = everyOrder.filter(
+    (o) => o.status !== 'CANCELLED' && o.status !== 'AWAITING_PAYMENT',
+  ).length;
+  const unpaidOrDead = everyOrder.length - expectedBillable;
+
+  check(
+    'AC-5: unpaid and expired orders are not counted as revenue',
+    analytics?.order_count === expectedBillable,
+    `counted ${analytics?.order_count}, expected ${expectedBillable} (${unpaidOrDead} unpaid or cancelled of ${everyOrder.length})`,
+  );
+  check(
+    'the revenue filter actually excluded something',
+    unpaidOrDead > 0,
+    'no unpaid or cancelled orders present, so this check proved nothing',
+  );
+}
+
 // ── 10. Runner availability toggle ───────────────────────────────────────────
 
 section('10. Runner availability');
