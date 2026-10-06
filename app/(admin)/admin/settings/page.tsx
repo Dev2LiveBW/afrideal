@@ -4,7 +4,9 @@ import { EmptyState, PageHeader } from '@/components/brand/Panel';
 import { ConsoleTopbar } from '@/components/layout/ConsoleTopbar';
 import { auth } from '@/lib/auth';
 import { getNotifications } from '@/lib/queries';
+import { checkoutIsPaused } from '@/lib/settings';
 
+import { CheckoutPauseCard } from './CheckoutPauseCard';
 import { SettingsForm } from './SettingsForm';
 
 export const dynamic = 'force-dynamic';
@@ -13,6 +15,7 @@ export default async function AdminSettingsPage() {
   const session = await auth();
   const notifications = session?.user ? await getNotifications(session.user.id) : [];
   const isSuperAdmin = session?.user?.role === 'SUPER_ADMIN';
+  const checkoutPaused = await checkoutIsPaused();
 
   return (
     <>
@@ -38,7 +41,9 @@ export default async function AdminSettingsPage() {
             />
           </div>
         ) : (
-          <SettingsForm
+          <>
+            <CheckoutPauseCard paused={checkoutPaused} />
+            <SettingsForm
             initialCommissionRate={12}
             initialSupplierTermsDays={7}
             initialRevenueShareRate={5}
@@ -53,7 +58,8 @@ export default async function AdminSettingsPage() {
               { id: 'push', label: 'Push notifications', enabled: false },
               { id: 'inapp', label: 'In-app notifications', enabled: true },
             ]}
-          />
+            />
+          </>
         )}
       </div>
     </>
