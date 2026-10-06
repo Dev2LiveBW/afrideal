@@ -25,6 +25,10 @@ const TONES: Record<Tone, string> = {
 
 const STATUS_TONES: Record<string, Tone> = {
   // Orders
+  // Spec 0003: unpaid is amber like the other waiting states. A missing key here
+  // falls back to a neutral tone silently, so an unpaid order would have read as
+  // settled rather than outstanding.
+  AWAITING_PAYMENT: 'amber',
   PENDING: 'amber',
   PROCESSING: 'amber',
   IN_TRANSIT: 'ink',

@@ -634,6 +634,20 @@ section('9c. Finance controls — mark as paid, and pausing checkout');
   const noRef = await markPaid(finance, {});
   check('a reference is required', noRef.status === 422, `got ${noRef.status}`);
 
+  // AC-10: the buyer can open another attempt on an unpaid order, and only the
+  // buyer. A declined card must not cost them their basket.
+  const notMine = await json(ops, `/api/orders/${eftOrderId}/payments`, { method: 'POST' });
+  check('AC-10: a stranger cannot open a payment on your order', notMine.status === 403,
+    `got ${notMine.status}`);
+
+  const retry = await json(buyer, `/api/orders/${eftOrderId}/payments`, { method: 'POST' });
+  check('AC-10: the buyer can open another payment attempt', retry.status === 200 || retry.status === 201,
+    `got ${retry.status}`);
+  check('the attempt carries a reference to quote', typeof retry.body?.payment?.reference === 'string',
+    JSON.stringify(retry.body?.payment));
+  check('an attempt already open is reused, not duplicated', retry.body?.reused === true,
+    `reused ${retry.body?.reused}`);
+
   const before = (await json(ops, `/api/orders/${eftOrderId}`)).body;
   check('an unpaid bank transfer order has no supplier leg', (before?.legs?.length ?? 0) === 0,
     `${before?.legs?.length} leg(s)`);

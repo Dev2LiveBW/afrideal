@@ -17,7 +17,10 @@ import type { OrderStatus, OrderTimelineEntry } from '@/types';
  */
 
 const HAPPY_PATH = [
-  { code: 'PENDING', label: 'Placed' },
+  // Spec 0003 renamed the first rung: an order is placed and waiting for payment,
+  // not "pending". Orders written before that carry a PENDING entry instead, and
+  // the map below folds those onto this rung so their history still reads right.
+  { code: 'AWAITING_PAYMENT', label: 'Placed' },
   { code: 'PAID', label: 'Paid' },
   { code: 'PROCESSING', label: 'Preparing' },
   { code: 'COLLECTED', label: 'Collected' },
@@ -35,7 +38,12 @@ export function OrderTimeline({
   status: OrderStatus;
   className?: string;
 }) {
-  const reached = new Map(timeline.map((entry) => [entry.status, entry]));
+  const reached = new Map(
+    // A legacy PENDING entry means the same thing as AWAITING_PAYMENT: the order
+    // was placed. Folding it here keeps every order already in the database
+    // rendering its first step, without rewriting their stored history.
+    timeline.map((entry) => [entry.status === 'PENDING' ? 'AWAITING_PAYMENT' : entry.status, entry]),
+  );
 
   const terminated = status === 'CANCELLED' || status === 'DISPUTED';
   const steps = terminated

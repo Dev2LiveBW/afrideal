@@ -26,7 +26,15 @@ export const dynamic = 'force-dynamic';
 
 const COMMISSION_RATE = 0.12;
 const REVENUE_SHARE_RATE = 0.05;
-const ACTIVE_STATUSES: OrderStatus[] = ['PENDING', 'PROCESSING', 'IN_TRANSIT'];
+/**
+ * Orders with fulfilment work in flight.
+ *
+ * Spec 0003 dropped PENDING, which no order is born into any more. AWAITING_PAYMENT
+ * is deliberately absent: an unpaid order has no supplier leg, so there is no work to
+ * do on it, and counting it would inflate this the way it inflated revenue. Unpaid
+ * orders have their own queue on the payables screen.
+ */
+const ACTIVE_STATUSES: OrderStatus[] = ['PROCESSING', 'IN_TRANSIT'];
 
 const SYSTEM_HEALTH = [
   { name: 'DPO Pay', detail: 'Card payment gateway', latency: '184ms' },

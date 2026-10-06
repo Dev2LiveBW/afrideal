@@ -26,7 +26,9 @@ export interface OrderRow {
 
 const STATUS_TABS: { id: OrderStatus | 'ALL'; label: string }[] = [
   { id: 'ALL', label: 'All' },
-  { id: 'PENDING', label: 'Pending' },
+  // Spec 0003: no order is born PENDING any more, so that tab matched nothing.
+  // Unpaid orders are the ones operations most needs to be able to find.
+  { id: 'AWAITING_PAYMENT', label: 'Awaiting payment' },
   { id: 'PROCESSING', label: 'Processing' },
   { id: 'IN_TRANSIT', label: 'In transit' },
   { id: 'DELIVERED', label: 'Delivered' },

@@ -1,7 +1,7 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import { notFound, redirect } from 'next/navigation';
-import { CircleHelp, Lock, MapPin, RotateCcw, ShieldCheck } from 'lucide-react';
+import { CircleHelp, Clock, Lock, MapPin, RotateCcw, ShieldCheck } from 'lucide-react';
 
 import { MoneyText } from '@/components/brand/MoneyText';
 import { StatusBadge } from '@/components/brand/StatusBadge';
@@ -13,8 +13,22 @@ import { auth } from '@/lib/auth';
 import { readAll } from '@/lib/db';
 import { PAYMENT_LABELS, dateTime, shortDate } from '@/lib/format';
 import { getOrderDetail } from '@/lib/queries';
+import { findById } from '@/lib/db';
 
 import { OrderActions } from './OrderActions';
+import { RetryPaymentButton } from './RetryPaymentButton';
+
+/**
+ * Our banking details, from the setting rather than from code.
+ *
+ * Returns null when it is not configured, so the page says details will follow
+ * instead of inventing an account number that would send money to a stranger.
+ */
+async function bankTransferDetails(): Promise<string | null> {
+  const row = await findById('settings', 'eft_bank_details');
+  const text = row?.value?.text;
+  return typeof text === 'string' && text.trim() !== '' ? text.trim() : null;
+}
 
 export const metadata: Metadata = { title: 'Order tracking' };
 export const dynamic = 'force-dynamic';
@@ -32,7 +46,7 @@ export default async function OrderTrackingPage({
   const detail = await getOrderDetail(params.id);
   if (!detail) notFound();
 
-  const { order, items, payables } = detail;
+  const { order, items, payables, payments } = detail;
 
   const isStaff = ['SUPER_ADMIN', 'OPERATIONS_ADMIN', 'FINANCE_ADMIN'].includes(session.user.role);
   if (order.customer_id !== session.user.id && !isStaff) notFound();
@@ -63,6 +77,13 @@ export default async function OrderTrackingPage({
   const underReview = payables.filter((record) => record.status === 'ON_HOLD');
   const orderValue = payables.reduce((sum, record) => sum + record.amount, 0);
 
+  // Spec 0003: what the buyer is told turns on whether their money has arrived.
+  const awaitingPayment = order.status === 'AWAITING_PAYMENT';
+  const isBankTransfer = order.payment_method === 'EFT';
+  const latestAttempt = payments[0] ?? null;
+  const lastFailed = latestAttempt?.status === 'FAILED';
+  const bankDetails = awaitingPayment && isBankTransfer ? await bankTransferDetails() : null;
+
   const canConfirm = order.status === 'IN_TRANSIT' || order.status === 'DELIVERED';
   const canDispute = outstanding.length > 0 && order.status !== 'CANCELLED';
 
@@ -71,21 +92,77 @@ export default async function OrderTrackingPage({
 
   return (
     <div className="mx-auto max-w-market px-6 pb-24 pt-28">
-      {searchParams.placed === '1' && (
-        <div className="mb-7 flex items-start gap-3 rounded-md border border-forest/25 bg-forest-wash px-5 py-4">
-          <ShieldCheck size={18} strokeWidth={1.5} className="mt-0.5 shrink-0 text-forest" />
+      {/*
+        Spec 0003: this used to say "Your payment has been processed" the instant an
+        order was placed, which was never true and is now plainly false. What the
+        buyer is told depends on whether their money has actually arrived.
+      */}
+      {awaitingPayment ? (
+        <div className="mb-7 flex items-start gap-3 rounded-md border border-gold/40 bg-gold-wash px-5 py-4">
+          <Clock size={18} strokeWidth={1.5} className="mt-0.5 shrink-0 text-gold-ink" />
           <div>
-            <p className="text-[14px] font-semibold text-forest-ink">Order confirmed</p>
-            <p className="mt-1 text-[13px] leading-5 text-forest-ink/85">
-              Your payment has been processed.{' '}
-              {payables.length === 1
-                ? 'The supplier has'
-                : `All ${payables.length} suppliers have`}{' '}
-              been notified and are preparing your order. Tell us as soon as it arrives, and if
-              anything is wrong we will put it right.
+            <p className="text-[14px] font-semibold text-ink">Waiting for your payment</p>
+            <p className="mt-1 text-[13px] leading-5 text-ink/80">
+              {order.reference} is held for you. We start sourcing it as soon as your payment
+              is confirmed, and no supplier has been asked to prepare anything yet.
+            </p>
+
+            {isBankTransfer && (
+              <div className="mt-3 rounded border border-hairline-strong bg-surface px-3.5 py-3">
+                <p className="text-[12px] font-medium text-muted">Paying by bank transfer</p>
+                <p className="mt-1.5 text-[13px] leading-5 text-ink">
+                  Quote{' '}
+                  <strong className="font-mono font-semibold">
+                    {latestAttempt?.provider_reference ?? order.reference}
+                  </strong>{' '}
+                  as your payment reference so we can match your money to this order.
+                </p>
+                {bankDetails ? (
+                  <p className="mt-2 whitespace-pre-line text-[12.5px] leading-5 text-muted">
+                    {bankDetails}
+                  </p>
+                ) : (
+                  <p className="mt-2 text-[12.5px] leading-5 text-muted">
+                    Our banking details will be sent to you shortly.
+                  </p>
+                )}
+              </div>
+            )}
+
+            {lastFailed && (
+              <p className="mt-3 text-[12.5px] leading-5 text-danger-ink">
+                Your last attempt did not go through. Nothing was charged, and your order is
+                still held.
+              </p>
+            )}
+
+            {/* Offered for any unpaid order, not only a failed one: a buyer who
+                abandoned a card page needs the same way back in. */}
+            <div className="mt-3">
+              <RetryPaymentButton orderId={order.id} />
+            </div>
+
+            <p className="mt-3 text-[12px] text-muted">
+              This order is held until {dateTime(order.payment_expires_at)}.
             </p>
           </div>
         </div>
+      ) : (
+        searchParams.placed === '1' && (
+          <div className="mb-7 flex items-start gap-3 rounded-md border border-forest/25 bg-forest-wash px-5 py-4">
+            <ShieldCheck size={18} strokeWidth={1.5} className="mt-0.5 shrink-0 text-forest" />
+            <div>
+              <p className="text-[14px] font-semibold text-forest-ink">Payment confirmed</p>
+              <p className="mt-1 text-[13px] leading-5 text-forest-ink/85">
+                {payables.length === 1
+                  ? 'The supplier has'
+                  : `All ${payables.length} suppliers have`}{' '}
+                been notified and are preparing your order. Tell us as soon as it arrives, and if
+                anything is wrong we will put it right.
+              </p>
+            </div>
+          </div>
+        )
       )}
 
       <div className="flex flex-col gap-10 lg:flex-row lg:gap-12">

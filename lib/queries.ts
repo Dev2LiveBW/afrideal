@@ -7,6 +7,7 @@ import type {
   SupplierPayable,
   Order,
   OrderItem,
+  Payment,
   Product,
   SelectionResult,
   Supplier,
@@ -26,6 +27,14 @@ export interface OrderDetail {
   items: OrderItem[];
   legs: (SupplierOrder & { supplier: Supplier | null; items: OrderItem[]; payable: SupplierPayable | null })[];
   payables: SupplierPayable[];
+  /**
+   * Every attempt to pay for this order, newest first (spec 0003).
+   *
+   * Part of an order's detail now rather than a separate lookup: a screen showing
+   * an unpaid order has to tell the buyer which reference to quote, and whether
+   * their last attempt failed.
+   */
+  payments: Payment[];
 }
 
 export async function getOrderDetail(orderId: string): Promise<OrderDetail | null> {
@@ -53,6 +62,9 @@ export async function getOrderDetail(orderId: string): Promise<OrderDetail | nul
     order,
     items: orderItems,
     payables: orderPayables,
+    payments: payments
+      .filter((row) => row.order_id === orderId)
+      .sort((a, b) => b.created_at.localeCompare(a.created_at)),
     legs: legs
       .filter((leg) => leg.order_id === orderId)
       .map((leg) => ({

@@ -26,12 +26,12 @@ An order is born waiting for payment and only becomes paid when payment is confi
 **Done when:** a new order starts as pending payment; no supplier order or payable exists until confirmation; an unpaid order expires after its window; `npm run verify` covers the new states.
 spec [0003](../specs/0003-order-payment-states.md) · code in `lib/payments/`
 - [x] Design it (spec): `/architect order payment states`
-- [ ] Build it: `/develop order payment states`
+- [x] Build it: `/develop order payment states`
   - [x] Schema, types and the confirmation seam: `AWAITING_PAYMENT`, `EFT`, the `payments` and `settings` collections, and `confirmPayment()` in its claim, legs, finish order (AC-1, AC-2, AC-3, AC-4, AC-7, AC-9, AC-11)
   - [x] Reaching the seam: the signed provider callback, the retry endpoint, and cancel from unpaid (AC-4, AC-6, AC-10)
   - [x] Expiry everywhere: `effectiveOrderStatus()` across the read surfaces, including the analytics revenue filters (AC-5)
   - [x] Finance and switches: mark as paid on the payables queue, plus pause checkout (AC-6, AC-8, AC-11)
-  - [ ] Honest checkout and full coverage: the waiting state, EFT instructions, and `payAs()` in verify (AC-1, AC-10, AC-12)
+  - [x] Honest checkout and full coverage: the waiting state, EFT instructions, and `payAs()` in verify (AC-1, AC-10, AC-12)
 - [ ] Verify it: `/check verify order payment states`
 - [ ] Test it: `/test order payment states`
 - [ ] Review it (fresh model): `/check review order payment states`
