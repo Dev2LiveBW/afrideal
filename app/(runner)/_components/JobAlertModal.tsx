@@ -175,7 +175,7 @@ export function JobAlertModal({
                 <p className="truncate text-[13.5px] font-medium text-ink">{job.dropoff_name}</p>
               </div>
             </div>
-            <p className="text-[11.5px] text-muted">{job.distance_km.toFixed(1)} km away</p>
+            {job.distance_km > 0 && <p className="text-[11.5px] text-muted">{job.distance_km.toFixed(1)} km away</p>}
           </div>
 
           <div className="mt-4 flex gap-2.5">

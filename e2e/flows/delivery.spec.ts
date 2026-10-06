@@ -16,7 +16,9 @@ test('F02 + B05 the runner delivers, then the buyer confirms it arrived @p1', as
     .filter({ has: runner.getByRole('button', { name: 'Confirm delivered' }) }).last();
   await clickAndSave(job.getByRole('button', { name: 'Confirm delivered' }));
   await expect(runner.getByText('Delivery confirmed - nice work')).toBeVisible();
-  await expect(runner.getByText('Kefilwe Dithebe', { exact: true })).toHaveCount(0);
+  // The delivered job leaves his active list. (Another job to Kefilwe may sit
+  // in the pool: E02 marking her order ready opens one.)
+  await expect(job).toHaveCount(0);
 
   const buyer = await as('kefilwe');
   await buyer.goto('/orders/o006');

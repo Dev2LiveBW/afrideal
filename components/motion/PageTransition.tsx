@@ -57,14 +57,21 @@ export function PageTransition({
 
   // Decided once per mount - a template remounts on every navigation.
   const [kind] = useState<Kind>(() => {
+    // A server render is always a full page load, the first page of a
+    // session, so it never animates. `mounts` must not count it either: on
+    // the server it is shared by every request, and counting there gave
+    // every server-rendered page the push wrapper.
+    if (typeof window === 'undefined') return 'none';
     const isFirst = mounts === 0;
     mounts += 1;
     const kind = nextKind;
     nextKind = 'push';
     if (isFirst) return 'none';
-    if (typeof window !== 'undefined' && !window.matchMedia(PHONE).matches) return 'none';
+    if (!window.matchMedia(PHONE).matches) return 'none';
     return kind;
   });
+
+  const [settled, setSettled] = useState(false);
 
   if (mode === 'console') {
     return (
@@ -94,7 +101,12 @@ export function PageTransition({
             ? { duration: 0.22, ease: [0.22, 0.61, 0.36, 1] }
             : { duration: 0.2, ease: [0, 0, 0.2, 1] }
         }
-        style={{ willChange: 'transform' }}
+        // `will-change: transform` makes this wrapper the box every
+        // `position: fixed` descendant pins to, so while it stays, the buy
+        // bar and the cart's checkout bar float mid-page instead of sitting
+        // at the bottom of the screen. Keep the hint for the slide only.
+        style={settled ? undefined : { willChange: 'transform' }}
+        onAnimationComplete={() => setSettled(true)}
       >
         {children}
       </motion.div>

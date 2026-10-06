@@ -52,10 +52,13 @@ export function JobCard({ job }: { job: DecoratedShipment }) {
         </div>
         <div className="shrink-0 text-right">
           <MoneyText amount={job.payout} size="lg" tone="gold" />
-          <p className="mt-1.5 flex items-center justify-end gap-1 text-[11.5px] text-muted">
-            <Route size={12} strokeWidth={1.5} />
-            {job.distance_km.toFixed(1)} km
-          </p>
+          {/* 0 means not measured (jobs opened by the hand-off, lib/shipments.ts). */}
+          {job.distance_km > 0 && (
+            <p className="mt-1.5 flex items-center justify-end gap-1 text-[11.5px] text-muted">
+              <Route size={12} strokeWidth={1.5} />
+              {job.distance_km.toFixed(1)} km
+            </p>
+          )}
         </div>
       </div>
 

@@ -3,6 +3,7 @@ import { z } from 'zod';
 import { fail, guard, handled, ok } from '@/lib/api';
 import { findById, readAll, update } from '@/lib/db';
 import { EVENTS, audit, notify } from '@/lib/notifications';
+import { markCollected } from '@/lib/shipments';
 import type { ShipmentStatus } from '@/types';
 
 export const dynamic = 'force-dynamic';
@@ -46,6 +47,10 @@ export const PATCH = handled(async (request: Request, { params }: { params: { id
     runner_id: parsed.data.runner_id ?? shipment.runner_id ?? actor.runnerId,
     delivered_at: parsed.data.status === 'DELIVERED' ? now : shipment.delivered_at,
   });
+
+  if (parsed.data.status === 'PICKED_UP') {
+    await markCollected(shipment, actor);
+  }
 
   if (parsed.data.status === 'DELIVERED') {
     // Pay the runner and advance the supplier leg.

@@ -22,7 +22,7 @@ Each run makes a fresh Neon branch called `e2e-<timestamp>`, loads `data/*.json`
 - The last run's report, with a video and a trace of every failure: `npm run e2e:report`.
 - Demo recordings: `npm run e2e:demo` records every journey marked Video (slowed down, a caption bar along the top of each screen naming the person, the journey and the step), then `npm run e2e:videos` turns them into `demo-videos/<journey>-<size>[-<person>].mp4` at their recorded pace. Pass a folder or `--grep` to record only some (`npm run e2e:demo -- --grep D01`). Captions come from each journey's title and its `caption()` calls (`e2e/support/fixtures.ts`).
 
-The spec for each journey lives in `e2e/` (storefront, supplier, runner, console, access, flows). Bugs the suite found are kept as tests marked `test.fail()` in `e2e/access/known-issues.spec.ts` and `e2e/flows/z01-golden-thread.spec.ts`: they pass while the bug is there and report "unexpectedly passed" once it is fixed, which is the cue to delete the marker.
+The spec for each journey lives in `e2e/` (storefront, supplier, runner, console, access, flows). Bugs the suite found are kept as tests marked `test.fail()` in `e2e/access/known-issues.spec.ts`: they pass while the bug is there and report "unexpectedly passed" once it is fixed, which is the cue to delete the marker.
 
 ## Before you start
 
@@ -382,7 +382,7 @@ Run D01 to D05 in order; each picks up the request the last one left.
 
 **Expect:** "Delivery confirmed - nice work"; the job leaves his list; Kefilwe can now confirm the order arrived (B05).
 
-**Known gap:** a new order never reaches this screen. Nothing creates a runner job when a supplier marks an order ready for collection (Findings, 1), so accepting a fresh job alert, "Mark picked up" and "Start delivery" can only be tried on seeded jobs.
+A fresh job (accept from the alert or the list, "Mark picked up", "Start delivery") is covered by Z01, step 3.
 
 ### F03 Read earnings
 
@@ -478,7 +478,7 @@ These have no video: they are safety checks, not things to show off.
 
 One order, start to finish, five people. This is the demo that shows the whole system. Run it after a fresh reset.
 
-**Today it stops at step 3** (Findings, 1): the order never reaches Kagiso. The spec runs steps 1 to 3 and is marked as an expected failure until the hand off to runners is built. Until then, show steps 3 to 7 on a seeded order instead (F02, B05, G06), and say so in the video.
+Runs end to end since 2026-10-06 (Findings, 1). Kagiso's job pays BWP 45.00, the order's delivery fee, as it has one supplier.
 
 | Step | Who | Does | System shows |
 |---|---|---|---|
@@ -487,8 +487,8 @@ One order, start to finish, five people. This is the demo that shows the whole s
 | 3 | Kagiso | Accepts the job, picks up, delivers (F02) | Thabo's order: In transit, then delivered |
 | 4 | Thabo | Confirms arrival (B05) | Order: Delivered |
 | 5 | Keabetswe | Opens the order in the console (G02) | Full timeline, supplier and runner named |
-| 6 | Finance | Settles Naledi's invoice for it (G06) | Invoice: Settled |
-| 7 | Naledi | Opens earnings (E04) | The invoice shows as settled |
+| 6 | Finance | Opens Payables, All | Naledi's invoice already Settled: Thabo's confirmation in step 4 released it |
+| 7 | Naledi | Opens Orders | The order shows Delivered and her invoice Settled |
 
 **Expect at the end:** the amounts agree everywhere: what Thabo paid equals subtotal plus delivery; Naledi's invoice equals her line; the console order, the buyer's order and the supplier's invoice all carry the same reference.
 
@@ -510,12 +510,12 @@ These have no journeys until they are built; add them here when they land.
 
 What the first runs turned up. Bugs are kept as tests marked `test.fail()` (see "Running the suite").
 
-1. **A new order never reaches a runner.** Marking an order "Ready for collection" only sends a notification; nothing in the code creates a shipment, so no runner job appears. Every runner job today comes from the seed. The golden thread Z01 stops at step 3, so its demo video cannot be recorded honestly until this hand off is built. Test: `e2e/flows/z01-golden-thread.spec.ts`.
+1. **Fixed 2026-10-06: a new order never reached a runner.** Marking an order "Ready for collection" only sent a notification; nothing created a shipment, so no runner job appeared and every runner job came from the seed. Now `lib/shipments.ts` opens the job when a supplier marks their part ready (`openJobForLeg`), and marks the part collected and the order in transit when the runner picks it up (`markCollected`). The payout is the order's delivery fee split across its pickups (product owner's decision); distance is not measured yet and the runner screens hide it. Test: Z01, end to end.
 2. **Garbled text.** The order list and the runner request list print "Â·" where a middle dot belongs (`app/(store)/orders/page.tsx:112`, `app/(store)/requests/page.tsx:92`; also the legacy v4 footer). Tests: `e2e/access/known-issues.spec.ts`.
 3. **The RFQ chain has no screens** past the buyer's request (C02 to C04 above).
 4. **When Clerk cannot be reached, the page crashes.** Every signed-in page calls Clerk's API (`currentUser()` in `lib/auth.ts`). From this machine that call fails now and then ("fetch failed"). `lib/auth.ts` retries twice, but in one 25 minute run it still failed 5 times, and each time the buyer saw the full "We could not finish loading this" screen (for example `/requests`, digest 2291417529). A gentler fallback (a longer backoff, or rendering the page signed out with a "reconnecting" notice) would hide most of these. The suite's one retry absorbs them and reports the test as flaky.
-5. **On a phone, the pinned buy bar is not pinned.** The phone page transition (`components/motion/PageTransition.tsx:97`) leaves `will-change: transform` on the page wrapper. That makes every `position: fixed` element inside a page pin to the wrapper instead of the screen, so "Add to cart" sits about 3,600 px down the product page instead of at the bottom of the screen, and the cart's Total and Checkout bar floats in the middle of the screen over the cart line. Anything else fixed inside a storefront page (dialogs, bars) is exposed to the same thing. Test: A03 on phone.
-6. **On a phone, the quotation dialog sits under the buy bar (latent).** The bar is `z-[60]` and the "Request a quotation" dialog is `z-50`, so whenever the bar is pinned it covers "Send request" (seen on the dev server, where it pinned). Today's production build hides this because of finding 5; fixing 5 will expose it, and C01 on phone will catch it.
+5. **Fixed 2026-10-06: on a phone, the pinned buy bar was not pinned.** The transition now keeps `will-change` only while it slides, and never wraps a server render (which counted every request as a navigation). It was: the phone page transition (`components/motion/PageTransition.tsx`) left `will-change: transform` on the page wrapper. That makes every `position: fixed` element inside a page pin to the wrapper instead of the screen, so "Add to cart" sits about 3,600 px down the product page instead of at the bottom of the screen, and the cart's Total and Checkout bar floats in the middle of the screen over the cart line. Anything else fixed inside a storefront page (dialogs, bars) is exposed to the same thing. Test: A03 on phone.
+6. **Fixed 2026-10-06: on a phone, the quotation dialog sat under the buy bar.** The bar is `z-[60]`; the "Request a quotation" dialog is now `z-[70]`. Test: C01 on phone.
 7. **Saves are slow from Botswana.** Measured with two test workers at once: median **8.3 s** to **18.9 s** depending on the run (worst single saves 23 s to 34 s; placing an order was the slowest, 33.7 s in one run). Each save is several locked transactions (the record, the audit log, notifications), and each transaction reads its whole collection; one such transaction alone takes about 1.2 s of round trips to Ohio from here. The report lists every save's time on its test. On Vercel next to the database (`iad1`) this should fall to well under a second, but it is what anyone testing from Botswana against the US database will feel, the client included, and the whole-collection read inside every write grows with the data.
 8. **Sign in can land staff on the storefront.** `/after-sign-in` sends anyone to `/` if resolving their session throws, with no message. In the first run, AfriDeal Admin landed on the storefront once that way.
 
