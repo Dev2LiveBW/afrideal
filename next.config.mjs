@@ -1,6 +1,9 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   reactStrictMode: true,
+  // The Playwright journeys run their own dev server (on a throwaway Neon
+  // branch) beside yours; a separate build folder keeps the two apart.
+  distDir: process.env.NEXT_DIST_DIR || '.next',
   experimental: {
     // instrumentation.ts raises Node's TCP handshake budget before the first
     // outbound call; see lib/postgres/network.mjs.

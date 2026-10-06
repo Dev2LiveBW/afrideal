@@ -28,7 +28,19 @@ npm run db:migrate   # apply drizzle migrations
 npm run db:load      # reload Postgres from data/*.json
 npm run verify       # API checks against VERIFY_BASE
 npm run audit        # page checks against AUDIT_BASE
+npm run e2e          # Playwright journeys on a throwaway Neon branch (docs/testing/e2e-journeys.md)
+npm run e2e:demo     # the same, slowed down with every screen recorded, for demo videos
+npm run e2e:report   # open the last run's report (videos and traces of failures)
+npm run e2e:videos   # turn the last demo run into demo-videos/*.mp4 (needs ffmpeg)
 ```
+
+`npm run e2e` branches `production` into `e2e-<timestamp>`, reloads it from
+`data/*.json`, builds and starts the app on port 3300 against that branch
+(`CATALOGUE_SOURCE=json`, own build folder `.next-e2e`), signs the eight demo
+accounts in through their cards, runs `e2e/`, and deletes the branch. It never
+writes to the live data or Sanity, and runs beside `npm run dev`. The journeys,
+findings and known bugs (tests marked `test.fail()`) are listed in
+`docs/testing/e2e-journeys.md`; change a journey there before its spec.
 
 ## Specs
 
@@ -164,7 +176,8 @@ user's `publicMetadata`, written only by `node scripts/sync-users-to-clerk.mjs`
 from the Sanity people directory - never by hand in the Clerk dashboard.
 
 - Sign-in page is `/sign-in` (Clerk's form plus the eight demo cards);
-  `/login` and `/signup` redirect there. `/after-sign-in` lands each role.
+  `/login` redirects there and `/signup` to `/sign-up`. `/after-sign-in`
+  lands each role.
 - `npm run verify` mints Clerk sessions with `CLERK_SECRET_KEY` from
   `.env.local` and sends bearer tokens; it needs the demo accounts to exist
   (run the sync script once).
