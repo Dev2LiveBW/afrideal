@@ -137,6 +137,83 @@ export async function confirmPayment(input: ConfirmInput): Promise<ConfirmOutcom
   };
 }
 
+export type FailOutcome =
+  | { ok: true; payment: Payment }
+  | { ok: false; reason: 'NOT_FOUND' | 'ALREADY_CONFIRMED' };
+
+/**
+ * Record that an attempt failed (AC-10).
+ *
+ * Deliberately touches nothing but the payment row. A declined card does not
+ * cancel the order: the buyer may start another attempt until the deadline, and
+ * cancelling here would throw away a basket over one bad card.
+ *
+ * A confirmed payment is never walked back to FAILED. An out of order provider
+ * notification arriving after a success is refused, because the money did arrive
+ * and reversing it belongs to refunds, not to a late failure notice.
+ */
+export async function failPayment(input: {
+  orderId: string;
+  provider: PaymentProvider;
+  providerReference: string;
+  reason?: string | null;
+  actor: ConfirmActor;
+}): Promise<FailOutcome> {
+  const order = await findById('orders', input.orderId);
+  if (!order) return { ok: false, reason: 'NOT_FOUND' };
+
+  const outcome = await mutate<'payments', FailOutcome>('payments', (rows) => {
+    const mine = rows.filter((row) => row.order_id === order.id);
+
+    if (mine.some((row) => row.status === 'CONFIRMED')) {
+      return { rows, result: { ok: false, reason: 'ALREADY_CONFIRMED' } };
+    }
+
+    const target =
+      mine.find(
+        (row) =>
+          row.provider === input.provider &&
+          (row.provider_reference === input.providerReference || row.provider_reference === null),
+      ) ?? null;
+
+    if (!target) return { rows, result: { ok: false, reason: 'NOT_FOUND' } };
+
+    const failed: Payment = {
+      ...target,
+      provider_reference: input.providerReference,
+      status: 'FAILED',
+      confirmed_at: null,
+      failure_reason: input.reason ?? 'The provider reported a failed payment.',
+    };
+
+    return {
+      rows: rows.map((row) => (row.id === target.id ? failed : row)),
+      result: { ok: true, payment: failed },
+    };
+  });
+
+  if (!outcome.ok) return outcome;
+
+  // Audited like any other money event: a failed attempt is part of the record.
+  await audit({
+    actorId: input.actor.id,
+    actorName: input.actor.name,
+    action: EVENTS.PAYMENT_CONFIRMED,
+    entity: 'order',
+    entityId: order.id,
+    detail: `${order.reference} payment failed via ${input.provider}: ${outcome.payment.failure_reason}`,
+  });
+
+  await notify({
+    userId: order.customer_id,
+    title: 'Payment did not go through',
+    body: `${order.reference} is still held for you. You can try paying again.`,
+    kind: 'PAYMENT',
+  });
+
+  return outcome;
+}
+
 type ClaimResult = { payment: Payment; wonClaim: boolean; conflict?: boolean };
 
 /**

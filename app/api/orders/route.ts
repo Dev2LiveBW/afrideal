@@ -232,6 +232,9 @@ export const POST = handled(async (request: Request) => {
       payment: {
         id: payment.id,
         provider: payment.provider,
+        // The buyer needs this for a bank transfer: it is what they quote so we
+        // can match their money to this order.
+        reference: payment.provider_reference,
         redirect_url: started.redirectUrl,
         instructions: started.instructions,
       },

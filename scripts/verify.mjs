@@ -13,6 +13,8 @@
  * and sent as a bearer token. No browser, no bot detection, no cookies to
  * juggle - and the same middleware and `auth()` the app runs in production.
  */
+import { createHmac } from 'node:crypto';
+
 import nextEnv from '@next/env';
 import { createClerkClient } from '@clerk/backend';
 
@@ -105,6 +107,39 @@ async function json(jar, path, init) {
   const response = await request(jar, path, init);
   const body = await response.json().catch(() => null);
   return { status: response.status, body };
+}
+
+// ── Spec 0003: confirming a payment the way a gateway does ───────────────────
+//
+// Pays through the real signed callback rather than reaching into the database,
+// so these checks exercise the same path DPO Pay will use. The secret mirrors
+// lib/payments/signature.ts, which falls back to a dev value outside production
+// so nobody has to put a secret in .env.local to run this.
+const MOCK_SECRET = process.env.PAYMENT_SECRET_MOCK ?? 'afrideal-dev-mock-secret';
+
+async function payCallback(orderId, attempt, options = {}) {
+  const body = JSON.stringify({
+    reference: attempt?.provider_reference ?? attempt?.reference ?? null,
+    status: options.status ?? 'CONFIRMED',
+    amount: options.amount,
+    currency: 'BWP',
+    occurred_at: new Date().toISOString(),
+    ...(options.reason ? { reason: options.reason } : {}),
+  });
+
+  const headers = { 'Content-Type': 'application/json' };
+  if (options.sign !== false) {
+    headers['x-afrideal-signature'] =
+      options.signature ?? createHmac('sha256', MOCK_SECRET).update(body, 'utf8').digest('hex');
+  }
+
+  const response = await fetch(`${BASE}/api/payments/${attempt?.provider ?? 'MOCK'}/callback`, {
+    method: 'POST',
+    headers,
+    body,
+  });
+
+  return { status: response.status, body: await response.json().catch(() => null) };
 }
 
 // ── 1. Every seeded login works and carries the right role ───────────────────
@@ -417,6 +452,69 @@ section('9. Checkout — the order split engine');
       result.items[0].unit_price === variant?.price,
       `${result.items[0].unit_price} vs catalogue ${variant?.price}`,
     );
+  }
+
+  // ── Spec 0003: the confirmation path ───────────────────────────────────────
+  // Everything above proves an order starts unpaid. These prove it can become
+  // paid, and only through a signed callback.
+  if (result?.order) {
+    const orderId = result.order.id;
+    const attempt = result.payment;
+
+    const staff = sessions['ops@afrideal.co.bw'].jar;
+    const before2 = (await json(staff, `/api/orders/${orderId}`)).body;
+    check(
+      'AC-2: an unpaid order has no supplier leg in the database',
+      Array.isArray(before2?.legs) && before2.legs.length === 0,
+      `legs=${JSON.stringify(before2?.legs)}`,
+    );
+    check(
+      'AC-2: an unpaid order has no payable in the database',
+      Array.isArray(before2?.payables) && before2.payables.length === 0,
+      `payables=${JSON.stringify(before2?.payables)}`,
+    );
+
+    const unsigned = await payCallback(orderId, attempt, { sign: false, amount: result.order.total });
+    check('AC-6: an unsigned callback is refused with 401', unsigned.status === 401, `got ${unsigned.status}`);
+
+    const stillUnpaid = (await json(jar, `/api/orders/${orderId}`)).body?.order?.status;
+    check('an unsigned callback changed nothing', stillUnpaid === 'AWAITING_PAYMENT', `got ${stillUnpaid}`);
+
+    const tampered = await payCallback(orderId, attempt, { signature: 'f'.repeat(64), amount: result.order.total });
+    check('a wrong signature is refused with 401', tampered.status === 401, `got ${tampered.status}`);
+
+    const confirmed = await payCallback(orderId, attempt, { amount: result.order.total });
+    check('AC-3: a signed callback confirms the payment', confirmed.status === 200, `got ${confirmed.status}`);
+    check('the callback reports the order processing', confirmed.body?.order_status === 'PROCESSING',
+      `got ${confirmed.body?.order_status}`);
+    check('it was not treated as a replay', confirmed.body?.replayed === false);
+    check('the amount matched the order total', confirmed.body?.amount_matches === true);
+
+    const detail = (await json(staff, `/api/orders/${orderId}`)).body;
+    check('AC-3: supplier legs now exist', (detail?.legs?.length ?? 0) > 0,
+      `${detail?.legs?.length ?? 0} leg(s)`);
+    check('AC-3: one payable per supplier leg',
+      detail?.payables?.length === detail?.legs?.length,
+      `${detail?.payables?.length} payable(s) vs ${detail?.legs?.length} leg(s)`);
+    check('the order now carries a payment reference', typeof detail?.order?.payment_reference === 'string');
+
+    // AC-4: the same callback again must add nothing.
+    const legCount = detail?.legs?.length ?? 0;
+    const payableCount = detail?.payables?.length ?? 0;
+    const replay = await payCallback(orderId, attempt, { amount: result.order.total });
+    check('AC-4: a replayed callback still answers 200', replay.status === 200, `got ${replay.status}`);
+    check('AC-4: the replay is recognised as one', replay.body?.replayed === true);
+
+    const afterReplay = (await json(staff, `/api/orders/${orderId}`)).body;
+    check('AC-4: the replay raised no extra supplier leg',
+      afterReplay?.legs?.length === legCount,
+      `${afterReplay?.legs?.length} vs ${legCount}`);
+    check('AC-4: the replay raised no extra payable',
+      afterReplay?.payables?.length === payableCount,
+      `${afterReplay?.payables?.length} vs ${payableCount}`);
+
+    const paidAgain = await json(jar, `/api/orders/${orderId}/payments`, { method: 'POST' });
+    check('a paid order cannot open another attempt', paidAgain.status === 409, `got ${paidAgain.status}`);
   }
 
   const empty = await json(jar, '/api/orders', {

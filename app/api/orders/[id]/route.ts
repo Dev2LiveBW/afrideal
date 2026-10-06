@@ -149,8 +149,10 @@ export const PATCH = handled(async (request: Request, { params }: { params: { id
     }
 
     case 'CANCEL': {
-      if (order.status !== 'PENDING') {
-        return fail('Only an unconfirmed order can be cancelled here.', 409);
+      // Spec 0003: an unpaid order is AWAITING_PAYMENT, not PENDING. Without this
+      // a buyer could no longer cancel their own unpaid order at all.
+      if (order.status !== 'AWAITING_PAYMENT' && order.status !== 'PENDING') {
+        return fail('Only an unpaid order can be cancelled here.', 409);
       }
 
       for (const leg of legs) {
@@ -158,8 +160,12 @@ export const PATCH = handled(async (request: Request, { params }: { params: { id
         await update('supplier-payables', leg.id, applyTransition(leg, 'CANCELLED', actor.name, 'Order cancelled.'));
       }
 
+      // The reason is what stops a late payment silently reopening this order.
+      // confirmPayment() reopens an EXPIRED cancellation and refuses a deliberate
+      // one, so recording who decided is load bearing, not bookkeeping.
       const updated = await update('orders', params.id, {
         status: 'CANCELLED',
+        cancel_reason: isStaff ? 'STAFF' : 'CUSTOMER',
         updated_at: now,
         timeline: [...order.timeline, { status: 'CANCELLED', label: 'Cancelled', at: now, actor: actor.name }],
       });

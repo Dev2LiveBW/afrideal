@@ -28,7 +28,7 @@ spec [0003](../specs/0003-order-payment-states.md) · code in `lib/payments/`
 - [x] Design it (spec): `/architect order payment states`
 - [ ] Build it: `/develop order payment states`
   - [x] Schema, types and the confirmation seam: `AWAITING_PAYMENT`, `EFT`, the `payments` and `settings` collections, and `confirmPayment()` in its claim, legs, finish order (AC-1, AC-2, AC-3, AC-4, AC-7, AC-9, AC-11)
-  - [ ] Reaching the seam: the signed provider callback, the retry endpoint, and cancel from unpaid (AC-4, AC-6, AC-10)
+  - [x] Reaching the seam: the signed provider callback, the retry endpoint, and cancel from unpaid (AC-4, AC-6, AC-10)
   - [ ] Expiry everywhere: `effectiveOrderStatus()` across the read surfaces, including the analytics revenue filters (AC-5)
   - [ ] Finance and switches: mark as paid on the payables queue, plus pause checkout (AC-6, AC-8, AC-11)
   - [ ] Honest checkout and full coverage: the waiting state, EFT instructions, and `payAs()` in verify (AC-1, AC-10, AC-12)
