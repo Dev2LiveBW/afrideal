@@ -3,6 +3,7 @@ import { z } from 'zod';
 import { fail, guard, handled, ok } from '@/lib/api';
 import { findById, readAll, update } from '@/lib/db';
 import { EVENTS, audit, notify } from '@/lib/notifications';
+import { openJobForLeg } from '@/lib/shipments';
 import { selectSupplier } from '@/lib/supplier-selection';
 import type { OrderStatus, SupplierOrderStatus } from '@/types';
 
@@ -111,6 +112,11 @@ export const PATCH = handled(async (request: Request, { params }: { params: { id
   }
 
   const updated = await update('supplier-orders', params.id, { status: parsed.data.status });
+
+  // Ready for collection opens the runner job for this part of the order.
+  if (parsed.data.status === 'READY_FOR_COLLECTION') {
+    await openJobForLeg(updated ?? { ...leg, status: parsed.data.status }, actor);
+  }
 
   // Reflect onto the parent order once every leg agrees.
   const siblings = (await readAll('supplier-orders')).filter((sibling) => sibling.order_id === leg.order_id);

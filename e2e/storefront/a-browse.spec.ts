@@ -44,14 +44,9 @@ test.describe('A. Browsing (no account)', () => {
     await expect(page.getByText(bwp(146)).first()).toBeVisible();
     const addToCart = page.getByRole('button', { name: 'Add to cart' });
     await expect(addToCart).toBeAttached();
-    // On a phone the buy bar should be pinned to the bottom of the screen.
-    if (test.info().project.name === 'phone') {
-      test.fail(
-        true,
-        'KNOWN BUG: the phone page transition (components/motion/PageTransition.tsx) keeps will-change: transform on the page wrapper, so the "fixed" buy bar pins to the wrapper, about 3,600 px down the page, not to the screen.',
-      );
-      await expect(addToCart).toBeInViewport({ timeout: 10_000 });
-    }
+    // On a phone the buy bar is pinned to the bottom of the screen
+    // (components/motion/PageTransition.tsx must not hold will-change on).
+    if (test.info().project.name === 'phone') await expect(addToCart).toBeInViewport();
   });
 
   test('A04 the unit price steps down at 5, 20 and 50 units @p1', async ({ page }) => {

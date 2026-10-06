@@ -162,7 +162,7 @@ export default async function AdminOrderDetailPage({ params }: { params: { id: s
                         {shipment.pickup_name} → {shipment.dropoff_name}
                       </p>
                       <div className="mt-1 flex items-center gap-3 text-[11px] text-muted">
-                        <span>{shipment.distance_km} km</span>
+                        {shipment.distance_km > 0 && <span>{shipment.distance_km} km</span>}
                         <MoneyText amount={shipment.payout} size="xs" tone="muted" />
                         {shipment.delivered_at && <span>Delivered {shortDate(shipment.delivered_at)}</span>}
                       </div>
