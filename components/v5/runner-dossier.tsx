@@ -43,10 +43,12 @@ export function RunnerDossier() {
             const isPending = stage.id > activeStage;
 
             return (
-              <div 
+              <button
                 key={stage.id}
+                type="button"
                 onClick={() => setActiveStage(stage.id)}
-                className={`group cursor-pointer border ${
+                aria-pressed={isActive}
+                className={`group w-full text-left cursor-pointer border ${
                   isActive ? "border-[#0044FF] bg-[#0044FF]/5" : "border-[#111111]"
                 } p-4 flex items-center justify-between transition-colors ${
                   isPending ? "opacity-50 hover:opacity-100" : ""
@@ -68,7 +70,7 @@ export function RunnerDossier() {
                 </div>
                 {isCompleted && <span className="font-mono text-[10px] uppercase text-[#71717A] border border-[#71717A] px-1">Done</span>}
                 {isActive && <span className="font-mono text-[10px] uppercase text-[#0044FF] border border-[#0044FF] px-1 animate-pulse">Live</span>}
-              </div>
+              </button>
             );
           })}
         </div>

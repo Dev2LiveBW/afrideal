@@ -41,6 +41,7 @@ export function OrderNotes({ orderId, initialNote }: { orderId: string; initialN
         value={note}
         onChange={(event) => setNote(event.target.value)}
         rows={6}
+        aria-label="Internal note, staff only"
         placeholder="Notes visible to staff only - escalation context, delivery exceptions, customer calls…"
         className="w-full resize-y rounded border border-hairline-strong bg-surface px-3 py-2.5 text-[13px] leading-5 text-ink outline-none focus:border-gold"
       />

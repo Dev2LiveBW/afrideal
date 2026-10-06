@@ -131,11 +131,13 @@ function RuleRow({ initial, canEdit }: { initial: PricingRule; canEdit: boolean 
             step="1"
             value={rule.markup_value}
             onChange={(event) => setRule({ ...rule, markup_value: Number(event.target.value) })}
+            aria-label={`Markup for ${rule.category_name}`}
             className="w-16 rounded border border-hairline-strong bg-surface-raised px-2 py-1 font-mono text-[12.5px] tabular-nums text-ink outline-none focus:border-gold"
           />
           <select
             value={rule.markup_type}
             onChange={(event) => setRule({ ...rule, markup_type: event.target.value as PricingRule['markup_type'] })}
+            aria-label={`Markup type for ${rule.category_name}`}
             className="rounded border border-hairline-strong bg-surface-raised px-1.5 py-1 text-[12px] text-ink outline-none focus:border-gold"
           >
             <option value="PERCENTAGE">%</option>
@@ -151,6 +153,7 @@ function RuleRow({ initial, canEdit }: { initial: PricingRule; canEdit: boolean 
           step="1"
           value={rule.logistics_cost}
           onChange={(event) => setRule({ ...rule, logistics_cost: Number(event.target.value) })}
+          aria-label={`Logistics cost for ${rule.category_name}, in Pula`}
           className="w-20 rounded border border-hairline-strong bg-surface-raised px-2 py-1 font-mono text-[12.5px] tabular-nums text-ink outline-none focus:border-gold"
         />
       </td>
@@ -163,9 +166,12 @@ function RuleRow({ initial, canEdit }: { initial: PricingRule; canEdit: boolean 
             step="0.1"
             value={Number((rule.gateway_rate * 100).toFixed(2))}
             onChange={(event) => setRule({ ...rule, gateway_rate: Number(event.target.value) / 100 })}
+            aria-label={`Gateway rate for ${rule.category_name}, as a percentage`}
             className="w-16 rounded border border-hairline-strong bg-surface-raised px-2 py-1 font-mono text-[12.5px] tabular-nums text-ink outline-none focus:border-gold"
           />
-          <span className="text-[12px] text-muted">%</span>
+          <span aria-hidden="true" className="text-[12px] text-muted">
+            %
+          </span>
         </div>
       </td>
       <td>

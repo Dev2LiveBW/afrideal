@@ -1,7 +1,7 @@
 'use client';
 
 import { useRouter } from 'next/navigation';
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
 import { AlertCircle, CheckCircle2, FileText, X } from 'lucide-react';
 
@@ -41,6 +41,7 @@ export function RfqModal({
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [reference, setReference] = useState<string | null>(null);
+  const panelRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     if (isOpen) {
@@ -56,6 +57,20 @@ export function RfqModal({
     document.addEventListener('keydown', onKey);
     return () => document.removeEventListener('keydown', onKey);
   }, [isOpen, onClose]);
+
+  /*
+   * Escape already closed this; what was missing was the way in. Without
+   * moving focus, a keyboard buyer opens the quotation form and is still
+   * standing on the product page behind it, tabbing through the catalogue to
+   * reach a dialog that is already on screen. Focus returns to the button that
+   * opened it on the way out.
+   */
+  useEffect(() => {
+    if (!isOpen) return;
+    const previouslyFocused = document.activeElement as HTMLElement | null;
+    panelRef.current?.focus();
+    return () => previouslyFocused?.focus();
+  }, [isOpen]);
 
   async function submit() {
     setSaving(true);
@@ -111,9 +126,11 @@ export function RfqModal({
           />
 
           <motion.div
+            ref={panelRef}
             role="dialog"
             aria-modal="true"
             aria-label="Request a quotation"
+            tabIndex={-1}
             initial={{ opacity: 0, scale: 0.96, y: 12 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.97, y: 8 }}

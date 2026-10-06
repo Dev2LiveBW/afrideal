@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useId, useState } from 'react';
 import { Info, Save } from 'lucide-react';
 import toast from 'react-hot-toast';
 
@@ -153,20 +153,32 @@ function Field({
   max?: number;
   step?: number;
 }) {
+  // The label was already here; what it lacked was the pairing that makes it a
+  // label rather than nearby text. The unit travels with it as a description,
+  // so the field reads as "Runner base fee, Pula" instead of a bare number.
+  const fieldId = useId();
+  const suffixId = `${fieldId}-suffix`;
+
   return (
     <div>
-      <label className="mb-1.5 block text-[11.5px] font-medium text-muted">{label}</label>
+      <label htmlFor={fieldId} className="mb-1.5 block text-[11.5px] font-medium text-muted">
+        {label}
+      </label>
       <div className="flex items-center gap-2">
         <input
+          id={fieldId}
           type="number"
           value={value}
           min={min}
           max={max}
           step={step}
           onChange={(event) => onChange(Number(event.target.value))}
+          aria-describedby={suffixId}
           className="w-24 rounded border border-hairline-strong bg-surface-raised px-3 py-2 font-mono text-[14px] tabular-nums text-ink outline-none focus:border-gold"
         />
-        <span className="text-[12.5px] text-muted">{suffix}</span>
+        <span id={suffixId} className="text-[12.5px] text-muted">
+          {suffix}
+        </span>
       </div>
     </div>
   );

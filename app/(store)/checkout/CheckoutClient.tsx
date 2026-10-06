@@ -199,7 +199,9 @@ export function CheckoutClient({
                   id="address"
                   {...register('delivery_address')}
                   placeholder="Plot 5412, Extension 12"
+                  autoComplete="street-address"
                   aria-invalid={errors.delivery_address ? 'true' : undefined}
+                  aria-describedby={errors.delivery_address ? 'address-error' : undefined}
                   className={cn(
                     'w-full rounded border bg-surface px-3.5 py-2.5 text-[14px] text-ink outline-none transition-colors',
                     'placeholder:text-muted focus:border-gold/60',
@@ -207,7 +209,7 @@ export function CheckoutClient({
                   )}
                 />
                 {errors.delivery_address && (
-                  <p className="mt-1.5 text-[12px] text-danger-ink">
+                  <p id="address-error" role="alert" className="mt-1.5 text-[12px] text-danger-ink">
                     {errors.delivery_address.message}
                   </p>
                 )}
@@ -221,7 +223,9 @@ export function CheckoutClient({
                   id="city"
                   {...register('delivery_city')}
                   placeholder="Gaborone"
+                  autoComplete="address-level2"
                   aria-invalid={errors.delivery_city ? 'true' : undefined}
+                  aria-describedby={errors.delivery_city ? 'city-error' : undefined}
                   className={cn(
                     'w-full rounded border bg-surface px-3.5 py-2.5 text-[14px] text-ink outline-none transition-colors',
                     'placeholder:text-muted focus:border-gold/60',
@@ -229,7 +233,9 @@ export function CheckoutClient({
                   )}
                 />
                 {errors.delivery_city && (
-                  <p className="mt-1.5 text-[12px] text-danger-ink">{errors.delivery_city.message}</p>
+                  <p id="city-error" role="alert" className="mt-1.5 text-[12px] text-danger-ink">
+                    {errors.delivery_city.message}
+                  </p>
                 )}
               </div>
             </div>

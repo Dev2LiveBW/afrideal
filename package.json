@@ -15,6 +15,10 @@
     "db:load": "node scripts/db-load.mjs",
     "verify": "node scripts/verify.mjs",
     "audit": "node scripts/audit-pages.mjs",
+    "e2e": "node scripts/e2e.mjs",
+    "e2e:demo": "node scripts/e2e.mjs --demo",
+    "e2e:report": "playwright show-report",
+    "e2e:videos": "node scripts/demo-videos.mjs",
     "images": "node scripts/fetch-images.mjs"
   },
   "dependencies": {
@@ -44,6 +48,7 @@
     "zustand": "4.5.5"
   },
   "devDependencies": {
+    "@playwright/test": "^1.63.0",
     "@types/node": "20.17.12",
     "@types/react": "18.3.18",
     "@types/react-dom": "18.3.5",
