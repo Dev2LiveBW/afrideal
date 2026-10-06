@@ -595,6 +595,112 @@ section('9b. Payment expiry — a closed window reads as cancelled');
   );
 }
 
+// ── Spec 0003 AC-6, AC-8, AC-11: finance controls and the pause switch ───────
+section('9c. Finance controls — mark as paid, and pausing checkout');
+{
+  const finance = sessions['finance@afrideal.co.bw'].jar;
+  const ops = sessions['ops@afrideal.co.bw'].jar;
+  const admin = sessions['admin@afrideal.co.bw'].jar;
+  const buyer = sessions['thabo@gmail.com'].jar;
+
+  // Places its own bank transfer order rather than using the seeded o012. Marking a
+  // seeded order paid would mutate data section 9b asserts on, and the suite would
+  // stop being repeatable: a second run would find it already processing.
+  const placed = await json(buyer, '/api/orders', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      lines: [{ product_id: 'p001', variant_id: 'p001v1', qty: 1 }],
+      payment_method: 'EFT',
+      delivery_address: 'Plot 1, Gaborone',
+      delivery_city: 'Gaborone',
+    }),
+  });
+  check('a bank transfer order can be placed', placed.status === 201, `got ${placed.status}`);
+  const eftOrderId = placed.body?.order?.id;
+
+  const markPaid = (jar, body) =>
+    json(jar, `/api/orders/${eftOrderId}`, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ action: 'MARK_PAID', ...body }),
+    });
+
+  // AC-6: the role gate is its own check, because the handler's existing isStaff
+  // test includes operations and OPS_DENIED_PREFIXES only gates page paths.
+  const opsTry = await markPaid(ops, { reference: 'FNB-OPS-TRY' });
+  check('AC-6: operations cannot mark an order paid', opsTry.status === 403, `got ${opsTry.status}`);
+
+  const noRef = await markPaid(finance, {});
+  check('a reference is required', noRef.status === 422, `got ${noRef.status}`);
+
+  const before = (await json(ops, `/api/orders/${eftOrderId}`)).body;
+  check('an unpaid bank transfer order has no supplier leg', (before?.legs?.length ?? 0) === 0,
+    `${before?.legs?.length} leg(s)`);
+
+  // AC-11: a figure that does not match the total is recorded and flagged, never
+  // silently accepted and never refused. The money has arrived either way.
+  const paid = await markPaid(finance, {
+    reference: `FNB-${Date.now()}`,
+    amount: 1,
+    paid_note: 'Underpaid, chasing the balance.',
+  });
+  check('AC-6: finance can mark an order paid', paid.status === 200, `got ${paid.status}`);
+  check('AC-11: a mismatched amount is flagged, not swallowed', paid.body?.amount_matches === false,
+    `amount_matches ${paid.body?.amount_matches}`);
+  check('the order is now processing', paid.body?.order?.status === 'PROCESSING',
+    `got ${paid.body?.order?.status}`);
+  check('the reference finance typed is on the order',
+    typeof paid.body?.order?.payment_reference === 'string' &&
+      paid.body.order.payment_reference.startsWith('FNB-'),
+    `got ${paid.body?.order?.payment_reference}`);
+
+  const after = (await json(ops, `/api/orders/${eftOrderId}`)).body;
+  check('AC-6: marking it paid raised the supplier legs', (after?.legs?.length ?? 0) > 0,
+    `${after?.legs?.length} leg(s)`);
+  check('and one payable per leg', after?.payables?.length === after?.legs?.length,
+    `${after?.payables?.length} vs ${after?.legs?.length}`);
+
+  const twice = await markPaid(finance, { reference: `FNB-again-${Date.now()}` });
+  check('marking a paid order paid again is refused', twice.status === 409, `got ${twice.status}`);
+
+  // AC-8: pausing stops new orders, and only a super admin may do it.
+  const financePause = await json(finance, '/api/settings/checkout', {
+    method: 'PATCH',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ paused: true }),
+  });
+  check('AC-8: finance cannot pause checkout', financePause.status === 403, `got ${financePause.status}`);
+
+  const paused = await json(admin, '/api/settings/checkout', {
+    method: 'PATCH',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ paused: true }),
+  });
+  check('AC-8: a super admin can pause checkout', paused.status === 200 && paused.body?.paused === true,
+    `${paused.status} ${JSON.stringify(paused.body)}`);
+
+  const blocked = await json(buyer, '/api/orders', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      lines: [{ product_id: 'p001', variant_id: 'p001v1', qty: 1 }],
+      payment_method: 'EFT',
+      delivery_address: 'Plot 1, Gaborone',
+      delivery_city: 'Gaborone',
+    }),
+  });
+  check('AC-8: a paused checkout refuses new orders', blocked.status === 409, `got ${blocked.status}`);
+
+  const resumed = await json(admin, '/api/settings/checkout', {
+    method: 'PATCH',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ paused: false }),
+  });
+  check('AC-8: and it can be resumed', resumed.status === 200 && resumed.body?.paused === false,
+    `${resumed.status} ${JSON.stringify(resumed.body)}`);
+}
+
 // ── 10. Runner availability toggle ───────────────────────────────────────────
 
 section('10. Runner availability');

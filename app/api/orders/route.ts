@@ -7,6 +7,7 @@ import { resolvePrice } from '@/lib/pricing-tiers';
 import { selectSupplier } from '@/lib/supplier-selection';
 import { startPayment } from '@/lib/payments/adapters';
 import { allAsDisplayed } from '@/lib/payments/status';
+import { checkoutIsPaused } from '@/lib/settings';
 import { paymentExpiresAt } from '@/lib/payments/policy';
 import type { Order, OrderItem, OrderTimelineEntry, Payment } from '@/types';
 
@@ -84,6 +85,12 @@ export const POST = handled(async (request: Request) => {
   }
 
   const { lines, payment_method, delivery_address, delivery_city } = parsed.data;
+
+  // Spec 0003, AC-8: checked before any pricing or supplier work, so a pause stops
+  // an order at the door rather than part way through building one.
+  if (await checkoutIsPaused()) {
+    return fail('Checkout is temporarily unavailable. Please try again shortly.', 409);
+  }
 
   const [products, offers, suppliers, bands] = await Promise.all([
     readAll('products'),

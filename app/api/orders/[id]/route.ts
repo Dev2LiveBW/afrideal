@@ -4,6 +4,8 @@ import { fail, guard, handled, ok } from '@/lib/api';
 import { findById, insert, nextId, readAll, update } from '@/lib/db';
 import { applyTransition } from '@/lib/payables';
 import { EVENTS, audit, notify } from '@/lib/notifications';
+import { providerFor } from '@/lib/payments/adapters';
+import { confirmPayment } from '@/lib/payments/confirm';
 import { getOrderDetail } from '@/lib/queries';
 import type { Dispute } from '@/types';
 
@@ -32,10 +34,23 @@ export const GET = handled(async (_request: Request, { params }: { params: { id:
 });
 
 const PatchSchema = z.object({
-  action: z.enum(['CONFIRM_DELIVERY', 'RAISE_DISPUTE', 'CANCEL', 'ADD_NOTE']),
+  action: z.enum(['CONFIRM_DELIVERY', 'RAISE_DISPUTE', 'CANCEL', 'ADD_NOTE', 'MARK_PAID']),
   reason: z.string().max(120).optional(),
   detail: z.string().max(1000).optional(),
   note: z.string().max(2000).optional(),
+  /** MARK_PAID: the bank's reference for the transfer. Required, and how finance traces it. */
+  reference: z.string().min(1).max(120).optional(),
+  /**
+   * MARK_PAID: what actually landed. Optional because it usually equals the
+   * total; when it does not, AC-11 flags the order rather than silently
+   * accepting an underpayment.
+   */
+  amount: z.number().nonnegative().optional(),
+  /**
+   * MARK_PAID: the admin's own words. Separate from `note`, which is the
+   * internal-notes field ADD_NOTE writes and means something else.
+   */
+  paid_note: z.string().max(2000).optional(),
 });
 
 export const PATCH = handled(async (request: Request, { params }: { params: { id: string } }) => {
@@ -171,6 +186,54 @@ export const PATCH = handled(async (request: Request, { params }: { params: { id
       });
 
       return ok(updated);
+    }
+
+    // ── Finance confirms a bank transfer by hand (spec 0003, AC-6) ────────
+    case 'MARK_PAID': {
+      // Deliberately narrower than `isStaff`, which includes operations. Finance
+      // surfaces are theirs alone, and OPS_DENIED_PREFIXES only gates page paths,
+      // not API routes, so this check is the real guard.
+      if (!['FINANCE_ADMIN', 'SUPER_ADMIN'].includes(actor.role)) {
+        return fail('Only finance can mark an order paid.', 403);
+      }
+
+      if (!parsed.data.reference) {
+        return fail('A payment reference is required to mark an order paid.', 422);
+      }
+
+      // Checked before confirming so a human gets a clear refusal rather than a
+      // silent no op. A race still converges, handled below.
+      const existing = (await readAll('payments')).filter(
+        (row) => row.order_id === params.id && row.status === 'CONFIRMED',
+      );
+      if (existing.length > 0) return fail('That order is already paid for.', 409);
+
+      const result = await confirmPayment({
+        orderId: params.id,
+        provider: providerFor(order.payment_method),
+        providerReference: parsed.data.reference,
+        // Defaults to the total. A different figure is recorded and flagged, not
+        // rejected: the money has already arrived, so refusing it helps nobody.
+        amount: parsed.data.amount ?? order.total,
+        actor: { id: actor.id, name: actor.name },
+        note: parsed.data.paid_note ?? null,
+      });
+
+      if (!result.ok) {
+        if (result.reason === 'NOT_FOUND') return fail('Order not found.', 404);
+        if (result.reason === 'CANCELLED_BY_PERSON') {
+          return fail('That order was cancelled on purpose and will not reopen on a payment.', 409);
+        }
+        return fail('That order already has a different confirmed payment.', 409);
+      }
+
+      return ok({
+        order: result.order,
+        payment: result.payment,
+        late: result.late,
+        // False means the figure did not match the total, so finance needs to chase it.
+        amount_matches: result.payment.amount_matches,
+      });
     }
 
     case 'ADD_NOTE': {

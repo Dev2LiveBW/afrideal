@@ -198,7 +198,7 @@ export async function failPayment(input: {
   await audit({
     actorId: input.actor.id,
     actorName: input.actor.name,
-    action: EVENTS.PAYMENT_CONFIRMED,
+    action: EVENTS.PAYMENT_FAILED,
     entity: 'order',
     entityId: order.id,
     detail: `${order.reference} payment failed via ${input.provider}: ${outcome.payment.failure_reason}`,
