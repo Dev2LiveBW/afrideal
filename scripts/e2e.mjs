@@ -31,7 +31,7 @@ const PREFIX = 'e2e-';
 
 // The journeys docs/testing/e2e-journeys.md marks for a demo video. H02 (the
 // eight sign-ins) is recorded by the setup project on every demo run.
-const VIDEO_JOURNEYS = '(A0[1-4]|B0[1246]|B05|C01|D01|E0[124]|F0[12]|G0[1-35-8]) ';
+const VIDEO_JOURNEYS = '(A0[1-4]|B0[1246]|B05|C01|D01|E0[124]|F0[12]|G0[1-35-8]|Z01) ';
 
 const args = process.argv.slice(2);
 const keep = args.includes('--keep');

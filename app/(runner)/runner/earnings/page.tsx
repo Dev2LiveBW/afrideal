@@ -92,7 +92,8 @@ export default async function RunnerEarningsPage() {
                 <div className="min-w-0 flex-1">
                   <p className="truncate text-[13.5px] font-medium text-ink">{shipment.dropoff_name}</p>
                   <p className="truncate text-[11.5px] text-muted">
-                    {shipment.dropoff_address} · {shipment.distance_km.toFixed(1)} km
+                    {shipment.dropoff_address}
+                    {shipment.distance_km > 0 && ` · ${shipment.distance_km.toFixed(1)} km`}
                   </p>
                   {shipment.delivered_at && (
                     <p className="mt-0.5 font-mono text-[10.5px] tabular-nums text-muted">
