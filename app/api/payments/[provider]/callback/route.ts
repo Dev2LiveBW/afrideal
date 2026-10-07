@@ -118,6 +118,11 @@ export const POST = handled(
       if (result.reason === 'CANCELLED_BY_PERSON') {
         return fail('That order was cancelled and will not be reopened by a payment.', 409);
       }
+      if (result.reason === 'REFERENCE_USED_ELSEWHERE') {
+        // Says what is wrong without naming the other order, which is not this
+        // caller's business. The audit log carries the detail.
+        return fail('That payment reference is already settled against another order.', 409);
+      }
       return fail('That order already has a different confirmed payment.', 409);
     }
 

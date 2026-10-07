@@ -224,6 +224,14 @@ export const PATCH = handled(async (request: Request, { params }: { params: { id
         if (result.reason === 'CANCELLED_BY_PERSON') {
           return fail('That order was cancelled on purpose and will not reopen on a payment.', 409);
         }
+        if (result.reason === 'REFERENCE_USED_ELSEWHERE') {
+          // The likeliest way a human hits this: reusing a bank reference they
+          // already entered against another order. Say so plainly.
+          return fail(
+            'That reference is already settled against another order. Check the statement and use the right one.',
+            409,
+          );
+        }
         return fail('That order already has a different confirmed payment.', 409);
       }
 

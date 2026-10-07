@@ -72,7 +72,15 @@ export type ConfirmInput = {
 
 export type ConfirmOutcome =
   | { ok: true; order: Order; payment: Payment; replayed: boolean; late: boolean }
-  | { ok: false; reason: 'NOT_FOUND' | 'CANCELLED_BY_PERSON' | 'ALREADY_PAID_DIFFERENTLY' };
+  | {
+      ok: false;
+      reason:
+        | 'NOT_FOUND'
+        | 'CANCELLED_BY_PERSON'
+        | 'ALREADY_PAID_DIFFERENTLY'
+        /** This reference is already confirmed against a different order. */
+        | 'REFERENCE_USED_ELSEWHERE';
+    };
 
 /**
  * Confirm a payment and raise everything that depends on it.
@@ -101,12 +109,20 @@ export async function confirmPayment(input: ConfirmInput): Promise<ConfirmOutcom
     claim = await claimPayment(input, order, now, amountMatches);
   } catch (error) {
     if (!isUniqueViolation(error)) throw error;
-    // The index caught a genuine race: another caller inserted this exact
-    // (provider, provider_reference) first. Their row wins, and we still go on to
-    // step 2, because that caller may not have finished its own legs yet.
-    const existing = await findConfirmed(input);
-    if (!existing) throw error;
-    claim = { payment: existing, wonClaim: false };
+
+    // The index refused the insert. Which of two very different things that means
+    // depends on whose row is already holding the reference.
+    const held = await findConfirmed(input);
+
+    // Another order's money. Refuse: confirming here would mark this order paid on
+    // a payment that was never for it.
+    if (held.otherOrderId) return { ok: false, reason: 'REFERENCE_USED_ELSEWHERE' };
+
+    // Our own order, so a genuine race: another caller claimed it first. Their row
+    // wins and we still continue to step 2, because that caller may not have
+    // finished its legs yet.
+    if (!held.mine) throw error;
+    claim = { payment: held.mine, wonClaim: false };
   }
 
   if (claim.conflict) return { ok: false, reason: 'ALREADY_PAID_DIFFERENTLY' };
@@ -253,13 +269,22 @@ async function claimPayment(
       return { rows, result: { payment: otherConfirmed, wonClaim: false, conflict: true } };
     }
 
-    // Prefer flipping the attempt checkout already opened, so one order does not
-    // accumulate an orphan STARTED row beside its confirmed one.
+    // Prefer flipping an attempt this order already has, so it does not accumulate
+    // an orphan row beside its confirmed one.
+    //
+    // A FAILED row carrying this exact reference counts as claimable. A provider
+    // that reports a payment failed and then settles the same transaction is a real
+    // sequence, and before this it was a permanent dead end: the claim skipped the
+    // failed row, inserted a duplicate, the unique index fired, and the error
+    // rethrew as a 500 on every retry forever. A failed row with no reference is
+    // left alone, because there is nothing to identify it by.
     const started = mine.find(
       (row) =>
-        row.status === 'STARTED' &&
         row.provider === input.provider &&
-        (row.provider_reference === null || row.provider_reference === input.providerReference),
+        ((row.status === 'STARTED' &&
+          (row.provider_reference === null ||
+            row.provider_reference === input.providerReference)) ||
+          (row.status === 'FAILED' && row.provider_reference === input.providerReference)),
     );
 
     const confirmed: Payment = {
@@ -284,17 +309,32 @@ async function claimPayment(
   });
 }
 
-/** Re-read the confirmed row after losing the unique-index race. */
-async function findConfirmed(input: ConfirmInput): Promise<Payment | null> {
+/**
+ * Who owns the confirmed row that this reference already belongs to.
+ *
+ * Matching on the order as well as the reference is the whole point. The first
+ * version matched only provider and reference, so a reference already confirmed on
+ * order A was handed back to a confirmation aimed at order B: order B then had its
+ * supplier legs raised and was marked paid on money that was never for it, with no
+ * payment row of its own and no amount check. A finance admin reusing a bank
+ * reference they had typed before was enough to trigger it.
+ */
+async function findConfirmed(
+  input: ConfirmInput,
+): Promise<{ mine: Payment | null; otherOrderId: string | null }> {
   const rows = await readAll('payments');
-  return (
-    rows.find(
-      (row) =>
-        row.status === 'CONFIRMED' &&
-        row.provider === input.provider &&
-        row.provider_reference === input.providerReference,
-    ) ?? null
+
+  const matching = rows.filter(
+    (row) =>
+      row.status === 'CONFIRMED' &&
+      row.provider === input.provider &&
+      row.provider_reference === input.providerReference,
   );
+
+  return {
+    mine: matching.find((row) => row.order_id === input.orderId) ?? null,
+    otherOrderId: matching.find((row) => row.order_id !== input.orderId)?.order_id ?? null,
+  };
 }
 
 type RaisedLegs = { supplierOrders: SupplierOrder[]; payables: SupplierPayable[] };
