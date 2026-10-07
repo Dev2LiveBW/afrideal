@@ -1,6 +1,6 @@
 import 'server-only';
 
-import { findById, insertMany, mutate, nextIds, readAll } from '@/lib/db';
+import { findById, mutate, nextIds, readAll } from '@/lib/db';
 import { EVENTS, audit, notify } from '@/lib/notifications';
 import { selectSupplier } from '@/lib/supplier-selection';
 import type {
@@ -306,20 +306,34 @@ type RaisedLegs = { supplierOrders: SupplierOrder[]; payables: SupplierPayable[]
  * for the payable, so a replay or a resumed run adds nothing. This is the step
  * that used to run at checkout, which is how a supplier could be told to prepare
  * goods for an order nobody had paid for.
+ *
+ * ## Why each decision happens inside its own `mutate`
+ *
+ * The first version of this read the existing legs, decided what was missing, and
+ * inserted several awaits later. Two overlapping confirmations both read "no legs"
+ * and both inserted, so one order got two sets of supplier orders and two payables:
+ * double liability to the supplier.
+ *
+ * It passed testing only by accident. On the JSON driver `nextIds` scans for the
+ * highest existing number without reserving it, so both callers minted the same id
+ * and `assertNewIds` rejected the second. On Postgres `id_counters` hands each
+ * caller its own block, so the ids differ and nothing stops either insert. A bug
+ * that only appears on the real store is the worst kind.
+ *
+ * So the check and the write now share one lock per collection. `mutate` cannot
+ * span two collections, which is fine: legs are claimed under the legs lock,
+ * payables under the payables lock, and a run that dies between them leaves legs
+ * with no payable, which the next retry completes. Same claim then complete shape
+ * as `confirmPayment` itself.
  */
 async function raiseSupplierLegs(order: Order, now: string): Promise<RaisedLegs> {
-  const [items, existingLegs, existingPayables, offers, suppliers] = await Promise.all([
+  const [items, offers, suppliers] = await Promise.all([
     readAll('order-items'),
-    readAll('supplier-orders'),
-    readAll('supplier-payables'),
     readAll('supplier-offers'),
     readAll('suppliers'),
   ]);
 
   const mine = items.filter((item) => item.order_id === order.id);
-  const alreadyLegged = new Set(
-    existingLegs.filter((leg) => leg.order_id === order.id).map((leg) => leg.supplier_id),
-  );
 
   // AC-9: the supplier chosen at checkout fulfils the order. Re-selection runs
   // only when that supplier can no longer fulfil, because the buyer's price is a
@@ -330,70 +344,105 @@ async function raiseSupplierLegs(order: Order, now: string): Promise<RaisedLegs>
     bySupplier.set(supplierId, [...(bySupplier.get(supplierId) ?? []), item]);
   }
 
-  const pending = [...bySupplier.entries()].filter(([supplierId]) => !alreadyLegged.has(supplierId));
-  if (pending.length === 0) return { supplierOrders: [], payables: [] };
+  if (bySupplier.size === 0) return { supplierOrders: [], payables: [] };
 
-  const legIds = await nextIds('supplier-orders', 'sup', pending.length);
-  const payableIds = await nextIds('supplier-payables', 'pay', pending.length);
+  // Reserved before the lock, because minting ids is itself a write and taking a
+  // second lock inside a held one invites a deadlock. Ids this call ends up not
+  // using just leave a gap, which the store already tolerates.
+  const legIds = await nextIds('supplier-orders', 'sup', bySupplier.size);
 
-  const supplierOrders: SupplierOrder[] = [];
-  const payables: SupplierPayable[] = [];
-  const legged = new Set(existingPayables.map((entry) => entry.supplier_order_id));
+  const supplierOrders = await mutate<'supplier-orders', SupplierOrder[]>(
+    'supplier-orders',
+    (rows) => {
+      // Read inside the lock. This is the line that makes the whole thing safe: a
+      // second caller cannot observe this set before the first one has written.
+      const alreadyLegged = new Set(
+        rows.filter((leg) => leg.order_id === order.id).map((leg) => leg.supplier_id),
+      );
 
-  pending.forEach(([supplierId, supplierItems], index) => {
-    const legId = legIds[index];
-    const gross = supplierItems.reduce((sum, item) => sum + item.line_total, 0);
-    const cost = supplierItems.reduce((sum, item) => sum + item.supplier_cost * item.qty, 0);
+      const created: SupplierOrder[] = [];
+      let next = 0;
 
-    const route = selectSupplier(
-      offers.filter((offer) => offer.product_id === supplierItems[0].product_id),
-      suppliers,
-      supplierItems[0].qty,
-    );
+      for (const [supplierId, supplierItems] of bySupplier) {
+        if (alreadyLegged.has(supplierId)) continue;
 
-    supplierOrders.push({
-      id: legId,
-      order_id: order.id,
-      supplier_id: supplierId,
-      status: 'AWAITING_CONFIRMATION',
-      item_ids: supplierItems.map((item) => item.id),
-      supplier_subtotal: cost,
-      platform_margin: gross - cost,
-      selection_reason: route?.reason ?? 'Routed on composite supplier score.',
-      auto_selected: true,
-      created_at: now,
-    });
+        const gross = supplierItems.reduce((sum, item) => sum + item.line_total, 0);
+        const cost = supplierItems.reduce((sum, item) => sum + item.supplier_cost * item.qty, 0);
 
-    if (legged.has(legId)) return;
+        const route = selectSupplier(
+          offers.filter((offer) => offer.product_id === supplierItems[0].product_id),
+          suppliers,
+          supplierItems[0].qty,
+        );
 
-    // Raised here rather than through lib/payables.ts, which owns transitions
-    // between states and not the first write into PENDING.
-    payables.push({
-      id: payableIds[index],
-      order_id: order.id,
-      supplier_order_id: legId,
-      supplier_id: supplierId,
-      amount: gross,
-      status: 'PENDING',
-      gateway: order.payment_method,
-      raised_at: now,
-      settled_at: null,
-      cancelled_at: null,
-      terms_days: 7,
-      history: [
-        {
-          from: null,
-          to: 'PENDING',
-          at: now,
-          actor: 'System',
-          note: 'Procurement invoice raised once payment was confirmed.',
-        },
-      ],
-    });
-  });
+        created.push({
+          id: legIds[next++],
+          order_id: order.id,
+          supplier_id: supplierId,
+          status: 'AWAITING_CONFIRMATION',
+          item_ids: supplierItems.map((item) => item.id),
+          supplier_subtotal: cost,
+          platform_margin: gross - cost,
+          selection_reason: route?.reason ?? 'Routed on composite supplier score.',
+          auto_selected: true,
+          created_at: now,
+        });
+      }
 
-  await insertMany('supplier-orders', supplierOrders);
-  await insertMany('supplier-payables', payables);
+      return { rows: [...rows, ...created], result: created };
+    },
+  );
+
+  // Every leg this order now has, not only the ones this call created. A resumed
+  // run has to raise the payable for a leg an earlier, interrupted run left
+  // behind, which the previous version could never do.
+  const allLegs = (await readAll('supplier-orders')).filter((leg) => leg.order_id === order.id);
+  if (allLegs.length === 0) return { supplierOrders, payables: [] };
+
+  const payableIds = await nextIds('supplier-payables', 'pay', allLegs.length);
+
+  const payables = await mutate<'supplier-payables', SupplierPayable[]>(
+    'supplier-payables',
+    (rows) => {
+      const covered = new Set(rows.map((entry) => entry.supplier_order_id));
+      const created: SupplierPayable[] = [];
+      let next = 0;
+
+      for (const leg of allLegs) {
+        if (covered.has(leg.id)) continue;
+
+        // Raised here rather than through lib/payables.ts, which owns transitions
+        // between states and not the first write into PENDING.
+        created.push({
+          id: payableIds[next++],
+          order_id: order.id,
+          supplier_order_id: leg.id,
+          supplier_id: leg.supplier_id,
+          // Taken from the leg rather than recomputed, so a payable can be raised
+          // for a leg this call did not build. Gross is what the customer pays for
+          // those lines: the supplier's cost plus our margin on them.
+          amount: leg.supplier_subtotal + leg.platform_margin,
+          status: 'PENDING',
+          gateway: order.payment_method,
+          raised_at: now,
+          settled_at: null,
+          cancelled_at: null,
+          terms_days: 7,
+          history: [
+            {
+              from: null,
+              to: 'PENDING',
+              at: now,
+              actor: 'System',
+              note: 'Procurement invoice raised once payment was confirmed.',
+            },
+          ],
+        });
+      }
+
+      return { rows: [...rows, ...created], result: created };
+    },
+  );
 
   return { supplierOrders, payables };
 }
@@ -429,7 +478,16 @@ async function finishOrder(
     if (index === -1) return { rows, result: order };
 
     const current = rows[index];
-    if (current.status === 'PROCESSING') return { rows, result: current };
+
+    // Only an order still waiting, or one the clock cancelled, may be moved to
+    // PROCESSING. Without this a replayed callback dragged an IN_TRANSIT or
+    // DELIVERED order backwards, and overwrote a cancellation that landed after
+    // this function read its snapshot.
+    const mayStart =
+      current.status === 'AWAITING_PAYMENT' ||
+      (current.status === 'CANCELLED' && current.cancel_reason === 'EXPIRED');
+
+    if (!mayStart) return { rows, result: current };
 
     const next: Order = {
       ...current,

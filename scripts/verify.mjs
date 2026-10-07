@@ -515,6 +515,63 @@ section('9. Checkout — the order split engine');
 
     const paidAgain = await json(jar, `/api/orders/${orderId}/payments`, { method: 'POST' });
     check('a paid order cannot open another attempt', paidAgain.status === 409, `got ${paidAgain.status}`);
+
+    // Regression, /debug 2026-10-07: raiseSupplierLegs used to read the existing
+    // legs, decide, and insert several awaits later, so two overlapping callbacks
+    // both read "no legs" and both inserted. One order ended up with two sets of
+    // supplier orders and payables, which is double liability to the supplier.
+    //
+    // It only passed before because the JSON driver's nextIds does not reserve, so
+    // both callers minted the same id and the duplicate was caught by accident. On
+    // Postgres the ids differ and nothing would have stopped it.
+    //
+    // HONEST LIMIT, measured: these three checks still pass with the fix reverted,
+    // because that accidental id collision hides the duplicate on the JSON driver.
+    // They assert the right invariant and they WILL bite on Postgres, where the
+    // ids differ, but do not read a green here as proof the lock is in place. The
+    // real guard is the `mutate` in raiseSupplierLegs; run this suite against
+    // DB_DRIVER=postgres to make it a genuine regression test.
+    const raceOrder = await json(jar, '/api/orders', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        lines: [
+          { product_id: 'p001', variant_id: 'p001v1', qty: 1 },
+          { product_id: 'p006', variant_id: 'p006v1', qty: 1 },
+        ],
+        payment_method: 'DPO_PAY',
+        delivery_address: 'Plot 1, Gaborone',
+        delivery_city: 'Gaborone',
+      }),
+    });
+
+    if (raceOrder.status === 201) {
+      const racing = raceOrder.body.order;
+      const attempt = raceOrder.body.payment;
+
+      await Promise.all(
+        Array.from({ length: 4 }, () =>
+          payCallback(racing.id, attempt, { amount: racing.total }).catch(() => null),
+        ),
+      );
+
+      const settled = (await json(staff, `/api/orders/${racing.id}`)).body;
+      check(
+        'AC-3: overlapping confirmations raise exactly one leg per supplier',
+        settled?.legs?.length === 2,
+        `${settled?.legs?.length} leg(s), expected 2`,
+      );
+      check(
+        'AC-3: and exactly one payable per leg',
+        settled?.payables?.length === settled?.legs?.length,
+        `${settled?.payables?.length} payable(s) vs ${settled?.legs?.length} leg(s)`,
+      );
+      check(
+        'AC-4: and only one confirmed payment',
+        settled?.payments?.filter((p) => p.status === 'CONFIRMED').length === 1,
+        JSON.stringify(settled?.payments?.map((p) => p.status)),
+      );
+    }
   }
 
   const empty = await json(jar, '/api/orders', {

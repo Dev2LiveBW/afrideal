@@ -34,7 +34,7 @@ spec [0003](../specs/0003-order-payment-states.md) · code in `lib/payments/`
   - [x] Honest checkout and full coverage: the waiting state, EFT instructions, and `payAs()` in verify (AC-1, AC-10, AC-12)
 - [ ] Verify it: `/check verify order payment states`
 - [ ] Test it: `/test order payment states`
-- [ ] Review it (fresh model): `/check review order payment states`
+- [x] Review it (fresh model): `/check review order payment states`
 - [ ] Document it: `/document order payment states`
 
 ## Slice 1: Pay for one order by card, end to end
