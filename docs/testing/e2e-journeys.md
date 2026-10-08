@@ -203,16 +203,16 @@ That is 49 journeys. 46 have a screen to test (C02 to C04 do not yet, see Findin
 2. Open the cart. Check the line and the total.
 3. Tap through to checkout.
 4. Enter a delivery address (for example "Plot 5412, Extension 12", "Gaborone").
-5. Choose a payment method (DPO Pay).
+5. Choose a payment method: bank transfer (until a card gateway is live it is the only one offered; spec 0003).
 6. Place the order.
 
 **Expect:**
 - The cart total equals quantity times the unit price.
 - At checkout: total equals subtotal plus delivery fee.
-- After placing: "Order confirmed" and a reference like `AFD-24851`, with Placed and Paid already ticked on the timeline.
-- The order appears at the top of `/orders` with status Processing.
+- After placing: "Waiting for your payment", a reference like `AFD-24851`, and the bank transfer box asking Thabo to quote that reference. No supplier is asked to prepare anything until the money arrives.
+- The order appears at the top of `/orders`.
 - The cart is empty afterwards.
-- No money is taken (payment is simulated today).
+- Finance marking the transfer paid moves it on (Z01, step 2).
 
 ### B03 Order from two suppliers in one checkout
 
@@ -482,13 +482,14 @@ Runs end to end since 2026-10-06 (Findings, 1). Kagiso's job pays BWP 45.00, the
 
 | Step | Who | Does | System shows |
 |---|---|---|---|
-| 1 | Thabo | Buys 2 of a Naledi product (B02) | Order `AFD-…`, Pending |
-| 2 | Naledi | Confirms, prepares, marks ready (E02) | Thabo's order: Processing |
-| 3 | Kagiso | Accepts the job, picks up, delivers (F02) | Thabo's order: In transit, then delivered |
-| 4 | Thabo | Confirms arrival (B05) | Order: Delivered |
-| 5 | Keabetswe | Opens the order in the console (G02) | Full timeline, supplier and runner named |
-| 6 | Finance | Opens Payables, All | Naledi's invoice already Settled: Thabo's confirmation in step 4 released it |
-| 7 | Naledi | Opens Orders | The order shows Delivered and her invoice Settled |
+| 1 | Thabo | Buys 2 of a Naledi product by bank transfer (B02) | Order `AFD-…`, Waiting for your payment |
+| 2 | Finance | Payables, "Waiting for payment", Mark paid with the bank reference | Thabo's order: Payment confirmed; Naledi is asked to confirm |
+| 3 | Naledi | Confirms, prepares, marks ready (E02) | Thabo's order: Processing |
+| 4 | Kagiso | Accepts the job, picks up, delivers (F02) | Thabo's order: In transit, then delivered |
+| 5 | Thabo | Confirms arrival (B05) | Order: Delivered |
+| 6 | Keabetswe | Opens the order in the console (G02) | Full timeline, supplier and runner named |
+| 7 | Finance | Opens Payables, All | Naledi's invoice already Settled: Thabo's confirmation in step 5 released it |
+| 8 | Naledi | Opens Orders | The order shows Delivered and her invoice Settled |
 
 **Expect at the end:** the amounts agree everywhere: what Thabo paid equals subtotal plus delivery; Naledi's invoice equals her line; the console order, the buyer's order and the supplier's invoice all carry the same reference.
 
@@ -499,7 +500,7 @@ Runs end to end since 2026-10-06 (Findings, 1). Kagiso's job pays BWP 45.00, the
 These have no journeys until they are built; add them here when they land.
 
 - Real card payment and failed payments (scope 3 and 4)
-- Mark as paid for EFT, pausing checkout, refunds, reconciliation (13 to 15)
+- Pausing checkout, refunds, reconciliation (14, 15); mark as paid is in Z01 step 2
 - Customs and duty in the price; collection point delivery (9, 10)
 - Order emails and SMS (11, 12)
 - A chosen quote becoming an order (24, see C04)

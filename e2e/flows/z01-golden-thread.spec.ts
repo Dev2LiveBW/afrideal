@@ -4,9 +4,9 @@ import { addToCart, caption, card, clickAndSave, expect, ready, test } from '../
 
 /**
  * Z01. The golden thread: one order from cart to supplier paid, five people
- * (docs/testing/e2e-journeys.md). Thabo buys, Naledi prepares, Kagiso
- * collects and delivers, Thabo confirms (which settles Naledi's invoice),
- * Finance and Naledi see it paid.
+ * (docs/testing/e2e-journeys.md). Thabo buys by bank transfer, Finance marks
+ * the transfer paid, Naledi prepares, Kagiso collects and delivers, Thabo
+ * confirms (which settles Naledi's invoice), Finance and Naledi see it paid.
  *
  * The runner job is opened by Naledi marking the order ready
  * (lib/shipments.ts); it pays the buyer's BWP 45 delivery fee, as this order
@@ -45,10 +45,27 @@ test('Z01 one order from cart to the supplier paid @p1', async ({ as }) => {
     await buyer.waitForURL(/\/orders\/o\d+\?placed=1/);
     orderPath = new URL(buyer.url()).pathname;
     reference = (await buyer.getByRole('heading', { level: 1, name: /^AFD-\d+$/ }).textContent())!.trim();
+    await expect(buyer.getByText('Waiting for your payment')).toBeVisible();
   });
 
-  await test.step('2. Naledi confirms, prepares and marks it ready for collection', async () => {
-    await caption(supplier, `Z01 · 2. Naledi prepares ${reference} and marks it ready`);
+  await test.step('2. Finance sees the transfer land and marks the order paid', async () => {
+    await caption(finance, `Z01 · 2. Finance marks ${reference} paid with the bank reference`);
+    await finance.goto('/admin/payables');
+    // The queue of orders whose money has not arrived, not the payables table below it.
+    const queue = finance.getByRole('table', { name: /Orders waiting for payment/ });
+    const row = queue.getByRole('row', { name: new RegExp(`${reference}\\b`) }).first();
+    await row.getByRole('button', { name: 'Mark paid' }).click();
+    const dialog = finance.getByRole('dialog');
+    await dialog.getByLabel('Bank reference (required)').fill(`FNB ${reference}`);
+    await clickAndSave(dialog.getByRole('button', { name: 'Mark paid' }));
+    await expect(queue.getByRole('row', { name: new RegExp(`${reference}\\b`) })).toHaveCount(0);
+
+    await buyer.goto(orderPath);
+    await expect(buyer.getByText('Waiting for your payment')).toHaveCount(0);
+  });
+
+  await test.step('3. Naledi confirms, prepares and marks it ready for collection', async () => {
+    await caption(supplier, `Z01 · 3. Naledi prepares ${reference} and marks it ready`);
     await supplier.goto('/supplier/orders');
     const order = card(supplier, reference);
     for (const button of ['Confirm order', 'Start preparing', 'Mark ready for collection']) {
@@ -58,8 +75,8 @@ test('Z01 one order from cart to the supplier paid @p1', async ({ as }) => {
     await expect(order).toContainText('Ready for collection');
   });
 
-  await test.step('3. Kagiso accepts the job, collects it and delivers it', async () => {
-    await caption(runner, `Z01 · 3. Kagiso collects ${reference} from Naledi and delivers it`);
+  await test.step('4. Kagiso accepts the job, collects it and delivers it', async () => {
+    await caption(runner, `Z01 · 4. Kagiso collects ${reference} from Naledi and delivers it`);
     await runner.goto('/runner/jobs');
 
     // A job alert pops up over the list for each new job; take ours from it,
@@ -86,25 +103,25 @@ test('Z01 one order from cart to the supplier paid @p1', async ({ as }) => {
     await expect(runner.getByText('Delivery confirmed - nice work')).toBeVisible();
   });
 
-  await test.step('4. Thabo confirms it arrived', async () => {
-    await caption(buyer, `Z01 · 4. Thabo confirms ${reference} arrived`);
+  await test.step('5. Thabo confirms it arrived', async () => {
+    await caption(buyer, `Z01 · 5. Thabo confirms ${reference} arrived`);
     await buyer.goto(orderPath);
     await buyer.getByRole('button', { name: 'Confirm delivery' }).click();
     await clickAndSave(buyer.getByRole('dialog').getByRole('button', { name: 'Yes, it arrived' }));
     await expect(buyer.getByRole('button', { name: 'Confirm delivery' })).toHaveCount(0);
   });
 
-  await test.step("5. Thabo's confirmation released Naledi's payment; Finance sees it settled", async () => {
+  await test.step("6. Thabo's confirmation released Naledi's payment; Finance sees it settled", async () => {
     // Confirming delivery settles the supplier invoice by itself (the confirm
     // dialog says so), so there is nothing left for Finance to settle.
-    await caption(finance, `Z01 · 5. Finance sees Naledi's invoice for ${reference} settled`);
+    await caption(finance, `Z01 · 6. Finance sees Naledi's invoice for ${reference} settled`);
     await finance.goto('/admin/payables');
     await finance.getByRole('button', { name: /^All \(\d+\)$/ }).click();
     await expect(finance.getByRole('row', { name: new RegExp(`${reference}\\b`) }).first()).toContainText('Settled');
   });
 
-  await test.step('6. Naledi sees the order delivered and her invoice settled', async () => {
-    await caption(supplier, `Z01 · 6. Naledi sees ${reference} delivered and paid`);
+  await test.step('7. Naledi sees the order delivered and her invoice settled', async () => {
+    await caption(supplier, `Z01 · 7. Naledi sees ${reference} delivered and paid`);
     await supplier.goto('/supplier/orders');
     const order = card(supplier, reference);
     await expect(order).toContainText('Delivered');

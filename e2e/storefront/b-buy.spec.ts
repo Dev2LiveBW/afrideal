@@ -43,19 +43,24 @@ test.describe('B. Buying and tracking', () => {
     await page.getByRole('link', { name: 'Checkout' }).click();
     await expect(page.getByRole('heading', { name: 'Confirm and pay' })).toBeVisible();
     await ready(page);
-    await caption(page, 'B02 · 3. Delivery address and payment method, then Place order (no money moves yet)');
+    await caption(page, 'B02 · 3. Delivery address and bank transfer, then Place order (no money moves yet)');
     await page.getByRole('textbox', { name: 'Street address or plot number' }).fill('Plot 5412, Extension 12');
     await page.getByRole('textbox', { name: 'City or town' }).fill('Gaborone');
-    await expect(page.getByRole('radio', { name: /DPO Pay/ })).toBeChecked();
+    // Until a card gateway is live, bank transfer is the only method that can
+    // complete, so it is the only one offered (spec 0003).
+    await expect(page.getByRole('radio', { name: /Bank transfer/ })).toBeChecked();
+    await expect(page.getByRole('radio', { name: /DPO Pay/ })).toHaveCount(0);
     await expect(page.getByText('Total to pay').locator('xpath=following-sibling::*[1]')).toHaveText(bwp(337));
     await clickAndSave(page.getByRole('button', { name: 'Place order' }));
 
-    // The confirmation: a reference, the right sums, no money taken yet (simulated).
+    // The order waits for the money: a reference to quote, and nothing sourced yet.
     await page.waitForURL(/\/orders\/o\d+\?placed=1/);
-    await caption(page, 'B02 · 4. Order confirmed, with its AFD reference and timeline');
+    await caption(page, 'B02 · 4. Waiting for payment, with the reference to quote at the bank');
     await expectHealthy(page);
-    await expect(page.getByText('Order confirmed')).toBeVisible();
+    await expect(page.getByText('Waiting for your payment')).toBeVisible();
+    await expect(page.getByText('Paying by bank transfer')).toBeVisible();
     const reference = (await page.getByRole('heading', { level: 1, name: /^AFD-\d+$/ }).textContent())!.trim();
+    await expect(page.locator('main strong', { hasText: reference }).first()).toBeVisible();
     await expect(page.getByText('Total', { exact: true }).locator('xpath=following-sibling::*[1]')).toHaveText(bwp(337));
     await expect(page.getByText('Plot 5412, Extension 12')).toBeVisible();
 

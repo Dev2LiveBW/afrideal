@@ -42,7 +42,7 @@ if (demo && !playwrightArgs.some((a) => a.startsWith('--grep') || a.startsWith('
   playwrightArgs.push('--grep', VIDEO_JOURNEYS);
 }
 
-function neon(...cmd) {
+function neonOnce(cmd) {
   const out = execFileSync('neon', [...cmd, '--project-id', PROJECT_ID, '--output', 'json'], {
     cwd: ROOT_DIR,
     encoding: 'utf8',
@@ -50,6 +50,29 @@ function neon(...cmd) {
     stdio: ['ignore', 'pipe', 'inherit'],
   });
   return JSON.parse(out);
+}
+
+function pause(ms) {
+  Atomics.wait(new Int32Array(new SharedArrayBuffer(4)), 0, 0, ms);
+}
+
+/**
+ * The Neon API is a long way from Botswana and the CLI gives up quickly, so a
+ * whole run used to die on one dropped request ("Could not reach the Neon API").
+ * Reads and deletes are safe to repeat, so they are retried. Creating a branch
+ * is not (a request that timed out may still have made it), which is why
+ * `createBranch` below retries under a fresh name instead.
+ */
+function neon(...cmd) {
+  for (let attempt = 1; ; attempt++) {
+    try {
+      return neonOnce(cmd);
+    } catch (error) {
+      if (attempt >= 4) throw error;
+      console.warn(`e2e: neon ${cmd.slice(0, 2).join(' ')} failed, retrying (${attempt} of 3)`);
+      pause(5_000 * attempt);
+    }
+  }
 }
 
 function deleteBranch(id, name) {
@@ -70,10 +93,24 @@ for (const branch of neon('branches', 'list')) {
   if (branch.name.startsWith(PREFIX)) deleteBranch(branch.id, branch.name);
 }
 
-// 2. A fresh branch.
-const name = `${PREFIX}${stamp()}`;
-console.log(`e2e: creating branch ${name} from ${PARENT}`);
-const created = neon('branches', 'create', '--name', name, '--parent', PARENT);
+// 2. A fresh branch. A failed create may still have made one, so each retry
+// uses a new name; anything half made is a leftover that step 1 of the next
+// run deletes.
+function createBranch() {
+  for (let attempt = 1; ; attempt++) {
+    const branchName = `${PREFIX}${stamp()}`;
+    console.log(`e2e: creating branch ${branchName} from ${PARENT}`);
+    try {
+      return { name: branchName, created: neonOnce(['branches', 'create', '--name', branchName, '--parent', PARENT]) };
+    } catch (error) {
+      if (attempt >= 3) throw error;
+      console.warn(`e2e: creating the branch failed, retrying (${attempt} of 2)`);
+      pause(5_000 * attempt);
+    }
+  }
+}
+
+const { name, created } = createBranch();
 const branchId = created.branch.id;
 const databaseUrl = created.connection_uris?.[0]?.connection_uri;
 if (!databaseUrl) {
@@ -92,7 +129,16 @@ try {
     ...(demo ? { E2E_DEMO: '1' } : {}),
   };
 
-  // 3. Every run starts from the seed, whatever production holds today.
+  // 3. The branch is a copy of production, so it has production's schema. A
+  // change that adds tables is tested before production has them, so apply this
+  // checkout's migrations to the branch first. It also proves each migration runs
+  // cleanly on a copy of the real data before anyone runs it for real.
+  console.log('e2e: applying migrations to the branch');
+  const drizzle = path.join(ROOT_DIR, 'node_modules', 'drizzle-kit', 'bin.cjs');
+  const migrate = spawnSync(process.execPath, [drizzle, 'migrate'], { cwd: ROOT_DIR, env, stdio: 'inherit' });
+  if (migrate.status !== 0) throw new Error('e2e: migrating the branch failed');
+
+  // 4. Every run starts from the seed, whatever production holds today.
   console.log('e2e: loading data/*.json into the branch');
   const load = spawnSync(process.execPath, ['scripts/db-load.mjs'], { cwd: ROOT_DIR, env, stdio: 'inherit' });
   if (load.status !== 0) throw new Error('e2e: loading the seed into the branch failed');
