@@ -478,7 +478,7 @@ These have no video: they are safety checks, not things to show off.
 
 One order, start to finish, five people. This is the demo that shows the whole system. Run it after a fresh reset.
 
-Runs end to end since 2026-10-06 (Findings, 1). Kagiso's job pays BWP 45.00, the order's delivery fee, as it has one supplier.
+Runs end to end since 2026-10-06 (Findings, 1). Kagiso's job pays BWP 45.00: every delivery pays the full delivery fee.
 
 | Step | Who | Does | System shows |
 |---|---|---|---|
@@ -511,7 +511,7 @@ These have no journeys until they are built; add them here when they land.
 
 What the first runs turned up. Bugs are kept as tests marked `test.fail()` (see "Running the suite").
 
-1. **Fixed 2026-10-06: a new order never reached a runner.** Marking an order "Ready for collection" only sent a notification; nothing created a shipment, so no runner job appeared and every runner job came from the seed. Now `lib/shipments.ts` opens the job when a supplier marks their part ready (`openJobForLeg`), and marks the part collected and the order in transit when the runner picks it up (`markCollected`). The payout is the order's delivery fee split across its pickups (product owner's decision); distance is not measured yet and the runner screens hide it. Test: Z01, end to end.
+1. **Fixed 2026-10-06: a new order never reached a runner.** Marking an order "Ready for collection" only sent a notification; nothing created a shipment, so no runner job appeared and every runner job came from the seed. Now `lib/shipments.ts` opens the job when a supplier marks their part ready (`openJobForLeg`), and marks the part collected and the order in transit when the runner picks it up (`markCollected`). Each delivery has its own fee: every runner job pays the full delivery fee, so an order split across two suppliers pays two jobs of BWP 45 (product owner's decision, 2026-10-07, replacing the first rule that split one fee across the pickups). Distance is not measured yet and the runner screens hide it. Test: Z01, end to end.
 2. **Fixed 2026-10-06: garbled text.** The order list and the runner request list printed "Â·" where a middle dot belongs (the dots were stored double-encoded in `app/(store)/orders/page.tsx`, `app/(store)/requests/page.tsx` and the legacy v4 footer). Guards: K01 and K02 in `e2e/access/known-issues.spec.ts`.
 3. **The RFQ chain has no screens** past the buyer's request (C02 to C04 above).
 4. **Fixed 2026-10-06: when Clerk could not be reached, the page crashed.** `auth()` now builds the session from the signed session token's `metadata` claim and the profile already linked to the Clerk account, with no call to Clerk's API; `currentUser()` (now with three retries) is only needed on a first sign-in or a token without the claim. It was: every signed-in page called Clerk's API (`currentUser()` in `lib/auth.ts`). From this machine that call fails now and then ("fetch failed"). `lib/auth.ts` retries twice, but in one 25 minute run it still failed 5 times, and each time the buyer saw the full "We could not finish loading this" screen (for example `/requests`, digest 2291417529). A gentler fallback (a longer backoff, or rendering the page signed out with a "reconnecting" notice) would hide most of these. The suite's one retry absorbs them and reports the test as flaky.

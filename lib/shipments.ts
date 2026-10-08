@@ -15,13 +15,14 @@ import type { Order, Shipment, SupplierOrder } from '@/types';
 type Actor = { id: string; name: string };
 
 /**
- * What a runner earns for one pickup: the buyer's flat delivery fee, split
- * evenly across the order's pickups (BWP 45 for a one-supplier order, 22.50
- * each for two). AfriDeal keeps nothing on delivery. Product owner decision,
- * 2026-10-06.
+ * What a runner earns for one delivery: the full delivery fee. Each delivery
+ * has its own fee, so an order split across two suppliers pays two runner
+ * jobs of BWP 45 each, not one fee shared between them. Product owner
+ * decision, 2026-10-07 (it replaces the 2026-10-06 rule that split the fee
+ * across an order's pickups).
  */
-export function runnerPayout(order: Pick<Order, 'delivery_fee'>, pickups: number): number {
-  return Math.round((order.delivery_fee / Math.max(1, pickups)) * 100) / 100;
+export function runnerPayout(order: Pick<Order, 'delivery_fee'>): number {
+  return order.delivery_fee;
 }
 
 /**
@@ -32,15 +33,13 @@ export async function openJobForLeg(leg: SupplierOrder, actor: Actor): Promise<S
   const existing = (await readAll('shipments')).find((shipment) => shipment.supplier_order_id === leg.id);
   if (existing) return existing;
 
-  const [order, supplier, legs] = await Promise.all([
+  const [order, supplier] = await Promise.all([
     findById('orders', leg.order_id),
     findById('suppliers', leg.supplier_id),
-    readAll('supplier-orders'),
   ]);
   if (!order || !supplier) return null;
 
-  const pickups = legs.filter((other) => other.order_id === order.id && other.status !== 'CANCELLED').length;
-  const payout = runnerPayout(order, pickups);
+  const payout = runnerPayout(order);
 
   const job = await insert('shipments', {
     id: await nextId('shipments', 'sh'),
