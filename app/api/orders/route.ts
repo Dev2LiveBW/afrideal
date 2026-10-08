@@ -5,7 +5,7 @@ import { insert, insertMany, nextId, nextIds, readAll } from '@/lib/db';
 import { EVENTS, audit, notify } from '@/lib/notifications';
 import { resolvePrice } from '@/lib/pricing-tiers';
 import { selectSupplier } from '@/lib/supplier-selection';
-import { startPayment } from '@/lib/payments/adapters';
+import { availablePaymentMethods, startPayment } from '@/lib/payments/adapters';
 import { allAsDisplayed } from '@/lib/payments/status';
 import { checkoutIsPaused } from '@/lib/settings';
 import { paymentExpiresAt } from '@/lib/payments/policy';
@@ -90,6 +90,13 @@ export const POST = handled(async (request: Request) => {
   // an order at the door rather than part way through building one.
   if (await checkoutIsPaused()) {
     return fail('Checkout is temporarily unavailable. Please try again shortly.', 409);
+  }
+
+  // A method nothing can take money through would leave the order waiting for a
+  // payment that cannot arrive. Checkout only offers the available ones; this is
+  // the guard for anything that posts here directly.
+  if (!availablePaymentMethods().includes(payment_method)) {
+    return fail('That payment method is not available yet. Please pay by bank transfer.', 422);
   }
 
   const [products, offers, suppliers, bands] = await Promise.all([

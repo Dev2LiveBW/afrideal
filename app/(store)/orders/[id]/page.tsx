@@ -136,11 +136,15 @@ export default async function OrderTrackingPage({
               </p>
             )}
 
-            {/* Offered for any unpaid order, not only a failed one: a buyer who
-                abandoned a card page needs the same way back in. */}
-            <div className="mt-3">
-              <RetryPaymentButton orderId={order.id} />
-            </div>
+            {/* Offered for any unpaid card or wallet order, not only a failed one: a
+                buyer who abandoned a card page needs the same way back in. A bank
+                transfer has nothing to retry; the buyer pays from their bank and
+                finance confirms it. */}
+            {!isBankTransfer && (
+              <div className="mt-3">
+                <RetryPaymentButton orderId={order.id} />
+              </div>
+            )}
 
             <p className="mt-3 text-[12px] text-muted">
               This order is held until {dateTime(order.payment_expires_at)}.

@@ -1,6 +1,6 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
 
-import { paymentExpiresAt, windowHasClosed } from './policy';
+import { claimedAfterWindow, paymentExpiresAt, windowHasClosed } from './policy';
 
 /**
  * The payment window (spec 0003, AC-1).
@@ -84,5 +84,25 @@ describe('windowHasClosed', () => {
     const order = { payment_expires_at: '2026-10-06T08:30:00.000Z' };
 
     expect(windowHasClosed(order, new Date('2026-10-06T09:00:00.000Z'))).toBe(true);
+  });
+});
+
+describe('claimedAfterWindow', () => {
+  const order = { status: 'AWAITING_PAYMENT' as const, payment_expires_at: '2026-10-06T11:00:00.000Z' };
+
+  it('is late when the money was claimed after the deadline, though nothing wrote the expiry', () => {
+    expect(claimedAfterWindow(order, { confirmed_at: '2026-10-06T11:05:00.000Z' })).toBe(true);
+  });
+
+  it('is on time when the claim beat the deadline, even if the run finishes after it', () => {
+    expect(
+      claimedAfterWindow(order, { confirmed_at: '2026-10-06T10:59:00.000Z' }, new Date('2026-10-06T12:00:00.000Z')),
+    ).toBe(false);
+  });
+
+  it('never calls an order that is no longer waiting late', () => {
+    expect(
+      claimedAfterWindow({ ...order, status: 'PROCESSING' }, { confirmed_at: '2026-10-07T00:00:00.000Z' }),
+    ).toBe(false);
   });
 });

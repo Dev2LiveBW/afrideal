@@ -5,7 +5,8 @@ import { afterEach, describe, expect, it, vi } from 'vitest';
 const findById = vi.fn();
 vi.mock('@/lib/db', () => ({ findById: (...args: unknown[]) => findById(...args) }));
 
-const { MockProviderInProductionError, providerFor, startPayment } = await import('./adapters');
+const { MockProviderInProductionError, availablePaymentMethods, providerFor, startPayment } =
+  await import('./adapters');
 import type { Order } from '@/types';
 
 /**
@@ -148,5 +149,49 @@ describe('startPayment, for a card', () => {
     await startPayment(order());
 
     expect(findById).not.toHaveBeenCalled();
+  });
+});
+
+describe('the production opt in for the mock', () => {
+  it('lets a production build outside Vercel use the mock when ALLOW_MOCK_PAYMENTS is 1', () => {
+    vi.stubEnv('NODE_ENV', 'production');
+    vi.stubEnv('VERCEL', '');
+    vi.stubEnv('PAYMENTS_PROVIDER', 'mock');
+    vi.stubEnv('ALLOW_MOCK_PAYMENTS', '1');
+
+    expect(providerFor('DPO_PAY')).toBe('MOCK');
+  });
+
+  it('ignores ALLOW_MOCK_PAYMENTS on Vercel, so a deployed site can never use the mock', () => {
+    vi.stubEnv('NODE_ENV', 'production');
+    vi.stubEnv('VERCEL', '1');
+    vi.stubEnv('PAYMENTS_PROVIDER', 'mock');
+    vi.stubEnv('ALLOW_MOCK_PAYMENTS', '1');
+
+    expect(() => providerFor('DPO_PAY')).toThrow(MockProviderInProductionError);
+  });
+});
+
+describe('availablePaymentMethods', () => {
+  it('offers bank transfer alone when nothing can take a card payment', () => {
+    vi.stubEnv('NODE_ENV', 'production');
+    vi.stubEnv('PAYMENTS_PROVIDER', '');
+
+    expect(availablePaymentMethods()).toEqual(['EFT']);
+  });
+
+  it('offers bank transfer alone, not an error, when the mock is misconfigured in production', () => {
+    vi.stubEnv('NODE_ENV', 'production');
+    vi.stubEnv('VERCEL', '1');
+    vi.stubEnv('PAYMENTS_PROVIDER', 'mock');
+
+    expect(availablePaymentMethods()).toEqual(['EFT']);
+  });
+
+  it('offers every method while the mock can take card payments', () => {
+    vi.stubEnv('NODE_ENV', 'development');
+    vi.stubEnv('PAYMENTS_PROVIDER', 'mock');
+
+    expect(availablePaymentMethods()).toEqual(['DPO_PAY', 'ORANGE_MONEY', 'PAYGATE', 'EFT']);
   });
 });

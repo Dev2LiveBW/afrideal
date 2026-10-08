@@ -1,6 +1,7 @@
 import 'server-only';
 
 import { findById } from '@/lib/db';
+import { mockAllowedInProduction } from '@/lib/payments/policy';
 import type { Order, PaymentMethod, PaymentProvider } from '@/types';
 
 /**
@@ -42,8 +43,33 @@ export class MockProviderInProductionError extends Error {
 
 function usingMock(): boolean {
   const mock = process.env.PAYMENTS_PROVIDER === 'mock';
-  if (mock && process.env.NODE_ENV === 'production') throw new MockProviderInProductionError();
+  if (mock && process.env.NODE_ENV === 'production' && !mockAllowedInProduction()) {
+    throw new MockProviderInProductionError();
+  }
   return mock;
+}
+
+/** Card and wallet methods, which need a gateway (or the mock) to take money. */
+const GATEWAY_METHODS: PaymentMethod[] = ['DPO_PAY', 'ORANGE_MONEY', 'PAYGATE'];
+
+/**
+ * The methods a buyer can actually complete a payment with, right now.
+ *
+ * A bank transfer always works: finance marks it paid by hand. A card or wallet
+ * method needs something to take the money, and until DPO Pay is approved the
+ * only such thing is the mock. Offering a method that can never complete would
+ * leave every order it touches waiting for a payment that cannot arrive, so it
+ * is not offered at all.
+ */
+export function availablePaymentMethods(): PaymentMethod[] {
+  let mock = false;
+  try {
+    mock = usingMock();
+  } catch {
+    // A misconfigured mock in production: offer only what is safe.
+    mock = false;
+  }
+  return mock ? [...GATEWAY_METHODS, 'EFT'] : ['EFT'];
 }
 
 /**

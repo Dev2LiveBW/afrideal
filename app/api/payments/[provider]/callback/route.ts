@@ -1,8 +1,13 @@
 import { z } from 'zod';
 
 import { fail, handled, ok } from '@/lib/api';
-import { readAll } from '@/lib/db';
-import { CALLBACK_ACTOR, confirmPayment, failPayment } from '@/lib/payments/confirm';
+import { findById, readAll } from '@/lib/db';
+import {
+  CALLBACK_ACTOR,
+  confirmPayment,
+  failPayment,
+  flagRefusedPayment,
+} from '@/lib/payments/confirm';
 import { SIGNATURE_HEADER, isStale, verifyCallback } from '@/lib/payments/signature';
 import type { PaymentProvider } from '@/types';
 
@@ -71,16 +76,30 @@ export const POST = handled(
     const parsed = CallbackSchema.safeParse(payload);
     if (!parsed.success) return fail('Callback body was not in the expected shape.', 422);
 
-    // A signed but ancient callback is refused, so a captured request cannot be
-    // replayed days later even with a valid signature.
-    if (isStale(parsed.data.occurred_at)) return fail('Callback is too old to act on.', 409);
-
     // Find the attempt this callback belongs to. The reference is the only link a
     // provider has to our data, which is why it is unique per provider.
     const payments = await readAll('payments');
     const attempt = payments.find(
       (row) => row.provider === provider && row.provider_reference === parsed.data.reference,
     );
+
+    // A signed but ancient callback is refused, so a captured request cannot be
+    // replayed days later even with a valid signature. A genuine success that only
+    // arrives late (a gateway retrying through an outage) is still money taken, so
+    // it is recorded for finance rather than dropped. A replay of a payment we
+    // already applied needs nothing.
+    if (isStale(parsed.data.occurred_at)) {
+      if (parsed.data.status === 'CONFIRMED' && attempt?.status !== 'CONFIRMED') {
+        await flagRefusedPayment({
+          order: attempt ? await findById('orders', attempt.order_id) : null,
+          provider,
+          providerReference: parsed.data.reference,
+          amount: parsed.data.amount,
+          why: 'the confirmation arrived more than a day after the payment, too old to apply automatically',
+        });
+      }
+      return fail('Callback is too old to act on.', 409);
+    }
 
     if (!attempt) return fail('No payment matches that reference.', 404);
 

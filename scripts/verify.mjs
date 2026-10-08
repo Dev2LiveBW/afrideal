@@ -772,6 +772,67 @@ section('9c. Finance controls — mark as paid, and pausing checkout');
     `${resumed.status} ${JSON.stringify(resumed.body)}`);
 }
 
+// ── Spec 0003 AC-7: money that cannot be applied, and cancelling paid orders ──
+section('9d. Refused payments — a cancelled order is not reopened, a paid one not cancelled');
+{
+  const buyer = sessions['thabo@gmail.com'].jar;
+  const ops = sessions['ops@afrideal.co.bw'].jar;
+
+  const place = () =>
+    json(buyer, '/api/orders', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        lines: [{ product_id: 'p001', variant_id: 'p001v1', qty: 1 }],
+        payment_method: 'DPO_PAY',
+        delivery_address: 'Plot 1, Gaborone',
+        delivery_city: 'Gaborone',
+      }),
+    });
+
+  // A buyer cancels, then the gateway reports the money arrived anyway. The
+  // payment must not reopen an order a person cancelled, and must not raise legs.
+  const cancelled = await place();
+  const cancelledId = cancelled.body?.order?.id;
+  const attempt = cancelled.body?.payment;
+
+  const cancel = await json(buyer, `/api/orders/${cancelledId}`, {
+    method: 'PATCH',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ action: 'CANCEL' }),
+  });
+  check('a buyer can cancel their unpaid order', cancel.status === 200 && cancel.body?.status === 'CANCELLED',
+    `${cancel.status} ${cancel.body?.status}`);
+
+  const late = await payCallback(cancelledId, attempt, { amount: cancelled.body?.order?.total });
+  check('AC-7: a payment for an order a person cancelled is refused', late.status === 409, `got ${late.status}`);
+
+  const after = (await json(ops, `/api/orders/${cancelledId}`)).body;
+  check('and the order stays cancelled', after?.order?.status === 'CANCELLED', `got ${after?.order?.status}`);
+  check('and no supplier was asked to prepare anything', (after?.legs?.length ?? 0) === 0,
+    `${after?.legs?.length} leg(s)`);
+
+  // Once paid, the buyer's cancel button must not be able to strand the money.
+  const paid = await place();
+  const paidId = paid.body?.order?.id;
+  await payCallback(paidId, paid.body?.payment, { amount: paid.body?.order?.total });
+
+  const cancelPaid = await json(buyer, `/api/orders/${paidId}`, {
+    method: 'PATCH',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ action: 'CANCEL' }),
+  });
+  check('a paid order cannot be cancelled by the buyer', cancelPaid.status === 409, `got ${cancelPaid.status}`);
+
+  // A replayed confirmation finishes nothing new and must not announce twice;
+  // the order's timeline carries exactly one "Payment confirmed".
+  await payCallback(paidId, paid.body?.payment, { amount: paid.body?.order?.total });
+  const replayed = (await json(ops, `/api/orders/${paidId}`)).body;
+  const paidEntries = (replayed?.order?.timeline ?? []).filter((entry) => entry.status === 'PAID');
+  check('a replayed confirmation adds nothing to the timeline', paidEntries.length === 1,
+    `${paidEntries.length} PAID entries`);
+}
+
 // ── 10. Runner availability toggle ───────────────────────────────────────────
 
 section('10. Runner availability');

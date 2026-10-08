@@ -22,9 +22,6 @@ const DELIVERY_FEE = 45;
 const CheckoutSchema = z.object({
   delivery_address: z.string().min(4, 'Enter a street address or plot number.'),
   delivery_city: z.string().min(2, 'Enter a city or town.'),
-  // `EFT` is accepted but has no card in GATEWAYS yet, so a buyer cannot pick it
-  // here. Spec 0003 needs the method to exist so finance can raise and confirm a
-  // bank transfer order; the checkout card for it comes with the phone checkout.
   payment_method: z.enum(['DPO_PAY', 'ORANGE_MONEY', 'PAYGATE', 'EFT']),
 });
 
@@ -49,6 +46,12 @@ const GATEWAYS: { value: PaymentMethod; name: string; monogram: string; blurb: s
     monogram: 'PG',
     blurb: 'South African card acquiring.',
   },
+  {
+    value: 'EFT',
+    name: 'Bank transfer',
+    monogram: 'EFT',
+    blurb: 'Pay from your bank. We start sourcing once it reaches us, usually 1 to 3 working days.',
+  },
 ];
 
 export function CheckoutClient({
@@ -57,6 +60,7 @@ export function CheckoutClient({
   bands,
   products,
   customerType,
+  methods,
 }: {
   customerName: string;
   customerEmail: string;
@@ -64,6 +68,12 @@ export function CheckoutClient({
   bands: CustomerPrice[];
   products: Product[];
   customerType: CustomerType;
+  /**
+   * The methods that can actually take a payment right now, decided on the
+   * server. Until a card gateway is live that is bank transfer alone, and a
+   * card that could never complete is not shown at all.
+   */
+  methods: PaymentMethod[];
 }) {
   const router = useRouter();
   const cart = useAfriDealStore((state) => state.cart);
@@ -85,7 +95,7 @@ export function CheckoutClient({
     defaultValues: {
       delivery_address: '',
       delivery_city: 'Gaborone',
-      payment_method: 'DPO_PAY',
+      payment_method: methods[0] ?? 'EFT',
     },
   });
 
@@ -253,7 +263,7 @@ export function CheckoutClient({
             </p>
 
             <div className="mt-5 space-y-2.5">
-              {GATEWAYS.map((gateway) => {
+              {GATEWAYS.filter((gateway) => methods.includes(gateway.value)).map((gateway) => {
                 const active = selectedGateway === gateway.value;
 
                 return (

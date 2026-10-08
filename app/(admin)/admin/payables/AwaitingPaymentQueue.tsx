@@ -24,6 +24,8 @@ export type AwaitingRow = {
   order: Order;
   /** Pre-formatted on the server so the table needs no date arithmetic. */
   waitingFor: string;
+  /** A bank transfer whose payment window closed. Marking it paid reopens it. */
+  late: boolean;
 };
 
 export function AwaitingPaymentQueue({
@@ -34,7 +36,7 @@ export function AwaitingPaymentQueue({
   canConfirm: boolean;
 }) {
   const router = useRouter();
-  const [confirming, setConfirming] = useState<Order | null>(null);
+  const [confirming, setConfirming] = useState<AwaitingRow | null>(null);
   const [reference, setReference] = useState('');
   const [amount, setAmount] = useState('');
   const [note, setNote] = useState('');
@@ -65,7 +67,7 @@ export function AwaitingPaymentQueue({
     setSaving(true);
 
     try {
-      const response = await fetch(`/api/orders/${confirming.id}`, {
+      const response = await fetch(`/api/orders/${confirming.order.id}`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -86,7 +88,9 @@ export function AwaitingPaymentQueue({
       toast.success(
         body?.amount_matches === false
           ? 'Marked paid, but the amount does not match the order total. Flagged for follow up.'
-          : 'Marked paid. The supplier has been asked to confirm.',
+          : body?.late
+            ? 'Marked paid and the order reopened. The supplier has been asked to confirm.'
+            : 'Marked paid. The supplier has been asked to confirm.',
       );
 
       close();
@@ -125,31 +129,41 @@ export function AwaitingPaymentQueue({
             </tr>
           </thead>
           <tbody>
-            {rows.map(({ order, waitingFor }) => (
-              <tr key={order.id}>
-                <td className="font-mono text-[12.5px] text-ink">{order.reference}</td>
-                <td className="text-ink">{order.customer_name}</td>
-                <td className="text-[12.5px] text-muted">
-                  {PAYMENT_LABELS[order.payment_method] ?? order.payment_method}
-                </td>
-                <td>
-                  <MoneyText amount={order.total} size="sm" tone="ink" />
-                </td>
-                <td className="text-[12.5px] text-muted">{waitingFor}</td>
-                {canConfirm && (
-                  <td>
-                    <ActionButton
-                      size="sm"
-                      variant="ghost"
-                      onClick={() => setConfirming(order)}
-                      icon={<Landmark size={14} strokeWidth={1.5} />}
-                    >
-                      Mark paid
-                    </ActionButton>
+            {rows.map((row) => {
+              const { order, waitingFor, late } = row;
+              return (
+                <tr key={order.id}>
+                  <td className="font-mono text-[12.5px] text-ink">{order.reference}</td>
+                  <td className="text-ink">{order.customer_name}</td>
+                  <td className="text-[12.5px] text-muted">
+                    {PAYMENT_LABELS[order.payment_method] ?? order.payment_method}
                   </td>
-                )}
-              </tr>
-            ))}
+                  <td>
+                    <MoneyText amount={order.total} size="sm" tone="ink" />
+                  </td>
+                  <td className="text-[12.5px] text-muted">
+                    {waitingFor}
+                    {late && (
+                      <span className="ml-2 rounded-full bg-gold-50 px-2 py-0.5 text-[11px] font-medium text-gold-700">
+                        Window closed
+                      </span>
+                    )}
+                  </td>
+                  {canConfirm && (
+                    <td>
+                      <ActionButton
+                        size="sm"
+                        variant="ghost"
+                        onClick={() => setConfirming(row)}
+                        icon={<Landmark size={14} strokeWidth={1.5} />}
+                      >
+                        Mark paid
+                      </ActionButton>
+                    </td>
+                  )}
+                </tr>
+              );
+            })}
           </tbody>
         </table>
       </div>
@@ -159,10 +173,10 @@ export function AwaitingPaymentQueue({
         onClose={close}
         onConfirm={markPaid}
         loading={saving}
-        title={`Mark ${confirming?.reference ?? ''} as paid`}
+        title={`Mark ${confirming?.order.reference ?? ''} as paid`}
         description={
           confirming
-            ? `Confirms that ${confirming.customer_name}'s transfer has landed. The supplier will be asked to prepare the goods and a procurement invoice will be raised. This is the same path the card gateway uses.`
+            ? `Confirms that ${confirming.order.customer_name}'s transfer has landed. The supplier will be asked to prepare the goods and a procurement invoice will be raised. This is the same path the card gateway uses.${confirming.late ? ' The payment window for this order has closed, so marking it paid reopens it and records the payment as late.' : ''}`
             : ''
         }
         confirmLabel="Mark paid"
@@ -192,7 +206,7 @@ export function AwaitingPaymentQueue({
               step="0.01"
               value={amount}
               onChange={(event) => setAmount(event.target.value)}
-              placeholder={confirming ? String(confirming.total) : ''}
+              placeholder={confirming ? String(confirming.order.total) : ''}
               aria-describedby={`${amountId}-hint`}
               className="w-full rounded border border-hairline-strong bg-surface px-3 py-2 font-mono text-[13px] tabular-nums text-ink outline-none focus:border-gold"
             />

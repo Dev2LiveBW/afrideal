@@ -1,13 +1,13 @@
 import { z } from 'zod';
 
 import { fail, guard, handled, ok } from '@/lib/api';
-import { findById, insert, nextId, readAll, update } from '@/lib/db';
+import { findById, insert, mutate, nextId, readAll, update } from '@/lib/db';
 import { applyTransition } from '@/lib/payables';
 import { EVENTS, audit, notify } from '@/lib/notifications';
 import { providerFor } from '@/lib/payments/adapters';
 import { confirmPayment } from '@/lib/payments/confirm';
 import { getOrderDetail } from '@/lib/queries';
-import type { Dispute } from '@/types';
+import type { Dispute, Order } from '@/types';
 
 export const dynamic = 'force-dynamic';
 
@@ -164,26 +164,53 @@ export const PATCH = handled(async (request: Request, { params }: { params: { id
     }
 
     case 'CANCEL': {
-      // Spec 0003: an unpaid order is AWAITING_PAYMENT, not PENDING. Without this
-      // a buyer could no longer cancel their own unpaid order at all.
-      if (order.status !== 'AWAITING_PAYMENT' && order.status !== 'PENDING') {
-        return fail('Only an unpaid order can be cancelled here.', 409);
+      // Money that has arrived is never cancelled away here. A confirmation that
+      // was interrupted part way leaves a CONFIRMED payment on an order still
+      // AWAITING_PAYMENT; cancelling it would strand the buyer's money, cancel the
+      // payables and make confirmPayment() refuse the order for good.
+      const paid = (await readAll('payments')).some(
+        (row) => row.order_id === params.id && row.status === 'CONFIRMED',
+      );
+      if (paid) {
+        return fail('That order is already paid for, so it cannot be cancelled here. Contact us about a refund.', 409);
       }
+
+      // The order write is conditional on the status it finds under the lock, so
+      // a confirmation that finished a moment ago is not overwritten. A claim that
+      // lands between the payment check above and this write is caught on the
+      // other side: confirmPayment() sees the deliberate cancellation and flags it
+      // for finance instead of quietly reopening it.
+      //
+      // The reason is what stops a late payment silently reopening this order.
+      // confirmPayment() reopens an EXPIRED cancellation and refuses a deliberate
+      // one, so recording who decided is load bearing, not bookkeeping.
+      const updated = await mutate<'orders', Order | null>('orders', (rows) => {
+        const index = rows.findIndex((row) => row.id === params.id);
+        const current = index === -1 ? null : rows[index];
+        if (!current || (current.status !== 'AWAITING_PAYMENT' && current.status !== 'PENDING')) {
+          return { rows, result: null };
+        }
+
+        const next: Order = {
+          ...current,
+          status: 'CANCELLED',
+          cancel_reason: isStaff ? 'STAFF' : 'CUSTOMER',
+          updated_at: now,
+          timeline: [...current.timeline, { status: 'CANCELLED', label: 'Cancelled', at: now, actor: actor.name }],
+        };
+        const copy = [...rows];
+        copy[index] = next;
+        return { rows: copy, result: next };
+      });
+
+      // Spec 0003: an unpaid order is AWAITING_PAYMENT, not PENDING. Without the
+      // first a buyer could no longer cancel their own unpaid order at all.
+      if (!updated) return fail('Only an unpaid order can be cancelled here.', 409);
 
       for (const leg of legs) {
         if (leg.status !== 'PENDING') continue;
         await update('supplier-payables', leg.id, applyTransition(leg, 'CANCELLED', actor.name, 'Order cancelled.'));
       }
-
-      // The reason is what stops a late payment silently reopening this order.
-      // confirmPayment() reopens an EXPIRED cancellation and refuses a deliberate
-      // one, so recording who decided is load bearing, not bookkeeping.
-      const updated = await update('orders', params.id, {
-        status: 'CANCELLED',
-        cancel_reason: isStaff ? 'STAFF' : 'CUSTOMER',
-        updated_at: now,
-        timeline: [...order.timeline, { status: 'CANCELLED', label: 'Cancelled', at: now, actor: actor.name }],
-      });
 
       return ok(updated);
     }
@@ -201,23 +228,43 @@ export const PATCH = handled(async (request: Request, { params }: { params: { id
         return fail('A payment reference is required to mark an order paid.', 422);
       }
 
-      // Checked before confirming so a human gets a clear refusal rather than a
-      // silent no op. A race still converges, handled below.
-      const existing = (await readAll('payments')).filter(
+      const existing = (await readAll('payments')).find(
         (row) => row.order_id === params.id && row.status === 'CONFIRMED',
       );
-      if (existing.length > 0) return fail('That order is already paid for.', 409);
 
-      const result = await confirmPayment({
-        orderId: params.id,
-        provider: providerFor(order.payment_method),
-        providerReference: parsed.data.reference,
-        // Defaults to the total. A different figure is recorded and flagged, not
-        // rejected: the money has already arrived, so refusing it helps nobody.
-        amount: parsed.data.amount ?? order.total,
-        actor: { id: actor.id, name: actor.name },
-        note: parsed.data.paid_note ?? null,
-      });
+      // A confirmed payment on an order that never reached PROCESSING is a
+      // confirmation that was interrupted part way. For a bank transfer there is
+      // no gateway to retry it, only this button, so it resumes the run with the
+      // payment already on file instead of refusing. That finishes the supplier
+      // legs and the order; the reference typed this time is not needed.
+      const unfinished =
+        order.status === 'AWAITING_PAYMENT' ||
+        (order.status === 'CANCELLED' && order.cancel_reason === 'EXPIRED');
+
+      if (existing && !unfinished) return fail('That order is already paid for.', 409);
+
+      const result = await confirmPayment(
+        existing
+          ? {
+              orderId: params.id,
+              provider: existing.provider,
+              providerReference: existing.provider_reference ?? parsed.data.reference,
+              amount: existing.amount,
+              actor: { id: actor.id, name: actor.name },
+              note: existing.note,
+            }
+          : {
+              orderId: params.id,
+              provider: providerFor(order.payment_method),
+              providerReference: parsed.data.reference,
+              // Defaults to the total. A different figure is recorded and flagged,
+              // not rejected: the money has already arrived, so refusing it helps
+              // nobody.
+              amount: parsed.data.amount ?? order.total,
+              actor: { id: actor.id, name: actor.name },
+              note: parsed.data.paid_note ?? null,
+            },
+      );
 
       if (!result.ok) {
         if (result.reason === 'NOT_FOUND') return fail('Order not found.', 404);

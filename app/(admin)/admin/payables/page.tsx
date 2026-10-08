@@ -23,6 +23,9 @@ function sinceLabel(placedAt: string): string {
   return `${days} day${days === 1 ? '' : 's'}`;
 }
 
+/** How far back a bank transfer whose window closed is still offered to finance. */
+const LATE_TRANSFER_DAYS = 30;
+
 export default async function AdminPayablesPage() {
   const [session, records, suppliers, orders, payments] = await Promise.all([
     auth(),
@@ -38,12 +41,29 @@ export default async function AdminPayablesPage() {
   const supplierName = new Map(suppliers.map((supplier) => [supplier.id, supplier.name]));
   const orderReference = new Map(orders.map((order) => [order.id, order.reference]));
 
-  // Spec 0003: the orders whose money has not arrived. Uses the effective status so
-  // an order whose window has already closed is not offered up for confirmation.
+  // Spec 0003: the orders whose money has not arrived, plus bank transfers whose
+  // window closed in the last 30 days. A transfer can land after day 7 (a long
+  // weekend, a holiday), and AC-7 says that money reopens the order; without these
+  // rows finance had no way to apply it short of a hand written API call. Only the
+  // clock's cancellations are listed: an order a person cancelled stays closed.
+  const lateCutoff = Date.now() - LATE_TRANSFER_DAYS * 86_400_000;
   const awaiting: AwaitingRow[] = orders
-    .filter((order) => effectiveOrderStatus(order, payments) === 'AWAITING_PAYMENT')
-    .sort((a, b) => a.placed_at.localeCompare(b.placed_at))
-    .map((order) => ({ order, waitingFor: sinceLabel(order.placed_at) }));
+    .flatMap((order): AwaitingRow[] => {
+      const status = effectiveOrderStatus(order, payments);
+      if (status === 'AWAITING_PAYMENT') {
+        return [{ order, waitingFor: sinceLabel(order.placed_at), late: false }];
+      }
+
+      const clockCancelled =
+        status === 'CANCELLED' && (order.status === 'AWAITING_PAYMENT' || order.cancel_reason === 'EXPIRED');
+      const recent = new Date(order.payment_expires_at).getTime() >= lateCutoff;
+      if (order.payment_method === 'EFT' && clockCancelled && recent) {
+        return [{ order, waitingFor: sinceLabel(order.placed_at), late: true }];
+      }
+
+      return [];
+    })
+    .sort((a, b) => a.order.placed_at.localeCompare(b.order.placed_at));
 
   // Confirming money is finance's authority, not operations'.
   const canConfirm = ['FINANCE_ADMIN', 'SUPER_ADMIN'].includes(session?.user.role ?? '');

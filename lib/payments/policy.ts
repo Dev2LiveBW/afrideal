@@ -49,3 +49,35 @@ export function paymentExpiresAt(placedAt: string, method: PaymentMethod): strin
 export function windowHasClosed(order: Pick<Order, 'payment_expires_at'>, now = new Date()): boolean {
   return now.getTime() >= new Date(order.payment_expires_at).getTime();
 }
+
+/**
+ * Whether a payment was claimed after its order's window closed (AC-7).
+ *
+ * Judged from when the money was claimed, not from when the order is finished:
+ * a confirmation interrupted before the deadline and resumed after it is still on
+ * time, and one that lands at minute 35 is late even though nothing had written
+ * the expiry down yet.
+ */
+export function claimedAfterWindow(
+  order: Pick<Order, 'status' | 'payment_expires_at'>,
+  payment: { confirmed_at: string | null },
+  now = new Date(),
+): boolean {
+  if (order.status !== 'AWAITING_PAYMENT') return false;
+  const claimedAt = payment.confirmed_at ? new Date(payment.confirmed_at) : now;
+  return windowHasClosed(order, claimedAt);
+}
+
+/**
+ * Whether a production build may use the mock anyway.
+ *
+ * CI and the Playwright run start `next start`, which is NODE_ENV=production, so
+ * without an escape hatch nothing automated could pay at all. The hatch is a
+ * deliberate, separately named switch rather than NODE_ENV, and it is ignored on
+ * Vercel whatever its value: a deployed site must never be able to mark orders
+ * paid through a mock, even if someone copies the variable across.
+ */
+export function mockAllowedInProduction(): boolean {
+  if (process.env.VERCEL) return false;
+  return process.env.ALLOW_MOCK_PAYMENTS === '1';
+}
