@@ -46,20 +46,42 @@ A supplier can join without staff doing it for them, and run more of their own a
 **Done when:** a new supplier signs up, uploads documents and lands on "waiting for approval"; admin approval moves them to a welcome screen; a supplier can decline a quote with a reason, switch a product off, and download earnings as CSV.
 - [ ] Design it (spec): `/architect supplier onboarding & self service`
 
-### 28. Runner onboarding & profile · needs a decision
+### 28. Runner onboarding & profile · in-progress
 A runner can join on their phone (sign up, documents, service area, approval, welcome), has a profile page with ratings and performance, and confirms delivery with a real photo instead of the placeholder.
+spec [0005](../specs/0005-runner-signup-service-area.md) covers sign up, documents, approval and service area (milestone M5); the profile, ratings and delivery photos stay open here. Builds after spec 0006 task 2.
 **Done when:** a new runner signs up with documents and a service area and waits for approval; an approved runner sees their profile figures and reviews; confirming delivery stores a photo against the job.
-- [ ] Design it (spec): `/architect runner onboarding & profile`
+- [x] Design it (spec): `/architect runner onboarding & profile`
+- [ ] Build it: `/develop runner onboarding & profile`
+  - [ ] Thread: apply at /drive with documents, approve, jobs and alerts by town with the 30 minute widening (AC-1, AC-3, AC-4, AC-5)
+  - [ ] Reject, withdraw, resubmit, status page (AC-2, AC-3)
+  - [ ] Runner towns and the service towns setting (AC-6, AC-7)
+  - [ ] Document retention cron (AC-8)
+  - [ ] Authorisation, audit, verify and the e2e journey (AC-9, AC-10, AC-11)
+  - [ ] Runner profile, ratings and delivery photos (needs its own spec)
+- [ ] Verify it: `/check verify runner onboarding & profile`
+- [ ] Test it: `/test runner onboarding & profile`
+- [ ] Review it (fresh model): `/check review runner onboarding & profile`
+- [ ] Document it: `/document runner onboarding & profile`
 
 ### 29. Team console gaps · needs a decision
 The admin pieces on the Phase 1 list that are missing: customer accounts (list, detail, suspend, message, password reset), runner detail and suspend, an audit log screen, flagging an order, escalating a dispute, overriding the chosen supplier, CSV export from analytics, and an alert feed staff can mark read and filter.
 **Done when:** staff can find, view and suspend a customer or runner; the audit log is browsable and filterable; an order can be flagged and a dispute escalated; analytics downloads as CSV; every one of these actions is audit logged.
 - [ ] Design it (spec): `/architect team console gaps`
 
-### 30. Team user management · needs a decision
+### 30. Team user management · in-progress
 Adding staff and assigning their admin role from the console. Conflicts with the current rule that roles come only from `scripts/sync-users-to-clerk.mjs` and the Sanity people directory, so where roles live must be decided first.
+spec [0006](../specs/0006-people-and-roles.md): every person lives in the app database; the Studio keeps records and shows people read only.
 **Done when:** a super admin can add a staff member with a role and deactivate one, and the role source of truth is still single and documented.
-- [ ] Design it (spec): `/architect team user management`
+- [x] Design it (spec): `/architect team user management`
+- [ ] Build it: `/develop team user management`
+  - [ ] Thread: one write path, suspension enforced from the database, the Users page (AC-1, AC-5, AC-8, AC-10)
+  - [ ] Runner suspension effects and the demo only endpoint (AC-6, AC-9)
+  - [ ] Staff invitations, promote and role changes with safeguards (AC-2, AC-3, AC-4, AC-7)
+  - [ ] Studio people read only, sync script limited to demo accounts, verify and e2e (AC-4, AC-11)
+- [ ] Verify it: `/check verify team user management`
+- [ ] Test it: `/test team user management`
+- [ ] Review it (fresh model): `/check review team user management`
+- [ ] Document it: `/document team user management`
 
 ### 31. What a supplier sees on an order · needs a decision
 Suppliers currently see the customer's price and payment method next to AfriDeal's buying price. As merchant of record, AfriDeal probably shows suppliers only its own purchase order. Confirm with the product owner, then hide the rest.
