@@ -7,6 +7,20 @@
       "runtimeArgs": ["run", "dev"],
       "port": 3100,
       "autoPort": true
+    },
+    {
+      "name": "afrideal-demo",
+      "runtimeExecutable": "npm",
+      "runtimeArgs": ["run", "dev", "--", "-p", "3200"],
+      "port": 3200,
+      "env": { "DB_DRIVER": "json", "CATALOGUE_SOURCE": "json", "PAYMENTS_PROVIDER": "mock" }
+    },
+    {
+      "name": "afrideal-demo-prod",
+      "runtimeExecutable": "npm",
+      "runtimeArgs": ["run", "start", "--", "-p", "3200"],
+      "port": 3200,
+      "env": { "DB_DRIVER": "json", "CATALOGUE_SOURCE": "json" }
     }
   ]
 }

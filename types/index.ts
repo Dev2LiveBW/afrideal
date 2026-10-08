@@ -164,6 +164,7 @@ export interface InventoryRecord {
 // ── Orders, settlement, fulfilment ───────────────────────────────────────────
 
 export type OrderStatus =
+  | 'AWAITING_PAYMENT'
   | 'PENDING'
   | 'PROCESSING'
   | 'IN_TRANSIT'
@@ -171,7 +172,18 @@ export type OrderStatus =
   | 'DISPUTED'
   | 'CANCELLED';
 
-export type PaymentMethod = 'DPO_PAY' | 'ORANGE_MONEY' | 'PAYGATE';
+/**
+ * `EFT` is a bank transfer the buyer makes and finance confirms by hand (spec
+ * 0003). It is a real method a buyer picks, not an internal marker: it is what
+ * lets AfriDeal trade before the card gateway is approved.
+ */
+export type PaymentMethod = 'DPO_PAY' | 'ORANGE_MONEY' | 'PAYGATE' | 'EFT';
+
+/**
+ * Why an order was cancelled. A late payment reopens an `EXPIRED` order but
+ * never one a person cancelled on purpose, so the two must stay distinguishable.
+ */
+export type CancelReason = 'EXPIRED' | 'CUSTOMER' | 'STAFF';
 
 export interface OrderTimelineEntry {
   status: string;
@@ -191,7 +203,16 @@ export interface Order {
   delivery_fee: number;
   total: number;
   payment_method: PaymentMethod;
-  payment_reference: string;
+  /**
+   * The provider's reference for the payment that settled this order. Null
+   * until a payment is confirmed: before spec 0003 this was invented at
+   * checkout, which made every order look paid.
+   */
+  payment_reference: string | null;
+  /** When an unpaid order stops being payable. Derived from the method at checkout. */
+  payment_expires_at: string;
+  /** Set only when `status` is `CANCELLED`. Gates whether a late payment may reopen it. */
+  cancel_reason: CancelReason | null;
   delivery_address: string;
   delivery_city: string;
   placed_at: string;
@@ -237,6 +258,53 @@ export interface SupplierOrder {
   selection_reason: string;
   auto_selected: boolean;
   created_at: string;
+}
+
+// ── Payments (spec 0003) ─────────────────────────────────────────────────────
+
+/**
+ * Who took the money. `MOCK` stands in for a hosted card page while DPO Pay
+ * approval is outstanding, and is refused outright in production.
+ */
+export type PaymentProvider = 'MOCK' | 'DPO_PAY' | 'ORANGE_MONEY' | 'PAYGATE' | 'EFT';
+
+export type PaymentStatus = 'STARTED' | 'CONFIRMED' | 'FAILED';
+
+/**
+ * One attempt to pay for one order.
+ *
+ * An order may collect several of these (a declined card, then a successful
+ * retry) but at most one `CONFIRMED`. The pair `(provider, provider_reference)`
+ * is unique, which is what makes a replayed gateway callback a no op at the
+ * database rather than in a read then write two callbacks can both pass.
+ */
+export interface Payment {
+  id: string;
+  order_id: string;
+  provider: PaymentProvider;
+  /**
+   * The provider's own id for this attempt, and what a callback arrives
+   * carrying. Null only while `STARTED` on a provider that issues it late.
+   */
+  provider_reference: string | null;
+  status: PaymentStatus;
+  /** What we expected to be paid, captured at creation from the order total. */
+  amount: number;
+  /** Whether the amount actually confirmed matched `amount`. False needs a human. */
+  amount_matches: boolean;
+  created_at: string;
+  confirmed_at: string | null;
+  failure_reason: string | null;
+  /** A finance admin's words when they confirmed a bank transfer by hand. */
+  note: string | null;
+}
+
+/** A single platform switch. The first one is `checkout_paused`. */
+export interface Setting {
+  id: string;
+  value: Record<string, unknown>;
+  updated_at: string;
+  updated_by: string;
 }
 
 export type PayableStatus = 'PENDING' | 'SETTLED' | 'CANCELLED' | 'ON_HOLD';

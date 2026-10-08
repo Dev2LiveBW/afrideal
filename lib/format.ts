@@ -132,4 +132,5 @@ export const PAYMENT_LABELS: Record<string, string> = {
   DPO_PAY: 'DPO Pay',
   ORANGE_MONEY: 'Orange Money',
   PAYGATE: 'PayGate',
+  EFT: 'Bank transfer',
 };

@@ -9,6 +9,7 @@ import { EmptyState } from '@/components/brand/Panel';
 import { Swatch } from '@/components/storefront/Swatch';
 import { auth } from '@/lib/auth';
 import { readAll } from '@/lib/db';
+import { allAsDisplayed } from '@/lib/payments/status';
 import { PAYMENT_LABELS, shortDate } from '@/lib/format';
 
 export const metadata: Metadata = { title: 'Your orders' };
@@ -37,11 +38,16 @@ export default async function OrdersPage() {
     );
   }
 
-  const [allOrders, allItems, allImages] = await Promise.all([
+  const [storedOrders, allItems, allImages, payments] = await Promise.all([
     readAll('orders'),
     readAll('order-items'),
     readAll('product-images'),
+    readAll('payments'),
   ]);
+
+  // Spec 0003, AC-5: a buyer must not be shown an order as still payable once its
+  // window has closed.
+  const allOrders = allAsDisplayed(storedOrders, payments);
 
   // One lookup for the whole page rather than a scan per line in the stack.
   const primaryImage = new Map(

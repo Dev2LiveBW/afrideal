@@ -652,14 +652,17 @@ const orderSpecs = [
   ['PROCESSING', 'u007', 3, 'DPO_PAY', 'Gaborone', 'Plot 220, Block 6, Broadhurst', [['p001', 2, 1], ['p002', 3, 2], ['p003', 1, 1]]],
   ['PROCESSING', 'u006', 2, 'ORANGE_MONEY', 'Gaborone', 'Plot 5412, Extension 12', [['p009', 0, 2]]],
   ['PROCESSING', 'u007', 2, 'PAYGATE', 'Maun', 'Plot 3301, Boseja Ward', [['p008', 0, 6]]],
-  ['PENDING', 'u006', 1, 'DPO_PAY', 'Gaborone', 'Plot 5412, Extension 12', [['p005', 1, 1]]],
-  ['PENDING', 'u007', 0, 'ORANGE_MONEY', 'Gaborone', 'Plot 220, Block 6, Broadhurst', [['p010', 1, 1], ['p001', 0, 2]]],
+  ['AWAITING_PAYMENT', 'u006', 1, 'DPO_PAY', 'Gaborone', 'Plot 5412, Extension 12', [['p005', 1, 1]]],
+  ['AWAITING_PAYMENT', 'u007', 0, 'EFT', 'Gaborone', 'Plot 220, Block 6, Broadhurst', [['p010', 1, 1], ['p001', 0, 2]]],
   ['DISPUTED', 'u006', 12, 'PAYGATE', 'Gaborone', 'Plot 5412, Extension 12', [['p005', 0, 2]]],
   ['DISPUTED', 'u007', 9, 'DPO_PAY', 'Francistown', 'Plot 1180, Tati Siding', [['p007', 1, 6]]],
   ['CANCELLED', 'u006', 21, 'ORANGE_MONEY', 'Gaborone', 'Plot 5412, Extension 12', [['p004', 2, 1]]],
 ];
 
 const TIMELINE_BY_STATUS = {
+  // Spec 0003: an unpaid order has been placed and nothing more. It raises no
+  // supplier leg and carries no payment row, which is what AC-2 asserts.
+  AWAITING_PAYMENT: [['AWAITING_PAYMENT', 'Order placed, waiting for payment']],
   PENDING: [['PENDING', 'Order placed']],
   PROCESSING: [['PENDING', 'Order placed'], ['PAID', 'Payment confirmed'], ['PROCESSING', 'Supplier confirmed, preparing goods']],
   IN_TRANSIT: [['PENDING', 'Order placed'], ['PAID', 'Payment confirmed'], ['PROCESSING', 'Supplier confirmed, preparing goods'], ['COLLECTED', 'Collected by runner'], ['IN_TRANSIT', 'Out for delivery']],
@@ -669,6 +672,16 @@ const TIMELINE_BY_STATUS = {
 };
 
 const DELIVERY_FEE = 45;
+
+/**
+ * Paid, but the supplier has not confirmed yet: the state confirmPayment()
+ * leaves every new order in. Under spec 0003 the unpaid orders no longer carry
+ * supplier legs, so without this nothing in the seed would be waiting for a
+ * supplier to confirm, and neither the supplier walkthrough nor E02 would have
+ * an order to act on. o008 includes Naledi's shea butter.
+ */
+const AWAITING_SUPPLIER = new Set(['o008']);
+const TIMELINE_AWAITING_SUPPLIER = [['PENDING', 'Order placed'], ['PAID', 'Payment confirmed'], ['PROCESSING', 'Sourcing from supplier']];
 
 const orders = [];
 const orderItems = [];
@@ -718,7 +731,7 @@ orderSpecs.forEach((spec, index) => {
   const subtotal = routedLines.reduce((sum, { item }) => sum + item.line_total, 0);
   const total = subtotal + DELIVERY_FEE;
 
-  const timeline = (TIMELINE_BY_STATUS[status] ?? []).map(([code, label], i, arr) => ({
+  const timeline = ((AWAITING_SUPPLIER.has(orderId) ? TIMELINE_AWAITING_SUPPLIER : TIMELINE_BY_STATUS[status]) ?? []).map(([code, label], i, arr) => ({
     status: code,
     label,
     at: daysAgo(Math.max(0, placedDaysAgo - Math.round((i / Math.max(1, arr.length - 1)) * Math.min(placedDaysAgo, 5))), 9 + i),
@@ -734,7 +747,15 @@ orderSpecs.forEach((spec, index) => {
     delivery_fee: DELIVERY_FEE,
     total,
     payment_method: payment,
-    payment_reference: `${payment.split('_')[0]}-${String(884210 + index * 37)}`,
+    // Spec 0003: only a confirmed payment gives an order a reference. An unpaid
+    // order has none, which is what stopped every seeded order looking paid.
+    payment_reference:
+      status === 'AWAITING_PAYMENT' ? null : `${payment.split('_')[0]}-${String(884210 + index * 37)}`,
+    // Card and wallet windows are 30 minutes, a bank transfer gets 7 days.
+    payment_expires_at: new Date(
+      new Date(placedAt).getTime() + (payment === 'EFT' ? 7 * 24 * 60 : 30) * 60 * 1000,
+    ).toISOString(),
+    cancel_reason: status === 'CANCELLED' ? 'STAFF' : null,
     delivery_address: address,
     delivery_city: city,
     placed_at: placedAt,
@@ -772,7 +793,14 @@ orderSpecs.forEach((spec, index) => {
     CANCELLED: 'CANCELLED',
   };
 
-  for (const [supplierId, bucket] of bySupplier) {
+  // Spec 0003, AC-2: no supplier order and no payable may exist for an order
+  // that was never paid for. The supplier is told to prepare goods at
+  // confirmation, never at checkout.
+  // A seeded cancellation (o015) was cancelled before it was ever paid, so it
+  // has no legs either.
+  const paidFor = status !== 'AWAITING_PAYMENT' && status !== 'CANCELLED';
+
+  for (const [supplierId, bucket] of paidFor ? bySupplier : []) {
     const supOrderId = `sup${String(supOrderSeq++).padStart(3, '0')}`;
     const supplierSubtotal = bucket.items.reduce((sum, i) => sum + i.supplier_cost * i.qty, 0);
     const gross = bucket.items.reduce((sum, i) => sum + i.line_total, 0);
@@ -781,7 +809,7 @@ orderSpecs.forEach((spec, index) => {
       id: supOrderId,
       order_id: orderId,
       supplier_id: supplierId,
-      status: SUPPLIER_STATUS[status],
+      status: AWAITING_SUPPLIER.has(orderId) ? 'AWAITING_CONFIRMATION' : SUPPLIER_STATUS[status],
       item_ids: bucket.items.map((i) => i.id),
       supplier_subtotal: supplierSubtotal,
       platform_margin: gross - supplierSubtotal,
@@ -1429,6 +1457,44 @@ RFQ_SPECS.forEach((spec, index) => {
   });
 });
 
+// ─── Payments and settings (spec 0003) ───────────────────────────────────────
+
+/**
+ * One confirmed payment per order that was genuinely paid for under the old
+ * model. Orders left at AWAITING_PAYMENT get none, so the AC-2 invariant holds
+ * on seeded data rather than being violated from the first run. A blanket
+ * CONFIRMED stamp would record money that never arrived, in a ledger the
+ * Data Protection Act applies to.
+ */
+let paymentSeq = 1;
+const payments = orders
+  .filter((order) => order.status !== 'AWAITING_PAYMENT' && order.status !== 'CANCELLED')
+  .map((order) => {
+    const confirmedAt = order.timeline.find((entry) => entry.status === 'PAID')?.at ?? order.placed_at;
+    return {
+      id: `pmt${String(paymentSeq++).padStart(3, '0')}`,
+      order_id: order.id,
+      provider: order.payment_method,
+      provider_reference: order.payment_reference,
+      status: 'CONFIRMED',
+      amount: order.total,
+      amount_matches: true,
+      created_at: order.placed_at,
+      confirmed_at: confirmedAt,
+      failure_reason: null,
+      note: null,
+    };
+  });
+
+const settings = [
+  {
+    id: 'checkout_paused',
+    value: { paused: false },
+    updated_at: daysAgo(0, 9),
+    updated_by: 'System',
+  },
+];
+
 // ─── Write ───────────────────────────────────────────────────────────────────
 
 const files = {
@@ -1457,6 +1523,8 @@ const files = {
   brands,
   'product-images': productImages,
   'supplier-users': supplierUsers,
+  payments,
+  settings,
 };
 
 await fs.mkdir(DATA_DIR, { recursive: true });
@@ -1483,7 +1551,19 @@ for (const order of orders) {
   if (order.subtotal + order.delivery_fee !== order.total) problems.push(`${order.id} total does not equal subtotal + delivery`);
 
   const legs = supplierOrders.filter((s) => s.order_id === order.id);
-  if (legs.length === 0) problems.push(`${order.id} has no supplier orders`);
+  // Spec 0003, AC-2: the rule now cuts both ways. A paid order must have its
+  // supplier legs, and an unpaid one must have none.
+  const paidFor = order.status !== 'AWAITING_PAYMENT' && order.status !== 'CANCELLED';
+  if (paidFor && legs.length === 0) problems.push(`${order.id} has no supplier orders`);
+  if (!paidFor && legs.length > 0) {
+    problems.push(`${order.id} was never paid but has ${legs.length} supplier order(s)`);
+  }
+  if (!paidFor && payments.some((entry) => entry.order_id === order.id)) {
+    problems.push(`${order.id} was never paid but has a payment row`);
+  }
+  if (paidFor && !payments.some((entry) => entry.order_id === order.id)) {
+    problems.push(`${order.id} is paid for but has no payment row`);
+  }
   for (const leg of legs) {
     const matching = payables.filter((entry) => entry.supplier_order_id === leg.id);
     if (matching.length !== 1) problems.push(`${leg.id} has ${matching.length} supplier payables, expected exactly 1`);
@@ -1491,7 +1571,9 @@ for (const order of orders) {
 }
 
 const statusCounts = orders.reduce((acc, o) => ({ ...acc, [o.status]: (acc[o.status] ?? 0) + 1 }), {});
-const expected = { DELIVERED: 4, IN_TRANSIT: 3, PROCESSING: 3, PENDING: 2, DISPUTED: 2, CANCELLED: 1 };
+// Spec 0003 turned the two PENDING orders into AWAITING_PAYMENT: they were
+// never paid for, and PENDING now means only the old timeline label.
+const expected = { DELIVERED: 4, IN_TRANSIT: 3, PROCESSING: 3, AWAITING_PAYMENT: 2, DISPUTED: 2, CANCELLED: 1 };
 for (const [status, count] of Object.entries(expected)) {
   if (statusCounts[status] !== count) problems.push(`expected ${count} ${status} orders, got ${statusCounts[status] ?? 0}`);
 }

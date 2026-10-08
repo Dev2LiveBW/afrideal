@@ -5,13 +5,11 @@ import { insert, insertMany, nextId, nextIds, readAll } from '@/lib/db';
 import { EVENTS, audit, notify } from '@/lib/notifications';
 import { resolvePrice } from '@/lib/pricing-tiers';
 import { selectSupplier } from '@/lib/supplier-selection';
-import type {
-  SupplierPayable,
-  Order,
-  OrderItem,
-  OrderTimelineEntry,
-  SupplierOrder,
-} from '@/types';
+import { availablePaymentMethods, startPayment } from '@/lib/payments/adapters';
+import { allAsDisplayed } from '@/lib/payments/status';
+import { checkoutIsPaused } from '@/lib/settings';
+import { paymentExpiresAt } from '@/lib/payments/policy';
+import type { Order, OrderItem, OrderTimelineEntry, Payment } from '@/types';
 
 export const dynamic = 'force-dynamic';
 
@@ -27,7 +25,7 @@ const CheckoutSchema = z.object({
       }),
     )
     .min(1, 'Your cart is empty.'),
-  payment_method: z.enum(['DPO_PAY', 'ORANGE_MONEY', 'PAYGATE']),
+  payment_method: z.enum(['DPO_PAY', 'ORANGE_MONEY', 'PAYGATE', 'EFT']),
   delivery_address: z.string().min(4, 'Enter a delivery address.'),
   delivery_city: z.string().min(2, 'Enter a city.'),
 });
@@ -38,7 +36,10 @@ export const GET = handled(async (request: Request) => {
   const { actor, response } = await guard();
   if (response) return response;
 
-  const orders = await readAll('orders');
+  // Spec 0003, AC-5: the list agrees with the detail screens about what is still
+  // payable, so a closed window shows as cancelled here too.
+  const [storedOrders, payments] = await Promise.all([readAll('orders'), readAll('payments')]);
+  const orders = allAsDisplayed(storedOrders, payments);
   const status = new URL(request.url).searchParams.get('status');
 
   // Customers only ever see their own orders; suppliers see the orders they
@@ -84,6 +85,19 @@ export const POST = handled(async (request: Request) => {
   }
 
   const { lines, payment_method, delivery_address, delivery_city } = parsed.data;
+
+  // Spec 0003, AC-8: checked before any pricing or supplier work, so a pause stops
+  // an order at the door rather than part way through building one.
+  if (await checkoutIsPaused()) {
+    return fail('Checkout is temporarily unavailable. Please try again shortly.', 409);
+  }
+
+  // A method nothing can take money through would leave the order waiting for a
+  // payment that cannot arrive. Checkout only offers the available ones; this is
+  // the guard for anything that posts here directly.
+  if (!availablePaymentMethods().includes(payment_method)) {
+    return fail('That payment method is not available yet. Please pay by bank transfer.', 422);
+  }
 
   const [products, offers, suppliers, bands] = await Promise.all([
     readAll('products'),
@@ -153,9 +167,10 @@ export const POST = handled(async (request: Request) => {
 
   const subtotal = items.reduce((sum, item) => sum + item.line_total, 0);
 
+  // Spec 0003: an order is placed and nothing more. The PAID entry is written by
+  // confirmPayment(), the only thing that knows money actually moved.
   const timeline: OrderTimelineEntry[] = [
-    { status: 'PENDING', label: 'Order placed', at: now },
-    { status: 'PAID', label: 'Payment confirmed', at: now },
+    { status: 'AWAITING_PAYMENT', label: 'Order placed, waiting for payment', at: now },
   ];
 
   // 3 - the customer-facing order. The reference follows the id (the seed
@@ -166,12 +181,16 @@ export const POST = handled(async (request: Request) => {
     reference: `AFD-${24809 + Number.parseInt(orderId.slice(1), 10)}`,
     customer_id: actor.id,
     customer_name: actor.name,
-    status: 'PROCESSING',
+    status: 'AWAITING_PAYMENT',
     subtotal,
     delivery_fee: DELIVERY_FEE,
     total: subtotal + DELIVERY_FEE,
     payment_method,
-    payment_reference: `${payment_method.split('_')[0]}-${Date.now().toString().slice(-6)}`,
+    // Null until a payment confirms. It used to be invented from the clock here,
+    // which is what made every order look paid the moment it was placed.
+    payment_reference: null,
+    payment_expires_at: paymentExpiresAt(now, payment_method),
+    cancel_reason: null,
     delivery_address,
     delivery_city,
     placed_at: now,
@@ -183,81 +202,32 @@ export const POST = handled(async (request: Request) => {
   await insert('orders', order);
   await insertMany('order-items', items);
 
-  // 4 + 5 - one supplier order and one procurement invoice per supplier.
-  const bySupplier = new Map<string, OrderItem[]>();
-  for (const item of items) {
-    bySupplier.set(item.supplier_id, [...(bySupplier.get(item.supplier_id) ?? []), item]);
-  }
+  // Spec 0003: no supplier order and no payable exists yet. The supplier is
+  // asked to prepare goods by confirmPayment(), once money has actually arrived.
+  // Opening the attempt here gives a callback something to match on later.
+  const started = await startPayment(order);
+  const [paymentId] = await nextIds('payments', 'pmt', 1);
 
-  const supplierOrderIds = await nextIds('supplier-orders', 'sup', bySupplier.size);
-  const payableIds = await nextIds('supplier-payables', 'pay', bySupplier.size);
+  const payment: Payment = {
+    id: paymentId,
+    order_id: orderId,
+    provider: started.provider,
+    provider_reference: started.providerReference,
+    status: 'STARTED',
+    amount: order.total,
+    amount_matches: false,
+    created_at: now,
+    confirmed_at: null,
+    failure_reason: null,
+    note: null,
+  };
 
-  const supplierOrders: SupplierOrder[] = [];
-  const payableRecords: SupplierPayable[] = [];
-
-  for (const [supplierId, supplierItems] of bySupplier) {
-    const supplierOrderId = supplierOrderIds[supplierOrders.length];
-    const gross = supplierItems.reduce((sum, item) => sum + item.line_total, 0);
-    const cost = supplierItems.reduce((sum, item) => sum + item.supplier_cost * item.qty, 0);
-
-    const route = selectSupplier(
-      offers.filter((offer) => offer.product_id === supplierItems[0].product_id),
-      suppliers,
-      supplierItems[0].qty,
-    );
-
-    supplierOrders.push({
-      id: supplierOrderId,
-      order_id: orderId,
-      supplier_id: supplierId,
-      status: 'AWAITING_CONFIRMATION',
-      item_ids: supplierItems.map((item) => item.id),
-      supplier_subtotal: cost,
-      platform_margin: gross - cost,
-      selection_reason: route?.reason ?? 'Routed on composite supplier score.',
-      auto_selected: true,
-      created_at: now,
-    });
-
-    payableRecords.push({
-      id: payableIds[payableRecords.length],
-      order_id: orderId,
-      supplier_order_id: supplierOrderId,
-      supplier_id: supplierId,
-      amount: gross,
-      status: 'PENDING',
-      gateway: payment_method,
-      raised_at: now,
-      settled_at: null,
-      cancelled_at: null,
-      terms_days: 7,
-      history: [
-        { from: null, to: 'PENDING', at: now, actor: 'System', note: 'Procurement invoice raised against the order.' },
-      ],
-    });
-  }
-
-  await insertMany('supplier-orders', supplierOrders);
-  await insertMany('supplier-payables', payableRecords);
-
-  // Events. Suppliers get told they have something to confirm.
-  const users = await readAll('users');
-  for (const supplierOrder of supplierOrders) {
-    const owner = users.find((user) => user.supplier_id === supplierOrder.supplier_id);
-    if (owner) {
-      await notify({
-        userId: owner.id,
-        title: 'New order to confirm',
-        body: `${order.reference} needs confirmation within 24 hours.`,
-        kind: 'ORDER',
-      });
-    }
-  }
+  await insert('payments', payment);
 
   await notify({
     userId: actor.id,
-    title: 'Order placed',
-    body: `${order.reference} is confirmed. We are procuring it now and will let you know when it ships.`,
+    title: 'Order placed, waiting for payment',
+    body: `${order.reference} is held for you. We start sourcing as soon as payment is confirmed.`,
     kind: 'ORDER',
   });
 
@@ -267,16 +237,26 @@ export const POST = handled(async (request: Request) => {
     action: EVENTS.ORDER_CREATED,
     entity: 'order',
     entityId: orderId,
-    detail: `${order.reference} placed - ${items.length} line(s) split across ${supplierOrders.length} supplier(s).`,
+    detail: `${order.reference} placed - ${items.length} line(s), awaiting payment by ${payment.provider}.`,
   });
 
+  // Spec 0003: `supplier_orders` and `payables` are gone from this response
+  // because they do not exist yet. They appear once payment confirms, on the
+  // order detail. One `payment` object is what checkout branches on.
   return ok(
     {
       order,
       items,
-      supplier_orders: supplierOrders,
-      payables: payableRecords,
-      events: [EVENTS.ORDER_CREATED, EVENTS.PAYMENT_CONFIRMED, EVENTS.SUPPLIER_ORDER_CREATED],
+      payment: {
+        id: payment.id,
+        provider: payment.provider,
+        // The buyer needs this for a bank transfer: it is what they quote so we
+        // can match their money to this order.
+        reference: payment.provider_reference,
+        redirect_url: started.redirectUrl,
+        instructions: started.instructions,
+      },
+      events: [EVENTS.ORDER_CREATED],
     },
     { status: 201 },
   );

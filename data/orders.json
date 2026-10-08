@@ -10,45 +10,47 @@
     "total": 695,
     "payment_method": "DPO_PAY",
     "payment_reference": "DPO-884210",
+    "payment_expires_at": "2026-09-11T08:09:00.000Z",
+    "cancel_reason": null,
     "delivery_address": "Plot 5412, Extension 12",
     "delivery_city": "Gaborone",
-    "placed_at": "2026-08-24T07:39:00.000Z",
-    "updated_at": "2026-08-29T13:14:00.000Z",
+    "placed_at": "2026-09-11T07:39:00.000Z",
+    "updated_at": "2026-09-16T13:14:00.000Z",
     "timeline": [
       {
         "status": "PENDING",
         "label": "Order placed",
-        "at": "2026-08-24T07:39:00.000Z"
+        "at": "2026-09-11T07:39:00.000Z"
       },
       {
         "status": "PAID",
         "label": "Payment confirmed",
-        "at": "2026-08-25T08:22:00.000Z"
+        "at": "2026-09-12T08:22:00.000Z"
       },
       {
         "status": "PROCESSING",
         "label": "Supplier confirmed, preparing goods",
-        "at": "2026-08-26T09:05:00.000Z"
+        "at": "2026-09-13T09:05:00.000Z"
       },
       {
         "status": "COLLECTED",
         "label": "Collected by runner",
-        "at": "2026-08-27T10:48:00.000Z"
+        "at": "2026-09-14T10:48:00.000Z"
       },
       {
         "status": "IN_TRANSIT",
         "label": "Out for delivery",
-        "at": "2026-08-27T11:48:00.000Z"
+        "at": "2026-09-14T11:48:00.000Z"
       },
       {
         "status": "DELIVERED",
         "label": "Delivered and confirmed by customer",
-        "at": "2026-08-28T12:31:00.000Z"
+        "at": "2026-09-15T12:31:00.000Z"
       },
       {
         "status": "SETTLED",
         "label": "Supplier invoice settled",
-        "at": "2026-08-29T13:14:00.000Z"
+        "at": "2026-09-16T13:14:00.000Z"
       }
     ],
     "internal_notes": ""
@@ -64,45 +66,47 @@
     "total": 183,
     "payment_method": "ORANGE_MONEY",
     "payment_reference": "ORANGE-884247",
+    "payment_expires_at": "2026-09-14T09:18:00.000Z",
+    "cancel_reason": null,
     "delivery_address": "Plot 220, Block 6, Broadhurst",
     "delivery_city": "Gaborone",
-    "placed_at": "2026-08-27T08:48:00.000Z",
-    "updated_at": "2026-09-01T13:23:00.000Z",
+    "placed_at": "2026-09-14T08:48:00.000Z",
+    "updated_at": "2026-09-19T13:23:00.000Z",
     "timeline": [
       {
         "status": "PENDING",
         "label": "Order placed",
-        "at": "2026-08-27T07:48:00.000Z"
+        "at": "2026-09-14T07:48:00.000Z"
       },
       {
         "status": "PAID",
         "label": "Payment confirmed",
-        "at": "2026-08-28T08:31:00.000Z"
+        "at": "2026-09-15T08:31:00.000Z"
       },
       {
         "status": "PROCESSING",
         "label": "Supplier confirmed, preparing goods",
-        "at": "2026-08-29T09:14:00.000Z"
+        "at": "2026-09-16T09:14:00.000Z"
       },
       {
         "status": "COLLECTED",
         "label": "Collected by runner",
-        "at": "2026-08-30T10:57:00.000Z"
+        "at": "2026-09-17T10:57:00.000Z"
       },
       {
         "status": "IN_TRANSIT",
         "label": "Out for delivery",
-        "at": "2026-08-30T11:57:00.000Z"
+        "at": "2026-09-17T11:57:00.000Z"
       },
       {
         "status": "DELIVERED",
         "label": "Delivered and confirmed by customer",
-        "at": "2026-08-31T12:40:00.000Z"
+        "at": "2026-09-18T12:40:00.000Z"
       },
       {
         "status": "SETTLED",
         "label": "Supplier invoice settled",
-        "at": "2026-09-01T13:23:00.000Z"
+        "at": "2026-09-19T13:23:00.000Z"
       }
     ],
     "internal_notes": ""
@@ -118,45 +122,47 @@
     "total": 1568,
     "payment_method": "PAYGATE",
     "payment_reference": "PAYGATE-884284",
+    "payment_expires_at": "2026-09-19T09:53:00.000Z",
+    "cancel_reason": null,
     "delivery_address": "Plot 5412, Extension 12",
     "delivery_city": "Gaborone",
-    "placed_at": "2026-09-01T09:23:00.000Z",
-    "updated_at": "2026-09-06T13:58:00.000Z",
+    "placed_at": "2026-09-19T09:23:00.000Z",
+    "updated_at": "2026-09-24T13:58:00.000Z",
     "timeline": [
       {
         "status": "PENDING",
         "label": "Order placed",
-        "at": "2026-09-01T07:23:00.000Z"
+        "at": "2026-09-19T07:23:00.000Z"
       },
       {
         "status": "PAID",
         "label": "Payment confirmed",
-        "at": "2026-09-02T08:06:00.000Z"
+        "at": "2026-09-20T08:06:00.000Z"
       },
       {
         "status": "PROCESSING",
         "label": "Supplier confirmed, preparing goods",
-        "at": "2026-09-03T09:49:00.000Z"
+        "at": "2026-09-21T09:49:00.000Z"
       },
       {
         "status": "COLLECTED",
         "label": "Collected by runner",
-        "at": "2026-09-04T10:32:00.000Z"
+        "at": "2026-09-22T10:32:00.000Z"
       },
       {
         "status": "IN_TRANSIT",
         "label": "Out for delivery",
-        "at": "2026-09-04T11:32:00.000Z"
+        "at": "2026-09-22T11:32:00.000Z"
       },
       {
         "status": "DELIVERED",
         "label": "Delivered and confirmed by customer",
-        "at": "2026-09-05T12:15:00.000Z"
+        "at": "2026-09-23T12:15:00.000Z"
       },
       {
         "status": "SETTLED",
         "label": "Supplier invoice settled",
-        "at": "2026-09-06T13:58:00.000Z"
+        "at": "2026-09-24T13:58:00.000Z"
       }
     ],
     "internal_notes": ""
@@ -172,45 +178,47 @@
     "total": 1245,
     "payment_method": "DPO_PAY",
     "payment_reference": "DPO-884321",
+    "payment_expires_at": "2026-09-23T10:45:00.000Z",
+    "cancel_reason": null,
     "delivery_address": "Plot 1180, Tati Siding",
     "delivery_city": "Francistown",
-    "placed_at": "2026-09-05T10:15:00.000Z",
-    "updated_at": "2026-09-10T13:50:00.000Z",
+    "placed_at": "2026-09-23T10:15:00.000Z",
+    "updated_at": "2026-09-28T13:50:00.000Z",
     "timeline": [
       {
         "status": "PENDING",
         "label": "Order placed",
-        "at": "2026-09-05T07:15:00.000Z"
+        "at": "2026-09-23T07:15:00.000Z"
       },
       {
         "status": "PAID",
         "label": "Payment confirmed",
-        "at": "2026-09-06T08:58:00.000Z"
+        "at": "2026-09-24T08:58:00.000Z"
       },
       {
         "status": "PROCESSING",
         "label": "Supplier confirmed, preparing goods",
-        "at": "2026-09-07T09:41:00.000Z"
+        "at": "2026-09-25T09:41:00.000Z"
       },
       {
         "status": "COLLECTED",
         "label": "Collected by runner",
-        "at": "2026-09-08T10:24:00.000Z"
+        "at": "2026-09-26T10:24:00.000Z"
       },
       {
         "status": "IN_TRANSIT",
         "label": "Out for delivery",
-        "at": "2026-09-08T11:24:00.000Z"
+        "at": "2026-09-26T11:24:00.000Z"
       },
       {
         "status": "DELIVERED",
         "label": "Delivered and confirmed by customer",
-        "at": "2026-09-09T12:07:00.000Z"
+        "at": "2026-09-27T12:07:00.000Z"
       },
       {
         "status": "SETTLED",
         "label": "Supplier invoice settled",
-        "at": "2026-09-10T13:50:00.000Z"
+        "at": "2026-09-28T13:50:00.000Z"
       }
     ],
     "internal_notes": ""
@@ -226,35 +234,37 @@
     "total": 510,
     "payment_method": "ORANGE_MONEY",
     "payment_reference": "ORANGE-884358",
+    "payment_expires_at": "2026-10-02T12:12:00.000Z",
+    "cancel_reason": null,
     "delivery_address": "Plot 5412, Extension 12",
     "delivery_city": "Gaborone",
-    "placed_at": "2026-09-14T11:42:00.000Z",
-    "updated_at": "2026-09-19T11:17:00.000Z",
+    "placed_at": "2026-10-02T11:42:00.000Z",
+    "updated_at": "2026-10-07T11:17:00.000Z",
     "timeline": [
       {
         "status": "PENDING",
         "label": "Order placed",
-        "at": "2026-09-14T07:42:00.000Z"
+        "at": "2026-10-02T07:42:00.000Z"
       },
       {
         "status": "PAID",
         "label": "Payment confirmed",
-        "at": "2026-09-15T08:25:00.000Z"
+        "at": "2026-10-03T08:25:00.000Z"
       },
       {
         "status": "PROCESSING",
         "label": "Supplier confirmed, preparing goods",
-        "at": "2026-09-17T09:51:00.000Z"
+        "at": "2026-10-05T09:51:00.000Z"
       },
       {
         "status": "COLLECTED",
         "label": "Collected by runner",
-        "at": "2026-09-18T10:34:00.000Z"
+        "at": "2026-10-06T10:34:00.000Z"
       },
       {
         "status": "IN_TRANSIT",
         "label": "Out for delivery",
-        "at": "2026-09-19T11:17:00.000Z"
+        "at": "2026-10-07T11:17:00.000Z"
       }
     ],
     "internal_notes": ""
@@ -270,35 +280,37 @@
     "total": 4661,
     "payment_method": "DPO_PAY",
     "payment_reference": "DPO-884395",
+    "payment_expires_at": "2026-10-03T12:55:00.000Z",
+    "cancel_reason": null,
     "delivery_address": "Plot 220, Block 6, Broadhurst",
     "delivery_city": "Gaborone",
-    "placed_at": "2026-09-15T12:25:00.000Z",
-    "updated_at": "2026-09-20T11:00:00.000Z",
+    "placed_at": "2026-10-03T12:25:00.000Z",
+    "updated_at": "2026-10-08T11:00:00.000Z",
     "timeline": [
       {
         "status": "PENDING",
         "label": "Order placed",
-        "at": "2026-09-15T07:25:00.000Z"
+        "at": "2026-10-03T07:25:00.000Z"
       },
       {
         "status": "PAID",
         "label": "Payment confirmed",
-        "at": "2026-09-16T08:08:00.000Z"
+        "at": "2026-10-04T08:08:00.000Z"
       },
       {
         "status": "PROCESSING",
         "label": "Supplier confirmed, preparing goods",
-        "at": "2026-09-18T09:34:00.000Z"
+        "at": "2026-10-06T09:34:00.000Z"
       },
       {
         "status": "COLLECTED",
         "label": "Collected by runner",
-        "at": "2026-09-19T10:17:00.000Z"
+        "at": "2026-10-07T10:17:00.000Z"
       },
       {
         "status": "IN_TRANSIT",
         "label": "Out for delivery",
-        "at": "2026-09-20T11:00:00.000Z"
+        "at": "2026-10-08T11:00:00.000Z"
       }
     ],
     "internal_notes": ""
@@ -314,35 +326,37 @@
     "total": 1484,
     "payment_method": "PAYGATE",
     "payment_reference": "PAYGATE-884432",
+    "payment_expires_at": "2026-10-04T13:38:00.000Z",
+    "cancel_reason": null,
     "delivery_address": "Plot 88, Peleng Ward",
     "delivery_city": "Lobatse",
-    "placed_at": "2026-09-16T13:08:00.000Z",
-    "updated_at": "2026-09-20T11:00:00.000Z",
+    "placed_at": "2026-10-04T13:08:00.000Z",
+    "updated_at": "2026-10-08T11:00:00.000Z",
     "timeline": [
       {
         "status": "PENDING",
         "label": "Order placed",
-        "at": "2026-09-16T07:08:00.000Z"
+        "at": "2026-10-04T07:08:00.000Z"
       },
       {
         "status": "PAID",
         "label": "Payment confirmed",
-        "at": "2026-09-17T08:51:00.000Z"
+        "at": "2026-10-05T08:51:00.000Z"
       },
       {
         "status": "PROCESSING",
         "label": "Supplier confirmed, preparing goods",
-        "at": "2026-09-18T09:34:00.000Z"
+        "at": "2026-10-06T09:34:00.000Z"
       },
       {
         "status": "COLLECTED",
         "label": "Collected by runner",
-        "at": "2026-09-19T10:17:00.000Z"
+        "at": "2026-10-07T10:17:00.000Z"
       },
       {
         "status": "IN_TRANSIT",
         "label": "Out for delivery",
-        "at": "2026-09-20T11:00:00.000Z"
+        "at": "2026-10-08T11:00:00.000Z"
       }
     ],
     "internal_notes": ""
@@ -358,25 +372,27 @@
     "total": 528,
     "payment_method": "DPO_PAY",
     "payment_reference": "DPO-884469",
+    "payment_expires_at": "2026-10-05T15:21:00.000Z",
+    "cancel_reason": null,
     "delivery_address": "Plot 220, Block 6, Broadhurst",
     "delivery_city": "Gaborone",
-    "placed_at": "2026-09-17T14:51:00.000Z",
-    "updated_at": "2026-09-20T09:00:00.000Z",
+    "placed_at": "2026-10-05T14:51:00.000Z",
+    "updated_at": "2026-10-08T09:00:00.000Z",
     "timeline": [
       {
         "status": "PENDING",
         "label": "Order placed",
-        "at": "2026-09-17T07:51:00.000Z"
+        "at": "2026-10-05T07:51:00.000Z"
       },
       {
         "status": "PAID",
         "label": "Payment confirmed",
-        "at": "2026-09-19T08:17:00.000Z"
+        "at": "2026-10-07T08:17:00.000Z"
       },
       {
         "status": "PROCESSING",
-        "label": "Supplier confirmed, preparing goods",
-        "at": "2026-09-20T09:00:00.000Z"
+        "label": "Sourcing from supplier",
+        "at": "2026-10-08T09:00:00.000Z"
       }
     ],
     "internal_notes": ""
@@ -392,25 +408,27 @@
     "total": 1521,
     "payment_method": "ORANGE_MONEY",
     "payment_reference": "ORANGE-884506",
+    "payment_expires_at": "2026-10-06T08:04:00.000Z",
+    "cancel_reason": null,
     "delivery_address": "Plot 5412, Extension 12",
     "delivery_city": "Gaborone",
-    "placed_at": "2026-09-18T07:34:00.000Z",
-    "updated_at": "2026-09-20T09:00:00.000Z",
+    "placed_at": "2026-10-06T07:34:00.000Z",
+    "updated_at": "2026-10-08T09:00:00.000Z",
     "timeline": [
       {
         "status": "PENDING",
         "label": "Order placed",
-        "at": "2026-09-18T07:34:00.000Z"
+        "at": "2026-10-06T07:34:00.000Z"
       },
       {
         "status": "PAID",
         "label": "Payment confirmed",
-        "at": "2026-09-19T08:17:00.000Z"
+        "at": "2026-10-07T08:17:00.000Z"
       },
       {
         "status": "PROCESSING",
         "label": "Supplier confirmed, preparing goods",
-        "at": "2026-09-20T09:00:00.000Z"
+        "at": "2026-10-08T09:00:00.000Z"
       }
     ],
     "internal_notes": ""
@@ -426,25 +444,27 @@
     "total": 969,
     "payment_method": "PAYGATE",
     "payment_reference": "PAYGATE-884543",
+    "payment_expires_at": "2026-10-06T09:04:00.000Z",
+    "cancel_reason": null,
     "delivery_address": "Plot 3301, Boseja Ward",
     "delivery_city": "Maun",
-    "placed_at": "2026-09-18T08:34:00.000Z",
-    "updated_at": "2026-09-20T09:00:00.000Z",
+    "placed_at": "2026-10-06T08:34:00.000Z",
+    "updated_at": "2026-10-08T09:00:00.000Z",
     "timeline": [
       {
         "status": "PENDING",
         "label": "Order placed",
-        "at": "2026-09-18T07:34:00.000Z"
+        "at": "2026-10-06T07:34:00.000Z"
       },
       {
         "status": "PAID",
         "label": "Payment confirmed",
-        "at": "2026-09-19T08:17:00.000Z"
+        "at": "2026-10-07T08:17:00.000Z"
       },
       {
         "status": "PROCESSING",
         "label": "Supplier confirmed, preparing goods",
-        "at": "2026-09-20T09:00:00.000Z"
+        "at": "2026-10-08T09:00:00.000Z"
       }
     ],
     "internal_notes": ""
@@ -454,21 +474,23 @@
     "reference": "AFD-24820",
     "customer_id": "u006",
     "customer_name": "Thabo Modise",
-    "status": "PENDING",
+    "status": "AWAITING_PAYMENT",
     "subtotal": 879,
     "delivery_fee": 45,
     "total": 924,
     "payment_method": "DPO_PAY",
-    "payment_reference": "DPO-884580",
+    "payment_reference": null,
+    "payment_expires_at": "2026-10-07T09:47:00.000Z",
+    "cancel_reason": null,
     "delivery_address": "Plot 5412, Extension 12",
     "delivery_city": "Gaborone",
-    "placed_at": "2026-09-19T09:17:00.000Z",
-    "updated_at": "2026-09-19T07:17:00.000Z",
+    "placed_at": "2026-10-07T09:17:00.000Z",
+    "updated_at": "2026-10-07T07:17:00.000Z",
     "timeline": [
       {
-        "status": "PENDING",
-        "label": "Order placed",
-        "at": "2026-09-19T07:17:00.000Z"
+        "status": "AWAITING_PAYMENT",
+        "label": "Order placed, waiting for payment",
+        "at": "2026-10-07T07:17:00.000Z"
       }
     ],
     "internal_notes": ""
@@ -478,21 +500,23 @@
     "reference": "AFD-24821",
     "customer_id": "u007",
     "customer_name": "Kefilwe Dithebe",
-    "status": "PENDING",
+    "status": "AWAITING_PAYMENT",
     "subtotal": 584,
     "delivery_fee": 45,
     "total": 629,
-    "payment_method": "ORANGE_MONEY",
-    "payment_reference": "ORANGE-884617",
+    "payment_method": "EFT",
+    "payment_reference": null,
+    "payment_expires_at": "2026-10-15T10:00:00.000Z",
+    "cancel_reason": null,
     "delivery_address": "Plot 220, Block 6, Broadhurst",
     "delivery_city": "Gaborone",
-    "placed_at": "2026-09-20T10:00:00.000Z",
-    "updated_at": "2026-09-20T07:00:00.000Z",
+    "placed_at": "2026-10-08T10:00:00.000Z",
+    "updated_at": "2026-10-08T07:00:00.000Z",
     "timeline": [
       {
-        "status": "PENDING",
-        "label": "Order placed",
-        "at": "2026-09-20T07:00:00.000Z"
+        "status": "AWAITING_PAYMENT",
+        "label": "Order placed, waiting for payment",
+        "at": "2026-10-08T07:00:00.000Z"
       }
     ],
     "internal_notes": ""
@@ -508,35 +532,37 @@
     "total": 1803,
     "payment_method": "PAYGATE",
     "payment_reference": "PAYGATE-884654",
+    "payment_expires_at": "2026-09-26T11:54:00.000Z",
+    "cancel_reason": null,
     "delivery_address": "Plot 5412, Extension 12",
     "delivery_city": "Gaborone",
-    "placed_at": "2026-09-08T11:24:00.000Z",
-    "updated_at": "2026-09-13T11:59:00.000Z",
+    "placed_at": "2026-09-26T11:24:00.000Z",
+    "updated_at": "2026-10-01T11:59:00.000Z",
     "timeline": [
       {
         "status": "PENDING",
         "label": "Order placed",
-        "at": "2026-09-08T07:24:00.000Z"
+        "at": "2026-09-26T07:24:00.000Z"
       },
       {
         "status": "PAID",
         "label": "Payment confirmed",
-        "at": "2026-09-09T08:07:00.000Z"
+        "at": "2026-09-27T08:07:00.000Z"
       },
       {
         "status": "PROCESSING",
         "label": "Supplier confirmed, preparing goods",
-        "at": "2026-09-11T09:33:00.000Z"
+        "at": "2026-09-29T09:33:00.000Z"
       },
       {
         "status": "IN_TRANSIT",
         "label": "Out for delivery",
-        "at": "2026-09-12T10:16:00.000Z"
+        "at": "2026-09-30T10:16:00.000Z"
       },
       {
         "status": "DISPUTED",
         "label": "Customer raised a claim — under review",
-        "at": "2026-09-13T11:59:00.000Z"
+        "at": "2026-10-01T11:59:00.000Z"
       }
     ],
     "internal_notes": "Customer contacted support directly before raising the dispute. Evidence photos attached to the claim."
@@ -552,35 +578,37 @@
     "total": 2535,
     "payment_method": "DPO_PAY",
     "payment_reference": "DPO-884691",
+    "payment_expires_at": "2026-09-29T13:03:00.000Z",
+    "cancel_reason": null,
     "delivery_address": "Plot 1180, Tati Siding",
     "delivery_city": "Francistown",
-    "placed_at": "2026-09-11T12:33:00.000Z",
-    "updated_at": "2026-09-16T11:08:00.000Z",
+    "placed_at": "2026-09-29T12:33:00.000Z",
+    "updated_at": "2026-10-04T11:08:00.000Z",
     "timeline": [
       {
         "status": "PENDING",
         "label": "Order placed",
-        "at": "2026-09-11T07:33:00.000Z"
+        "at": "2026-09-29T07:33:00.000Z"
       },
       {
         "status": "PAID",
         "label": "Payment confirmed",
-        "at": "2026-09-12T08:16:00.000Z"
+        "at": "2026-09-30T08:16:00.000Z"
       },
       {
         "status": "PROCESSING",
         "label": "Supplier confirmed, preparing goods",
-        "at": "2026-09-14T09:42:00.000Z"
+        "at": "2026-10-02T09:42:00.000Z"
       },
       {
         "status": "IN_TRANSIT",
         "label": "Out for delivery",
-        "at": "2026-09-15T10:25:00.000Z"
+        "at": "2026-10-03T10:25:00.000Z"
       },
       {
         "status": "DISPUTED",
         "label": "Customer raised a claim — under review",
-        "at": "2026-09-16T11:08:00.000Z"
+        "at": "2026-10-04T11:08:00.000Z"
       }
     ],
     "internal_notes": "Customer contacted support directly before raising the dispute. Evidence photos attached to the claim."
@@ -596,20 +624,22 @@
     "total": 689,
     "payment_method": "ORANGE_MONEY",
     "payment_reference": "ORANGE-884728",
+    "payment_expires_at": "2026-09-17T14:27:00.000Z",
+    "cancel_reason": "STAFF",
     "delivery_address": "Plot 5412, Extension 12",
     "delivery_city": "Gaborone",
-    "placed_at": "2026-08-30T13:57:00.000Z",
-    "updated_at": "2026-09-04T08:32:00.000Z",
+    "placed_at": "2026-09-17T13:57:00.000Z",
+    "updated_at": "2026-09-22T08:32:00.000Z",
     "timeline": [
       {
         "status": "PENDING",
         "label": "Order placed",
-        "at": "2026-08-30T07:57:00.000Z"
+        "at": "2026-09-17T07:57:00.000Z"
       },
       {
         "status": "CANCELLED",
         "label": "Cancelled before payment confirmation",
-        "at": "2026-09-04T08:32:00.000Z"
+        "at": "2026-09-22T08:32:00.000Z"
       }
     ],
     "internal_notes": ""

@@ -1,5 +1,6 @@
 import { guard, handled, ok } from '@/lib/api';
 import { readAll } from '@/lib/db';
+import { billableOnly, effectiveOrderStatus } from '@/lib/payments/status';
 import { summarise } from '@/lib/payables';
 
 export const dynamic = 'force-dynamic';
@@ -28,19 +29,23 @@ export const GET = handled(async (request: Request) => {
   const period = new URL(request.url).searchParams.get('period') ?? 'MTD';
   const days = period === 'YTD' ? 365 : period === 'QTD' ? 90 : 30;
 
-  const [orders, items, suppliers, payableRecords, settlements] = await Promise.all([
+  const [orders, items, suppliers, payableRecords, settlements, payments] = await Promise.all([
     readAll('orders'),
     readAll('order-items'),
     readAll('suppliers'),
     readAll('supplier-payables'),
     readAll('settlements'),
+    readAll('payments'),
   ]);
 
   const since = new Date();
   since.setDate(since.getDate() - days);
 
   const inPeriod = orders.filter((order) => new Date(order.placed_at) >= since);
-  const billable = inPeriod.filter((order) => order.status !== 'CANCELLED');
+  // Spec 0003: an unpaid or expired order is not revenue. It used to be counted
+  // from the moment the basket was submitted, which inflated GMV, margin and the
+  // average order value until somebody cancelled it by hand.
+  const billable = billableOnly(inPeriod, payments);
 
   const periodGmv = billable.reduce((sum, order) => sum + order.total, 0);
 
@@ -88,7 +93,7 @@ export const GET = handled(async (request: Request) => {
     .filter((record) => record.status === 'ON_HOLD')
     .reduce((sum, record) => sum + record.amount, 0);
   const cancelled = inPeriod
-    .filter((order) => order.status === 'CANCELLED')
+    .filter((order) => effectiveOrderStatus(order, payments) === 'CANCELLED')
     .reduce((sum, order) => sum + order.total, 0);
 
   const exclusions = [

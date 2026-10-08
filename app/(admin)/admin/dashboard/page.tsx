@@ -17,6 +17,7 @@ import { ConsoleTopbar } from '@/components/layout/ConsoleTopbar';
 import { GMVChart, RevenueDonut } from '@/components/charts/Charts';
 import { auth } from '@/lib/auth';
 import { readAll } from '@/lib/db';
+import { billableOnly, effectiveOrderStatus } from '@/lib/payments/status';
 import { PAYMENT_LABELS, shortDate } from '@/lib/format';
 import { getNotifications } from '@/lib/queries';
 import type { OrderStatus } from '@/types';
@@ -25,7 +26,15 @@ export const dynamic = 'force-dynamic';
 
 const COMMISSION_RATE = 0.12;
 const REVENUE_SHARE_RATE = 0.05;
-const ACTIVE_STATUSES: OrderStatus[] = ['PENDING', 'PROCESSING', 'IN_TRANSIT'];
+/**
+ * Orders with fulfilment work in flight.
+ *
+ * Spec 0003 dropped PENDING, which no order is born into any more. AWAITING_PAYMENT
+ * is deliberately absent: an unpaid order has no supplier leg, so there is no work to
+ * do on it, and counting it would inflate this the way it inflated revenue. Unpaid
+ * orders have their own queue on the payables screen.
+ */
+const ACTIVE_STATUSES: OrderStatus[] = ['PROCESSING', 'IN_TRANSIT'];
 
 const SYSTEM_HEALTH = [
   { name: 'DPO Pay', detail: 'Card payment gateway', latency: '184ms' },
@@ -36,13 +45,14 @@ const SYSTEM_HEALTH = [
 ] as const;
 
 export default async function AdminDashboardPage() {
-  const [session, orders, items, suppliers, payableRecords, disputes] = await Promise.all([
+  const [session, orders, items, suppliers, payableRecords, disputes, payments] = await Promise.all([
     auth(),
     readAll('orders'),
     readAll('order-items'),
     readAll('suppliers'),
     readAll('supplier-payables'),
     readAll('disputes'),
+    readAll('payments'),
   ]);
 
   const notifications = session?.user ? await getNotifications(session.user.id) : [];
@@ -51,7 +61,10 @@ export default async function AdminDashboardPage() {
   since.setDate(since.getDate() - 30);
 
   const inPeriod = orders.filter((order) => new Date(order.placed_at) >= since);
-  const billable = inPeriod.filter((order) => order.status !== 'CANCELLED');
+  // Spec 0003: an unpaid or expired order is not revenue. It used to be counted
+  // from the moment the basket was submitted, which inflated GMV, margin and the
+  // average order value until somebody cancelled it by hand.
+  const billable = billableOnly(inPeriod, payments);
   const periodGmv = billable.reduce((sum, order) => sum + order.total, 0);
   const lifetimeGmv = suppliers.reduce((sum, supplier) => sum + supplier.total_gmv, 0);
 
@@ -74,7 +87,7 @@ export default async function AdminDashboardPage() {
     .filter((record) => record.status === 'ON_HOLD')
     .reduce((sum, record) => sum + record.amount, 0);
   const cancelledTotal = inPeriod
-    .filter((order) => order.status === 'CANCELLED')
+    .filter((order) => effectiveOrderStatus(order, payments) === 'CANCELLED')
     .reduce((sum, order) => sum + order.total, 0);
 
   const exclusions = [

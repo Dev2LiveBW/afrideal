@@ -1,11 +1,13 @@
 import 'server-only';
 
 import { readAll } from '@/lib/db';
+import { asDisplayed } from '@/lib/payments/status';
 import { rankOffers } from '@/lib/supplier-selection';
 import type {
   SupplierPayable,
   Order,
   OrderItem,
+  Payment,
   Product,
   SelectionResult,
   Supplier,
@@ -25,19 +27,33 @@ export interface OrderDetail {
   items: OrderItem[];
   legs: (SupplierOrder & { supplier: Supplier | null; items: OrderItem[]; payable: SupplierPayable | null })[];
   payables: SupplierPayable[];
+  /**
+   * Every attempt to pay for this order, newest first (spec 0003).
+   *
+   * Part of an order's detail now rather than a separate lookup: a screen showing
+   * an unpaid order has to tell the buyer which reference to quote, and whether
+   * their last attempt failed.
+   */
+  payments: Payment[];
 }
 
 export async function getOrderDetail(orderId: string): Promise<OrderDetail | null> {
-  const [orders, items, legs, payableRecords, suppliers] = await Promise.all([
+  const [orders, items, legs, payableRecords, suppliers, payments] = await Promise.all([
     readAll('orders'),
     readAll('order-items'),
     readAll('supplier-orders'),
     readAll('supplier-payables'),
     readAll('suppliers'),
+    readAll('payments'),
   ]);
 
-  const order = orders.find((candidate) => candidate.id === orderId);
-  if (!order) return null;
+  const stored = orders.find((candidate) => candidate.id === orderId);
+  if (!stored) return null;
+
+  // Spec 0003, AC-5: an unpaid order past its deadline reads as cancelled before
+  // anything has written that down. Applied here so the three screens using this
+  // read model all agree, and so no GET has to become a writer.
+  const order = asDisplayed(stored, payments);
 
   const orderItems = items.filter((item) => item.order_id === orderId);
   const orderPayables = payableRecords.filter((record) => record.order_id === orderId);
@@ -46,6 +62,9 @@ export async function getOrderDetail(orderId: string): Promise<OrderDetail | nul
     order,
     items: orderItems,
     payables: orderPayables,
+    payments: payments
+      .filter((row) => row.order_id === orderId)
+      .sort((a, b) => b.created_at.localeCompare(a.created_at)),
     legs: legs
       .filter((leg) => leg.order_id === orderId)
       .map((leg) => ({

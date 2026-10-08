@@ -19,6 +19,7 @@ import type {
   MarginRule,
   Order,
   OrderItem,
+  Payment,
   PricingRule,
   Product,
   ProductImage,
@@ -26,6 +27,7 @@ import type {
   RfqResponse,
   Runner,
   RunnerRequest,
+  Setting,
   Settlement,
   Shipment,
   Supplier,
@@ -103,6 +105,11 @@ export interface Schema {
   brands: Brand;
   'product-images': ProductImage;
   'supplier-users': SupplierUser;
+
+  // Payment states (spec 0003). `payments` records every attempt to pay for an
+  // order; `settings` holds platform switches, starting with `checkout_paused`.
+  payments: Payment;
+  settings: Setting;
 }
 
 export type Collection = keyof Schema;

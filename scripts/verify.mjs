@@ -13,6 +13,8 @@
  * and sent as a bearer token. No browser, no bot detection, no cookies to
  * juggle - and the same middleware and `auth()` the app runs in production.
  */
+import { createHmac } from 'node:crypto';
+
 import nextEnv from '@next/env';
 import { createClerkClient } from '@clerk/backend';
 
@@ -105,6 +107,39 @@ async function json(jar, path, init) {
   const response = await request(jar, path, init);
   const body = await response.json().catch(() => null);
   return { status: response.status, body };
+}
+
+// ── Spec 0003: confirming a payment the way a gateway does ───────────────────
+//
+// Pays through the real signed callback rather than reaching into the database,
+// so these checks exercise the same path DPO Pay will use. The secret mirrors
+// lib/payments/signature.ts, which falls back to a dev value outside production
+// so nobody has to put a secret in .env.local to run this.
+const MOCK_SECRET = process.env.PAYMENT_SECRET_MOCK ?? 'afrideal-dev-mock-secret';
+
+async function payCallback(orderId, attempt, options = {}) {
+  const body = JSON.stringify({
+    reference: attempt?.provider_reference ?? attempt?.reference ?? null,
+    status: options.status ?? 'CONFIRMED',
+    amount: options.amount,
+    currency: 'BWP',
+    occurred_at: new Date().toISOString(),
+    ...(options.reason ? { reason: options.reason } : {}),
+  });
+
+  const headers = { 'Content-Type': 'application/json' };
+  if (options.sign !== false) {
+    headers['x-afrideal-signature'] =
+      options.signature ?? createHmac('sha256', MOCK_SECRET).update(body, 'utf8').digest('hex');
+  }
+
+  const response = await fetch(`${BASE}/api/payments/${attempt?.provider ?? 'MOCK'}/callback`, {
+    method: 'POST',
+    headers,
+    body,
+  });
+
+  return { status: response.status, body: await response.json().catch(() => null) };
 }
 
 // ── 1. Every seeded login works and carries the right role ───────────────────
@@ -382,27 +417,27 @@ section('9. Checkout — the order split engine');
   if (result?.order) {
     check('one customer-facing order', result.order.id != null);
     check('two line items', result.items?.length === 2, `got ${result.items?.length}`);
+    // Spec 0003: checkout no longer raises supplier legs or payables, and the
+    // order is not paid. Those assertions moved to the confirmation path; what
+    // checkout must prove now is that none of it happened yet.
     check(
-      'split into two supplier orders',
-      result.supplier_orders?.length === 2,
-      `got ${result.supplier_orders?.length}`,
+      'order starts awaiting payment',
+      result.order.status === 'AWAITING_PAYMENT',
+      `got ${result.order.status}`,
     );
-    check(
-      'one supplier invoice per supplier order',
-      result.payables?.length === result.supplier_orders?.length,
-      `${result.payables?.length} invoices vs ${result.supplier_orders?.length} legs`,
-    );
-    check('every supplier invoice starts PENDING', result.payables?.every((e) => e.status === 'PENDING'));
+    check('order carries a payment deadline', typeof result.order.payment_expires_at === 'string');
+    check('no payment reference before payment', result.order.payment_reference === null);
+    check('a payment attempt was opened', result.payment?.id != null, JSON.stringify(result.payment));
+    check('no supplier order exists yet', result.supplier_orders === undefined);
+    check('no supplier invoice exists yet', result.payables === undefined);
+
+    // The database-level AC-2 assertion needs a staff session and the payAs()
+    // helper, so it lands with the confirmation checks.
 
     const lineSum = result.items.reduce((s, i) => s + i.line_total, 0);
     check('subtotal equals the sum of its lines', result.order.subtotal === lineSum,
       `${result.order.subtotal} vs ${lineSum}`);
     check('total = subtotal + delivery', result.order.total === result.order.subtotal + result.order.delivery_fee);
-
-    const payableSum = result.payables.reduce((s, e) => s + e.amount, 0);
-    check('supplier invoices sum to the order subtotal', payableSum === lineSum, `${payableSum} vs ${lineSum}`);
-
-    check('emits the three documented events', result.events?.length === 3, JSON.stringify(result.events));
     check('order belongs to the buyer', result.order.customer_id === session.user.id);
 
     const after = (await json(jar, '/api/orders')).body?.length ?? 0;
@@ -419,6 +454,126 @@ section('9. Checkout — the order split engine');
     );
   }
 
+  // ── Spec 0003: the confirmation path ───────────────────────────────────────
+  // Everything above proves an order starts unpaid. These prove it can become
+  // paid, and only through a signed callback.
+  if (result?.order) {
+    const orderId = result.order.id;
+    const attempt = result.payment;
+
+    const staff = sessions['ops@afrideal.co.bw'].jar;
+    const before2 = (await json(staff, `/api/orders/${orderId}`)).body;
+    check(
+      'AC-2: an unpaid order has no supplier leg in the database',
+      Array.isArray(before2?.legs) && before2.legs.length === 0,
+      `legs=${JSON.stringify(before2?.legs)}`,
+    );
+    check(
+      'AC-2: an unpaid order has no payable in the database',
+      Array.isArray(before2?.payables) && before2.payables.length === 0,
+      `payables=${JSON.stringify(before2?.payables)}`,
+    );
+
+    const unsigned = await payCallback(orderId, attempt, { sign: false, amount: result.order.total });
+    check('AC-6: an unsigned callback is refused with 401', unsigned.status === 401, `got ${unsigned.status}`);
+
+    const stillUnpaid = (await json(jar, `/api/orders/${orderId}`)).body?.order?.status;
+    check('an unsigned callback changed nothing', stillUnpaid === 'AWAITING_PAYMENT', `got ${stillUnpaid}`);
+
+    const tampered = await payCallback(orderId, attempt, { signature: 'f'.repeat(64), amount: result.order.total });
+    check('a wrong signature is refused with 401', tampered.status === 401, `got ${tampered.status}`);
+
+    const confirmed = await payCallback(orderId, attempt, { amount: result.order.total });
+    check('AC-3: a signed callback confirms the payment', confirmed.status === 200, `got ${confirmed.status}`);
+    check('the callback reports the order processing', confirmed.body?.order_status === 'PROCESSING',
+      `got ${confirmed.body?.order_status}`);
+    check('it was not treated as a replay', confirmed.body?.replayed === false);
+    check('the amount matched the order total', confirmed.body?.amount_matches === true);
+
+    const detail = (await json(staff, `/api/orders/${orderId}`)).body;
+    check('AC-3: supplier legs now exist', (detail?.legs?.length ?? 0) > 0,
+      `${detail?.legs?.length ?? 0} leg(s)`);
+    check('AC-3: one payable per supplier leg',
+      detail?.payables?.length === detail?.legs?.length,
+      `${detail?.payables?.length} payable(s) vs ${detail?.legs?.length} leg(s)`);
+    check('the order now carries a payment reference', typeof detail?.order?.payment_reference === 'string');
+
+    // AC-4: the same callback again must add nothing.
+    const legCount = detail?.legs?.length ?? 0;
+    const payableCount = detail?.payables?.length ?? 0;
+    const replay = await payCallback(orderId, attempt, { amount: result.order.total });
+    check('AC-4: a replayed callback still answers 200', replay.status === 200, `got ${replay.status}`);
+    check('AC-4: the replay is recognised as one', replay.body?.replayed === true);
+
+    const afterReplay = (await json(staff, `/api/orders/${orderId}`)).body;
+    check('AC-4: the replay raised no extra supplier leg',
+      afterReplay?.legs?.length === legCount,
+      `${afterReplay?.legs?.length} vs ${legCount}`);
+    check('AC-4: the replay raised no extra payable',
+      afterReplay?.payables?.length === payableCount,
+      `${afterReplay?.payables?.length} vs ${payableCount}`);
+
+    const paidAgain = await json(jar, `/api/orders/${orderId}/payments`, { method: 'POST' });
+    check('a paid order cannot open another attempt', paidAgain.status === 409, `got ${paidAgain.status}`);
+
+    // Regression, /debug 2026-10-07: raiseSupplierLegs used to read the existing
+    // legs, decide, and insert several awaits later, so two overlapping callbacks
+    // both read "no legs" and both inserted. One order ended up with two sets of
+    // supplier orders and payables, which is double liability to the supplier.
+    //
+    // It only passed before because the JSON driver's nextIds does not reserve, so
+    // both callers minted the same id and the duplicate was caught by accident. On
+    // Postgres the ids differ and nothing would have stopped it.
+    //
+    // HONEST LIMIT, measured: these three checks still pass with the fix reverted,
+    // because that accidental id collision hides the duplicate on the JSON driver.
+    // They assert the right invariant and they WILL bite on Postgres, where the
+    // ids differ, but do not read a green here as proof the lock is in place. The
+    // real guard is the `mutate` in raiseSupplierLegs; run this suite against
+    // DB_DRIVER=postgres to make it a genuine regression test.
+    const raceOrder = await json(jar, '/api/orders', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        lines: [
+          { product_id: 'p001', variant_id: 'p001v1', qty: 1 },
+          { product_id: 'p006', variant_id: 'p006v1', qty: 1 },
+        ],
+        payment_method: 'DPO_PAY',
+        delivery_address: 'Plot 1, Gaborone',
+        delivery_city: 'Gaborone',
+      }),
+    });
+
+    if (raceOrder.status === 201) {
+      const racing = raceOrder.body.order;
+      const attempt = raceOrder.body.payment;
+
+      await Promise.all(
+        Array.from({ length: 4 }, () =>
+          payCallback(racing.id, attempt, { amount: racing.total }).catch(() => null),
+        ),
+      );
+
+      const settled = (await json(staff, `/api/orders/${racing.id}`)).body;
+      check(
+        'AC-3: overlapping confirmations raise exactly one leg per supplier',
+        settled?.legs?.length === 2,
+        `${settled?.legs?.length} leg(s), expected 2`,
+      );
+      check(
+        'AC-3: and exactly one payable per leg',
+        settled?.payables?.length === settled?.legs?.length,
+        `${settled?.payables?.length} payable(s) vs ${settled?.legs?.length} leg(s)`,
+      );
+      check(
+        'AC-4: and only one confirmed payment',
+        settled?.payments?.filter((p) => p.status === 'CONFIRMED').length === 1,
+        JSON.stringify(settled?.payments?.map((p) => p.status)),
+      );
+    }
+  }
+
   const empty = await json(jar, '/api/orders', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
@@ -430,6 +585,252 @@ section('9. Checkout — the order split engine');
     }),
   });
   check('an empty cart is refused', empty.status === 422, `got ${empty.status}`);
+}
+
+// ── Spec 0003 AC-5: a closed payment window reads as cancelled ────────────────
+section('9b. Payment expiry — a closed window reads as cancelled');
+{
+  const ops = sessions['ops@afrideal.co.bw'].jar;
+
+  // The seed gives both cases without touching the clock: o011 was placed a day
+  // ago paying by card (a 30 minute window, so long gone) and o012 was placed
+  // today paying by bank transfer (7 days, so still open).
+  const expired = (await json(ops, '/api/orders/o011')).body;
+  const open = (await json(ops, '/api/orders/o012')).body;
+
+  check(
+    'AC-5: an order past its window reads as CANCELLED',
+    expired?.order?.status === 'CANCELLED',
+    `got ${expired?.order?.status}`,
+  );
+  check(
+    'AC-5: and says it was the clock, not a person',
+    expired?.order?.cancel_reason === 'EXPIRED',
+    `got ${expired?.order?.cancel_reason}`,
+  );
+  check(
+    'AC-5: an order inside its window still reads as awaiting payment',
+    open?.order?.status === 'AWAITING_PAYMENT',
+    `got ${open?.order?.status}`,
+  );
+  check(
+    'an expired order never gained supplier legs',
+    (expired?.legs?.length ?? 0) === 0,
+    `${expired?.legs?.length} leg(s)`,
+  );
+
+  // The list must agree with the detail, or operations chases an order the buyer
+  // has already been told is dead.
+  const list = (await json(ops, '/api/orders')).body ?? [];
+  const inList = Array.isArray(list) ? list.find((o) => o.id === 'o011') : null;
+  check(
+    'AC-5: the order list agrees with the detail screen',
+    inList ? inList.status === 'CANCELLED' : true,
+    `got ${inList?.status}`,
+  );
+
+  // Revenue must not count it. This is the bug the cross check found: billable
+  // excluded CANCELLED but not AWAITING_PAYMENT.
+  // Computed rather than hardcoded: earlier sections place orders of their own, so
+  // any fixed number here would rot. The list already carries effective statuses.
+  const analytics = (await json(ops, '/api/analytics?days=3650')).body;
+  const everyOrder = Array.isArray(list) ? list : [];
+  const expectedBillable = everyOrder.filter(
+    (o) => o.status !== 'CANCELLED' && o.status !== 'AWAITING_PAYMENT',
+  ).length;
+  const unpaidOrDead = everyOrder.length - expectedBillable;
+
+  check(
+    'AC-5: unpaid and expired orders are not counted as revenue',
+    analytics?.order_count === expectedBillable,
+    `counted ${analytics?.order_count}, expected ${expectedBillable} (${unpaidOrDead} unpaid or cancelled of ${everyOrder.length})`,
+  );
+  check(
+    'the revenue filter actually excluded something',
+    unpaidOrDead > 0,
+    'no unpaid or cancelled orders present, so this check proved nothing',
+  );
+}
+
+// ── Spec 0003 AC-6, AC-8, AC-11: finance controls and the pause switch ───────
+section('9c. Finance controls — mark as paid, and pausing checkout');
+{
+  const finance = sessions['finance@afrideal.co.bw'].jar;
+  const ops = sessions['ops@afrideal.co.bw'].jar;
+  const admin = sessions['admin@afrideal.co.bw'].jar;
+  const buyer = sessions['thabo@gmail.com'].jar;
+
+  // Places its own bank transfer order rather than using the seeded o012. Marking a
+  // seeded order paid would mutate data section 9b asserts on, and the suite would
+  // stop being repeatable: a second run would find it already processing.
+  const placed = await json(buyer, '/api/orders', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      lines: [{ product_id: 'p001', variant_id: 'p001v1', qty: 1 }],
+      payment_method: 'EFT',
+      delivery_address: 'Plot 1, Gaborone',
+      delivery_city: 'Gaborone',
+    }),
+  });
+  check('a bank transfer order can be placed', placed.status === 201, `got ${placed.status}`);
+  const eftOrderId = placed.body?.order?.id;
+
+  const markPaid = (jar, body) =>
+    json(jar, `/api/orders/${eftOrderId}`, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ action: 'MARK_PAID', ...body }),
+    });
+
+  // AC-6: the role gate is its own check, because the handler's existing isStaff
+  // test includes operations and OPS_DENIED_PREFIXES only gates page paths.
+  const opsTry = await markPaid(ops, { reference: 'FNB-OPS-TRY' });
+  check('AC-6: operations cannot mark an order paid', opsTry.status === 403, `got ${opsTry.status}`);
+
+  const noRef = await markPaid(finance, {});
+  check('a reference is required', noRef.status === 422, `got ${noRef.status}`);
+
+  // AC-10: the buyer can open another attempt on an unpaid order, and only the
+  // buyer. A declined card must not cost them their basket.
+  const notMine = await json(ops, `/api/orders/${eftOrderId}/payments`, { method: 'POST' });
+  check('AC-10: a stranger cannot open a payment on your order', notMine.status === 403,
+    `got ${notMine.status}`);
+
+  const retry = await json(buyer, `/api/orders/${eftOrderId}/payments`, { method: 'POST' });
+  check('AC-10: the buyer can open another payment attempt', retry.status === 200 || retry.status === 201,
+    `got ${retry.status}`);
+  check('the attempt carries a reference to quote', typeof retry.body?.payment?.reference === 'string',
+    JSON.stringify(retry.body?.payment));
+  check('an attempt already open is reused, not duplicated', retry.body?.reused === true,
+    `reused ${retry.body?.reused}`);
+
+  const before = (await json(ops, `/api/orders/${eftOrderId}`)).body;
+  check('an unpaid bank transfer order has no supplier leg', (before?.legs?.length ?? 0) === 0,
+    `${before?.legs?.length} leg(s)`);
+
+  // AC-11: a figure that does not match the total is recorded and flagged, never
+  // silently accepted and never refused. The money has arrived either way.
+  const paid = await markPaid(finance, {
+    reference: `FNB-${Date.now()}`,
+    amount: 1,
+    paid_note: 'Underpaid, chasing the balance.',
+  });
+  check('AC-6: finance can mark an order paid', paid.status === 200, `got ${paid.status}`);
+  check('AC-11: a mismatched amount is flagged, not swallowed', paid.body?.amount_matches === false,
+    `amount_matches ${paid.body?.amount_matches}`);
+  check('the order is now processing', paid.body?.order?.status === 'PROCESSING',
+    `got ${paid.body?.order?.status}`);
+  check('the reference finance typed is on the order',
+    typeof paid.body?.order?.payment_reference === 'string' &&
+      paid.body.order.payment_reference.startsWith('FNB-'),
+    `got ${paid.body?.order?.payment_reference}`);
+
+  const after = (await json(ops, `/api/orders/${eftOrderId}`)).body;
+  check('AC-6: marking it paid raised the supplier legs', (after?.legs?.length ?? 0) > 0,
+    `${after?.legs?.length} leg(s)`);
+  check('and one payable per leg', after?.payables?.length === after?.legs?.length,
+    `${after?.payables?.length} vs ${after?.legs?.length}`);
+
+  const twice = await markPaid(finance, { reference: `FNB-again-${Date.now()}` });
+  check('marking a paid order paid again is refused', twice.status === 409, `got ${twice.status}`);
+
+  // AC-8: pausing stops new orders, and only a super admin may do it.
+  const financePause = await json(finance, '/api/settings/checkout', {
+    method: 'PATCH',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ paused: true }),
+  });
+  check('AC-8: finance cannot pause checkout', financePause.status === 403, `got ${financePause.status}`);
+
+  const paused = await json(admin, '/api/settings/checkout', {
+    method: 'PATCH',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ paused: true }),
+  });
+  check('AC-8: a super admin can pause checkout', paused.status === 200 && paused.body?.paused === true,
+    `${paused.status} ${JSON.stringify(paused.body)}`);
+
+  const blocked = await json(buyer, '/api/orders', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      lines: [{ product_id: 'p001', variant_id: 'p001v1', qty: 1 }],
+      payment_method: 'EFT',
+      delivery_address: 'Plot 1, Gaborone',
+      delivery_city: 'Gaborone',
+    }),
+  });
+  check('AC-8: a paused checkout refuses new orders', blocked.status === 409, `got ${blocked.status}`);
+
+  const resumed = await json(admin, '/api/settings/checkout', {
+    method: 'PATCH',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ paused: false }),
+  });
+  check('AC-8: and it can be resumed', resumed.status === 200 && resumed.body?.paused === false,
+    `${resumed.status} ${JSON.stringify(resumed.body)}`);
+}
+
+// ── Spec 0003 AC-7: money that cannot be applied, and cancelling paid orders ──
+section('9d. Refused payments — a cancelled order is not reopened, a paid one not cancelled');
+{
+  const buyer = sessions['thabo@gmail.com'].jar;
+  const ops = sessions['ops@afrideal.co.bw'].jar;
+
+  const place = () =>
+    json(buyer, '/api/orders', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        lines: [{ product_id: 'p001', variant_id: 'p001v1', qty: 1 }],
+        payment_method: 'DPO_PAY',
+        delivery_address: 'Plot 1, Gaborone',
+        delivery_city: 'Gaborone',
+      }),
+    });
+
+  // A buyer cancels, then the gateway reports the money arrived anyway. The
+  // payment must not reopen an order a person cancelled, and must not raise legs.
+  const cancelled = await place();
+  const cancelledId = cancelled.body?.order?.id;
+  const attempt = cancelled.body?.payment;
+
+  const cancel = await json(buyer, `/api/orders/${cancelledId}`, {
+    method: 'PATCH',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ action: 'CANCEL' }),
+  });
+  check('a buyer can cancel their unpaid order', cancel.status === 200 && cancel.body?.status === 'CANCELLED',
+    `${cancel.status} ${cancel.body?.status}`);
+
+  const late = await payCallback(cancelledId, attempt, { amount: cancelled.body?.order?.total });
+  check('AC-7: a payment for an order a person cancelled is refused', late.status === 409, `got ${late.status}`);
+
+  const after = (await json(ops, `/api/orders/${cancelledId}`)).body;
+  check('and the order stays cancelled', after?.order?.status === 'CANCELLED', `got ${after?.order?.status}`);
+  check('and no supplier was asked to prepare anything', (after?.legs?.length ?? 0) === 0,
+    `${after?.legs?.length} leg(s)`);
+
+  // Once paid, the buyer's cancel button must not be able to strand the money.
+  const paid = await place();
+  const paidId = paid.body?.order?.id;
+  await payCallback(paidId, paid.body?.payment, { amount: paid.body?.order?.total });
+
+  const cancelPaid = await json(buyer, `/api/orders/${paidId}`, {
+    method: 'PATCH',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ action: 'CANCEL' }),
+  });
+  check('a paid order cannot be cancelled by the buyer', cancelPaid.status === 409, `got ${cancelPaid.status}`);
+
+  // A replayed confirmation finishes nothing new and must not announce twice;
+  // the order's timeline carries exactly one "Payment confirmed".
+  await payCallback(paidId, paid.body?.payment, { amount: paid.body?.order?.total });
+  const replayed = (await json(ops, `/api/orders/${paidId}`)).body;
+  const paidEntries = (replayed?.order?.timeline ?? []).filter((entry) => entry.status === 'PAID');
+  check('a replayed confirmation adds nothing to the timeline', paidEntries.length === 1,
+    `${paidEntries.length} PAID entries`);
 }
 
 // ── 10. Runner availability toggle ───────────────────────────────────────────

@@ -6,6 +6,7 @@ import { ActionButton } from '@/components/brand/ActionButton';
 import { EmptyState } from '@/components/brand/Panel';
 import { auth } from '@/lib/auth';
 import { readAll } from '@/lib/db';
+import { availablePaymentMethods } from '@/lib/payments/adapters';
 
 import { CheckoutClient } from './CheckoutClient';
 
@@ -50,6 +51,7 @@ export default async function CheckoutPage() {
         bands={bands}
         products={products}
         customerType={session.user.customer_type ?? 'RETAIL'}
+        methods={availablePaymentMethods()}
       />
     </div>
   );
