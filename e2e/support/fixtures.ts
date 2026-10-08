@@ -34,7 +34,7 @@ async function openAs(browser: Browser, testInfo: TestInfo, person: Person, size
     recordVideo: demo ? { dir: testInfo.outputPath(`video-${person}`), size: phone ? PHONE : { width: 1280, height: 800 } } : undefined,
   });
   context.setDefaultNavigationTimeout(90_000);
-  const page = instrument(await context.newPage(), testInfo);
+  const page = instrument(await context.newPage(), testInfo, `video-${person}`);
   speaker.set(page, account(person).name);
   return page;
 }
@@ -94,11 +94,24 @@ export async function caption(page: Page, text: string) {
  * - Every save (a non-GET call to /api) is timed and listed on the test in
  *   the report. From Botswana a save is several sequential round trips to
  *   Neon in Ohio, so this is where slowness shows up first.
+ * - The moment its first page has loaded is noted as a `video-start`
+ *   annotation (`<video name> <seconds>`). Playwright records from the moment
+ *   the browser opens, so a demo video otherwise opens on several seconds of
+ *   blank white screen; scripts/demo-videos.mjs cuts it there.
  */
-function instrument(page: Page, testInfo: TestInfo): Page {
+function instrument(page: Page, testInfo: TestInfo, videoName = 'video'): Page {
   const goto = page.goto.bind(page);
   const reload = page.reload.bind(page);
-  page.goto = (url, options) => goto(url, { waitUntil: 'networkidle', ...options });
+  const opened = Date.now();
+  let started = false;
+  page.goto = async (url, options) => {
+    const response = await goto(url, { waitUntil: 'networkidle', ...options });
+    if (!started) {
+      started = true;
+      testInfo.annotations.push({ type: 'video-start', description: `${videoName} ${((Date.now() - opened) / 1000).toFixed(2)}` });
+    }
+    return response;
+  };
   page.reload = (options) => reload({ waitUntil: 'networkidle', ...options });
 
   page.on('requestfinished', async (request) => {

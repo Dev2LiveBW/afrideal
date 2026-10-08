@@ -18,7 +18,8 @@ test.describe('A. Browsing (no account)', () => {
     );
     expect(hrefs.length, 'the home page links to other pages').toBeGreaterThan(3);
     for (const href of hrefs) {
-      const response = await request.get(href, { maxRedirects: 0 });
+      // Slow is not broken: from Botswana a page can take over 20 s to answer.
+      const response = await request.get(href, { maxRedirects: 0, timeout: 90_000 });
       expect(response.status(), `${href} answers`).toBeLessThan(400);
     }
   });
