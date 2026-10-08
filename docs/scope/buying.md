@@ -89,10 +89,21 @@ Fix the stray `Â·` characters in the orders list and collapse each row's meta 
 
 Gaps against the client's Phase 1 feature list that you can build alone. Order and packages: [docs/phase1-closeout-plan.md](../phase1-closeout-plan.md).
 
-### 24. Chosen quote becomes an order · needs a decision
-Today a buyer can choose a supplier's quote, but nothing happens next. Choosing a quote should create an order at the quoted price, ready to pay like any other.
+### 24. Chosen quote becomes an order · in-progress
+Today a quotation request reaches no supplier, and a chosen quote goes nowhere. Widened to milestone M4: invited suppliers answer in their portal, the team sends the buyer one AfriDeal price, and the buyer accepts (creating an order paid like any other), declines, or asks for a new price.
+spec [0004](../specs/0004-quote-chain.md) · waits on spec 0003 (payment states) reaching `main`
 **Done when:** selecting a quote creates one order linked to the request for quote, at the quoted price, in the same payment state as a checkout order; the request shows "ordered"; `npm run verify` covers it.
-- [ ] Design it (spec): `/architect chosen quote becomes an order`
+- [x] Design it (spec): `/architect chosen quote becomes an order`
+- [ ] Build it: `/develop chosen quote becomes an order`
+  - [ ] Thread: invitations, server priced quote, accept into a paid order with the supplier leg confirmed, plain screens for all three roles (AC-1 to AC-7, AC-12)
+  - [ ] Supplier pass, team invite, answer locking, team decline (AC-2, AC-3, AC-8)
+  - [ ] Buyer decline and new price with the limit, quantity notice, town check (AC-6, AC-8, AC-9)
+  - [ ] Expiry and accepting again after a cancelled order, derived on read (AC-10, AC-11)
+  - [ ] Audit, notifications, verify checks and the e2e journey (AC-13, AC-14)
+- [ ] Verify it: `/check verify chosen quote becomes an order`
+- [ ] Test it: `/test chosen quote becomes an order`
+- [ ] Review it (fresh model): `/check review chosen quote becomes an order`
+- [ ] Document it: `/document chosen quote becomes an order`
 
 ### 25. Buyer account & checkout extras · needs a decision
 The account and checkout pieces on the Phase 1 list: saved addresses chosen at checkout, a review step with delivery instructions and terms, promo codes, reorder, a map link on tracking, a mini cart, saved items, alert settings, and a welcome step after sign up. Builds on 5 (phone checkout).
