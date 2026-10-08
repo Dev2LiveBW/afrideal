@@ -130,3 +130,24 @@ AC-8 is met literally (`POST /api/orders`), but "stop taking money during an inc
 Covered by `npm run verify` (JSON driver, dev server): unpaid start state, no legs or payables before payment, unsigned and wrongly signed callbacks refused, one signed confirmation, one sequential replay adding nothing, expiry reads on the two seeded orders, the analytics exclusion, MARK_PAID role gate and mismatched-amount flag, the retry endpoint's ownership and reuse, pause and resume. Typecheck and lint are clean.
 
 Not covered, in addition to AC-7, AC-9 and the failed state already known: concurrent confirmations (the Blocker); recovery after a failed or partial step 2 (the spec's own "Recovery" scenario); replay after the order has progressed; CANCEL and its interaction with a CONFIRMED payment; the CANCELLED_BY_PERSON and ALREADY_PAID_DIFFERENTLY refusals and their codes; the stale-callback path; reused or colliding references; the Postgres-only 23505 and FAILED-then-CONFIRMED paths (the JSON driver has no index, so these branches have never run, and migration 0002 is not applied to Neon); payable amounts after confirmation (the old "invoices sum to the order subtotal" assertion was removed and not re-added); "no write happened on the read" for AC-5; and the dashboard surface. Existing Playwright journeys B02 and Z01 assume an order is paid at checkout and were not updated, and CI's verify job is not configured to be able to pay (see the Major above).
+
+## Resolution (2026-10-08)
+
+Every Blocker and Major finding is closed on `feat/order-payment-states-finish`. Proof: `npm run verify` 163/163 against a production build (`CI` setup: `PAYMENTS_PROVIDER=mock`, `ALLOW_MOCK_PAYMENTS=1`), `npm run e2e` 74/74 on a Neon branch with no mock (the live site's setup), 62 unit tests.
+
+| Finding | Status | How |
+|---|---|---|
+| 🔴 Duplicate supplier orders and payables | Fixed | `ff901a4`: legs and payables decided inside their own `mutate`; Postgres integration test `7812701` |
+| 🟠 Resumed run skips payables | Fixed | `ff901a4`: payables raised for every leg the order has, not only this call's |
+| 🟠 Finance cannot complete an interrupted confirmation | Fixed | `MARK_PAID` resumes with the payment already on file when the order never reached PROCESSING |
+| 🟠 `finishOrder` regresses later states | Fixed | `ff901a4` |
+| 🟠 `CANCEL` ignores payments | Fixed | Refuses with 409 when any payment is CONFIRMED; the order write is conditional under the orders lock; a claim that races it is flagged by `confirmPayment()` (verify 9d) |
+| 🟠 Reused bank reference pays a second order | Fixed | `b73b709` |
+| 🟠 FAILED then CONFIRMED is a permanent 500 | Fixed | `b73b709` |
+| 🟠 Refused or dropped confirmations leave no record | Fixed | `flagRefusedPayment()`: audit `PAYMENT_REFUSED` plus a notification to finance and super admins, for a person cancelled order, a double charge, a reused reference, a cancel racing a claim, and a stale but signed success |
+| 🟠 Late payment detection misses the normal case; no UI to reopen | Fixed | Lateness judged from the claim time (`claimedAfterWindow()`, unit tested), with the expiry written into the timeline; the finance queue lists bank transfers whose window closed in the last 30 days, marked "Window closed" |
+| 🟠 Nothing can be paid in production | Fixed | Checkout offers bank transfer, and card or wallet methods only when something can take them (`availablePaymentMethods()`); `POST /api/orders` refuses the rest with 422; the order page shows no retry for a bank transfer |
+| 🟠 CI cannot pass `verify`; e2e not updated | Fixed | `ALLOW_MOCK_PAYMENTS=1` opt in, ignored on Vercel; CI sets it; B02 and Z01 buy by bank transfer and Z01 has finance mark it paid; E02 uses seeded `o008` (paid, supplier not yet confirmed); `npm run e2e` applies pending migrations to its branch |
+| 🟡 `announce` runs on every replay | Fixed | Only the call that moves the order to PROCESSING announces (verify 9d) |
+
+Minor findings not listed stay open for a later pass. Also fixed on the way: the committed seed carried ten leftover orders from a verify run (o016 to o025); the order cancelled before payment (o015) no longer has a payment or supplier legs.
