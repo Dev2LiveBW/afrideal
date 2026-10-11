@@ -38,7 +38,12 @@ for (const person of Object.keys(PEOPLE) as Person[]) {
     setup.setTimeout(120_000);
     await page.goto('/sign-in');
     const button = page.getByRole('button', { name: new RegExp(who.name) });
-    await expect(button).toBeEnabled({ timeout: 60_000 });
+    try {
+      await expect(button).toBeEnabled({ timeout: 20_000 });
+    } catch {
+      await page.reload();
+      await expect(button).toBeEnabled({ timeout: 40_000 });
+    }
     await button.click();
 
     const landing = LANDING[who.role];

@@ -175,11 +175,14 @@ test.describe('C. Request for quotation (Chosen quote to order)', () => {
 test.describe('F. Runner deliveries (Collection Point)', () => {
   test.use(signedInAs('kefilwe'));
 
-  test('F04 runner delivers to a Collection Point and buyer confirms collection @p1', async ({ page, as }) => {
+  test('F04 runner delivers to a Collection Point and buyer confirms collection @p1', async ({ page, as, isMobile }) => {
+    test.skip(isMobile, 'Multi-role relay flow runs once under desktop project');
+
     // 1. Kefilwe places an order to a Collection Point
     await caption(page, 'F04 · 1. Kefilwe orders with Collection Point delivery');
     await addToCart(page, 'p001', 1);
     await page.goto('/checkout');
+    await expect(page.getByRole('heading', { name: 'Confirm and pay' })).toBeVisible();
     await ready(page);
 
     await page.getByRole('radio', { name: /Collection Point/ }).check();
@@ -228,28 +231,42 @@ test.describe('F. Runner deliveries (Collection Point)', () => {
     for (let attempt = 0; attempt < 3 && !accepted; attempt++) {
       if (await alertModal.waitFor({ timeout: 5000 }).then(() => true, () => false)) {
         const text = await alertModal.innerText();
-        if (text.includes('Gaborone Central Locker') || text.includes('Motswedi')) {
+        if (text.includes('Gaborone Central Locker')) {
           await clickAndSave(alertModal.getByRole('button', { name: 'Accept' }));
           accepted = true;
           break;
         } else {
           await alertModal.getByRole('button', { name: 'Decline' }).click();
+          await alertModal.waitFor({ state: 'detached', timeout: 3000 }).catch(() => {});
         }
       }
     }
 
     if (!accepted) {
-      const availableJob = runner.locator('div').filter({ has: runner.getByText('Gaborone Central Locker') })
+      if (await alertModal.isVisible()) {
+        await alertModal.getByRole('button', { name: 'Decline' }).click();
+        await alertModal.waitFor({ state: 'detached', timeout: 3000 }).catch(() => {});
+      }
+      const availableJob = runner.locator('.shadow-card').filter({ has: runner.getByText('Gaborone Central Locker') })
         .filter({ has: runner.getByRole('button', { name: 'Accept job' }) }).first();
       await clickAndSave(availableJob.getByRole('button', { name: 'Accept job' }));
     }
 
     // Active job progress: Mark picked up -> Start delivery
-    const activeJob = runner.locator('div').filter({ has: runner.getByText('Active job') })
+    const activeJob = runner.locator('.shadow-card').filter({ has: runner.getByText('Active job') })
       .filter({ has: runner.getByText('Gaborone Central Locker') }).first();
     await expect(activeJob).toBeVisible();
 
+    const dismissAnyAlert = async () => {
+      if (await alertModal.isVisible()) {
+        await alertModal.getByRole('button', { name: 'Decline' }).click().catch(() => {});
+        await alertModal.waitFor({ state: 'detached', timeout: 3000 }).catch(() => {});
+      }
+    };
+
+    await dismissAnyAlert();
     await clickAndSave(activeJob.getByRole('button', { name: 'Mark picked up' }));
+    await dismissAnyAlert();
     await clickAndSave(activeJob.getByRole('button', { name: 'Start delivery' }));
 
     // 4. Runner enters locker PIN and drops off at collection point

@@ -159,8 +159,24 @@ export async function readAll<C extends Collection>(collection: C): Promise<Sche
 /** Overwrite a whole collection. Prefer `mutate()` unless you already hold the lock. */
 async function writeAll<C extends Collection>(collection: C, rows: Schema[C][]): Promise<void> {
   const tmp = `${fileFor(collection)}.tmp`;
+  const target = fileFor(collection);
   await fs.writeFile(tmp, `${JSON.stringify(rows, null, 2)}\n`, 'utf8');
-  await fs.rename(tmp, fileFor(collection));
+
+  // On Windows, concurrent file reads or background handles can briefly hold a lock,
+  // causing EPERM or EBUSY on rename. Retry with short exponential backoff.
+  for (let attempt = 0; attempt < 5; attempt++) {
+    try {
+      await fs.rename(tmp, target);
+      return;
+    } catch (err: unknown) {
+      const code = (err as { code?: string })?.code;
+      if ((code === 'EPERM' || code === 'EBUSY') && attempt < 4) {
+        await new Promise((resolve) => setTimeout(resolve, 25 * Math.pow(2, attempt) + Math.random() * 25));
+      } else {
+        throw err;
+      }
+    }
+  }
 }
 
 // One tail-promise per collection. Each mutation appends to its chain.
