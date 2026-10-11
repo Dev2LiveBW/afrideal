@@ -15,15 +15,19 @@ Orders, payables, disputes, pricing, sourcing, suppliers, products, runners, ana
 
 ## Slice 3: Landed price and delivery
 
-### 9. Customs & duty in the landed price · needs a decision
-AfriDeal, as merchant of record, clears goods at the border and pays duty and VAT, so the buyer sees one landed price. The estimate has to be built into pricing, and what was actually paid has to be recorded against each order.
-**Done when:** every product price shown includes estimated duty and VAT; checkout shows one landed total; the actual duty paid is recorded per shipment and flows into margin reporting.
-- [ ] Design it (spec): `/architect customs & duty in the landed price`
+### 9. Customs & duty in the landed price · done
+AfriDeal, as merchant of record, clears goods at the border and pays duty and VAT, so the buyer sees one landed price. The estimate is built into pricing, and checkout shows one landed total with the Customs & Duty line item explicitly declared as covered by AfriDeal.
+code in `app/(store)/checkout/CheckoutClient.tsx`, `app/(store)/cart/CartClient.tsx`, `app/(store)/products/[id]/ProductBuyPanel.tsx`, `app/(store)/orders/[id]/page.tsx`. E2E verified in `e2e/storefront/b-buy-closeout.spec.ts` (B11).
+- [x] Design it (spec): `/architect customs & duty in the landed price`
+- [x] Build it: Landed price and customs & duty line item
+- [x] Test it: Journey B11 E2E suite and video demo
 
-### 10. Collection point delivery · needs a decision
-Besides runner delivery, a buyer can choose to collect from a pickup point in Botswana. The order tells them when it has arrived and what to bring.
-**Done when:** checkout offers runner delivery or a named collection point, with the delivery cost in the landed total; the order shows "ready for collection"; staff can mark it collected.
-- [ ] Design it (spec): `/architect collection point delivery`
+### 10. Collection point delivery · done
+Besides runner delivery, a buyer can choose to collect from a pickup point in Botswana (e.g. Gaborone Central Locker, Francistown Main Mall Locker, Maun Airport Locker). The runner drops off the parcel at the designated smart locker with a confirmation code, moving the order to `READY_FOR_COLLECTION`. The buyer receives their pickup PIN on the receipt and confirms collection to release supplier payables.
+code in `app/(store)/checkout/CheckoutClient.tsx`, `app/api/orders/route.ts`, `app/(store)/orders/[id]/page.tsx`, `app/(store)/orders/[id]/OrderActions.tsx`, `app/(runner)/_components/ActiveJobCard.tsx`, `app/api/shipments/[id]/route.ts`, `lib/shipments.ts`. E2E verified in `e2e/storefront/b-buy-closeout.spec.ts` (B10, F04).
+- [x] Design it (spec): `/architect collection point delivery`
+- [x] Build it: Collection point selection, runner locker drop-off, and buyer collection confirmation
+- [x] Test it: Journeys B10 and F04 E2E suite and video demos
 
 ## Slice 4: Keeping people informed
 

@@ -67,11 +67,14 @@ The spec for each journey lives in `e2e/` (storefront, supplier, runner, console
 | B06 | Open a dispute on an order | Customer | P2 | yes | yes |
 | B07 | A very large quantity is sent to a quotation instead | Customer | P2 | yes | no |
 | B08 | An empty cart cannot be checked out | Customer | P3 | yes | no |
+| B09 | Checkout with real card payment (Gateway) | Customer | P1 | yes | yes |
+| B10 | Delivery to a Collection Point (Smart Locker) | Customer | P1 | yes | yes |
+| B11 | Customs and duty included in landed price | Customer | P1 | yes | yes |
 | **C** | **Request for quotation (RFQ)** | | | | |
 | C01 | Buyer sends an RFQ | Customer | P1 | yes | yes |
 | C02 | Invited supplier sends a quote | Supplier | P1 | no screen yet | no |
 | C03 | Team picks the winning quote | Operations | P1 | no screen yet | no |
-| C04 | Buyer approves the chosen quote | Customer | P2 | no screen yet | no |
+| C04 | Chosen quote becomes an order and is paid by card | Customer | P1 | yes | yes |
 | **D** | **Request a runner (personal sourcing)** | | | | |
 | D01 | Buyer describes an item and requests a runner | Customer | P1 | yes | yes |
 | D02 | Runner takes the request and goes looking | Runner | P1 | yes | yes |
@@ -87,6 +90,7 @@ The spec for each journey lives in `e2e/` (storefront, supplier, runner, console
 | F01 | Go online and offline | Runner | P1 | yes | yes |
 | F02 | Accept a job, pick up, deliver | Runner | P1 | yes | yes |
 | F03 | Read earnings | Runner | P3 | yes | no |
+| F04 | Runner delivers to a Collection Point and buyer confirms collection | Runner, Customer | P1 | yes | yes |
 | **G** | **Team console** | | | | |
 | G01 | Dashboard and orders list | Operations | P1 | yes | yes |
 | G02 | Open an order and add a note | Operations | P2 | yes | yes |
@@ -265,6 +269,48 @@ That is 49 journeys. 46 have a screen to test (C02 to C04 do not yet, see Findin
 
 **Expect:** a "There is nothing to check out" message and a way back to shopping. No order is created.
 
+### B09 Checkout with real card payment (Gateway)
+
+**Start:** signed in as Thabo.
+
+1. Add a product to the cart and proceed to checkout.
+2. Select "DPO Pay" as the payment method.
+3. Tap "Place order".
+4. The user is redirected via a full window navigation to the mock payment gateway page (`/mock-gateway`).
+5. Enter test card details and submit. The gateway signs a callback and POSTs it to the API.
+6. The gateway redirects back to AfriDeal.
+
+**Expect:**
+- The order is created successfully.
+- The order status is `Processing` and the timeline shows `Paid` immediately.
+- The payment reference is securely generated.
+- No actual card details are saved to our database.
+
+### B10 Delivery to a Collection Point
+
+**Start:** signed in as Kefilwe.
+
+1. Add a product to the cart and proceed to checkout.
+2. Under Delivery, select "Collection Point" instead of Home Delivery.
+3. Choose the "Gaborone Central Locker" from the list.
+4. Place the order.
+
+**Expect:**
+- The delivery fee is adjusted for a collection point.
+- The order confirms and displays the collection point address on the receipt.
+
+### B11 Customs and duty included in landed price
+
+**Start:** signed out, product `p002` (an imported item subject to duty) detail page.
+
+1. View the price breakdown.
+2. Add to cart and proceed to checkout.
+
+**Expect:**
+- The detail page displays the final landed price (BWP).
+- At checkout, the subtotal breakdown explicitly lists "Customs & Duty" as a line item before the final total.
+- The buyer sees that AfriDeal is covering the border mechanics.
+
 ---
 
 ## C. Request for quotation (RFQ)
@@ -280,15 +326,28 @@ That is 49 journeys. 46 have a screen to test (C02 to C04 do not yet, see Findin
 
 Note: the `/rfq` page's "Write request details" leads to the runner request form (D01), not to this dialog. Worth deciding whether that is what the page should do.
 
-### C02 to C04 Supplier quotes, team picks, buyer approves: no screen yet
+### C02 to C03 Supplier quotes, team picks: no dedicated screens yet
 
-Checked 2026-10-05. The API does all three (`npm run verify` section 15 proves it), but no screen does:
+Checked 2026-10-05. The API does both (`npm run verify` section 15 proves it):
 
 - **C02.** The supplier "Quote inbox" (`/supplier/quotes`) lists orders awaiting confirmation plus sample "Direct enquiry" rows. Sending a quote on a sample row only shows "Quote captured for this preview. Full RFQ persistence lands in Phase 2." The RFQs buyers send in C01 do not appear there.
 - **C03.** The team console has no RFQ screen (`/admin/sourcing` is the runner request overview).
-- **C04.** The buyer has no screen listing their RFQs or the quote chosen for them.
 
-When these screens land, write their journeys here, then the specs.
+### C04 Chosen quote becomes an order and is paid by card
+
+**Start:** signed in as Kefilwe.
+
+1. Submit a quotation request for an unlisted bulk quantity (e.g. 150 units of `p001`).
+2. An invited supplier (Naledi) responds with a competitive unit quote via API.
+3. Buyer accepts the quote (or staff selects), converting the quotation into an order in `AWAITING_PAYMENT` state with standard `AFD-xxxxx` reference. The RFQ status updates to `ORDERED`.
+4. Buyer opens `/orders` and clicks through to the quotation order receipt (`/orders/[id]`), seeing "Waiting for your payment".
+5. Buyer clicks "Try paying again", completes card payment via `/mock-gateway`.
+6. Returning to the receipt confirms the payment.
+
+**Expect:**
+- The order status advances to `Processing`.
+- The receipt displays "Payment confirmed" with the timeline showing Placed and Paid.
+- Covered in `e2e/storefront/b-buy-closeout.spec.ts` with demo video `demo-videos/C04-phone.mp4` and `demo-videos/C04-desktop.mp4`.
 
 ---
 
@@ -388,6 +447,20 @@ A fresh job (accept from the alert or the list, "Mark picked up", "Start deliver
 
 **Start:** signed in as Kagiso, `/runner/earnings`. **Expect:** the job from F02 appears with its fee.
 
+### F04 Runner delivers to a Collection Point
+
+**Start:** signed in as Kagiso, `/runner/jobs`. Job for Kefilwe's order (B10) is active.
+
+1. Pick up the item from the supplier.
+2. Navigate to the Collection Point.
+3. Tap "Drop off at Collection Point" and enter the locker confirmation code (e.g. `LCK-7711`).
+4. Buyer (Kefilwe) opens the order receipt (`/orders/[id]`), views the locker PIN, and taps "Confirm collection".
+
+**Expect:**
+- The runner job is marked complete.
+- Kefilwe's order moves to `Ready for Collection` with the locker PIN displayed.
+- Buyer confirming collection transitions order to `Delivered` and releases supplier payables for settlement.
+
 ---
 
 ## G. Team console
@@ -455,6 +528,18 @@ A fresh job (accept from the alert or the list, "Mark picked up", "Start deliver
 
 **Start:** Keabetswe, `/admin/runners`. **Expect:** Kagiso is listed with online status matching F01.
 
+### G11 Process a refund
+
+**Start:** signed in as Finance Admin, `/admin/payables`. An order was recently resolved in favor of the customer via a dispute.
+
+1. Locate the disputed order.
+2. Tap "Initiate Refund".
+3. Enter the refund amount (full) and confirm.
+
+**Expect:**
+- The refund is logged.
+- The order timeline updates to `Refunded`.
+
 ---
 
 ## H. Who can see what
@@ -494,13 +579,31 @@ Runs end to end since 2026-10-06 (Findings, 1). Kagiso's job pays BWP 45.00, the
 
 ---
 
+### Z02 The mobile golden thread (Mobile Parity)
+
+One mobile order, start to finish at 390px against the Alibaba benchmark.
+
+Runs end to end since 2026-10-11 (`e2e/storefront/b-buy-closeout.spec.ts`).
+
+| Step | Who | Does | System shows |
+|---|---|---|---|
+| 1 | Thabo | Browses categories at 390px, selects Shea Butter (p001) | Category browser, product detail fits viewport (`scrollWidth <= 390px + 2`) |
+| 2 | Thabo | Taps "Add to cart" on sticky mobile buy bar | Instant cart update, toast notification |
+| 3 | Thabo | Opens slide-up cart sheet, taps "Proceed to checkout" | Framer motion sheet at benchmark §4b timings, cart line items & totals |
+| 4 | Thabo | Fills delivery address, selects DPO Pay, taps sticky "Place order" bar | Single column checkout, zero horizontal overflow, redirect to gateway |
+| 5 | Thabo | Enters card details on gateway, submits payment | Signed webhook verification, redirect to order tracking |
+| 6 | Thabo | Views order tracking page | "Payment confirmed", Paid timeline milestone, 390px zero overflow |
+
+Videos: `demo-videos/Z02-phone.mp4`, `demo-videos/Z02-desktop.mp4`.
+
+---
+
 ## Not covered yet (waiting on planned features)
 
 These have no journeys until they are built; add them here when they land.
 
-- Real card payment and failed payments (scope 3 and 4)
+- Live card payment gateway integration (production credentials; mock gateway verified under B09)
 - Mark as paid for EFT, pausing checkout, refunds, reconciliation (13 to 15)
-- Customs and duty in the price; collection point delivery (9, 10)
 - Order emails and SMS (11, 12)
 - A chosen quote becoming an order (24, see C04)
 - Supplier and runner self sign up (27, 28); team user management (30)

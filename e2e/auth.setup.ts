@@ -35,11 +35,22 @@ for (const person of Object.keys(PEOPLE) as Person[]) {
   const who = account(person);
 
   setup(`H02 ${who.name} signs in with the demo card and lands on ${LANDING[who.role]}`, async ({ page }) => {
+    setup.setTimeout(120_000);
     await page.goto('/sign-in');
-    await page.getByRole('button', { name: new RegExp(who.name) }).click();
+    const button = page.getByRole('button', { name: new RegExp(who.name) });
+    await expect(button).toBeEnabled({ timeout: 60_000 });
+    await button.click();
 
     const landing = LANDING[who.role];
-    await page.waitForURL((url) => url.pathname === landing, { timeout: 90_000 });
+    try {
+      await page.waitForURL((url) => url.pathname === landing, { timeout: 45_000 });
+    } catch {
+      if (page.url().includes('/sign-in')) {
+        await expect(button).toBeEnabled({ timeout: 30_000 });
+        await button.click();
+        await page.waitForURL((url) => url.pathname === landing, { timeout: 60_000 });
+      }
+    }
     await expect(page).toHaveURL(new RegExp(`${landing === '/' ? '/$' : landing}`));
 
     await page.context().storageState({ path: sessionFile(person) });

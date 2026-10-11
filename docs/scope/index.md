@@ -35,13 +35,13 @@ _These are recommendations to keep your build orderly, not requirements. Skip an
 | 1 | Coding standards & CI | platform | Foundation | done |
 | 2 | Staging & production environments | platform | Foundation | in-progress |
 | 3 | Order payment states | buying | Foundation | in-progress |
-| 4 | Card payment gateway | buying | Slice 1 | planned |
-| 5 | Phone checkout | buying | Slice 1 | planned |
+| 4 | Card payment gateway | buying | Slice 1 | done |
+| 5 | Phone checkout | buying | Slice 1 | done |
 | 6 | Product detail at phone parity | buying | Slice 2 | planned |
 | 7 | Cart at phone parity | buying | Slice 2 | planned |
 | 8 | Sign in safety & phone screens | platform | Slice 2 | planned |
-| 9 | Customs & duty in the landed price | delivery | Slice 3 | planned |
-| 10 | Collection point delivery | delivery | Slice 3 | planned |
+| 9 | Customs & duty in the landed price | delivery | Slice 3 | done |
+| 10 | Collection point delivery | delivery | Slice 3 | done |
 | 11 | Order & payment emails | delivery | Slice 4 | planned |
 | 12 | SMS alerts | delivery | Slice 4 | planned |
 | 13 | Finance controls: mark as paid, pause checkout | buying | Slice 5 | planned |
@@ -55,7 +55,7 @@ _These are recommendations to keep your build orderly, not requirements. Skip an
 | 21 | Real catalogue & photography | reach | Slice 8 | planned |
 | 22 | Launch checks | platform | Slice 8 | planned |
 | 23 | Production go live | platform | Slice 8 | planned |
-| 24 | Chosen quote becomes an order | buying | Close out | planned |
+| 24 | Chosen quote becomes an order | buying | Close out | done |
 | 25 | Buyer account & checkout extras | buying | Close out | planned |
 | 26 | Browse extras | buying | Close out | planned |
 | 27 | Supplier onboarding & self service | delivery | Close out | planned |

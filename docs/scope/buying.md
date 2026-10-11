@@ -39,15 +39,15 @@ spec [0003](../specs/0003-order-payment-states.md) · code in `lib/payments/`
 
 ## Slice 1: Pay for one order by card, end to end
 
-### 4. Card payment gateway · needs a decision
+### 4. Card payment gateway · done
 The thinnest real thread through every layer: checkout hands the buyer to a hosted card page, and the order turns paid only on a verified, signed callback from the gateway. A local mock gateway lets CI test the same path.
 **Done when:** a sandbox card payment turns one order paid only through a signed callback; an unsigned or replayed callback changes nothing; returning before the callback shows "confirming"; the payment path tests run green in CI against the mock.
-- [ ] Design it (spec): `/architect card payment gateway`
+- [x] Verified in `e2e/storefront/b-buy-closeout.spec.ts` (Journey B09) and reviewed in `docs/reviews/2026-10-10-feat-card-payment-gateway.md`
 
-### 5. Phone checkout · needs a decision
+### 5. Phone checkout · done
 Checkout rebuilt once, phone first, around the gateway handoff: page header, single column, sticky "Place order".
 **Done when:** at 390 by 844 the place order button is visible without scrolling; placing an order hands off to the gateway and returns to a clear paid, failed or confirming state.
-- [ ] Design it (spec): `/architect phone checkout`
+- [x] Verified in `e2e/storefront/b-buy-closeout.spec.ts` (Journey Z02) and reviewed in `docs/reviews/2026-10-11-feat-mobile-golden-thread.md`
 
 ## Slice 2: The buy decision on a phone
 
@@ -89,10 +89,10 @@ Fix the stray `Â·` characters in the orders list and collapse each row's meta 
 
 Gaps against the client's Phase 1 feature list that you can build alone. Order and packages: [docs/phase1-closeout-plan.md](../phase1-closeout-plan.md).
 
-### 24. Chosen quote becomes an order · needs a decision
+### 24. Chosen quote becomes an order · done
 Today a buyer can choose a supplier's quote, but nothing happens next. Choosing a quote should create an order at the quoted price, ready to pay like any other.
 **Done when:** selecting a quote creates one order linked to the request for quote, at the quoted price, in the same payment state as a checkout order; the request shows "ordered"; `npm run verify` covers it.
-- [ ] Design it (spec): `/architect chosen quote becomes an order`
+- [x] Implemented in `app/api/rfqs/[id]/route.ts` & verified via `scripts/verify.mjs` and Playwright E2E journey C04 (`e2e/storefront/b-buy-closeout.spec.ts`)
 
 ### 25. Buyer account & checkout extras · needs a decision
 The account and checkout pieces on the Phase 1 list: saved addresses chosen at checkout, a review step with delivery instructions and terms, promo codes, reorder, a map link on tracking, a mini cart, saved items, alert settings, and a welcome step after sign up. Builds on 5 (phone checkout).

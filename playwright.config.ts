@@ -35,7 +35,7 @@ if (!branchUrl && !externalBase) {
   );
 }
 
-const baseURL = externalBase ?? `http://localhost:${PORT}`;
+const baseURL = externalBase ?? `http://127.0.0.1:${PORT}`;
 
 // The storefront is measured against the Alibaba app on a phone.
 const PHONE = { width: 390, height: 844 };
@@ -109,8 +109,10 @@ export default defineConfig({
         stderr: 'pipe',
         env: {
           DATABASE_URL: branchUrl,
-          DB_DRIVER: 'postgres',
-          CATALOGUE_SOURCE: 'json',
+          DB_DRIVER: process.env.DB_DRIVER || 'postgres',
+          CATALOGUE_SOURCE: process.env.CATALOGUE_SOURCE || 'json',
+          PAYMENTS_PROVIDER: process.env.PAYMENTS_PROVIDER || 'mock',
+          ALLOW_MOCK_PAYMENTS: 'true',
           // Its own build folder, so it can run beside your `npm run dev`.
           NEXT_DIST_DIR: '.next-e2e',
         },
