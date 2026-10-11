@@ -6,6 +6,7 @@ import { applyTransition } from '@/lib/payables';
 import { EVENTS, audit, notify } from '@/lib/notifications';
 import { providerFor } from '@/lib/payments/adapters';
 import { confirmPayment } from '@/lib/payments/confirm';
+import { executeRefund } from '@/lib/refunds';
 import { getOrderDetail } from '@/lib/queries';
 import type { Dispute } from '@/types';
 
@@ -34,7 +35,7 @@ export const GET = handled(async (_request: Request, { params }: { params: { id:
 });
 
 const PatchSchema = z.object({
-  action: z.enum(['CONFIRM_DELIVERY', 'RAISE_DISPUTE', 'CANCEL', 'ADD_NOTE', 'MARK_PAID']),
+  action: z.enum(['CONFIRM_DELIVERY', 'RAISE_DISPUTE', 'CANCEL', 'ADD_NOTE', 'MARK_PAID', 'REFUND']),
   reason: z.string().max(120).optional(),
   detail: z.string().max(1000).optional(),
   note: z.string().max(2000).optional(),
@@ -247,6 +248,21 @@ export const PATCH = handled(async (request: Request, { params }: { params: { id
     case 'ADD_NOTE': {
       if (!isStaff) return fail('Internal notes are staff-only.', 403);
       return ok(await update('orders', params.id, { internal_notes: parsed.data.note ?? '' }));
+    }
+
+    case 'REFUND': {
+      if (!['FINANCE_ADMIN', 'SUPER_ADMIN'].includes(actor.role)) {
+        return fail('Only finance can refund an order.', 403);
+      }
+      const result = await executeRefund({
+        orderId: params.id,
+        amount: parsed.data.amount,
+        gatewayReference: parsed.data.reference,
+        reason: parsed.data.reason ?? parsed.data.note,
+        actor: { id: actor.id, name: actor.name, role: actor.role },
+      });
+      if (!result.ok) return fail(result.reason ?? 'Failed to refund order.', 409);
+      return ok(result.order);
     }
   }
 });

@@ -45,7 +45,7 @@ export function OrderTimeline({
     timeline.map((entry) => [entry.status === 'PENDING' ? 'AWAITING_PAYMENT' : entry.status, entry]),
   );
 
-  const terminated = status === 'CANCELLED' || status === 'DISPUTED';
+  const terminated = status === 'CANCELLED' || status === 'DISPUTED' || status === 'REFUNDED';
   const hasCollection = reached.has('READY_FOR_COLLECTION') || status === 'READY_FOR_COLLECTION';
 
   const path = hasCollection
@@ -64,7 +64,15 @@ export function OrderTimeline({
   const steps = terminated
     ? [
         ...path.filter((step) => reached.has(step.code)),
-        { code: status, label: status === 'CANCELLED' ? 'Cancelled' : 'Disputed' },
+        {
+          code: status,
+          label:
+            status === 'CANCELLED'
+              ? 'Cancelled'
+              : status === 'REFUNDED'
+                ? 'Refunded'
+                : 'Disputed',
+        },
       ]
     : path;
 
@@ -81,6 +89,7 @@ export function OrderTimeline({
           const done = index <= lastReachedIndex;
           const isCurrent = index === lastReachedIndex;
           const isFailure = terminated && index === steps.length - 1;
+          const isRefund = isFailure && status === 'REFUNDED';
 
           return (
             <li key={step.code} className="relative flex flex-1 flex-col items-center text-center">
@@ -93,7 +102,7 @@ export function OrderTimeline({
                     transition={{ delay: 0.1 + index * 0.09, duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
                     className={cn(
                       'block h-full origin-left',
-                      isFailure ? 'bg-danger' : 'bg-forest',
+                      isFailure ? (isRefund ? 'bg-slateish-ink' : 'bg-danger') : 'bg-forest',
                     )}
                   />
                 </span>
@@ -106,7 +115,9 @@ export function OrderTimeline({
                 className={cn(
                   'relative z-10 flex h-8 w-8 items-center justify-center rounded-full border-2 font-mono text-[11px] font-semibold tabular-nums',
                   isFailure
-                    ? 'border-danger bg-danger text-white'
+                    ? isRefund
+                      ? 'border-slateish-ink bg-slateish-ink text-white'
+                      : 'border-danger bg-danger text-white'
                     : done
                       ? 'border-forest bg-forest text-white'
                       : 'border-hairline-strong bg-surface-raised text-muted',
@@ -119,7 +130,13 @@ export function OrderTimeline({
               <p
                 className={cn(
                   'mt-2.5 px-1 text-[12.5px] font-medium',
-                  isFailure ? 'text-danger-ink' : done ? 'text-ink' : 'text-muted',
+                  isFailure
+                    ? isRefund
+                      ? 'text-slateish-ink font-semibold'
+                      : 'text-danger-ink'
+                    : done
+                      ? 'text-ink'
+                      : 'text-muted',
                 )}
               >
                 {step.label}

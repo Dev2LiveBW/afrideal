@@ -24,19 +24,21 @@ function sinceLabel(placedAt: string): string {
 }
 
 export default async function AdminPayablesPage() {
-  const [session, records, suppliers, orders, payments] = await Promise.all([
+  const [session, records, suppliers, orders, payments, disputes] = await Promise.all([
     auth(),
     readAll('supplier-payables'),
     readAll('suppliers'),
     readAll('orders'),
     readAll('payments'),
+    readAll('disputes'),
   ]);
 
   const notifications = session?.user ? await getNotifications(session.user.id) : [];
   const summary = summarise(records);
 
   const supplierName = new Map(suppliers.map((supplier) => [supplier.id, supplier.name]));
-  const orderReference = new Map(orders.map((order) => [order.id, order.reference]));
+  const orderById = new Map(orders.map((order) => [order.id, order]));
+  const disputeOrderIds = new Set(disputes.map((d) => d.order_id));
 
   // Spec 0003: the orders whose money has not arrived. Uses the effective status so
   // an order whose window has already closed is not offered up for confirmation.
@@ -50,11 +52,18 @@ export default async function AdminPayablesPage() {
 
   const rows: PayableRow[] = [...records]
     .sort((a, b) => b.raised_at.localeCompare(a.raised_at))
-    .map((record) => ({
-      record,
-      supplierName: supplierName.get(record.supplier_id) ?? record.supplier_id,
-      orderReference: orderReference.get(record.order_id) ?? record.order_id,
-    }));
+    .map((record) => {
+      const order = orderById.get(record.order_id);
+      return {
+        record,
+        supplierName: supplierName.get(record.supplier_id) ?? record.supplier_id,
+        orderReference: order?.reference ?? record.order_id,
+        orderId: record.order_id,
+        orderStatus: order?.status ?? 'PROCESSING',
+        orderTotal: order?.total ?? record.amount,
+        hasDispute: disputeOrderIds.has(record.order_id) || record.status === 'ON_HOLD',
+      };
+    });
 
   return (
     <>
@@ -122,7 +131,7 @@ export default async function AdminPayablesPage() {
           <AwaitingPaymentQueue rows={awaiting} canConfirm={canConfirm} />
         </Panel>
 
-        <PayablesQueue rows={rows} />
+        <PayablesQueue rows={rows} canRefund={canConfirm} />
       </div>
     </>
   );

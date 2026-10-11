@@ -171,7 +171,8 @@ export type OrderStatus =
   | 'READY_FOR_COLLECTION'
   | 'DELIVERED'
   | 'DISPUTED'
-  | 'CANCELLED';
+  | 'CANCELLED'
+  | 'REFUNDED';
 
 /**
  * `EFT` is a bank transfer the buyer makes and finance confirms by hand (spec
@@ -222,6 +223,10 @@ export interface Order {
   updated_at: string;
   timeline: OrderTimelineEntry[];
   internal_notes: string;
+  refund_amount?: number;
+  refund_reference?: string | null;
+  refund_reason?: string | null;
+  refunded_at?: string | null;
 }
 
 export interface OrderItem {
@@ -344,6 +349,8 @@ export interface SupplierPayable {
   /** Agreed supplier payment terms, in days from delivery confirmation. */
   terms_days: number;
   history: PayableTransition[];
+  credit_note_for_payable_id?: string | null;
+  reason?: string;
 }
 
 export type DisputeStatus =

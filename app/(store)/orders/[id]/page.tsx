@@ -193,6 +193,26 @@ export default async function OrderTrackingPage({
         </div>
       )}
 
+      {order.status === 'REFUNDED' && (
+        <div className="mb-7 flex items-start gap-3 rounded-md border border-slateish-ink/20 bg-slateish-wash px-5 py-4">
+          <RotateCcw size={18} strokeWidth={1.5} className="mt-0.5 shrink-0 text-slateish-ink" />
+          <div>
+            <p className="text-[14px] font-semibold text-ink">Order refunded</p>
+            <p className="mt-1 text-[13px] leading-5 text-ink/85">
+              A refund of <strong>BWP {(order.refund_amount ?? order.total).toFixed(2)}</strong> has been processed to your original payment method.
+              {order.refund_reference && (
+                <> (Gateway reference: <span className="font-mono font-medium">{order.refund_reference}</span>)</>
+              )}
+            </p>
+            {order.refund_reason && (
+              <p className="mt-1 text-[12.5px] text-muted">
+                Reason: {order.refund_reason}
+              </p>
+            )}
+          </div>
+        </div>
+      )}
+
       <div className="flex flex-col gap-10 lg:flex-row lg:gap-12">
         <AccountSidebar
           name={order.customer_name}

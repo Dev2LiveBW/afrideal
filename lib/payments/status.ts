@@ -76,7 +76,7 @@ export function allAsDisplayed(orders: Order[], payments: Payment[], now = new D
  */
 export function isBillable(order: Order, payments: Payment[], now = new Date()): boolean {
   const status = effectiveOrderStatus(order, payments, now);
-  return status !== 'CANCELLED' && status !== 'AWAITING_PAYMENT';
+  return status !== 'CANCELLED' && status !== 'AWAITING_PAYMENT' && status !== 'REFUNDED';
 }
 
 /** Revenue bearing orders out of a list, in one call. */

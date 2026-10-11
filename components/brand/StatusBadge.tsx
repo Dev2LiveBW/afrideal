@@ -35,6 +35,7 @@ const STATUS_TONES: Record<string, Tone> = {
   DELIVERED: 'green',
   DISPUTED: 'red',
   CANCELLED: 'inert',
+  REFUNDED: 'slate',
 
   // Supplier payables
   SETTLED: 'green',
