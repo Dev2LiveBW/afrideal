@@ -42,8 +42,21 @@ export class MockProviderInProductionError extends Error {
 
 function usingMock(): boolean {
   const mock = process.env.PAYMENTS_PROVIDER === 'mock';
-  if (mock && process.env.NODE_ENV === 'production') throw new MockProviderInProductionError();
+  if (mock && process.env.NODE_ENV === 'production' && process.env.ALLOW_MOCK_PAYMENTS !== 'true') {
+    throw new MockProviderInProductionError();
+  }
   return mock;
+}
+
+/**
+ * Whether the stand-in hosted page may exist. Never throws: in production the
+ * page answers 404, and checkout is what fails loudly (usingMock above).
+ * An explicit ALLOW_MOCK_PAYMENTS='true' allows E2E suites running against
+ * production builds to test the mock gateway.
+ */
+export function mockGatewayAvailable(): boolean {
+  if (process.env.ALLOW_MOCK_PAYMENTS === 'true') return true;
+  return process.env.NODE_ENV !== 'production' && process.env.PAYMENTS_PROVIDER === 'mock';
 }
 
 /**
@@ -76,13 +89,20 @@ export async function startPayment(order: Order): Promise<StartedPayment> {
     };
   }
 
-  // The mock has no hosted page yet, so there is nowhere to send the buyer: the
-  // order sits at AWAITING_PAYMENT until a signed callback arrives. The real
-  // gateway adapter fills `redirectUrl` in when DPO Pay is approved.
+  const providerReference = `${provider}-${order.id}-${Date.now().toString(36)}`;
+
+  // The mock has a stand-in hosted page (app/mock-gateway) that confirms through
+  // the signed callback, exactly as the real gateway will. Only the reference
+  // travels in the URL: the page reads the amount from the stored attempt, so
+  // editing the address bar cannot change what gets confirmed. The real gateway
+  // adapter fills `redirectUrl` in when DPO Pay is approved.
+  const redirectUrl =
+    provider === 'MOCK' ? `/mock-gateway?reference=${encodeURIComponent(providerReference)}` : null;
+
   return {
     provider,
-    providerReference: `${provider}-${order.id}-${Date.now().toString(36)}`,
-    redirectUrl: null,
+    providerReference,
+    redirectUrl,
     instructions: null,
   };
 }

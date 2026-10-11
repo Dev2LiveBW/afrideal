@@ -24,8 +24,8 @@ export async function demoSignInTicket(email: string): Promise<{ ticket: string 
   if (!(await isDemoSignInEnabled())) return { error: 'Demo sign-in is switched off here.' };
   if (!ALL_DEMO_ACCOUNTS.some((account) => account.email === email)) return { error: 'Not a demo account.' };
 
-  // From Botswana a single Clerk API call fails now and then; one retry covers it.
-  for (let attempt = 1; ; attempt++) {
+  // From Botswana a single Clerk API call fails now and then; retry with backoff.
+  for (let attempt = 1; attempt <= 4; attempt++) {
     try {
       const clerk = await clerkClient();
       const { data } = await clerk.users.getUserList({ emailAddress: [email] });
@@ -34,10 +34,12 @@ export async function demoSignInTicket(email: string): Promise<{ ticket: string 
       const token = await clerk.signInTokens.createSignInToken({ userId: user.id, expiresInSeconds: 120 });
       return { ticket: token.token };
     } catch (error) {
-      if (attempt >= 2) {
+      if (attempt >= 4) {
         console.error('[afrideal] demo sign-in ticket failed', error);
         return { error: 'Could not reach Clerk. Try again in a moment.' };
       }
+      await new Promise((resolve) => setTimeout(resolve, 1000 * attempt));
     }
   }
+  return { error: 'Could not reach Clerk.' };
 }

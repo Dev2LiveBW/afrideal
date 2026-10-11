@@ -298,6 +298,8 @@ export async function remove<C extends Collection>(collection: C, id: string): P
   });
 }
 
+const inMemoryCounters = new Map<string, number>();
+
 /**
  * The next `count` ids for a collection, e.g. `nextIds('order-items', 'oi', 3)`
  * → `['oi024', 'oi025', 'oi026']`. Scans existing ids rather than counting
@@ -319,8 +321,15 @@ export async function nextIds<C extends Collection>(
     return Number.isFinite(n) && n > max ? n : max;
   }, 0);
 
-  const last =
-    DB_DRIVER === 'postgres' ? await reserveIds(`${collection}:${prefix}`, count, highest) : highest + count;
+  const key = `${collection}:${prefix}`;
+  let last: number;
+  if (DB_DRIVER === 'postgres') {
+    last = await reserveIds(key, count, highest);
+  } else {
+    const floor = Math.max(highest, inMemoryCounters.get(key) ?? 0);
+    last = floor + count;
+    inMemoryCounters.set(key, last);
+  }
   const first = last - count + 1;
   return Array.from({ length: count }, (_, i) => `${prefix}${String(first + i).padStart(width, '0')}`);
 }
