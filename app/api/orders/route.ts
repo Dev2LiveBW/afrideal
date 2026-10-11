@@ -13,7 +13,8 @@ import type { Order, OrderItem, OrderTimelineEntry, Payment } from '@/types';
 
 export const dynamic = 'force-dynamic';
 
-const DELIVERY_FEE = 45;
+const DOORSTEP_DELIVERY_FEE = 45;
+const COLLECTION_POINT_DELIVERY_FEE = 25;
 
 const CheckoutSchema = z.object({
   lines: z
@@ -26,6 +27,8 @@ const CheckoutSchema = z.object({
     )
     .min(1, 'Your cart is empty.'),
   payment_method: z.enum(['DPO_PAY', 'ORANGE_MONEY', 'PAYGATE', 'EFT']),
+  delivery_method: z.enum(['DOORSTEP', 'COLLECTION_POINT']).optional().default('DOORSTEP'),
+  collection_point: z.string().nullish(),
   delivery_address: z.string().min(4, 'Enter a delivery address.'),
   delivery_city: z.string().min(2, 'Enter a city.'),
 });
@@ -84,7 +87,7 @@ export const POST = handled(async (request: Request) => {
     return fail(parsed.error.issues[0]?.message ?? 'Invalid checkout payload.', 422);
   }
 
-  const { lines, payment_method, delivery_address, delivery_city } = parsed.data;
+  const { lines, payment_method, delivery_method, collection_point, delivery_address, delivery_city } = parsed.data;
 
   // Spec 0003, AC-8: checked before any pricing or supplier work, so a pause stops
   // an order at the door rather than part way through building one.
@@ -166,6 +169,10 @@ export const POST = handled(async (request: Request) => {
     { status: 'AWAITING_PAYMENT', label: 'Order placed, waiting for payment', at: now },
   ];
 
+  const isCollectionPoint = delivery_method === 'COLLECTION_POINT';
+  const delivery_fee = isCollectionPoint ? COLLECTION_POINT_DELIVERY_FEE : DOORSTEP_DELIVERY_FEE;
+  const resolvedAddress = isCollectionPoint && collection_point ? collection_point : delivery_address;
+
   // 3 - the customer-facing order. The reference follows the id (the seed
   // numbers o001 as AFD-24810), so it is unique for the same reason the id is;
   // a row count would repeat under concurrent checkouts.
@@ -176,16 +183,18 @@ export const POST = handled(async (request: Request) => {
     customer_name: actor.name,
     status: 'AWAITING_PAYMENT',
     subtotal,
-    delivery_fee: DELIVERY_FEE,
-    total: subtotal + DELIVERY_FEE,
+    delivery_fee,
+    total: subtotal + delivery_fee,
     payment_method,
     // Null until a payment confirms. It used to be invented from the clock here,
     // which is what made every order look paid the moment it was placed.
     payment_reference: null,
     payment_expires_at: paymentExpiresAt(now, payment_method),
     cancel_reason: null,
-    delivery_address,
+    delivery_address: resolvedAddress,
     delivery_city,
+    delivery_method,
+    collection_point: isCollectionPoint ? (collection_point || resolvedAddress) : null,
     placed_at: now,
     updated_at: now,
     timeline,

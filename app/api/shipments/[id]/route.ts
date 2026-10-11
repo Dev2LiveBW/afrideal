@@ -11,6 +11,7 @@ export const dynamic = 'force-dynamic';
 const PatchSchema = z.object({
   status: z.enum(['ASSIGNED', 'PICKED_UP', 'IN_TRANSIT', 'DELIVERED', 'FAILED']),
   runner_id: z.string().optional(),
+  locker_code: z.string().optional(),
 });
 
 const NEXT: Record<ShipmentStatus, ShipmentStatus[]> = {
@@ -72,17 +73,35 @@ export const PATCH = handled(async (request: Request, { params }: { params: { id
     if (order && order.status !== 'DISPUTED') {
       const legs = (await readAll('supplier-orders')).filter((leg) => leg.order_id === order.id);
       if (legs.every((leg) => leg.status === 'DELIVERED')) {
+        const isCollectionPoint = order.delivery_method === 'COLLECTION_POINT';
+        const targetStatus = isCollectionPoint ? 'READY_FOR_COLLECTION' : 'DELIVERED';
+        const note = isCollectionPoint
+          ? `Locker PIN: ${parsed.data.locker_code || 'LCK-8492'}`
+          : undefined;
+
         await update('orders', order.id, {
-          status: 'DELIVERED',
+          status: targetStatus,
           updated_at: now,
-          timeline: [...order.timeline, { status: 'DELIVERED', label: 'Delivered', at: now, actor: actor.name }],
+          timeline: [
+            ...order.timeline,
+            {
+              status: targetStatus,
+              label: isCollectionPoint ? 'Ready for collection at locker' : 'Delivered',
+              at: now,
+              actor: actor.name,
+              ...(note ? { note } : {}),
+            },
+          ],
         });
       }
 
+      const isCollectionPoint = order.delivery_method === 'COLLECTION_POINT';
       await notify({
         userId: order.customer_id,
-        title: 'Delivered',
-        body: `${order.reference} was delivered. Confirm receipt to close the order.`,
+        title: isCollectionPoint ? 'Ready for collection' : 'Delivered',
+        body: isCollectionPoint
+          ? `${order.reference} is ready for collection at ${order.collection_point || 'your locker'}. Locker PIN: ${parsed.data.locker_code || 'LCK-8492'}.`
+          : `${order.reference} was delivered. Confirm receipt to close the order.`,
         kind: 'ORDER',
       });
     }

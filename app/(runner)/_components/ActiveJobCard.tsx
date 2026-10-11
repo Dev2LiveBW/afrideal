@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { Camera, CheckCircle2, MapPin, Navigation, PackageCheck, Truck } from 'lucide-react';
+import { Camera, CheckCircle2, Lock, MapPin, Navigation, PackageCheck, Truck } from 'lucide-react';
 import toast from 'react-hot-toast';
 
 import { ActionButton } from '@/components/brand/ActionButton';
@@ -46,14 +46,20 @@ export function ActiveJobCard({
 }) {
   const router = useRouter();
   const [saving, setSaving] = useState(false);
+  const [lockerCode, setLockerCode] = useState('LCK-8492');
 
-  async function advance(status: ShipmentStatus) {
+  const isCollectionPoint =
+    job.order?.delivery_method === 'COLLECTION_POINT' ||
+    job.dropoff_name.toLowerCase().includes('locker') ||
+    job.dropoff_address.toLowerCase().includes('locker');
+
+  async function advance(status: ShipmentStatus, lockerPin?: string) {
     setSaving(true);
     try {
       const response = await fetch(`/api/shipments/${job.id}`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ status }),
+        body: JSON.stringify({ status, locker_code: lockerPin }),
       });
 
       if (!response.ok) {
@@ -61,7 +67,13 @@ export function ActiveJobCard({
         throw new Error(error ?? 'Could not update this job.');
       }
 
-      toast.success(status === 'DELIVERED' ? 'Delivery confirmed - nice work' : PHASE_LABELS[status]);
+      toast.success(
+        status === 'DELIVERED'
+          ? isCollectionPoint
+            ? 'Dropped off at locker - nice work'
+            : 'Delivery confirmed - nice work'
+          : PHASE_LABELS[status],
+      );
       router.refresh();
     } catch (error) {
       toast.error(error instanceof Error ? error.message : 'Could not update this job.');
@@ -113,31 +125,68 @@ export function ActiveJobCard({
         <div className="mt-4 border-t border-hairline pt-4">
           {job.status === 'IN_TRANSIT' ? (
             variant === 'full' ? (
-              <div className="space-y-3">
-                <div className="flex items-center gap-3 rounded-md border border-dashed border-hairline-strong bg-surface px-3.5 py-3 text-muted">
-                  <Camera size={18} strokeWidth={1.5} className="shrink-0" />
-                  <p className="text-[12px] leading-4">
-                    Photo capture placeholder - not wired up in this preview build.
-                  </p>
+              isCollectionPoint ? (
+                <div className="space-y-3">
+                  <div className="rounded-md border border-hairline-strong bg-surface p-3.5 space-y-2">
+                    <div className="flex items-center gap-2 text-ink">
+                      <Lock size={16} strokeWidth={1.5} className="text-forest" />
+                      <p className="text-[13px] font-medium">Smart Locker Drop-off</p>
+                    </div>
+                    <p className="text-[12px] leading-4 text-muted">
+                      Deposit the parcel into the locker and enter the confirmation PIN for the recipient.
+                    </p>
+                    <div>
+                      <label htmlFor="locker-code" className="block text-[11px] font-medium uppercase tracking-wider text-muted mb-1">
+                        Locker confirmation code
+                      </label>
+                      <input
+                        id="locker-code"
+                        type="text"
+                        value={lockerCode}
+                        onChange={(e) => setLockerCode(e.target.value)}
+                        placeholder="e.g. LCK-8492"
+                        className="w-full rounded border border-hairline-strong bg-surface-raised px-3 py-1.5 font-mono text-[13px] text-ink focus:border-forest focus:outline-none"
+                      />
+                    </div>
+                  </div>
+                  <ActionButton
+                    className="w-full"
+                    size="lg"
+                    variant="forest"
+                    icon={<CheckCircle2 size={16} strokeWidth={1.5} />}
+                    loading={saving}
+                    onClick={() => advance('DELIVERED', lockerCode)}
+                  >
+                    Drop off at Collection Point
+                  </ActionButton>
                 </div>
-                <ActionButton
-                  className="w-full"
-                  size="lg"
-                  variant="forest"
-                  icon={<CheckCircle2 size={16} strokeWidth={1.5} />}
-                  loading={saving}
-                  onClick={() => advance('DELIVERED')}
-                >
-                  Confirm delivered
-                </ActionButton>
-              </div>
+              ) : (
+                <div className="space-y-3">
+                  <div className="flex items-center gap-3 rounded-md border border-dashed border-hairline-strong bg-surface px-3.5 py-3 text-muted">
+                    <Camera size={18} strokeWidth={1.5} className="shrink-0" />
+                    <p className="text-[12px] leading-4">
+                      Photo capture placeholder - not wired up in this preview build.
+                    </p>
+                  </div>
+                  <ActionButton
+                    className="w-full"
+                    size="lg"
+                    variant="forest"
+                    icon={<CheckCircle2 size={16} strokeWidth={1.5} />}
+                    loading={saving}
+                    onClick={() => advance('DELIVERED')}
+                  >
+                    Confirm delivered
+                  </ActionButton>
+                </div>
+              )
             ) : (
               <Link
                 href="/runner/jobs"
                 className="flex min-h-[44px] w-full items-center justify-center gap-2 rounded-full bg-forest px-6 text-[14px] font-medium text-white transition-colors hover:bg-forest-light"
               >
                 <CheckCircle2 size={16} strokeWidth={1.5} />
-                Confirm delivery
+                {isCollectionPoint ? 'Drop off at Collection Point' : 'Confirm delivery'}
               </Link>
             )
           ) : action ? (

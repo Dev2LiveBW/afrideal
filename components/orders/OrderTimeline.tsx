@@ -46,12 +46,27 @@ export function OrderTimeline({
   );
 
   const terminated = status === 'CANCELLED' || status === 'DISPUTED';
-  const steps = terminated
+  const hasCollection = reached.has('READY_FOR_COLLECTION') || status === 'READY_FOR_COLLECTION';
+
+  const path = hasCollection
     ? [
-        ...HAPPY_PATH.filter((step) => reached.has(step.code)),
-        { code: status, label: status === 'CANCELLED' ? 'Cancelled' : 'Disputed' },
+        { code: 'AWAITING_PAYMENT', label: 'Placed' },
+        { code: 'PAID', label: 'Paid' },
+        { code: 'PROCESSING', label: 'Preparing' },
+        { code: 'COLLECTED', label: 'Collected' },
+        { code: 'IN_TRANSIT', label: 'In transit' },
+        { code: 'READY_FOR_COLLECTION', label: 'At locker' },
+        { code: 'DELIVERED', label: 'Delivered' },
+        { code: 'SETTLED', label: 'Supplier settled' },
       ]
     : HAPPY_PATH;
+
+  const steps = terminated
+    ? [
+        ...path.filter((step) => reached.has(step.code)),
+        { code: status, label: status === 'CANCELLED' ? 'Cancelled' : 'Disputed' },
+      ]
+    : path;
 
   const lastReachedIndex = steps.reduce(
     (last, step, index) => (reached.has(step.code) ? index : last),

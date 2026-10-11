@@ -84,14 +84,24 @@ export default async function OrderTrackingPage({
   const lastFailed = latestAttempt?.status === 'FAILED';
   const bankDetails = awaitingPayment && isBankTransfer ? await bankTransferDetails() : null;
 
-  const canConfirm = order.status === 'IN_TRANSIT' || order.status === 'DELIVERED';
+  const canConfirm =
+    order.status === 'IN_TRANSIT' ||
+    order.status === 'READY_FOR_COLLECTION' ||
+    order.status === 'DELIVERED';
   const canDispute = outstanding.length > 0 && order.status !== 'CANCELLED';
+  const isCollectionPoint = order.delivery_method === 'COLLECTION_POINT';
+
+  const lockerPinEntry = [...order.timeline]
+    .reverse()
+    .find((t) => t.note?.includes('Locker PIN') || (t.status === 'READY_FOR_COLLECTION' && t.note));
+  const lockerPinMatch = lockerPinEntry?.note?.match(/Locker PIN:\s*([A-Za-z0-9-]+)/i);
+  const lockerPin = lockerPinMatch ? lockerPinMatch[1] : (lockerPinEntry?.note ?? null);
 
   const expected = new Date(order.placed_at);
   expected.setDate(expected.getDate() + 3);
 
   return (
-    <div className="mx-auto max-w-market px-6 pb-24 pt-28">
+    <div className="mx-auto max-w-market px-4 pb-24 pt-20 sm:px-6 sm:pt-28">
       {/*
         Spec 0003: this used to say "Your payment has been processed" the instant an
         order was placed, which was never true and is now plainly false. What the
@@ -163,6 +173,24 @@ export default async function OrderTrackingPage({
             </div>
           </div>
         )
+      )}
+
+      {order.status === 'READY_FOR_COLLECTION' && (
+        <div className="mb-7 flex items-start gap-3 rounded-md border border-forest/30 bg-forest-wash px-5 py-4">
+          <Lock size={18} strokeWidth={1.5} className="mt-0.5 shrink-0 text-forest" />
+          <div>
+            <p className="text-[14px] font-semibold text-forest-ink">Ready for collection</p>
+            <p className="mt-1 text-[13px] leading-5 text-forest-ink/85">
+              Your package is waiting at <strong>{order.collection_point || order.delivery_address}</strong>.
+            </p>
+            {lockerPin && (
+              <div className="mt-3 inline-flex items-center gap-2 rounded border border-forest/20 bg-surface px-3 py-1.5 text-ink">
+                <span className="text-[12px] font-medium text-muted">Locker PIN:</span>
+                <span className="font-mono text-[14px] font-bold tracking-wider text-forest-ink">{lockerPin}</span>
+              </div>
+            )}
+          </div>
+        </div>
       )}
 
       <div className="flex flex-col gap-10 lg:flex-row lg:gap-12">
@@ -262,12 +290,19 @@ export default async function OrderTrackingPage({
 
           <div className="mt-6 grid gap-6 lg:grid-cols-[minmax(0,1fr)_minmax(0,320px)]">
             <section className="rounded-md border border-hairline bg-surface-raised p-5">
-              <h2 className="text-[15px] font-semibold text-ink">Delivery</h2>
+              <h2 className="text-[15px] font-semibold text-ink">
+                {order.delivery_method === 'COLLECTION_POINT' ? 'Collection Point' : 'Delivery'}
+              </h2>
               <div className="mt-4 flex items-start gap-3">
                 <MapPin size={16} strokeWidth={1.5} className="mt-0.5 shrink-0 text-muted" />
                 <div>
-                  <p className="text-[14px] text-ink">{order.delivery_address}</p>
+                  <p className="text-[14px] font-medium text-ink">{order.delivery_address}</p>
                   <p className="text-[13px] text-body">{order.delivery_city}, Botswana</p>
+                  {order.delivery_method === 'COLLECTION_POINT' && (
+                    <p className="mt-2 text-[12px] text-muted">
+                      Your order will be held in a secure locker. You will receive your locker PIN once runner drop-off is complete.
+                    </p>
+                  )}
                 </div>
               </div>
             </section>
@@ -290,6 +325,24 @@ export default async function OrderTrackingPage({
                         <MoneyText amount={order.delivery_fee} size="sm" />
                       </dd>
                     </div>
+                    {items.some((item) => {
+                      const p = products.find((prod) => prod.id === item.product_id);
+                      return p ? p.country_of_origin !== 'BW' : false;
+                    }) && (
+                      <div className="flex items-center justify-between">
+                        <dt className="flex items-center gap-1.5 text-body">
+                          <span>Customs & Duty</span>
+                          <span className="rounded bg-forest-wash px-1.5 py-0.5 font-mono text-[10px] font-medium uppercase tracking-wider text-forest-ink">
+                            Included
+                          </span>
+                        </dt>
+                        <dd className="text-right">
+                          <span className="text-[12.5px] font-medium text-forest">
+                            Covered by AfriDeal
+                          </span>
+                        </dd>
+                      </div>
+                    )}
                     <div className="flex items-baseline justify-between border-t border-hairline pt-3">
                       <dt className="font-medium text-ink">Total</dt>
                       <dd>
@@ -381,6 +434,7 @@ export default async function OrderTrackingPage({
                 orderAmount={orderValue}
                 canConfirm={canConfirm && outstanding.length > 0}
                 canDispute={canDispute}
+                isCollectionPoint={isCollectionPoint}
               />
             </div>
           </div>

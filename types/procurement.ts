@@ -120,7 +120,7 @@ export interface CustomerPrice {
 }
 
 /** §21 - a buyer asking for a price on a quantity nobody has listed. */
-export type RfqStatus = 'SUBMITTED' | 'SOURCING' | 'QUOTED' | 'ACCEPTED' | 'DECLINED' | 'EXPIRED';
+export type RfqStatus = 'SUBMITTED' | 'SOURCING' | 'QUOTED' | 'ORDERED' | 'ACCEPTED' | 'DECLINED' | 'EXPIRED';
 
 export interface Rfq {
   id: string;
@@ -137,6 +137,8 @@ export interface Rfq {
   required_delivery_date: string | null;
   notes: string;
   status: RfqStatus;
+  order_id?: string | null;
+  quoted_unit_price?: number | null;
   created_at: string;
   updated_at: string;
 }

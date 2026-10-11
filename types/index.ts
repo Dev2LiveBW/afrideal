@@ -168,6 +168,7 @@ export type OrderStatus =
   | 'PENDING'
   | 'PROCESSING'
   | 'IN_TRANSIT'
+  | 'READY_FOR_COLLECTION'
   | 'DELIVERED'
   | 'DISPUTED'
   | 'CANCELLED';
@@ -215,6 +216,8 @@ export interface Order {
   cancel_reason: CancelReason | null;
   delivery_address: string;
   delivery_city: string;
+  delivery_method?: 'DOORSTEP' | 'COLLECTION_POINT';
+  collection_point?: string | null;
   placed_at: string;
   updated_at: string;
   timeline: OrderTimelineEntry[];

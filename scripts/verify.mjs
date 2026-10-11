@@ -1076,6 +1076,19 @@ section('15. RFQ — quotation requests');
         body: JSON.stringify({ action: 'SELECT_RESPONSE', response_id: target.id }),
       });
       check('staff can select a winning quote', selected.status === 200, `got ${selected.status}`);
+      check('a chosen quote creates an order', Boolean(selected.body?.order?.id), `got ${selected.body?.order?.id}`);
+      check('the order starts as AWAITING_PAYMENT', selected.body?.order?.status === 'AWAITING_PAYMENT');
+      check('the order is linked to the rfq customer', selected.body?.order?.customer_id === created.body?.rfq?.customer_id);
+
+      const rfqAfter = (await json(business, `/api/rfqs/${rfqId}`)).body;
+      check('rfq is marked ORDERED', rfqAfter?.rfq?.status === 'ORDERED', `got ${rfqAfter?.rfq?.status}`);
+      check('rfq references the created order', rfqAfter?.rfq?.order_id === selected.body?.order?.id);
+
+      const buyerOrders = (await json(business, '/api/orders')).body;
+      check(
+        'the quotation order appears in buyer orders list',
+        Array.isArray(buyerOrders) && buyerOrders.some((o) => o.id === selected.body?.order?.id),
+      );
     }
 
     const runner = sessions['runner@afrideal.co.bw'].jar;
