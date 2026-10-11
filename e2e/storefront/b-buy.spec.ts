@@ -47,14 +47,20 @@ test.describe('B. Buying and tracking', () => {
     await page.getByRole('textbox', { name: 'Street address or plot number' }).fill('Plot 5412, Extension 12');
     await page.getByRole('textbox', { name: 'City or town' }).fill('Gaborone');
     await expect(page.getByRole('radio', { name: /DPO Pay/ })).toBeChecked();
-    await expect(page.getByText('Total to pay').locator('xpath=following-sibling::*[1]')).toHaveText(bwp(337));
-    await clickAndSave(page.getByRole('button', { name: 'Place order' }));
+    await expect(page.getByText('Total to pay').first().locator('xpath=following-sibling::*[1]')).toHaveText(bwp(337));
+    await clickAndSave(page.getByRole('button', { name: 'Place order' }).filter({ visible: true }));
 
-    // The confirmation: a reference, the right sums, no money taken yet (simulated).
+    // The payment gateway handoff (Feature 4)
+    if (await page.waitForURL(/mock-gateway/, { timeout: 10_000 }).then(() => true, () => false)) {
+      await page.getByRole('textbox', { name: 'Card number' }).fill('4242424242424242');
+      await page.getByRole('button', { name: 'Pay' }).click();
+    }
+
+    // The confirmation: a reference, the right sums
     await page.waitForURL(/\/orders\/o\d+\?placed=1/);
     await caption(page, 'B02 · 4. Order confirmed, with its AFD reference and timeline');
     await expectHealthy(page);
-    await expect(page.getByText('Order confirmed')).toBeVisible();
+    await expect(page.getByText(/Order confirmed|Payment confirmed/)).toBeVisible();
     const reference = (await page.getByRole('heading', { level: 1, name: /^AFD-\d+$/ }).textContent())!.trim();
     await expect(page.getByText('Total', { exact: true }).locator('xpath=following-sibling::*[1]')).toHaveText(bwp(337));
     await expect(page.getByText('Plot 5412, Extension 12')).toBeVisible();
@@ -67,8 +73,21 @@ test.describe('B. Buying and tracking', () => {
   });
 
   test('B04 an order shows its progress on a timeline @p1', async ({ page }) => {
-    // o005 (AFD-24814) is seeded in transit.
-    await page.goto('/orders/o005');
+    // Start at /orders: assert healthy list, no mojibake, rows <= 120px
+    await page.goto('/orders');
+    await expectHealthy(page);
+    const orderLink = page.getByRole('link', { name: /AFD-24814/ });
+    await expect(orderLink).toBeVisible();
+
+    const box = await orderLink.boundingBox();
+    expect(box).not.toBeNull();
+    if (box) {
+      expect(box.height).toBeLessThanOrEqual(120);
+    }
+
+    // Open the in-transit order and track its timeline
+    await orderLink.click();
+    await page.waitForURL(/\/orders\/o005/);
     await expectHealthy(page);
     await expect(page.getByRole('heading', { level: 1, name: 'AFD-24814' })).toBeVisible();
     for (const step of ['Placed', 'Paid', 'Preparing', 'Collected', 'In transit', 'Delivered']) {

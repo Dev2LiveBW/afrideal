@@ -59,7 +59,7 @@ export default async function OrdersPage() {
     .sort((a, b) => b.placed_at.localeCompare(a.placed_at));
 
   return (
-    <div className="mx-auto max-w-market px-6 pb-24 pt-28">
+    <div className="mx-auto max-w-market px-4 pb-24 pt-20 sm:px-6 sm:pt-28">
       <h1 className="font-display text-headline-lg font-semibold text-ink">Your orders</h1>
       <p className="measure mt-2 text-[14px] leading-6 text-body">
         Every order here is covered by AfriDeal buyer protection. Confirm each one as it arrives,
@@ -89,47 +89,55 @@ export default async function OrdersPage() {
               <li key={order.id}>
                 <Link
                   href={`/orders/${order.id}`}
-                  className="group flex flex-wrap items-center gap-5 rounded-md border border-hairline bg-surface-raised p-5 transition-all duration-400 ease-[cubic-bezier(0.16,1,0.3,1)] hover:border-gold/30 hover:shadow-lift"
+                  className="group block rounded-md border border-hairline bg-surface-raised p-3.5 transition-all duration-300 hover:border-gold/30 hover:shadow-lift sm:p-5"
                 >
-                  <div className="flex -space-x-2" aria-hidden="true">
-                    {items.slice(0, 3).map((item) => (
-                      <Swatch
-                        key={item.id}
-                        image={primaryImage.get(item.product_id)}
-                        fallback={['#ECEBE7', '#8A918B']}
-                        emoji={item.emoji}
-                        className="h-11 w-11 rounded-full border-2 border-surface-raised"
-                        glyphClassName="text-[19px]"
-                        zoomOnHover={false}
-                      />
-                    ))}
-                    {items.length > 3 && (
-                      <span className="flex h-11 w-11 items-center justify-center rounded-full border-2 border-surface-raised bg-ink font-mono text-[11px] font-semibold text-white">
-                        +{items.length - 3}
+                  <div className="flex items-center gap-3 sm:gap-4">
+                    <div className="flex shrink-0 -space-x-2" aria-hidden="true">
+                      {items.slice(0, 3).map((item) => (
+                        <Swatch
+                          key={item.id}
+                          image={primaryImage.get(item.product_id)}
+                          fallback={['#ECEBE7', '#8A918B']}
+                          emoji={item.emoji}
+                          className="h-10 w-10 rounded-full border-2 border-surface-raised sm:h-11 sm:w-11"
+                          glyphClassName="text-[17px] sm:text-[19px]"
+                          zoomOnHover={false}
+                        />
+                      ))}
+                      {items.length > 3 && (
+                        <span className="flex h-10 w-10 items-center justify-center rounded-full border-2 border-surface-raised bg-ink font-mono text-[10px] font-semibold text-white sm:h-11 sm:w-11 sm:text-[11px]">
+                          +{items.length - 3}
+                        </span>
+                      )}
+                    </div>
+
+                    <div className="min-w-0 flex-1">
+                      <div className="flex items-center gap-2">
+                        <p className="font-mono text-[13px] font-medium tabular-nums text-ink">
+                          {order.reference}
+                        </p>
+                        <div className="sm:hidden">
+                          <StatusBadge status={order.status} size="sm" />
+                        </div>
+                      </div>
+                      <p className="mt-0.5 truncate text-[11.5px] text-body sm:text-[12.5px]">
+                        {shortDate(order.placed_at)} · {items.length}{' '}
+                        {items.length === 1 ? 'item' : 'items'} ·{' '}
+                        {PAYMENT_LABELS[order.payment_method] ?? order.payment_method}
+                      </p>
+                    </div>
+
+                    <div className="hidden sm:block">
+                      <StatusBadge status={order.status} />
+                    </div>
+
+                    <div className="shrink-0 text-right">
+                      <MoneyText amount={order.total} size="sm" tone="ink" />
+                      <span className="mt-0.5 block font-mono text-[10px] uppercase tracking-[0.14em] text-muted transition-colors group-hover:text-ink">
+                        Track →
                       </span>
-                    )}
+                    </div>
                   </div>
-
-                  <div className="min-w-0 flex-1">
-                    <p className="font-mono text-[13px] font-medium tabular-nums text-ink">
-                      {order.reference}
-                    </p>
-                    <p className="mt-0.5 text-[12.5px] text-body">
-                      {shortDate(order.placed_at)} Â· {items.length}{' '}
-                      {items.length === 1 ? 'item' : 'items'} Â·{' '}
-                      {PAYMENT_LABELS[order.payment_method] ?? order.payment_method}
-                    </p>
-                  </div>
-
-                  <StatusBadge status={order.status} />
-
-                  <div className="text-right">
-                    <MoneyText amount={order.total} size="md" tone="ink" />
-                  </div>
-
-                  <span className="font-mono text-[10px] uppercase tracking-[0.14em] text-muted transition-colors group-hover:text-ink">
-                    Track →
-                  </span>
                 </Link>
               </li>
             );

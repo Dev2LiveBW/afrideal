@@ -1,4 +1,4 @@
-import { expectHealthy, signedInAs, test } from '../support/fixtures';
+import { expect, expectHealthy, signedInAs, test } from '../support/fixtures';
 
 /**
  * Bugs the journeys found, kept as tests marked `test.fail()`.
@@ -10,14 +10,22 @@ import { expectHealthy, signedInAs, test } from '../support/fixtures';
 
 test.use(signedInAs('thabo'));
 
-test('K01 the order list shows no garbled characters', async ({ page }) => {
-  test.fail(true, 'app/(store)/orders/page.tsx prints "Â·" where a middle dot belongs.');
+test('K01 the order list shows no garbled characters and rows are under 120px', async ({ page }) => {
   await page.goto('/orders');
   await expectHealthy(page);
+  const rows = page.locator('main ul > li');
+  const count = await rows.count();
+  expect(count).toBeGreaterThan(0);
+  for (let i = 0; i < count; i++) {
+    const box = await rows.nth(i).boundingBox();
+    expect(box).not.toBeNull();
+    if (box) {
+      expect(box.height).toBeLessThanOrEqual(120);
+    }
+  }
 });
 
 test('K02 the runner request list shows no garbled characters', async ({ page }) => {
-  test.fail(true, 'app/(store)/requests/page.tsx prints "Â·" where a middle dot belongs.');
   await page.goto('/requests');
   await expectHealthy(page);
 });

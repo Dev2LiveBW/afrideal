@@ -79,7 +79,7 @@ export function V4Footer() {
 
         {/* Bottom Copyright */}
         <div className="flex flex-col sm:flex-row items-center justify-between gap-4 text-[11px] font-mono text-gray-500 pt-4 border-t border-white/5">
-          <p>Â© 2026 AfriDeal. All rights reserved.</p>
+          <p>© 2026 AfriDeal. All rights reserved.</p>
           <div className="flex items-center gap-4">
             <Link href="/legacy/v3" className="hover:text-gray-300">Classic Version</Link>
             <span>•</span>

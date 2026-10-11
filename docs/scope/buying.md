@@ -80,10 +80,10 @@ A finance page comparing orders paid in a period against the gateway's settlemen
 
 ## Slice 7: Reach
 
-### 20. Orders list clean up · Beta
+### 20. Orders list clean up · done
 Fix the stray `Â·` characters in the orders list and collapse each row's meta to two lines. The full rebuild is deferred.
 **Done when:** no mojibake anywhere in the orders list; each order row is 120px or less at 390px.
-- [ ] Build it: `/develop orders list clean up`
+- [x] Implemented in `app/(store)/orders/page.tsx`, `requests/page.tsx`, `v4-footer.tsx`; verified by Playwright guards `K01`, `K02` (`e2e/access/known-issues.spec.ts`) and Journey B04 (`e2e/storefront/b-buy.spec.ts`); reviewed in `docs/reviews/2026-10-11-feat-orders-list-cleanup.md`.
 
 ## Phase 1 close out
 
