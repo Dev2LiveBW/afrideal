@@ -134,12 +134,31 @@ function looksLikeJwt(token: string): boolean {
   }
 }
 
-export default function middleware(req: NextRequest, event: NextFetchEvent) {
+export default async function middleware(req: NextRequest, event: NextFetchEvent) {
   const authorization = req.headers.get('authorization');
   if (authorization?.startsWith('Bearer ') && !looksLikeJwt(authorization.slice('Bearer '.length).trim())) {
     return NextResponse.json({ error: 'Invalid session token.' }, { status: 401 });
   }
-  return withClerk(req, event);
+
+  // Prevent 500 MIDDLEWARE_INVOCATION_FAILED on Vercel preview environments missing Clerk keys
+  if (!process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY) {
+    if (isPublic(req)) return NextResponse.next();
+    return NextResponse.json(
+      { error: 'Authentication configuration missing. Please set NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY.' },
+      { status: 503 },
+    );
+  }
+
+  try {
+    return await withClerk(req, event);
+  } catch (error) {
+    console.error('[middleware] Clerk invocation error:', error);
+    if (isPublic(req)) return NextResponse.next();
+    return NextResponse.json(
+      { error: 'Authentication service temporarily unavailable.' },
+      { status: 503 },
+    );
+  }
 }
 
 export const config = {
