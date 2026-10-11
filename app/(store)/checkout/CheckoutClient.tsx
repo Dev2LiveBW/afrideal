@@ -17,16 +17,65 @@ import { resolvePrice } from '@/lib/pricing-tiers';
 import { cn } from '@/lib/utils';
 import type { CustomerPrice, CustomerType, PaymentMethod, Product } from '@/types';
 
-const DELIVERY_FEE = 45;
+const DOORSTEP_DELIVERY_FEE = 45;
+const COLLECTION_POINT_DELIVERY_FEE = 25;
 
-const CheckoutSchema = z.object({
-  delivery_address: z.string().min(4, 'Enter a street address or plot number.'),
-  delivery_city: z.string().min(2, 'Enter a city or town.'),
-  // `EFT` is accepted but has no card in GATEWAYS yet, so a buyer cannot pick it
-  // here. Spec 0003 needs the method to exist so finance can raise and confirm a
-  // bank transfer order; the checkout card for it comes with the phone checkout.
-  payment_method: z.enum(['DPO_PAY', 'ORANGE_MONEY', 'PAYGATE', 'EFT']),
-});
+export const COLLECTION_POINTS = [
+  {
+    id: 'gaborone-central-locker',
+    name: 'Gaborone Central Locker',
+    address: 'Station Mall, Plot 4931',
+    city: 'Gaborone',
+    fee: 25,
+    blurb: '24/7 Smart Locker pickup (BWP 25.00)',
+  },
+  {
+    id: 'francistown-main-mall',
+    name: 'Francistown Main Mall Locker',
+    address: 'Blue Jacket St, Main Mall',
+    city: 'Francistown',
+    fee: 30,
+    blurb: '24/7 Smart Locker pickup (BWP 30.00)',
+  },
+  {
+    id: 'maun-airport-locker',
+    name: 'Maun Airport Locker',
+    address: 'Airport Road',
+    city: 'Maun',
+    fee: 35,
+    blurb: 'Smart Locker pickup 06:00 - 22:00 (BWP 35.00)',
+  },
+] as const;
+
+const CheckoutSchema = z
+  .object({
+    delivery_method: z.enum(['DOORSTEP', 'COLLECTION_POINT']),
+    collection_point: z.string().optional(),
+    delivery_address: z.string().optional(),
+    delivery_city: z.string().optional(),
+    // `EFT` is accepted but has no card in GATEWAYS yet, so a buyer cannot pick it
+    // here. Spec 0003 needs the method to exist so finance can raise and confirm a
+    // bank transfer order; the checkout card for it comes with the phone checkout.
+    payment_method: z.enum(['DPO_PAY', 'ORANGE_MONEY', 'PAYGATE', 'EFT']),
+  })
+  .superRefine((data, ctx) => {
+    if (data.delivery_method === 'DOORSTEP') {
+      if (!data.delivery_address || data.delivery_address.trim().length < 4) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          path: ['delivery_address'],
+          message: 'Enter a street address or plot number.',
+        });
+      }
+      if (!data.delivery_city || data.delivery_city.trim().length < 2) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          path: ['delivery_city'],
+          message: 'Enter a city or town.',
+        });
+      }
+    }
+  });
 
 type CheckoutValues = z.infer<typeof CheckoutSchema>;
 
@@ -83,6 +132,8 @@ export function CheckoutClient({
   } = useForm<CheckoutValues>({
     resolver: zodResolver(CheckoutSchema),
     defaultValues: {
+      delivery_method: 'DOORSTEP',
+      collection_point: 'Gaborone Central Locker',
       delivery_address: '',
       delivery_city: 'Gaborone',
       payment_method: 'DPO_PAY',
@@ -90,6 +141,10 @@ export function CheckoutClient({
   });
 
   const selectedGateway = watch('payment_method');
+  const selectedDeliveryMethod = watch('delivery_method') ?? 'DOORSTEP';
+  const selectedCollectionPointName = watch('collection_point') ?? 'Gaborone Central Locker';
+  const selectedPoint =
+    COLLECTION_POINTS.find((p) => p.name === selectedCollectionPointName) ?? COLLECTION_POINTS[0];
   /*
    * Resolved per line for the quantity actually being ordered, mirroring the
    * orders route including the variant ratio. The summary a buyer approves must
@@ -115,10 +170,25 @@ export function CheckoutClient({
   const subtotal = mounted
     ? priced.reduce((sum, entry) => sum + entry.unitPrice * entry.line.qty, 0)
     : 0;
-  const total = subtotal + DELIVERY_FEE;
+  const deliveryFee =
+    selectedDeliveryMethod === 'COLLECTION_POINT' ? selectedPoint.fee : DOORSTEP_DELIVERY_FEE;
+  const total = subtotal + deliveryFee;
+
+  const hasImportedItems = cart.some((line) => {
+    const product = products.find((candidate) => candidate.id === line.product_id);
+    return product ? product.country_of_origin !== 'BW' : false;
+  });
 
   const onSubmit = handleSubmit(async (values) => {
     setApiError(null);
+
+    const isCollection = values.delivery_method === 'COLLECTION_POINT';
+    const point =
+      COLLECTION_POINTS.find((p) => p.name === values.collection_point) ?? COLLECTION_POINTS[0];
+    const finalAddress = isCollection
+      ? (values.collection_point ?? point.name)
+      : (values.delivery_address ?? '');
+    const finalCity = isCollection ? point.city : (values.delivery_city ?? 'Gaborone');
 
     const response = await fetch('/api/orders', {
       method: 'POST',
@@ -131,8 +201,10 @@ export function CheckoutClient({
           qty: line.qty,
         })),
         payment_method: values.payment_method,
-        delivery_address: values.delivery_address,
-        delivery_city: values.delivery_city,
+        delivery_method: values.delivery_method,
+        collection_point: isCollection ? finalAddress : null,
+        delivery_address: finalAddress,
+        delivery_city: finalCity,
       }),
     });
 
@@ -144,6 +216,12 @@ export function CheckoutClient({
     }
 
     clearCart();
+    // A hosted card page lives on the gateway's own domain, so this is a full
+    // navigation, not a client-side route change.
+    if (body.payment?.redirect_url) {
+      window.location.assign(body.payment.redirect_url);
+      return;
+    }
     router.push(`/orders/${body.order.id}?placed=1`);
   });
 
@@ -181,6 +259,7 @@ export function CheckoutClient({
       </h1>
 
       <form
+        id="checkout-form"
         onSubmit={onSubmit}
         className="mt-8 grid gap-10 lg:grid-cols-[minmax(0,1fr)_minmax(0,380px)] lg:gap-12"
       >
@@ -193,55 +272,135 @@ export function CheckoutClient({
               {customerEmail && ` (${customerEmail})`}.
             </p>
 
-            <div className="mt-5 space-y-4">
-              <div>
-                <label htmlFor="address" className="mb-1.5 block text-[13px] font-medium text-ink">
-                  Street address or plot number
-                </label>
-                <input
-                  id="address"
-                  {...register('delivery_address')}
-                  placeholder="Plot 5412, Extension 12"
-                  autoComplete="street-address"
-                  aria-invalid={errors.delivery_address ? 'true' : undefined}
-                  aria-describedby={errors.delivery_address ? 'address-error' : undefined}
-                  className={cn(
-                    'w-full rounded border bg-surface px-3.5 py-2.5 text-[14px] text-ink outline-none transition-colors',
-                    'placeholder:text-muted focus:border-gold/60',
-                    errors.delivery_address ? 'border-danger/60' : 'border-hairline-strong',
-                  )}
-                />
-                {errors.delivery_address && (
-                  <p id="address-error" role="alert" className="mt-1.5 text-[12px] text-danger-ink">
-                    {errors.delivery_address.message}
-                  </p>
+            {/* Delivery method choice */}
+            <div className="mt-4 grid gap-3 sm:grid-cols-2">
+              <label
+                className={cn(
+                  'flex cursor-pointer items-start gap-3 rounded-md border p-3.5 transition-all',
+                  selectedDeliveryMethod === 'DOORSTEP'
+                    ? 'border-gold bg-gold-50/60 ring-1 ring-inset ring-gold/30'
+                    : 'border-hairline-strong bg-surface hover:border-ink/25',
                 )}
-              </div>
+              >
+                <input
+                  type="radio"
+                  value="DOORSTEP"
+                  checked={selectedDeliveryMethod === 'DOORSTEP'}
+                  onChange={() => setValue('delivery_method', 'DOORSTEP')}
+                  className="mt-0.5 accent-gold"
+                />
+                <span className="min-w-0 flex-1">
+                  <span className="block text-[13.5px] font-medium text-ink">Doorstep delivery</span>
+                  <span className="mt-0.5 block text-[12px] text-body">
+                    By runner to your home or office (BWP 45.00)
+                  </span>
+                </span>
+              </label>
 
-              <div>
-                <label htmlFor="city" className="mb-1.5 block text-[13px] font-medium text-ink">
-                  City or town
-                </label>
-                <input
-                  id="city"
-                  {...register('delivery_city')}
-                  placeholder="Gaborone"
-                  autoComplete="address-level2"
-                  aria-invalid={errors.delivery_city ? 'true' : undefined}
-                  aria-describedby={errors.delivery_city ? 'city-error' : undefined}
-                  className={cn(
-                    'w-full rounded border bg-surface px-3.5 py-2.5 text-[14px] text-ink outline-none transition-colors',
-                    'placeholder:text-muted focus:border-gold/60',
-                    errors.delivery_city ? 'border-danger/60' : 'border-hairline-strong',
-                  )}
-                />
-                {errors.delivery_city && (
-                  <p id="city-error" role="alert" className="mt-1.5 text-[12px] text-danger-ink">
-                    {errors.delivery_city.message}
-                  </p>
+              <label
+                className={cn(
+                  'flex cursor-pointer items-start gap-3 rounded-md border p-3.5 transition-all',
+                  selectedDeliveryMethod === 'COLLECTION_POINT'
+                    ? 'border-gold bg-gold-50/60 ring-1 ring-inset ring-gold/30'
+                    : 'border-hairline-strong bg-surface hover:border-ink/25',
                 )}
-              </div>
+              >
+                <input
+                  type="radio"
+                  value="COLLECTION_POINT"
+                  checked={selectedDeliveryMethod === 'COLLECTION_POINT'}
+                  onChange={() => {
+                    setValue('delivery_method', 'COLLECTION_POINT');
+                    if (!watch('collection_point')) {
+                      setValue('collection_point', 'Gaborone Central Locker');
+                    }
+                  }}
+                  className="mt-0.5 accent-gold"
+                />
+                <span className="min-w-0 flex-1">
+                  <span className="block text-[13.5px] font-medium text-ink">Collection Point</span>
+                  <span className="mt-0.5 block text-[12px] text-body">
+                    Pickup from smart locker (from BWP 25.00)
+                  </span>
+                </span>
+              </label>
             </div>
+
+            {selectedDeliveryMethod === 'COLLECTION_POINT' ? (
+              <div className="mt-5 space-y-4 rounded-md border border-hairline bg-surface p-4">
+                <div>
+                  <label htmlFor="collection_point" className="mb-1.5 block text-[13px] font-medium text-ink">
+                    Select location
+                  </label>
+                  <select
+                    id="collection_point"
+                    aria-label="Select location"
+                    {...register('collection_point')}
+                    className="w-full rounded border border-hairline-strong bg-surface px-3.5 py-2.5 text-[14px] text-ink outline-none transition-colors focus:border-gold/60"
+                  >
+                    {COLLECTION_POINTS.map((point) => (
+                      <option key={point.id} value={point.name}>
+                        {point.name}
+                      </option>
+                    ))}
+                  </select>
+                  <p className="mt-2 text-[12.5px] text-body">
+                    {selectedPoint.address}, {selectedPoint.city} ·{' '}
+                    <span className="text-muted">{selectedPoint.blurb}</span>
+                  </p>
+                </div>
+              </div>
+            ) : (
+              <div className="mt-5 space-y-4">
+                <div>
+                  <label htmlFor="address" className="mb-1.5 block text-[13px] font-medium text-ink">
+                    Street address or plot number
+                  </label>
+                  <input
+                    id="address"
+                    {...register('delivery_address')}
+                    placeholder="Plot 5412, Extension 12"
+                    autoComplete="street-address"
+                    aria-invalid={errors.delivery_address ? 'true' : undefined}
+                    aria-describedby={errors.delivery_address ? 'address-error' : undefined}
+                    className={cn(
+                      'w-full rounded border bg-surface px-3.5 py-2.5 text-[14px] text-ink outline-none transition-colors',
+                      'placeholder:text-muted focus:border-gold/60',
+                      errors.delivery_address ? 'border-danger/60' : 'border-hairline-strong',
+                    )}
+                  />
+                  {errors.delivery_address && (
+                    <p id="address-error" role="alert" className="mt-1.5 text-[12px] text-danger-ink">
+                      {errors.delivery_address.message}
+                    </p>
+                  )}
+                </div>
+
+                <div>
+                  <label htmlFor="city" className="mb-1.5 block text-[13px] font-medium text-ink">
+                    City or town
+                  </label>
+                  <input
+                    id="city"
+                    {...register('delivery_city')}
+                    placeholder="Gaborone"
+                    autoComplete="address-level2"
+                    aria-invalid={errors.delivery_city ? 'true' : undefined}
+                    aria-describedby={errors.delivery_city ? 'city-error' : undefined}
+                    className={cn(
+                      'w-full rounded border bg-surface px-3.5 py-2.5 text-[14px] text-ink outline-none transition-colors',
+                      'placeholder:text-muted focus:border-gold/60',
+                      errors.delivery_city ? 'border-danger/60' : 'border-hairline-strong',
+                    )}
+                  />
+                  {errors.delivery_city && (
+                    <p id="city-error" role="alert" className="mt-1.5 text-[12px] text-danger-ink">
+                      {errors.delivery_city.message}
+                    </p>
+                  )}
+                </div>
+              </div>
+            )}
           </section>
 
           {/* Payment */}
@@ -314,7 +473,7 @@ export function CheckoutClient({
         <div className="min-w-0 lg:sticky lg:top-24 lg:self-start">
           <Enclosure>
             <div className="p-5">
-              <h2 className="text-[15px] font-semibold text-ink">Your order</h2>
+              <h2 className="text-[15px] font-semibold text-ink">Order summary</h2>
 
               <ul className="mt-4 space-y-3 border-b border-hairline pb-4">
                 {cart.map((line) => (
@@ -349,11 +508,30 @@ export function CheckoutClient({
                   </dd>
                 </div>
                 <div className="flex items-center justify-between">
-                  <dt className="text-body">Delivery</dt>
+                  <dt className="text-body">
+                    {selectedDeliveryMethod === 'COLLECTION_POINT'
+                      ? 'Collection (Locker)'
+                      : 'Delivery'}
+                  </dt>
                   <dd>
-                    <MoneyText amount={DELIVERY_FEE} size="sm" />
+                    <MoneyText amount={deliveryFee} size="sm" />
                   </dd>
                 </div>
+                {hasImportedItems && (
+                  <div className="flex items-center justify-between">
+                    <dt className="flex items-center gap-1.5 text-body">
+                      <span>Customs & Duty</span>
+                      <span className="rounded bg-forest-wash px-1.5 py-0.5 font-mono text-[10px] font-medium uppercase tracking-wider text-forest-ink">
+                        Included
+                      </span>
+                    </dt>
+                    <dd className="text-right">
+                      <span className="text-[12.5px] font-medium text-forest">
+                        Covered by AfriDeal
+                      </span>
+                    </dd>
+                  </div>
+                )}
                 <div className="flex items-baseline justify-between border-t border-hairline pt-3">
                   <dt className="font-medium text-ink">Total to pay</dt>
                   <dd>
@@ -365,7 +543,7 @@ export function CheckoutClient({
               <ActionButton
                 type="submit"
                 size="lg"
-                className="mt-5 w-full"
+                className="mt-5 hidden w-full lg:inline-flex"
                 loading={isSubmitting}
                 withArrow
               >
@@ -378,9 +556,28 @@ export function CheckoutClient({
             <ShieldCheck size={16} strokeWidth={1.5} className="mt-0.5 shrink-0 text-gold-700" />
             <p className="text-[12.5px] leading-5 text-gold-700">
               Placing this order buys the goods from AfriDeal. We procure them from a verified
-              supplier, deliver them to you, and cover the order under our returns and refunds
-              policy until seven days after delivery.
+              supplier, clear all border customs and duties, deliver them to you, and cover the
+              order under our returns and refunds policy until seven days after delivery.
             </p>
+          </div>
+        </div>
+
+        {/* ── Mobile sticky Place Order bar (Benchmark §3a & Feature 5) ── */}
+        <div className="fixed bottom-[calc(56px+env(safe-area-inset-bottom))] inset-x-0 z-[60] border-t border-hairline bg-white p-3 shadow-[0_-4px_12px_rgba(0,0,0,0.05)] lg:hidden">
+          <div className="mx-auto flex max-w-market items-center justify-between gap-4">
+            <div>
+              <span className="block text-[11px] text-muted">Total to pay</span>
+              <MoneyText amount={total} size="md" tone="ink" />
+            </div>
+            <ActionButton
+              type="submit"
+              size="lg"
+              className="flex-1 max-w-[200px]"
+              loading={isSubmitting}
+              withArrow
+            >
+              Place order
+            </ActionButton>
           </div>
         </div>
       </form>
