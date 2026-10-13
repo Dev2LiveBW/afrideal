@@ -21,7 +21,8 @@
     "e2e:demo": "node scripts/e2e.mjs --demo",
     "e2e:report": "playwright show-report",
     "e2e:videos": "node scripts/demo-videos.mjs",
-    "images": "node scripts/fetch-images.mjs"
+    "images": "node scripts/fetch-images.mjs",
+    "catalogue:audit": "node scripts/catalogue-audit.mjs"
   },
   "dependencies": {
     "@clerk/nextjs": "^6.39.6",
