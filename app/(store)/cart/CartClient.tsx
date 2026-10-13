@@ -72,6 +72,11 @@ export function CartClient({
     : 0;
   const total = subtotal + (cart.length > 0 ? DELIVERY_FEE : 0);
 
+  const hasImported = cart.some((line) => {
+    const p = products.find((candidate) => candidate.id === line.product_id);
+    return p ? p.country_of_origin !== 'BW' : false;
+  });
+
   if (!mounted) {
     return (
       <div className="mx-auto max-w-market px-3 pb-[100px] pt-[50px] lg:px-6 lg:pb-24 lg:pt-28">
@@ -251,6 +256,21 @@ export function CartClient({
                       <MoneyText amount={DELIVERY_FEE} size="sm" />
                     </dd>
                   </div>
+                  {hasImported && (
+                    <div className="flex items-center justify-between">
+                      <dt className="flex items-center gap-1.5 text-body">
+                        <span>Customs & Duty</span>
+                        <span className="rounded bg-forest-wash px-1.5 py-0.5 font-mono text-[10px] font-medium uppercase tracking-wider text-forest-ink">
+                          Included
+                        </span>
+                      </dt>
+                      <dd className="text-right">
+                        <span className="text-[12.5px] font-medium text-forest">
+                          Covered by AfriDeal
+                        </span>
+                      </dd>
+                    </div>
+                  )}
                   <div className="flex items-baseline justify-between border-t border-hairline pt-3">
                     <dt className="font-medium text-ink">Total</dt>
                     <dd>

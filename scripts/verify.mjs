@@ -633,10 +633,15 @@ section('9b. Payment expiry — a closed window reads as cancelled');
   // excluded CANCELLED but not AWAITING_PAYMENT.
   // Computed rather than hardcoded: earlier sections place orders of their own, so
   // any fixed number here would rot. The list already carries effective statuses.
-  const analytics = (await json(ops, '/api/analytics?days=3650')).body;
+  // `period=YTD` (365 days) so every seeded order is inside the window. This used
+  // to pass `days=3650`, which the route ignores: it fell back to the 30-day MTD
+  // window, and the check started failing on 2026-10-12, the day the oldest
+  // seeded order (o001, placed 2026-09-11) aged out of it.
+  const analytics = (await json(ops, '/api/analytics?period=YTD')).body;
   const everyOrder = Array.isArray(list) ? list : [];
   const expectedBillable = everyOrder.filter(
-    (o) => o.status !== 'CANCELLED' && o.status !== 'AWAITING_PAYMENT',
+    // Refunded orders stopped counting as revenue with feature 14 (isBillable).
+    (o) => o.status !== 'CANCELLED' && o.status !== 'AWAITING_PAYMENT' && o.status !== 'REFUNDED',
   ).length;
   const unpaidOrDead = everyOrder.length - expectedBillable;
 
@@ -831,6 +836,38 @@ section('9d. Refused payments — a cancelled order is not reopened, a paid one 
   const paidEntries = (replayed?.order?.timeline ?? []).filter((entry) => entry.status === 'PAID');
   check('a replayed confirmation adds nothing to the timeline', paidEntries.length === 1,
     `${paidEntries.length} PAID entries`);
+}
+
+// ── Feature 10: a collection point is charged the fee checkout shows ─────────
+section('9e. Collection points — the fee charged is the fee shown');
+{
+  const buyer = sessions['thabo@gmail.com'].jar;
+
+  const placeAt = (collection_point) =>
+    json(buyer, '/api/orders', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        lines: [{ product_id: 'p001', variant_id: 'p001v1', qty: 1 }],
+        payment_method: 'EFT',
+        delivery_method: 'COLLECTION_POINT',
+        collection_point,
+        delivery_address: collection_point ?? 'none',
+        delivery_city: 'Gaborone',
+      }),
+    });
+
+  // Checkout lists Francistown at BWP 30; the server used to charge 25 for every
+  // locker. Both now read lib/collection-points.ts.
+  const francistown = await placeAt('Francistown Main Mall Locker');
+  check('a Francistown locker order is placed', francistown.status === 201, `got ${francistown.status}`);
+  check('and charged the BWP 30 that checkout shows', francistown.body?.order?.delivery_fee === 30,
+    `charged ${francistown.body?.order?.delivery_fee}`);
+  check('and its town comes from the locker, not the request', francistown.body?.order?.delivery_city === 'Francistown',
+    `got ${francistown.body?.order?.delivery_city}`);
+
+  const unknown = await placeAt('A locker nobody listed');
+  check('an unlisted locker is refused, so it cannot set its own fee', unknown.status === 422, `got ${unknown.status}`);
 }
 
 // ── 10. Runner availability toggle ───────────────────────────────────────────
@@ -1137,6 +1174,19 @@ section('15. RFQ — quotation requests');
         body: JSON.stringify({ action: 'SELECT_RESPONSE', response_id: target.id }),
       });
       check('staff can select a winning quote', selected.status === 200, `got ${selected.status}`);
+      check('a chosen quote creates an order', Boolean(selected.body?.order?.id), `got ${selected.body?.order?.id}`);
+      check('the order starts as AWAITING_PAYMENT', selected.body?.order?.status === 'AWAITING_PAYMENT');
+      check('the order is linked to the rfq customer', selected.body?.order?.customer_id === created.body?.rfq?.customer_id);
+
+      const rfqAfter = (await json(business, `/api/rfqs/${rfqId}`)).body;
+      check('rfq is marked ORDERED', rfqAfter?.rfq?.status === 'ORDERED', `got ${rfqAfter?.rfq?.status}`);
+      check('rfq references the created order', rfqAfter?.rfq?.order_id === selected.body?.order?.id);
+
+      const buyerOrders = (await json(business, '/api/orders')).body;
+      check(
+        'the quotation order appears in buyer orders list',
+        Array.isArray(buyerOrders) && buyerOrders.some((o) => o.id === selected.body?.order?.id),
+      );
     }
 
     const runner = sessions['runner@afrideal.co.bw'].jar;

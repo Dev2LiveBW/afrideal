@@ -41,7 +41,10 @@ test('Z01 one order from cart to the supplier paid @p1', async ({ as }) => {
     await buyer.goto('/checkout');
     await ready(buyer);
     await buyer.getByRole('textbox', { name: 'Street address or plot number' }).fill('Plot 5412, Extension 12');
-    await clickAndSave(buyer.getByRole('button', { name: 'Place order' }));
+    // Bank transfer, so Finance confirms it in step 2. The e2e run also offers
+    // card methods through the mock gateway, which B09 and C04 cover.
+    await buyer.getByRole('radio', { name: /Bank transfer/ }).check({ force: true });
+    await clickAndSave(buyer.getByRole('button', { name: 'Place order' }).filter({ visible: true }));
     await buyer.waitForURL(/\/orders\/o\d+\?placed=1/);
     orderPath = new URL(buyer.url()).pathname;
     reference = (await buyer.getByRole('heading', { level: 1, name: /^AFD-\d+$/ }).textContent())!.trim();

@@ -76,18 +76,34 @@ async function computeAnalytics(period: AnalyticsPeriod): Promise<AnalyticsData>
   const refunded = payableRecords
     .filter((record) => record.status === 'CANCELLED')
     .reduce((sum, record) => sum + record.amount, 0);
+  const creditNotes = payableRecords
+    .filter((record) => record.amount < 0)
+    .reduce((sum, record) => sum + Math.abs(record.amount), 0);
   const disputedHeld = payableRecords
     .filter((record) => record.status === 'ON_HOLD')
     .reduce((sum, record) => sum + record.amount, 0);
   const cancelled = inPeriod
     .filter((order) => effectiveOrderStatus(order, payments) === 'CANCELLED')
     .reduce((sum, order) => sum + order.total, 0);
+  const refundedOrders = inPeriod
+    .filter((order) => effectiveOrderStatus(order, payments) === 'REFUNDED')
+    .reduce((sum, order) => sum + (order.refund_amount ?? order.total), 0);
 
   const exclusions = [
     {
       label: 'Cancelled supplier invoices',
       amount: refunded,
       why: 'Refunded to the customer, so it never became platform revenue.',
+    },
+    {
+      label: 'Supplier credit notes',
+      amount: creditNotes,
+      why: 'Post-settlement refunds offset against future payouts.',
+    },
+    {
+      label: 'Refunded customer orders',
+      amount: refundedOrders,
+      why: 'Order total returned to buyer via payment gateway.',
     },
     {
       label: 'Claims under review',

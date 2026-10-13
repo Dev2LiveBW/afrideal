@@ -14,6 +14,7 @@ import { TIER_LABELS, resolvePrice } from '@/lib/pricing-tiers';
 import { useAfriDealStore } from '@/store/useAfriDealStore';
 import { PriceLadder } from '@/components/storefront/PriceLadder';
 import { photoUrl } from '@/components/storefront/Swatch';
+import { CartSheet } from '@/components/storefront/CartSheet';
 import type { TierDoor } from '@/lib/tier-doors';
 import type { CustomerPrice, CustomerType, Product, ProductImage } from '@/types';
 
@@ -42,6 +43,7 @@ export function ProductBuyPanel({
   const [variantId, setVariantId] = useState(product.variants[0]?.id ?? '');
   const [qty, setQty] = useState(1);
   const [rfqOpen, setRfqOpen] = useState(false);
+  const [cartSheetOpen, setCartSheetOpen] = useState(false);
 
   const variant = product.variants.find((entry) => entry.id === variantId) ?? product.variants[0];
 
@@ -80,14 +82,21 @@ export function ProductBuyPanel({
       <div className="mt-6 rounded-lg border border-hairline bg-surface-raised p-5">
         <div className="flex items-end justify-between gap-4">
           <div>
-            <p className="text-[11.5px] text-muted">
-              Price per unit
-              {resolved.tier !== 'RETAIL' && (
-                <span className="ml-1.5 text-forest">
-                  · {TIER_LABELS[resolved.tier]}
+            <div className="flex flex-wrap items-center gap-1.5">
+              <p className="text-[11.5px] text-muted">
+                Price per unit
+                {resolved.tier !== 'RETAIL' && (
+                  <span className="ml-1.5 text-forest">
+                    · {TIER_LABELS[resolved.tier]}
+                  </span>
+                )}
+              </p>
+              {product.country_of_origin && product.country_of_origin !== 'BW' && (
+                <span className="rounded bg-forest-wash px-1.5 py-0.5 font-mono text-[9.5px] font-semibold uppercase tracking-wider text-forest-ink">
+                  Customs & duty included
                 </span>
               )}
-            </p>
+            </div>
             <MoneyText amount={unitPrice} size="xl" tone="ink" />
           </div>
 
@@ -197,11 +206,14 @@ export function ProductBuyPanel({
               Request a quotation
             </ActionButton>
           ) : (
-            <Link href="/cart" className="flex-1 lg:block lg:w-full">
-              <ActionButton variant="ghost" size="lg" className="w-full">
-                View cart
-              </ActionButton>
-            </Link>
+            <ActionButton
+              variant="ghost"
+              size="lg"
+              className="flex-1 lg:w-full"
+              onClick={() => setCartSheetOpen(true)}
+            >
+              View cart
+            </ActionButton>
           )}
         </div>
 
@@ -230,6 +242,11 @@ export function ProductBuyPanel({
         productName={product.name}
         initialQty={Math.max(100, qty)}
         customerType={customerType}
+      />
+
+      <CartSheet
+        isOpen={cartSheetOpen}
+        onClose={() => setCartSheetOpen(false)}
       />
     </>
   );

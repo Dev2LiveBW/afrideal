@@ -39,15 +39,15 @@ spec [0003](../specs/0003-order-payment-states.md) · code in `lib/payments/`
 
 ## Slice 1: Pay for one order by card, end to end
 
-### 4. Card payment gateway · needs a decision
+### 4. Card payment gateway · done
 The thinnest real thread through every layer: checkout hands the buyer to a hosted card page, and the order turns paid only on a verified, signed callback from the gateway. A local mock gateway lets CI test the same path.
 **Done when:** a sandbox card payment turns one order paid only through a signed callback; an unsigned or replayed callback changes nothing; returning before the callback shows "confirming"; the payment path tests run green in CI against the mock.
-- [ ] Design it (spec): `/architect card payment gateway`
+- [x] Verified in `e2e/storefront/b-buy-closeout.spec.ts` (Journey B09) and reviewed in `docs/reviews/2026-10-10-feat-card-payment-gateway.md`
 
-### 5. Phone checkout · needs a decision
+### 5. Phone checkout · done
 Checkout rebuilt once, phone first, around the gateway handoff: page header, single column, sticky "Place order".
 **Done when:** at 390 by 844 the place order button is visible without scrolling; placing an order hands off to the gateway and returns to a clear paid, failed or confirming state.
-- [ ] Design it (spec): `/architect phone checkout`
+- [x] Verified in `e2e/storefront/b-buy-closeout.spec.ts` (Journey Z02) and reviewed in `docs/reviews/2026-10-11-feat-mobile-golden-thread.md`
 
 ## Slice 2: The buy decision on a phone
 
@@ -80,10 +80,10 @@ A finance page comparing orders paid in a period against the gateway's settlemen
 
 ## Slice 7: Reach
 
-### 20. Orders list clean up · Beta
+### 20. Orders list clean up · done
 Fix the stray `Â·` characters in the orders list and collapse each row's meta to two lines. The full rebuild is deferred.
 **Done when:** no mojibake anywhere in the orders list; each order row is 120px or less at 390px.
-- [ ] Build it: `/develop orders list clean up`
+- [x] Implemented in `app/(store)/orders/page.tsx`, `requests/page.tsx`, `v4-footer.tsx`; verified by Playwright guards `K01`, `K02` (`e2e/access/known-issues.spec.ts`) and Journey B04 (`e2e/storefront/b-buy.spec.ts`); reviewed in `docs/reviews/2026-10-11-feat-orders-list-cleanup.md`.
 
 ## Phase 1 close out
 
@@ -91,8 +91,9 @@ Gaps against the client's Phase 1 feature list that you can build alone. Order a
 
 ### 24. Chosen quote becomes an order · in-progress
 Today a quotation request reaches no supplier, and a chosen quote goes nowhere. Widened to milestone M4: invited suppliers answer in their portal, the team sends the buyer one AfriDeal price, and the buyer accepts (creating an order paid like any other), declines, or asks for a new price.
-spec [0004](../specs/0004-quote-chain.md) · waits on spec 0003 (payment states) reaching `main`
+spec [0004](../specs/0004-quote-chain.md) · code in `app/api/rfqs/[id]/route.ts`
 **Done when:** selecting a quote creates one order linked to the request for quote, at the quoted price, in the same payment state as a checkout order; the request shows "ordered"; `npm run verify` covers it.
+**Two versions, decision pending (2026-10-13):** a first version was built on 11 Oct before spec 0004 reached the branch: staff selecting a quote (`SELECT_RESPONSE`) or the buyer accepting (`ACCEPT_QUOTE`) creates the order at once, covered by verify section 15 and e2e journey C04. Spec 0004 goes further (supplier answer screens, a 22% markup, buyer decline and new price). The product owner decides whether spec 0004 replaces the first version; the milestones below are spec 0004's.
 - [x] Design it (spec): `/architect chosen quote becomes an order`
 - [ ] Build it: `/develop chosen quote becomes an order`
   - [ ] Thread: invitations, server priced quote, accept into a paid order with the supplier leg confirmed, plain screens for all three roles (AC-1 to AC-7, AC-12)

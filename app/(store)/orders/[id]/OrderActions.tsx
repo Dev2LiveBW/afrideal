@@ -24,12 +24,14 @@ export function OrderActions({
   orderAmount,
   canConfirm,
   canDispute,
+  isCollectionPoint = false,
 }: {
   orderId: string;
   reference: string;
   orderAmount: number;
   canConfirm: boolean;
   canDispute: boolean;
+  isCollectionPoint?: boolean;
 }) {
   const router = useRouter();
 
@@ -74,7 +76,7 @@ export function OrderActions({
             icon={<CheckCircle2 size={15} strokeWidth={1.5} />}
             onClick={() => setDialog('confirm')}
           >
-            Confirm delivery
+            {isCollectionPoint ? 'Confirm collection' : 'Confirm delivery'}
           </ActionButton>
         )}
 
@@ -94,12 +96,21 @@ export function OrderActions({
       <ConfirmDialog
         open={dialog === 'confirm'}
         onClose={() => setDialog(null)}
-        onConfirm={() => send({ action: 'CONFIRM_DELIVERY' }, 'Delivery confirmed')}
+        onConfirm={() =>
+          send(
+            { action: 'CONFIRM_DELIVERY' },
+            isCollectionPoint ? 'Collection confirmed' : 'Delivery confirmed',
+          )
+        }
         loading={saving}
         tone="forest"
-        title="Confirm this order arrived?"
-        description={`Confirming closes ${reference} and settles ${bwp(orderAmount)} with the supplier who filled it. Only confirm once you have the goods and they are what you ordered. Returns stay open for seven days afterwards, but this step cannot be undone from here.`}
-        confirmLabel="Yes, it arrived"
+        title={isCollectionPoint ? 'Confirm you collected your order?' : 'Confirm this order arrived?'}
+        description={
+          isCollectionPoint
+            ? `Confirming closes ${reference} and settles ${bwp(orderAmount)} with the supplier who filled it. Only confirm once you have retrieved your package from the collection point and verified its contents.`
+            : `Confirming closes ${reference} and settles ${bwp(orderAmount)} with the supplier who filled it. Only confirm once you have the goods and they are what you ordered. Returns stay open for seven days afterwards, but this step cannot be undone from here.`
+        }
+        confirmLabel={isCollectionPoint ? 'Yes, I collected it' : 'Yes, it arrived'}
       />
 
       <ConfirmDialog

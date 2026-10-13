@@ -5,7 +5,7 @@ import { afterEach, describe, expect, it, vi } from 'vitest';
 const findById = vi.fn();
 vi.mock('@/lib/db', () => ({ findById: (...args: unknown[]) => findById(...args) }));
 
-const { MockProviderInProductionError, availablePaymentMethods, providerFor, startPayment } =
+const { MockProviderInProductionError, availablePaymentMethods, mockGatewayAvailable, providerFor, startPayment } =
   await import('./adapters');
 import type { Order } from '@/types';
 
@@ -149,6 +149,57 @@ describe('startPayment, for a card', () => {
     await startPayment(order());
 
     expect(findById).not.toHaveBeenCalled();
+  });
+
+  // Only the reference travels: an amount in the URL could be edited by the buyer.
+  it('sends the buyer to the stand-in hosted page with only the reference', async () => {
+    vi.stubEnv('PAYMENTS_PROVIDER', 'mock');
+
+    const started = await startPayment(order());
+
+    expect(started.redirectUrl).toBe(
+      `/mock-gateway?reference=${encodeURIComponent(started.providerReference)}`,
+    );
+    expect(started.redirectUrl).not.toContain('329');
+  });
+
+  it('has nowhere to send the buyer for a real provider until its adapter exists', async () => {
+    vi.stubEnv('PAYMENTS_PROVIDER', 'live');
+
+    const started = await startPayment(order());
+
+    expect(started.redirectUrl).toBeNull();
+  });
+});
+
+describe('mockGatewayAvailable', () => {
+  it('is on only for the mock outside production', () => {
+    vi.stubEnv('PAYMENTS_PROVIDER', 'mock');
+    vi.stubEnv('NODE_ENV', 'development');
+    expect(mockGatewayAvailable()).toBe(true);
+
+    vi.stubEnv('NODE_ENV', 'production');
+    expect(mockGatewayAvailable()).toBe(false);
+
+    vi.stubEnv('NODE_ENV', 'development');
+    vi.stubEnv('PAYMENTS_PROVIDER', 'live');
+    expect(mockGatewayAvailable()).toBe(false);
+  });
+
+  it('opens in a production build only through the opt in, and never on Vercel', () => {
+    vi.stubEnv('PAYMENTS_PROVIDER', 'mock');
+    vi.stubEnv('NODE_ENV', 'production');
+    vi.stubEnv('VERCEL', '');
+    vi.stubEnv('ALLOW_MOCK_PAYMENTS', '1');
+    expect(mockGatewayAvailable()).toBe(true);
+
+    vi.stubEnv('VERCEL', '1');
+    expect(mockGatewayAvailable()).toBe(false);
+
+    // The old spelling no longer opens it: one opt in, one value.
+    vi.stubEnv('VERCEL', '');
+    vi.stubEnv('ALLOW_MOCK_PAYMENTS', 'true');
+    expect(mockGatewayAvailable()).toBe(false);
   });
 });
 

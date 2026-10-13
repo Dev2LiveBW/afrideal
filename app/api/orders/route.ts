@@ -7,13 +7,14 @@ import { resolvePrice } from '@/lib/pricing-tiers';
 import { selectSupplier } from '@/lib/supplier-selection';
 import { availablePaymentMethods, startPayment } from '@/lib/payments/adapters';
 import { allAsDisplayed } from '@/lib/payments/status';
+import { findCollectionPoint } from '@/lib/collection-points';
 import { checkoutIsPaused } from '@/lib/settings';
 import { paymentExpiresAt } from '@/lib/payments/policy';
 import type { Order, OrderItem, OrderTimelineEntry, Payment } from '@/types';
 
 export const dynamic = 'force-dynamic';
 
-const DELIVERY_FEE = 45;
+const DOORSTEP_DELIVERY_FEE = 45;
 
 const CheckoutSchema = z.object({
   lines: z
@@ -26,6 +27,8 @@ const CheckoutSchema = z.object({
     )
     .min(1, 'Your cart is empty.'),
   payment_method: z.enum(['DPO_PAY', 'ORANGE_MONEY', 'PAYGATE', 'EFT']),
+  delivery_method: z.enum(['DOORSTEP', 'COLLECTION_POINT']).optional().default('DOORSTEP'),
+  collection_point: z.string().nullish(),
   delivery_address: z.string().min(4, 'Enter a delivery address.'),
   delivery_city: z.string().min(2, 'Enter a city.'),
 });
@@ -84,12 +87,18 @@ export const POST = handled(async (request: Request) => {
     return fail(parsed.error.issues[0]?.message ?? 'Invalid checkout payload.', 422);
   }
 
-  const { lines, payment_method, delivery_address, delivery_city } = parsed.data;
+  const { lines, payment_method, delivery_method, collection_point, delivery_address, delivery_city } = parsed.data;
 
   // Spec 0003, AC-8: checked before any pricing or supplier work, so a pause stops
   // an order at the door rather than part way through building one.
   if (await checkoutIsPaused()) {
     return fail('Checkout is temporarily unavailable. Please try again shortly.', 409);
+  }
+
+  // A collection point order must name a locker on the list; its fee is charged
+  // from that list, so an unknown name cannot pick its own price.
+  if (delivery_method === 'COLLECTION_POINT' && !findCollectionPoint(collection_point)) {
+    return fail('Choose one of the collection points listed at checkout.', 422);
   }
 
   // A method nothing can take money through would leave the order waiting for a
@@ -173,6 +182,13 @@ export const POST = handled(async (request: Request) => {
     { status: 'AWAITING_PAYMENT', label: 'Order placed, waiting for payment', at: now },
   ];
 
+  // The locker, its fee, address and town come from the one shared list, never
+  // from the request: checkout shows the same fee it reads from there.
+  const isCollectionPoint = delivery_method === 'COLLECTION_POINT';
+  const point = isCollectionPoint ? findCollectionPoint(collection_point) : null;
+  const delivery_fee = point ? point.fee : DOORSTEP_DELIVERY_FEE;
+  const resolvedAddress = point ? point.name : delivery_address;
+
   // 3 - the customer-facing order. The reference follows the id (the seed
   // numbers o001 as AFD-24810), so it is unique for the same reason the id is;
   // a row count would repeat under concurrent checkouts.
@@ -183,16 +199,18 @@ export const POST = handled(async (request: Request) => {
     customer_name: actor.name,
     status: 'AWAITING_PAYMENT',
     subtotal,
-    delivery_fee: DELIVERY_FEE,
-    total: subtotal + DELIVERY_FEE,
+    delivery_fee,
+    total: subtotal + delivery_fee,
     payment_method,
     // Null until a payment confirms. It used to be invented from the clock here,
     // which is what made every order look paid the moment it was placed.
     payment_reference: null,
     payment_expires_at: paymentExpiresAt(now, payment_method),
     cancel_reason: null,
-    delivery_address,
-    delivery_city,
+    delivery_address: resolvedAddress,
+    delivery_city: point ? point.city : delivery_city,
+    delivery_method,
+    collection_point: point ? point.name : null,
     placed_at: now,
     updated_at: now,
     timeline,

@@ -56,6 +56,7 @@ export function SettlementPanel({
   const [action, setAction] = useState<'SETTLED' | 'CANCELLED' | null>(null);
   const [saving, setSaving] = useState(false);
 
+  const isCreditNote = record.amount < 0 || record.reason === 'REFUND_CREDIT_NOTE';
   const open = record.status === 'PENDING' || record.status === 'ON_HOLD';
   const ageDays = daysSince(record.raised_at);
   const overdue = record.status === 'PENDING' && ageDays > record.terms_days;
@@ -101,13 +102,23 @@ export function SettlementPanel({
               <span
                 className={cn(
                   'flex h-10 w-10 items-center justify-center rounded-full',
-                  open ? 'bg-gold-50 text-gold-dark' : 'bg-forest-wash text-forest',
+                  isCreditNote
+                    ? 'bg-danger-wash text-danger-ink'
+                    : open
+                      ? 'bg-gold-50 text-gold-dark'
+                      : 'bg-forest-wash text-forest',
                 )}
               >
-                {open ? <FileText size={18} strokeWidth={1.5} /> : <ShieldCheck size={18} strokeWidth={1.5} />}
+                {isCreditNote ? (
+                  <RotateCcw size={18} strokeWidth={1.5} />
+                ) : open ? (
+                  <FileText size={18} strokeWidth={1.5} />
+                ) : (
+                  <ShieldCheck size={18} strokeWidth={1.5} />
+                )}
               </span>
               <div>
-                <p className="eyebrow">Supplier invoice</p>
+                <p className="eyebrow">{isCreditNote ? 'Supplier credit note' : 'Supplier invoice'}</p>
                 <p className="mt-1 text-[15px] font-semibold text-ink">{supplierName}</p>
               </div>
             </div>
@@ -116,8 +127,12 @@ export function SettlementPanel({
 
           <div className="mt-5 flex items-end justify-between gap-4">
             <div>
-              <p className="text-[12px] text-muted">Amount owed</p>
-              <MoneyText amount={record.amount} size="xl" tone={open ? 'gold' : 'forest'} />
+              <p className="text-[12px] text-muted">{isCreditNote ? 'Credit offset' : 'Amount owed'}</p>
+              <MoneyText
+                amount={record.amount}
+                size="xl"
+                tone={isCreditNote ? 'danger' : open ? 'gold' : 'forest'}
+              />
             </div>
             <div className="text-right">
               <p className="text-[12px] text-muted">Paid by customer via</p>
@@ -162,7 +177,7 @@ export function SettlementPanel({
             )}
           </dl>
 
-          {canAct && open && (
+          {canAct && open && !isCreditNote && (
             <div className="mt-5 flex flex-wrap gap-2 border-t border-hairline pt-4">
               <ActionButton
                 size="sm"

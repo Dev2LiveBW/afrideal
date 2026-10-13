@@ -50,8 +50,8 @@ export async function openJobForLeg(leg: SupplierOrder, actor: Actor): Promise<S
     status: 'UNASSIGNED',
     pickup_name: supplier.name,
     pickup_address: `${supplier.city} depot`,
-    dropoff_name: order.customer_name,
-    dropoff_address: `${order.delivery_address}, ${order.delivery_city}`,
+    dropoff_name: order.delivery_method === 'COLLECTION_POINT' ? (order.collection_point ?? 'Collection Locker') : order.customer_name,
+    dropoff_address: order.delivery_method === 'COLLECTION_POINT' ? order.delivery_address : `${order.delivery_address}, ${order.delivery_city}`,
     // Not measured yet: there is no geocoding. The runner screens hide a 0.
     distance_km: 0,
     payout,

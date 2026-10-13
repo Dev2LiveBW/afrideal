@@ -122,6 +122,52 @@ test.describe('Finance', () => {
     await expect(page.getByRole('heading', { name: /GMV trend/ })).toBeVisible();
     await expect(page.getByRole('heading', { name: /Annual Platform Report - revenue share/ })).toBeVisible();
   });
+
+  test('G11 process a refund @p1', async ({ page }) => {
+    await page.goto('/admin/payables');
+    await expectHealthy(page);
+
+    // Switch to "On hold" tab where disputed orders sit
+    await page.getByRole('button', { name: /^On hold \(\d+\)$/ }).click();
+
+    // Locate the first row with an Initiate Refund button
+    const refundBtn = page.getByRole('button', { name: 'Initiate Refund' }).first();
+    await expect(refundBtn).toBeVisible();
+
+    const row = page.getByRole('row').filter({ has: refundBtn }).first();
+    const orderLink = row.getByRole('link', { name: /^AFD-\d+$/ }).first();
+    const reference = await orderLink.innerText();
+    const href = await orderLink.getAttribute('href');
+    const orderId = href ? href.split('/').pop() : null;
+
+    // Click "Initiate Refund"
+    await refundBtn.click();
+
+    // The refund modal opens
+    const dialog = page.getByRole('dialog');
+    await expect(dialog).toBeVisible();
+    await expect(dialog).toContainText(reference);
+
+    // Confirm the refund
+    await clickAndSave(dialog.getByRole('button', { name: 'Confirm refund' }));
+
+    // Verify confirmation message
+    await expect(page.getByText(new RegExp(`Refund processed for ${reference}`))).toBeVisible();
+
+    // In payables queue under "All", the invoice is cancelled and order action marked Refunded
+    await page.getByRole('button', { name: /^All \(\d+\)$/ }).click();
+    const refundedRow = page.getByRole('row', { name: new RegExp(`${reference}\\b`) }).first();
+    await expect(refundedRow).toContainText('Cancelled');
+    await expect(refundedRow).toContainText('Refunded');
+
+    // Customer / staff tracking surface shows order status and timeline updated to Refunded
+    if (orderId) {
+      await page.goto(`/orders/${orderId}`);
+      await expectHealthy(page);
+      await expect(page.locator('header, h1, div').filter({ hasText: 'Refunded' }).first()).toBeVisible();
+      await expect(page.getByText('Order refunded').first()).toBeVisible();
+    }
+  });
 });
 
 test.describe('Super admin', () => {

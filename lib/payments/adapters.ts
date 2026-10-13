@@ -73,6 +73,20 @@ export function availablePaymentMethods(): PaymentMethod[] {
 }
 
 /**
+ * Whether the stand-in hosted page may exist. Never throws: when it is off the
+ * page answers 404, and checkout is what fails loudly (usingMock above).
+ *
+ * Only with PAYMENTS_PROVIDER=mock, and in a production build only through the
+ * same opt in as the mock provider (ALLOW_MOCK_PAYMENTS=1 for CI and the e2e
+ * run), which is ignored on Vercel: a deployed site never shows a page that can
+ * mark orders paid.
+ */
+export function mockGatewayAvailable(): boolean {
+  if (process.env.PAYMENTS_PROVIDER !== 'mock') return false;
+  return process.env.NODE_ENV !== 'production' || mockAllowedInProduction();
+}
+
+/**
  * The provider for a method.
  *
  * A bank transfer is always itself: there is no gateway in the middle, so mocking
@@ -102,13 +116,20 @@ export async function startPayment(order: Order): Promise<StartedPayment> {
     };
   }
 
-  // The mock has no hosted page yet, so there is nowhere to send the buyer: the
-  // order sits at AWAITING_PAYMENT until a signed callback arrives. The real
-  // gateway adapter fills `redirectUrl` in when DPO Pay is approved.
+  const providerReference = `${provider}-${order.id}-${Date.now().toString(36)}`;
+
+  // The mock has a stand-in hosted page (app/mock-gateway) that confirms through
+  // the signed callback, exactly as the real gateway will. Only the reference
+  // travels in the URL: the page reads the amount from the stored attempt, so
+  // editing the address bar cannot change what gets confirmed. The real gateway
+  // adapter fills `redirectUrl` in when DPO Pay is approved.
+  const redirectUrl =
+    provider === 'MOCK' ? `/mock-gateway?reference=${encodeURIComponent(providerReference)}` : null;
+
   return {
     provider,
-    providerReference: `${provider}-${order.id}-${Date.now().toString(36)}`,
-    redirectUrl: null,
+    providerReference,
+    redirectUrl,
     instructions: null,
   };
 }

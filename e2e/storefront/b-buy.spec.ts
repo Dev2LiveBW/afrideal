@@ -46,12 +46,13 @@ test.describe('B. Buying and tracking', () => {
     await caption(page, 'B02 · 3. Delivery address and bank transfer, then Place order (no money moves yet)');
     await page.getByRole('textbox', { name: 'Street address or plot number' }).fill('Plot 5412, Extension 12');
     await page.getByRole('textbox', { name: 'City or town' }).fill('Gaborone');
-    // Until a card gateway is live, bank transfer is the only method that can
-    // complete, so it is the only one offered (spec 0003).
+    // B02 is the bank transfer journey (B09 covers a card through the mock
+    // gateway). The e2e run turns the mock on, so card methods are offered too
+    // and bank transfer is chosen explicitly (spec 0003).
+    await page.getByRole('radio', { name: /Bank transfer/ }).check({ force: true });
     await expect(page.getByRole('radio', { name: /Bank transfer/ })).toBeChecked();
-    await expect(page.getByRole('radio', { name: /DPO Pay/ })).toHaveCount(0);
-    await expect(page.getByText('Total to pay').locator('xpath=following-sibling::*[1]')).toHaveText(bwp(337));
-    await clickAndSave(page.getByRole('button', { name: 'Place order' }));
+    await expect(page.getByText('Total to pay').first().locator('xpath=following-sibling::*[1]')).toHaveText(bwp(337));
+    await clickAndSave(page.getByRole('button', { name: 'Place order' }).filter({ visible: true }));
 
     // The order waits for the money: a reference to quote, and nothing sourced yet.
     await page.waitForURL(/\/orders\/o\d+\?placed=1/);
@@ -72,8 +73,21 @@ test.describe('B. Buying and tracking', () => {
   });
 
   test('B04 an order shows its progress on a timeline @p1', async ({ page }) => {
-    // o005 (AFD-24814) is seeded in transit.
-    await page.goto('/orders/o005');
+    // Start at /orders: assert healthy list, no mojibake, rows <= 120px
+    await page.goto('/orders');
+    await expectHealthy(page);
+    const orderLink = page.getByRole('link', { name: /AFD-24814/ });
+    await expect(orderLink).toBeVisible();
+
+    const box = await orderLink.boundingBox();
+    expect(box).not.toBeNull();
+    if (box) {
+      expect(box.height).toBeLessThanOrEqual(120);
+    }
+
+    // Open the in-transit order and track its timeline
+    await orderLink.click();
+    await page.waitForURL(/\/orders\/o005/);
     await expectHealthy(page);
     await expect(page.getByRole('heading', { level: 1, name: 'AFD-24814' })).toBeVisible();
     for (const step of ['Placed', 'Paid', 'Preparing', 'Collected', 'In transit', 'Delivered']) {

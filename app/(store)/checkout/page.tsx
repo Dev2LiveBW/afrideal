@@ -44,7 +44,7 @@ export default async function CheckoutPage() {
   const [bands, products] = await Promise.all([readAll('customer-prices'), readAll('products')]);
 
   return (
-    <div className="mx-auto max-w-market px-6 pb-24 pt-28">
+    <div className="mx-auto max-w-market px-4 pb-36 pt-20 sm:px-6 sm:pb-24 sm:pt-28">
       <CheckoutClient
         customerName={session.user.name ?? 'Customer'}
         customerEmail={session.user.email ?? ''}

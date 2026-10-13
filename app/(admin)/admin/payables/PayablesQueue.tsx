@@ -15,12 +15,16 @@ import { StatusBadge } from '@/components/brand/StatusBadge';
 import { openDays, isOverdue } from '@/lib/payables';
 import { PAYMENT_LABELS, dateTime } from '@/lib/format';
 import { cn } from '@/lib/utils';
-import type { SupplierPayable } from '@/types';
+import type { OrderStatus, SupplierPayable } from '@/types';
 
 export interface PayableRow {
   record: SupplierPayable;
   supplierName: string;
   orderReference: string;
+  orderId?: string;
+  orderStatus?: OrderStatus;
+  orderTotal?: number;
+  hasDispute?: boolean;
 }
 
 type Filter = 'OUTSTANDING' | 'ON_HOLD' | 'OVERDUE' | 'ALL';
@@ -43,12 +47,35 @@ function actionable(row: PayableRow) {
   return row.record.status === 'PENDING' || row.record.status === 'ON_HOLD';
 }
 
-export function PayablesQueue({ rows }: { rows: PayableRow[] }) {
+function isRefundable(row: PayableRow) {
+  if (row.orderStatus === 'REFUNDED') return false;
+  return (
+    row.record.status === 'ON_HOLD' ||
+    row.hasDispute === true ||
+    row.orderStatus === 'DISPUTED' ||
+    row.orderStatus === 'CANCELLED'
+  );
+}
+
+export function PayablesQueue({
+  rows,
+  canRefund = false,
+}: {
+  rows: PayableRow[];
+  canRefund?: boolean;
+}) {
   const router = useRouter();
   const [filter, setFilter] = useState<Filter>('OUTSTANDING');
   const [selected, setSelected] = useState<Set<string>>(new Set());
   const [action, setAction] = useState<'SETTLED' | 'CANCELLED' | null>(null);
   const [saving, setSaving] = useState(false);
+
+  // Refund dialog state
+  const [refundTarget, setRefundTarget] = useState<PayableRow | null>(null);
+  const [refundAmount, setRefundAmount] = useState<string>('');
+  const [refundGatewayRef, setRefundGatewayRef] = useState<string>('');
+  const [refundReason, setRefundReason] = useState<string>('Dispute resolved in customer favour');
+  const [refundSubmitting, setRefundSubmitting] = useState(false);
 
   const countFor = (id: Filter) => rows.filter((row) => matches(row, id)).length;
   const filtered = useMemo(() => rows.filter((row) => matches(row, filter)), [rows, filter]);
@@ -71,6 +98,46 @@ export function PayablesQueue({ rows }: { rows: PayableRow[] }) {
 
   const selectedRows = rows.filter((row) => selected.has(row.record.id));
   const selectedTotal = selectedRows.reduce((sum, row) => sum + row.record.amount, 0);
+
+  function openRefund(row: PayableRow) {
+    setRefundTarget(row);
+    const total = row.orderTotal ?? row.record.amount;
+    setRefundAmount(total.toFixed(2));
+    setRefundGatewayRef(`REF-${Math.floor(100000 + Math.random() * 900000)}`);
+    setRefundReason('Dispute resolved in customer favour');
+  }
+
+  async function confirmRefund() {
+    if (!refundTarget) return;
+    setRefundSubmitting(true);
+    try {
+      const parsedAmount = parseFloat(refundAmount);
+      const response = await fetch('/api/payables/refund', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          order_id: refundTarget.orderId ?? refundTarget.record.order_id,
+          amount: !isNaN(parsedAmount) && parsedAmount > 0 ? parsedAmount : undefined,
+          gateway_reference: refundGatewayRef.trim() || undefined,
+          reason: refundReason.trim() || undefined,
+        }),
+      });
+
+      if (!response.ok) {
+        const { error } = await response.json().catch(() => ({ error: 'Refund failed' }));
+        throw new Error(error ?? 'Refund failed');
+      }
+
+      toast.success(`Refund processed for ${refundTarget.orderReference}`);
+      setRefundTarget(null);
+      setSelected(new Set());
+      router.refresh();
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : 'Refund failed');
+    } finally {
+      setRefundSubmitting(false);
+    }
+  }
 
   async function confirmBatch() {
     if (!action || selected.size === 0) return;
@@ -142,6 +209,11 @@ export function PayablesQueue({ rows }: { rows: PayableRow[] }) {
             <ActionButton size="sm" variant="danger" onClick={() => setAction('CANCELLED')}>
               Cancel
             </ActionButton>
+            {canRefund && selected.size === 1 && selectedRows[0] && isRefundable(selectedRows[0]) && (
+              <ActionButton size="sm" variant="danger" onClick={() => openRefund(selectedRows[0])}>
+                Initiate Refund
+              </ActionButton>
+            )}
           </div>
         )}
       </div>
@@ -176,11 +248,15 @@ export function PayablesQueue({ rows }: { rows: PayableRow[] }) {
                   <th>Raised</th>
                   <th>Age</th>
                   <th className="text-right">Status</th>
+                  <th className="text-right">Action</th>
                 </tr>
               </thead>
               <tbody>
                 {filtered.map((row) => {
                   const overdue = isOverdue(row.record);
+                  const isCreditNote = row.record.amount < 0 || row.record.reason === 'REFUND_CREDIT_NOTE';
+                  const refundable = canRefund && isRefundable(row);
+
                   return (
                     <tr key={row.record.id} className={cn(overdue && 'bg-danger-wash/30')}>
                       <td>
@@ -211,7 +287,18 @@ export function PayablesQueue({ rows }: { rows: PayableRow[] }) {
                         </Link>
                       </td>
                       <td>
-                        <MoneyText amount={row.record.amount} size="sm" />
+                        <div className="flex items-center gap-1.5">
+                          <MoneyText
+                            amount={row.record.amount}
+                            size="sm"
+                            tone={isCreditNote ? 'danger' : 'ink'}
+                          />
+                          {isCreditNote && (
+                            <span className="rounded bg-danger-wash px-1.5 py-0.5 text-[10px] font-semibold text-danger-ink">
+                              Credit
+                            </span>
+                          )}
+                        </div>
                       </td>
                       <td className="text-[12px] text-body">
                         {PAYMENT_LABELS[row.record.gateway] ?? row.record.gateway}
@@ -230,6 +317,21 @@ export function PayablesQueue({ rows }: { rows: PayableRow[] }) {
                       <td className="text-right">
                         <StatusBadge status={row.record.status} size="sm" />
                       </td>
+                      <td className="text-right">
+                        {refundable ? (
+                          <ActionButton
+                            size="sm"
+                            variant="danger"
+                            onClick={() => openRefund(row)}
+                          >
+                            Initiate Refund
+                          </ActionButton>
+                        ) : row.orderStatus === 'REFUNDED' ? (
+                          <span className="text-[11.5px] font-medium text-slateish-ink">Refunded</span>
+                        ) : (
+                          <span className="text-[12px] text-muted">-</span>
+                        )}
+                      </td>
                     </tr>
                   );
                 })}
@@ -239,6 +341,7 @@ export function PayablesQueue({ rows }: { rows: PayableRow[] }) {
         </div>
       )}
 
+      {/* Settle / Cancel batch confirmation */}
       <ConfirmDialog
         open={action !== null}
         onClose={() => setAction(null)}
@@ -259,6 +362,69 @@ export function PayablesQueue({ rows }: { rows: PayableRow[] }) {
         }
         confirmLabel={action === 'SETTLED' ? 'Settle invoices' : 'Cancel invoices'}
       />
+
+      {/* Initiate Refund dialog */}
+      <ConfirmDialog
+        open={refundTarget !== null}
+        onClose={() => setRefundTarget(null)}
+        onConfirm={confirmRefund}
+        loading={refundSubmitting}
+        tone="danger"
+        title={refundTarget ? `Initiate Refund · ${refundTarget.orderReference}` : ''}
+        description={
+          refundTarget
+            ? `Record a payment gateway refund for ${refundTarget.orderReference}. This will mark the order as refunded, reverse the supplier's pending ledger, and record an audit log entry.`
+            : ''
+        }
+        confirmLabel="Confirm refund"
+      >
+        {refundTarget && (
+          <div className="space-y-3.5 pt-2 text-left">
+            <div>
+              <label htmlFor="refund-amount-input" className="block text-[12px] font-medium text-muted">
+                Refund amount (BWP)
+              </label>
+              <input
+                id="refund-amount-input"
+                type="number"
+                step="0.01"
+                aria-label="Refund amount"
+                value={refundAmount}
+                onChange={(e) => setRefundAmount(e.target.value)}
+                className="mt-1 w-full rounded border border-hairline-strong bg-surface px-3 py-2 font-mono text-[13px] text-ink outline-none focus:border-gold"
+              />
+            </div>
+            <div>
+              <label htmlFor="refund-gateway-ref" className="block text-[12px] font-medium text-muted">
+                Gateway refund reference
+              </label>
+              <input
+                id="refund-gateway-ref"
+                type="text"
+                aria-label="Gateway refund reference"
+                value={refundGatewayRef}
+                onChange={(e) => setRefundGatewayRef(e.target.value)}
+                placeholder="e.g. REF-884654 or DPO-REF-001"
+                className="mt-1 w-full rounded border border-hairline-strong bg-surface px-3 py-2 font-mono text-[13px] text-ink outline-none focus:border-gold"
+              />
+            </div>
+            <div>
+              <label htmlFor="refund-reason-input" className="block text-[12px] font-medium text-muted">
+                Reason
+              </label>
+              <input
+                id="refund-reason-input"
+                type="text"
+                aria-label="Refund reason"
+                value={refundReason}
+                onChange={(e) => setRefundReason(e.target.value)}
+                placeholder="e.g. Customer dispute upheld"
+                className="mt-1 w-full rounded border border-hairline-strong bg-surface px-3 py-2 text-[13px] text-ink outline-none focus:border-gold"
+              />
+            </div>
+          </div>
+        )}
+      </ConfirmDialog>
     </div>
   );
 }
