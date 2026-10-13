@@ -55,13 +55,13 @@ _These are recommendations to keep your build orderly, not requirements. Skip an
 | 21 | Real catalogue & photography | reach | Slice 8 | planned |
 | 22 | Launch checks | platform | Slice 8 | planned |
 | 23 | Production go live | platform | Slice 8 | planned |
-| 24 | Chosen quote becomes an order | buying | Close out | done |
+| 24 | Chosen quote becomes an order | buying | Close out | in-progress |
 | 25 | Buyer account & checkout extras | buying | Close out | planned |
 | 26 | Browse extras | buying | Close out | planned |
 | 27 | Supplier onboarding & self service | delivery | Close out | planned |
-| 28 | Runner onboarding & profile | delivery | Close out | planned |
+| 28 | Runner onboarding & profile | delivery | Close out | in-progress |
 | 29 | Team console gaps | delivery | Close out | planned |
-| 30 | Team user management | delivery | Close out | planned |
+| 30 | Team user management | delivery | Close out | in-progress |
 | 31 | What a supplier sees on an order | delivery | Close out | planned |
 
 Deferred features are listed at the end of each epic file.

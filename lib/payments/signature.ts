@@ -2,6 +2,7 @@ import 'server-only';
 
 import { createHmac, timingSafeEqual } from 'node:crypto';
 
+import { mockAllowedInProduction } from '@/lib/payments/policy';
 import type { PaymentProvider } from '@/types';
 
 /**
@@ -46,7 +47,12 @@ function secretFor(provider: PaymentProvider): string {
   const configured = process.env[`PAYMENT_SECRET_${provider}`];
   if (configured) return configured;
 
-  if (provider === 'MOCK' && process.env.NODE_ENV !== 'production') return DEV_MOCK_SECRET;
+  // A production build that opted into the mock (CI, the Playwright run) may use
+  // the dev secret too. `mockAllowedInProduction()` is false on Vercel, so this
+  // never reaches a deployed site.
+  if (provider === 'MOCK' && (process.env.NODE_ENV !== 'production' || mockAllowedInProduction())) {
+    return DEV_MOCK_SECRET;
+  }
 
   // A real provider with no secret must stop the request, not fall back to
   // something guessable. Signing with a default would make every callback forgeable.

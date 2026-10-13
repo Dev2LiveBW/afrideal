@@ -6,7 +6,7 @@
     "body": "Tsholofelo Fresh Produce and Setlhoa Office Group have submitted documents.",
     "kind": "SUPPLIER",
     "read": false,
-    "at": "2026-10-04T06:34:00.000Z"
+    "at": "2026-10-06T06:34:00.000Z"
   },
   {
     "id": "n002",
@@ -15,7 +15,7 @@
     "body": "AFD-24822 has under 24 hours remaining on its resolution clock.",
     "kind": "DISPUTE",
     "read": false,
-    "at": "2026-10-06T07:00:00.000Z"
+    "at": "2026-10-08T07:00:00.000Z"
   },
   {
     "id": "n003",
@@ -24,7 +24,7 @@
     "body": "Three supplier invoices have passed their seven-day payment terms.",
     "kind": "PAYMENT",
     "read": false,
-    "at": "2026-10-05T08:17:00.000Z"
+    "at": "2026-10-07T08:17:00.000Z"
   },
   {
     "id": "n004",
@@ -33,7 +33,7 @@
     "body": "AFD-24817 needs confirmation within 24 hours.",
     "kind": "ORDER",
     "read": false,
-    "at": "2026-10-03T09:51:00.000Z"
+    "at": "2026-10-05T09:51:00.000Z"
   },
   {
     "id": "n005",
@@ -42,7 +42,7 @@
     "body": "BWP 1,842.00 settled against AFD-24810.",
     "kind": "PAYMENT",
     "read": true,
-    "at": "2026-09-13T10:31:00.000Z"
+    "at": "2026-09-15T10:31:00.000Z"
   },
   {
     "id": "n006",
@@ -51,7 +51,7 @@
     "body": "A buyer has requested pricing on 200 units of School Uniform Set.",
     "kind": "ORDER",
     "read": false,
-    "at": "2026-10-05T11:17:00.000Z"
+    "at": "2026-10-07T11:17:00.000Z"
   },
   {
     "id": "n007",
@@ -60,7 +60,7 @@
     "body": "Pickup at Motswedi Francistown depot, 18.4km.",
     "kind": "ORDER",
     "read": false,
-    "at": "2026-10-06T12:00:00.000Z"
+    "at": "2026-10-08T12:00:00.000Z"
   },
   {
     "id": "n008",
@@ -69,7 +69,7 @@
     "body": "AFD-24814 left the depot and is out for delivery.",
     "kind": "ORDER",
     "read": false,
-    "at": "2026-10-05T13:17:00.000Z"
+    "at": "2026-10-07T13:17:00.000Z"
   },
   {
     "id": "n009",
@@ -78,7 +78,7 @@
     "body": "AFD-24813 was delivered and the supplier invoice was settled.",
     "kind": "ORDER",
     "read": true,
-    "at": "2026-09-25T14:07:00.000Z"
+    "at": "2026-09-27T14:07:00.000Z"
   },
   {
     "id": "n010",
@@ -87,213 +87,6 @@
     "body": "Five supplier settlements are pending approval.",
     "kind": "SYSTEM",
     "read": false,
-    "at": "2026-10-04T15:34:00.000Z"
-  },
-  {
-    "id": "n011",
-    "user_id": "u006",
-    "title": "Order placed, waiting for payment",
-    "body": "AFD-24825 is held for you. We start sourcing as soon as payment is confirmed.",
-    "kind": "ORDER",
-    "read": false,
-    "at": "2026-10-06T12:26:34.695Z"
-  },
-  {
-    "id": "n012",
-    "user_id": "u006",
-    "title": "Order placed, waiting for payment",
-    "body": "AFD-24826 is held for you. We start sourcing as soon as payment is confirmed.",
-    "kind": "ORDER",
-    "read": false,
-    "at": "2026-10-06T12:27:42.611Z"
-  },
-  {
-    "id": "n013",
-    "user_id": "u006",
-    "title": "Order placed, waiting for payment",
-    "body": "AFD-24827 is held for you. We start sourcing as soon as payment is confirmed.",
-    "kind": "ORDER",
-    "read": false,
-    "at": "2026-10-06T12:28:22.651Z"
-  },
-  {
-    "id": "n014",
-    "user_id": "u007",
-    "title": "Order placed, waiting for payment",
-    "body": "AFD-24828 is held for you. We start sourcing as soon as payment is confirmed.",
-    "kind": "ORDER",
-    "read": false,
-    "at": "2026-10-06T12:28:29.371Z"
-  },
-  {
-    "id": "n015",
-    "user_id": "u007",
-    "title": "Order placed, waiting for payment",
-    "body": "AFD-24829 is held for you. We start sourcing as soon as payment is confirmed.",
-    "kind": "ORDER",
-    "read": false,
-    "at": "2026-10-06T12:28:29.798Z"
-  },
-  {
-    "id": "n016",
-    "user_id": "u007",
-    "title": "Order placed, waiting for payment",
-    "body": "AFD-24830 is held for you. We start sourcing as soon as payment is confirmed.",
-    "kind": "ORDER",
-    "read": false,
-    "at": "2026-10-06T12:28:30.227Z"
-  },
-  {
-    "id": "n017",
-    "user_id": "u007",
-    "title": "Order placed, waiting for payment",
-    "body": "AFD-24831 is held for you. We start sourcing as soon as payment is confirmed.",
-    "kind": "ORDER",
-    "read": false,
-    "at": "2026-10-06T12:28:30.630Z"
-  },
-  {
-    "id": "n018",
-    "user_id": "u007",
-    "title": "Order placed, waiting for payment",
-    "body": "AFD-24832 is held for you. We start sourcing as soon as payment is confirmed.",
-    "kind": "ORDER",
-    "read": false,
-    "at": "2026-10-06T12:28:31.045Z"
-  },
-  {
-    "id": "n019",
-    "user_id": "u007",
-    "title": "Order placed, waiting for payment",
-    "body": "AFD-24833 is held for you. We start sourcing as soon as payment is confirmed.",
-    "kind": "ORDER",
-    "read": false,
-    "at": "2026-10-06T12:28:31.456Z"
-  },
-  {
-    "id": "n020",
-    "user_id": "u006",
-    "title": "Order placed, waiting for payment",
-    "body": "AFD-24834 is held for you. We start sourcing as soon as payment is confirmed.",
-    "kind": "ORDER",
-    "read": false,
-    "at": "2026-10-06T12:28:31.856Z"
-  },
-  {
-    "id": "n021",
-    "user_id": "u003",
-    "title": "Quotation requested",
-    "body": "RFQ-2603 - 400 units of Shea Butter Deep Treatment 500ml to Gaborone.",
-    "kind": "ORDER",
-    "read": false,
-    "at": "2026-10-06T12:28:41.023Z"
-  },
-  {
-    "id": "n022",
-    "user_id": "u004",
-    "title": "Quotation requested",
-    "body": "RFQ-2603 - 400 units of Shea Butter Deep Treatment 500ml to Gaborone.",
-    "kind": "ORDER",
-    "read": false,
-    "at": "2026-10-06T12:28:41.040Z"
-  },
-  {
-    "id": "n023",
-    "user_id": "u001",
-    "title": "New RFQ to source",
-    "body": "RFQ-2603 from Kefilwe Dithebe - 400 units of Shea Butter Deep Treatment 500ml.",
-    "kind": "ORDER",
-    "read": false,
-    "at": "2026-10-06T12:28:41.057Z"
-  },
-  {
-    "id": "n024",
-    "user_id": "u002",
-    "title": "New RFQ to source",
-    "body": "RFQ-2603 from Kefilwe Dithebe - 400 units of Shea Butter Deep Treatment 500ml.",
-    "kind": "ORDER",
-    "read": false,
-    "at": "2026-10-06T12:28:41.072Z"
-  },
-  {
-    "id": "n025",
-    "user_id": "u007",
-    "title": "Your quotation is ready",
-    "body": "RFQ-2603 - we have sourced 400 units of Shea Butter Deep Treatment 500ml.",
-    "kind": "ORDER",
-    "read": false,
-    "at": "2026-10-06T12:28:45.419Z"
-  },
-  {
-    "id": "n026",
-    "user_id": "u005",
-    "title": "New sourcing request",
-    "body": "RUN-24815: Verification probe — bulk hair dryer in Gaborone.",
-    "kind": "ORDER",
-    "read": false,
-    "at": "2026-10-06T12:28:47.321Z"
-  },
-  {
-    "id": "n027",
-    "user_id": "u006",
-    "title": "Request received",
-    "body": "RUN-24815 is with our runners. You will hear back with a price before anything is bought.",
-    "kind": "ORDER",
-    "read": false,
-    "at": "2026-10-06T12:28:47.340Z"
-  },
-  {
-    "id": "n028",
-    "user_id": "u006",
-    "title": "RUN-24815 moved to accepted",
-    "body": "Kagiso Sithole has updated your request.",
-    "kind": "ORDER",
-    "read": false,
-    "at": "2026-10-06T12:28:51.029Z"
-  },
-  {
-    "id": "n029",
-    "user_id": "u006",
-    "title": "RUN-24815 moved to sourcing",
-    "body": "Kagiso Sithole has updated your request.",
-    "kind": "ORDER",
-    "read": false,
-    "at": "2026-10-06T12:28:51.849Z"
-  },
-  {
-    "id": "n030",
-    "user_id": "u006",
-    "title": "RUN-24815 has a price",
-    "body": "Kagiso Sithole found it. BWP 2856.00 all in, including the sourcing fee. Approve it and they will buy it.",
-    "kind": "ORDER",
-    "read": false,
-    "at": "2026-10-06T12:28:52.701Z"
-  },
-  {
-    "id": "n031",
-    "user_id": "u005",
-    "title": "RUN-24815 - approved",
-    "body": "The customer approved your price. Go ahead and buy it.",
-    "kind": "ORDER",
-    "read": false,
-    "at": "2026-10-06T12:28:53.174Z"
-  },
-  {
-    "id": "n032",
-    "user_id": "u006",
-    "title": "RUN-24815 moved to delivering",
-    "body": "Kagiso Sithole has updated your request.",
-    "kind": "ORDER",
-    "read": false,
-    "at": "2026-10-06T12:28:53.635Z"
-  },
-  {
-    "id": "n033",
-    "user_id": "u005",
-    "title": "RUN-24815 - confirmed",
-    "body": "The customer marked this request confirmed.",
-    "kind": "ORDER",
-    "read": false,
-    "at": "2026-10-06T12:28:54.132Z"
+    "at": "2026-10-06T15:34:00.000Z"
   }
 ]

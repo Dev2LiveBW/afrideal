@@ -42,6 +42,16 @@ export const PATCH = handled(async (request: Request, { params }: { params: { id
     return fail(`A ${shipment.status.toLowerCase()} job cannot move to ${parsed.data.status.toLowerCase()}.`, 409);
   }
 
+  // A collection point drop off must carry the locker's real code: it is the PIN
+  // the buyer is sent to open the locker. Checked before anything is written.
+  const lockerCode = parsed.data.locker_code?.trim() ?? '';
+  if (parsed.data.status === 'DELIVERED' && !lockerCode) {
+    const target = await findById('orders', shipment.order_id);
+    if (target?.delivery_method === 'COLLECTION_POINT') {
+      return fail('Enter the locker code before dropping off at a collection point.', 422);
+    }
+  }
+
   const now = new Date().toISOString();
   const updated = await update('shipments', params.id, {
     status: parsed.data.status,
@@ -76,7 +86,7 @@ export const PATCH = handled(async (request: Request, { params }: { params: { id
         const isCollectionPoint = order.delivery_method === 'COLLECTION_POINT';
         const targetStatus = isCollectionPoint ? 'READY_FOR_COLLECTION' : 'DELIVERED';
         const note = isCollectionPoint
-          ? `Locker PIN: ${parsed.data.locker_code || 'LCK-8492'}`
+          ? `Locker PIN: ${lockerCode}`
           : undefined;
 
         await update('orders', order.id, {
@@ -100,7 +110,7 @@ export const PATCH = handled(async (request: Request, { params }: { params: { id
         userId: order.customer_id,
         title: isCollectionPoint ? 'Ready for collection' : 'Delivered',
         body: isCollectionPoint
-          ? `${order.reference} is ready for collection at ${order.collection_point || 'your locker'}. Locker PIN: ${parsed.data.locker_code || 'LCK-8492'}.`
+          ? `${order.reference} is ready for collection at ${order.collection_point || 'your locker'}. Locker PIN: ${lockerCode}.`
           : `${order.reference} was delivered. Confirm receipt to close the order.`,
         kind: 'ORDER',
       });

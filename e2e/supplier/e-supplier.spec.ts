@@ -12,8 +12,10 @@ test('E01 the dashboard shows Naledi her own business @p1', async ({ page }) => 
 });
 
 test('E02 confirm, prepare and mark an order ready for collection @p1', async ({ page }) => {
-  // The first order awaiting Naledi's confirmation (AFD-24842 and others are
-  // seeded that way); picked from the screen so a retry finds a fresh one.
+  // The first order awaiting Naledi's confirmation: o008 (AFD-24817) is seeded
+  // paid with its supplier not yet confirmed, the state every order reaches
+  // once its payment is confirmed (spec 0003). Picked from the screen rather
+  // than by reference, so the journey keeps working as the seed changes.
   await page.goto('/supplier/orders');
   const reference = await page
     .locator('section')

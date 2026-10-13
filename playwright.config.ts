@@ -112,7 +112,7 @@ export default defineConfig({
           DB_DRIVER: process.env.DB_DRIVER || 'postgres',
           CATALOGUE_SOURCE: process.env.CATALOGUE_SOURCE || 'json',
           PAYMENTS_PROVIDER: process.env.PAYMENTS_PROVIDER || 'mock',
-          ALLOW_MOCK_PAYMENTS: 'true',
+          ALLOW_MOCK_PAYMENTS: '1',
           // Its own build folder, so it can run beside your `npm run dev`.
           NEXT_DIST_DIR: '.next-e2e',
         },

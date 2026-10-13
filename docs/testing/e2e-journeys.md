@@ -207,16 +207,16 @@ That is 49 journeys. 46 have a screen to test (C02 to C04 do not yet, see Findin
 2. Open the cart. Check the line and the total.
 3. Tap through to checkout.
 4. Enter a delivery address (for example "Plot 5412, Extension 12", "Gaborone").
-5. Choose a payment method (DPO Pay).
+5. Choose a payment method: bank transfer (until a card gateway is live it is the only one offered; spec 0003).
 6. Place the order.
 
 **Expect:**
 - The cart total equals quantity times the unit price.
 - At checkout: total equals subtotal plus delivery fee.
-- After placing: "Order confirmed" and a reference like `AFD-24851`, with Placed and Paid already ticked on the timeline.
-- The order appears at the top of `/orders` with status Processing.
+- After placing: "Waiting for your payment", a reference like `AFD-24851`, and the bank transfer box asking Thabo to quote that reference. No supplier is asked to prepare anything until the money arrives.
+- The order appears at the top of `/orders`.
 - The cart is empty afterwards.
-- No money is taken (payment is simulated today).
+- Finance marking the transfer paid moves it on (Z01, step 2).
 
 ### B03 Order from two suppliers in one checkout
 
@@ -567,13 +567,14 @@ Runs end to end since 2026-10-06 (Findings, 1). Kagiso's job pays BWP 45.00, the
 
 | Step | Who | Does | System shows |
 |---|---|---|---|
-| 1 | Thabo | Buys 2 of a Naledi product (B02) | Order `AFD-…`, Pending |
-| 2 | Naledi | Confirms, prepares, marks ready (E02) | Thabo's order: Processing |
-| 3 | Kagiso | Accepts the job, picks up, delivers (F02) | Thabo's order: In transit, then delivered |
-| 4 | Thabo | Confirms arrival (B05) | Order: Delivered |
-| 5 | Keabetswe | Opens the order in the console (G02) | Full timeline, supplier and runner named |
-| 6 | Finance | Opens Payables, All | Naledi's invoice already Settled: Thabo's confirmation in step 4 released it |
-| 7 | Naledi | Opens Orders | The order shows Delivered and her invoice Settled |
+| 1 | Thabo | Buys 2 of a Naledi product by bank transfer (B02) | Order `AFD-…`, Waiting for your payment |
+| 2 | Finance | Payables, "Waiting for payment", Mark paid with the bank reference | Thabo's order: Payment confirmed; Naledi is asked to confirm |
+| 3 | Naledi | Confirms, prepares, marks ready (E02) | Thabo's order: Processing |
+| 4 | Kagiso | Accepts the job, picks up, delivers (F02) | Thabo's order: In transit, then delivered |
+| 5 | Thabo | Confirms arrival (B05) | Order: Delivered |
+| 6 | Keabetswe | Opens the order in the console (G02) | Full timeline, supplier and runner named |
+| 7 | Finance | Opens Payables, All | Naledi's invoice already Settled: Thabo's confirmation in step 5 released it |
+| 8 | Naledi | Opens Orders | The order shows Delivered and her invoice Settled |
 
 **Expect at the end:** the amounts agree everywhere: what Thabo paid equals subtotal plus delivery; Naledi's invoice equals her line; the console order, the buyer's order and the supplier's invoice all carry the same reference.
 
@@ -602,8 +603,9 @@ Videos: `demo-videos/Z02-phone.mp4`, `demo-videos/Z02-desktop.mp4`.
 
 These have no journeys until they are built; add them here when they land.
 
-- Live card payment gateway integration (production credentials; mock gateway verified under B09)
-- Mark as paid for EFT, pausing checkout, refunds, reconciliation (13 to 15)
+- Live card payment gateway (production credentials); the mock gateway is covered by B09
+- Pausing checkout and payment reconciliation (13, 15); mark as paid is in Z01 step 2, refunds in G11
+- Customs and duty in the price (9): the order only shows a "Customs & duty included" label so far
 - Order emails and SMS (11, 12)
 - A chosen quote becoming an order (24, see C04)
 - Supplier and runner self sign up (27, 28); team user management (30)
@@ -614,13 +616,13 @@ These have no journeys until they are built; add them here when they land.
 What the first runs turned up. Bugs are kept as tests marked `test.fail()` (see "Running the suite").
 
 1. **Fixed 2026-10-06: a new order never reached a runner.** Marking an order "Ready for collection" only sent a notification; nothing created a shipment, so no runner job appeared and every runner job came from the seed. Now `lib/shipments.ts` opens the job when a supplier marks their part ready (`openJobForLeg`), and marks the part collected and the order in transit when the runner picks it up (`markCollected`). The payout is the order's delivery fee split across its pickups (product owner's decision); distance is not measured yet and the runner screens hide it. Test: Z01, end to end.
-2. **Fixed 2026-10-11: Garbled text eliminated.** The order list (`app/(store)/orders/page.tsx`), runner request list (`app/(store)/requests/page.tsx`), and v4 footer (`components/v4/v4-footer.tsx`) have had all stray `Â·` and `Â©` artifacts replaced with proper unicode characters. Orders list mobile card density is now <= 120px at 390px. Tests `K01` and `K02` in `e2e/access/known-issues.spec.ts` graduated from failing known issues to active green guards.
+2. **Fixed 2026-10-06: garbled text.** The order list and the runner request list printed "Â·" where a middle dot belongs (the dots were stored double-encoded in `app/(store)/orders/page.tsx`, `app/(store)/requests/page.tsx` and the legacy v4 footer). On 2026-10-11 the phone order cards were made denser (at most 120px at 390px wide). Guards: K01 (characters and row height) and K02 in `e2e/access/known-issues.spec.ts`.
 3. **The RFQ chain has no screens** past the buyer's request (C02 to C04 above).
-4. **When Clerk cannot be reached, the page crashes.** Every signed-in page calls Clerk's API (`currentUser()` in `lib/auth.ts`). From this machine that call fails now and then ("fetch failed"). `lib/auth.ts` retries twice, but in one 25 minute run it still failed 5 times, and each time the buyer saw the full "We could not finish loading this" screen (for example `/requests`, digest 2291417529). A gentler fallback (a longer backoff, or rendering the page signed out with a "reconnecting" notice) would hide most of these. The suite's one retry absorbs them and reports the test as flaky.
+4. **Fixed 2026-10-06: when Clerk could not be reached, the page crashed.** `auth()` now builds the session from the signed session token's `metadata` claim and the profile already linked to the Clerk account, with no call to Clerk's API; `currentUser()` (now with three retries) is only needed on a first sign-in or a token without the claim. It was: every signed-in page called Clerk's API (`currentUser()` in `lib/auth.ts`). From this machine that call fails now and then ("fetch failed"). `lib/auth.ts` retries twice, but in one 25 minute run it still failed 5 times, and each time the buyer saw the full "We could not finish loading this" screen (for example `/requests`, digest 2291417529). A gentler fallback (a longer backoff, or rendering the page signed out with a "reconnecting" notice) would hide most of these. The suite's one retry absorbs them and reports the test as flaky.
 5. **Fixed 2026-10-06: on a phone, the pinned buy bar was not pinned.** The transition now keeps `will-change` only while it slides, and never wraps a server render (which counted every request as a navigation). It was: the phone page transition (`components/motion/PageTransition.tsx`) left `will-change: transform` on the page wrapper. That makes every `position: fixed` element inside a page pin to the wrapper instead of the screen, so "Add to cart" sits about 3,600 px down the product page instead of at the bottom of the screen, and the cart's Total and Checkout bar floats in the middle of the screen over the cart line. Anything else fixed inside a storefront page (dialogs, bars) is exposed to the same thing. Test: A03 on phone.
 6. **Fixed 2026-10-06: on a phone, the quotation dialog sat under the buy bar.** The bar is `z-[60]`; the "Request a quotation" dialog is now `z-[70]`. Test: C01 on phone.
 7. **Saves are slow from Botswana.** Measured with two test workers at once: median **8.3 s** to **18.9 s** depending on the run (worst single saves 23 s to 34 s; placing an order was the slowest, 33.7 s in one run). Each save is several locked transactions (the record, the audit log, notifications), and each transaction reads its whole collection; one such transaction alone takes about 1.2 s of round trips to Ohio from here. The report lists every save's time on its test. On Vercel next to the database (`iad1`) this should fall to well under a second, but it is what anyone testing from Botswana against the US database will feel, the client included, and the whole-collection read inside every write grows with the data.
-8. **Sign in can land staff on the storefront.** `/after-sign-in` sends anyone to `/` if resolving their session throws, with no message. In the first run, AfriDeal Admin landed on the storefront once that way.
+8. **Fixed 2026-10-06: sign in could land staff on the storefront.** `/after-sign-in` sent anyone to `/` if resolving their session threw, with no message (AfriDeal Admin landed on the storefront once that way in the first run). It now logs the error and shows "We could not finish signing you in" with Try again and Go to the shop.
 
 ## Questions for the product owner
 

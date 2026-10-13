@@ -5,8 +5,9 @@ import { insert, insertMany, nextId, nextIds, readAll } from '@/lib/db';
 import { EVENTS, audit, notify } from '@/lib/notifications';
 import { resolvePrice } from '@/lib/pricing-tiers';
 import { selectSupplier } from '@/lib/supplier-selection';
-import { startPayment } from '@/lib/payments/adapters';
+import { availablePaymentMethods, startPayment } from '@/lib/payments/adapters';
 import { allAsDisplayed } from '@/lib/payments/status';
+import { findCollectionPoint } from '@/lib/collection-points';
 import { checkoutIsPaused } from '@/lib/settings';
 import { paymentExpiresAt } from '@/lib/payments/policy';
 import type { Order, OrderItem, OrderTimelineEntry, Payment } from '@/types';
@@ -14,7 +15,6 @@ import type { Order, OrderItem, OrderTimelineEntry, Payment } from '@/types';
 export const dynamic = 'force-dynamic';
 
 const DOORSTEP_DELIVERY_FEE = 45;
-const COLLECTION_POINT_DELIVERY_FEE = 25;
 
 const CheckoutSchema = z.object({
   lines: z
@@ -95,6 +95,19 @@ export const POST = handled(async (request: Request) => {
     return fail('Checkout is temporarily unavailable. Please try again shortly.', 409);
   }
 
+  // A collection point order must name a locker on the list; its fee is charged
+  // from that list, so an unknown name cannot pick its own price.
+  if (delivery_method === 'COLLECTION_POINT' && !findCollectionPoint(collection_point)) {
+    return fail('Choose one of the collection points listed at checkout.', 422);
+  }
+
+  // A method nothing can take money through would leave the order waiting for a
+  // payment that cannot arrive. Checkout only offers the available ones; this is
+  // the guard for anything that posts here directly.
+  if (!availablePaymentMethods().includes(payment_method)) {
+    return fail('That payment method is not available yet. Please pay by bank transfer.', 422);
+  }
+
   const [products, offers, suppliers, bands] = await Promise.all([
     readAll('products'),
     readAll('supplier-offers'),
@@ -169,9 +182,12 @@ export const POST = handled(async (request: Request) => {
     { status: 'AWAITING_PAYMENT', label: 'Order placed, waiting for payment', at: now },
   ];
 
+  // The locker, its fee, address and town come from the one shared list, never
+  // from the request: checkout shows the same fee it reads from there.
   const isCollectionPoint = delivery_method === 'COLLECTION_POINT';
-  const delivery_fee = isCollectionPoint ? COLLECTION_POINT_DELIVERY_FEE : DOORSTEP_DELIVERY_FEE;
-  const resolvedAddress = isCollectionPoint && collection_point ? collection_point : delivery_address;
+  const point = isCollectionPoint ? findCollectionPoint(collection_point) : null;
+  const delivery_fee = point ? point.fee : DOORSTEP_DELIVERY_FEE;
+  const resolvedAddress = point ? point.name : delivery_address;
 
   // 3 - the customer-facing order. The reference follows the id (the seed
   // numbers o001 as AFD-24810), so it is unique for the same reason the id is;
@@ -192,9 +208,9 @@ export const POST = handled(async (request: Request) => {
     payment_expires_at: paymentExpiresAt(now, payment_method),
     cancel_reason: null,
     delivery_address: resolvedAddress,
-    delivery_city,
+    delivery_city: point ? point.city : delivery_city,
     delivery_method,
-    collection_point: isCollectionPoint ? (collection_point || resolvedAddress) : null,
+    collection_point: point ? point.name : null,
     placed_at: now,
     updated_at: now,
     timeline,
