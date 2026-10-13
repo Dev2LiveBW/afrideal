@@ -1,6 +1,7 @@
 import 'server-only';
 
 import { findById } from '@/lib/db';
+import { mockAllowedInProduction } from '@/lib/payments/policy';
 import type { Order, PaymentMethod, PaymentProvider } from '@/types';
 
 /**
@@ -42,21 +43,47 @@ export class MockProviderInProductionError extends Error {
 
 function usingMock(): boolean {
   const mock = process.env.PAYMENTS_PROVIDER === 'mock';
-  if (mock && process.env.NODE_ENV === 'production' && process.env.ALLOW_MOCK_PAYMENTS !== 'true') {
+  if (mock && process.env.NODE_ENV === 'production' && !mockAllowedInProduction()) {
     throw new MockProviderInProductionError();
   }
   return mock;
 }
 
+/** Card and wallet methods, which need a gateway (or the mock) to take money. */
+const GATEWAY_METHODS: PaymentMethod[] = ['DPO_PAY', 'ORANGE_MONEY', 'PAYGATE'];
+
 /**
- * Whether the stand-in hosted page may exist. Never throws: in production the
+ * The methods a buyer can actually complete a payment with, right now.
+ *
+ * A bank transfer always works: finance marks it paid by hand. A card or wallet
+ * method needs something to take the money, and until DPO Pay is approved the
+ * only such thing is the mock. Offering a method that can never complete would
+ * leave every order it touches waiting for a payment that cannot arrive, so it
+ * is not offered at all.
+ */
+export function availablePaymentMethods(): PaymentMethod[] {
+  let mock = false;
+  try {
+    mock = usingMock();
+  } catch {
+    // A misconfigured mock in production: offer only what is safe.
+    mock = false;
+  }
+  return mock ? [...GATEWAY_METHODS, 'EFT'] : ['EFT'];
+}
+
+/**
+ * Whether the stand-in hosted page may exist. Never throws: when it is off the
  * page answers 404, and checkout is what fails loudly (usingMock above).
- * An explicit ALLOW_MOCK_PAYMENTS='true' allows E2E suites running against
- * production builds to test the mock gateway.
+ *
+ * Only with PAYMENTS_PROVIDER=mock, and in a production build only through the
+ * same opt in as the mock provider (ALLOW_MOCK_PAYMENTS=1 for CI and the e2e
+ * run), which is ignored on Vercel: a deployed site never shows a page that can
+ * mark orders paid.
  */
 export function mockGatewayAvailable(): boolean {
-  if (process.env.ALLOW_MOCK_PAYMENTS === 'true') return true;
-  return process.env.NODE_ENV !== 'production' && process.env.PAYMENTS_PROVIDER === 'mock';
+  if (process.env.PAYMENTS_PROVIDER !== 'mock') return false;
+  return process.env.NODE_ENV !== 'production' || mockAllowedInProduction();
 }
 
 /**

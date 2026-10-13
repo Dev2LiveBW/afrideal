@@ -673,6 +673,16 @@ const TIMELINE_BY_STATUS = {
 
 const DELIVERY_FEE = 45;
 
+/**
+ * Paid, but the supplier has not confirmed yet: the state confirmPayment()
+ * leaves every new order in. Under spec 0003 the unpaid orders no longer carry
+ * supplier legs, so without this nothing in the seed would be waiting for a
+ * supplier to confirm, and neither the supplier walkthrough nor E02 would have
+ * an order to act on. o008 includes Naledi's shea butter.
+ */
+const AWAITING_SUPPLIER = new Set(['o008']);
+const TIMELINE_AWAITING_SUPPLIER = [['PENDING', 'Order placed'], ['PAID', 'Payment confirmed'], ['PROCESSING', 'Sourcing from supplier']];
+
 const orders = [];
 const orderItems = [];
 const supplierOrders = [];
@@ -721,7 +731,7 @@ orderSpecs.forEach((spec, index) => {
   const subtotal = routedLines.reduce((sum, { item }) => sum + item.line_total, 0);
   const total = subtotal + DELIVERY_FEE;
 
-  const timeline = (TIMELINE_BY_STATUS[status] ?? []).map(([code, label], i, arr) => ({
+  const timeline = ((AWAITING_SUPPLIER.has(orderId) ? TIMELINE_AWAITING_SUPPLIER : TIMELINE_BY_STATUS[status]) ?? []).map(([code, label], i, arr) => ({
     status: code,
     label,
     at: daysAgo(Math.max(0, placedDaysAgo - Math.round((i / Math.max(1, arr.length - 1)) * Math.min(placedDaysAgo, 5))), 9 + i),
@@ -786,7 +796,9 @@ orderSpecs.forEach((spec, index) => {
   // Spec 0003, AC-2: no supplier order and no payable may exist for an order
   // that was never paid for. The supplier is told to prepare goods at
   // confirmation, never at checkout.
-  const paidFor = status !== 'AWAITING_PAYMENT';
+  // A seeded cancellation (o015) was cancelled before it was ever paid, so it
+  // has no legs either.
+  const paidFor = status !== 'AWAITING_PAYMENT' && status !== 'CANCELLED';
 
   for (const [supplierId, bucket] of paidFor ? bySupplier : []) {
     const supOrderId = `sup${String(supOrderSeq++).padStart(3, '0')}`;
@@ -797,7 +809,7 @@ orderSpecs.forEach((spec, index) => {
       id: supOrderId,
       order_id: orderId,
       supplier_id: supplierId,
-      status: SUPPLIER_STATUS[status],
+      status: AWAITING_SUPPLIER.has(orderId) ? 'AWAITING_CONFIRMATION' : SUPPLIER_STATUS[status],
       item_ids: bucket.items.map((i) => i.id),
       supplier_subtotal: supplierSubtotal,
       platform_margin: gross - supplierSubtotal,
@@ -1456,7 +1468,7 @@ RFQ_SPECS.forEach((spec, index) => {
  */
 let paymentSeq = 1;
 const payments = orders
-  .filter((order) => order.status !== 'AWAITING_PAYMENT')
+  .filter((order) => order.status !== 'AWAITING_PAYMENT' && order.status !== 'CANCELLED')
   .map((order) => {
     const confirmedAt = order.timeline.find((entry) => entry.status === 'PAID')?.at ?? order.placed_at;
     return {
@@ -1541,13 +1553,13 @@ for (const order of orders) {
   const legs = supplierOrders.filter((s) => s.order_id === order.id);
   // Spec 0003, AC-2: the rule now cuts both ways. A paid order must have its
   // supplier legs, and an unpaid one must have none.
-  const paidFor = order.status !== 'AWAITING_PAYMENT';
+  const paidFor = order.status !== 'AWAITING_PAYMENT' && order.status !== 'CANCELLED';
   if (paidFor && legs.length === 0) problems.push(`${order.id} has no supplier orders`);
   if (!paidFor && legs.length > 0) {
-    problems.push(`${order.id} is awaiting payment but has ${legs.length} supplier order(s)`);
+    problems.push(`${order.id} was never paid but has ${legs.length} supplier order(s)`);
   }
   if (!paidFor && payments.some((entry) => entry.order_id === order.id)) {
-    problems.push(`${order.id} is awaiting payment but has a payment row`);
+    problems.push(`${order.id} was never paid but has a payment row`);
   }
   if (paidFor && !payments.some((entry) => entry.order_id === order.id)) {
     problems.push(`${order.id} is paid for but has no payment row`);

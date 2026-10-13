@@ -14,8 +14,9 @@ export const dynamic = 'force-dynamic';
 
 /**
  * A stand-in for DPO Pay's hosted card page while gateway approval is
- * outstanding (scope feature 4). Answers 404 unless PAYMENTS_PROVIDER=mock and
- * the server is not a production build. No card data is stored or sent anywhere:
+ * outstanding (scope feature 4). Answers 404 unless mockGatewayAvailable():
+ * PAYMENTS_PROVIDER=mock, and in a production build the ALLOW_MOCK_PAYMENTS=1 opt in,
+ * which is ignored on Vercel. No card data is stored or sent anywhere:
  * the number field exists only so the journey looks like the real one.
  */
 export default async function MockGatewayPage({
@@ -23,9 +24,8 @@ export default async function MockGatewayPage({
 }: {
   searchParams: { reference?: string };
 }) {
-  if (!mockGatewayAvailable()) {
-    throw new Error(`mockGatewayAvailable is false. PAYMENTS_PROVIDER=${process.env.PAYMENTS_PROVIDER} NODE_ENV=${process.env.NODE_ENV}`);
-  }
+  // Switched off: as far as anyone can tell, the page does not exist.
+  if (!mockGatewayAvailable()) notFound();
 
   const reference = searchParams.reference ?? '';
   const payments = await readAll('payments');

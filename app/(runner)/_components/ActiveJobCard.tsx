@@ -46,7 +46,9 @@ export function ActiveJobCard({
 }) {
   const router = useRouter();
   const [saving, setSaving] = useState(false);
-  const [lockerCode, setLockerCode] = useState('LCK-8492');
+  // Empty until the runner types the code shown on the locker: it is sent to the
+  // buyer as their PIN, so a made up default would lock them out.
+  const [lockerCode, setLockerCode] = useState('');
 
   const isCollectionPoint =
     job.order?.delivery_method === 'COLLECTION_POINT' ||
@@ -155,7 +157,8 @@ export function ActiveJobCard({
                     variant="forest"
                     icon={<CheckCircle2 size={16} strokeWidth={1.5} />}
                     loading={saving}
-                    onClick={() => advance('DELIVERED', lockerCode)}
+                    disabled={lockerCode.trim() === ''}
+                    onClick={() => advance('DELIVERED', lockerCode.trim())}
                   >
                     Drop off at Collection Point
                   </ActionButton>

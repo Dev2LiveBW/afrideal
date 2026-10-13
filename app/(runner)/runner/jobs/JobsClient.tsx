@@ -15,8 +15,12 @@ import type { DecoratedShipment } from '../../_lib/types';
 /**
  * Orchestrates the jobs page: the active-job screen, the available feed, and
  * the incoming-job alert. The alert only ever fires for a job this runner
- * hasn't already seen this session (`seenIds`), and only while online - a
- * runner who has gone offline shouldn't get paged.
+ * hasn't already seen this session (`seenIds`), only while online - a
+ * runner who has gone offline shouldn't get paged - and never while they
+ * have an active job. The alert covers the whole screen, so paging a runner
+ * mid-delivery put a new offer over the "Mark picked up" button every time
+ * they dismissed the last one. The open jobs stay listed below with their
+ * own Accept buttons.
  */
 export function JobsClient({
   active,
@@ -32,8 +36,10 @@ export function JobsClient({
   const [alertJob, setAlertJob] = useState<DecoratedShipment | null>(null);
   const [accepting, setAccepting] = useState(false);
 
+  const busy = active.length > 0;
+
   useEffect(() => {
-    if (!online || alertJob) return;
+    if (!online || busy || alertJob) return;
     const next = available.find((job) => !seenIds.current.has(job.id));
     if (!next) return;
 
@@ -41,7 +47,7 @@ export function JobsClient({
     // instant page-load pop-up.
     const timer = setTimeout(() => setAlertJob(next), 1200);
     return () => clearTimeout(timer);
-  }, [available, online, alertJob]);
+  }, [available, online, busy, alertJob]);
 
   function dismissAlert() {
     if (alertJob) seenIds.current.add(alertJob.id);

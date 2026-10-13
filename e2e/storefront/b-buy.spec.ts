@@ -43,25 +43,25 @@ test.describe('B. Buying and tracking', () => {
     await page.getByRole('link', { name: 'Checkout' }).click();
     await expect(page.getByRole('heading', { name: 'Confirm and pay' })).toBeVisible();
     await ready(page);
-    await caption(page, 'B02 · 3. Delivery address and payment method, then Place order (no money moves yet)');
+    await caption(page, 'B02 · 3. Delivery address and bank transfer, then Place order (no money moves yet)');
     await page.getByRole('textbox', { name: 'Street address or plot number' }).fill('Plot 5412, Extension 12');
     await page.getByRole('textbox', { name: 'City or town' }).fill('Gaborone');
-    await expect(page.getByRole('radio', { name: /DPO Pay/ })).toBeChecked();
+    // B02 is the bank transfer journey (B09 covers a card through the mock
+    // gateway). The e2e run turns the mock on, so card methods are offered too
+    // and bank transfer is chosen explicitly (spec 0003).
+    await page.getByRole('radio', { name: /Bank transfer/ }).check({ force: true });
+    await expect(page.getByRole('radio', { name: /Bank transfer/ })).toBeChecked();
     await expect(page.getByText('Total to pay').first().locator('xpath=following-sibling::*[1]')).toHaveText(bwp(337));
     await clickAndSave(page.getByRole('button', { name: 'Place order' }).filter({ visible: true }));
 
-    // The payment gateway handoff (Feature 4)
-    if (await page.waitForURL(/mock-gateway/, { timeout: 10_000 }).then(() => true, () => false)) {
-      await page.getByRole('textbox', { name: 'Card number' }).fill('4242424242424242');
-      await page.getByRole('button', { name: 'Pay' }).click();
-    }
-
-    // The confirmation: a reference, the right sums
+    // The order waits for the money: a reference to quote, and nothing sourced yet.
     await page.waitForURL(/\/orders\/o\d+\?placed=1/);
-    await caption(page, 'B02 · 4. Order confirmed, with its AFD reference and timeline');
+    await caption(page, 'B02 · 4. Waiting for payment, with the reference to quote at the bank');
     await expectHealthy(page);
-    await expect(page.getByText(/Order confirmed|Payment confirmed/)).toBeVisible();
+    await expect(page.getByText('Waiting for your payment')).toBeVisible();
+    await expect(page.getByText('Paying by bank transfer')).toBeVisible();
     const reference = (await page.getByRole('heading', { level: 1, name: /^AFD-\d+$/ }).textContent())!.trim();
+    await expect(page.locator('main strong', { hasText: reference }).first()).toBeVisible();
     await expect(page.getByText('Total', { exact: true }).locator('xpath=following-sibling::*[1]')).toHaveText(bwp(337));
     await expect(page.getByText('Plot 5412, Extension 12')).toBeVisible();
 

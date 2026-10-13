@@ -57,8 +57,9 @@ test.describe('H06. One supplier never sees another', () => {
   test("H06 GlowUp sees none of Naledi's orders @p1", async ({ page }) => {
     await page.goto('/supplier/orders');
     await expect(page.getByRole('heading', { name: 'Your orders', level: 1 })).toBeVisible();
-    // AFD-24850 (o041) is Thabo's order routed only to Naledi.
-    await expect(page.getByText('AFD-24850')).toHaveCount(0);
+    // AFD-24817 (o008) is Kefilwe's order routed only to Naledi. Seeded IDs here
+    // must exist in the committed data/ (npm run seed), not only a local copy.
+    await expect(page.getByText('AFD-24817')).toHaveCount(0);
     await expect(page.getByText('Naledi Beauty Supplies')).toHaveCount(0);
   });
 
@@ -67,9 +68,10 @@ test.describe('H06. One supplier never sees another', () => {
     // Clerk's short lived session token is fresh: this must be refused as
     // "not yours" (403), not "not signed in" (401).
     await page.goto('/supplier/orders');
-    // sup045 is Naledi's leg of o041 (data/supplier-orders.json).
+    // sup008 is Naledi's leg of o008 (data/supplier-orders.json). The ownership
+    // check comes before any status rule, so this is refused whatever its state.
     const status = await page.evaluate(async () => {
-      const response = await fetch('/api/supplier-orders/sup045', {
+      const response = await fetch('/api/supplier-orders/sup008', {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ status: 'CONFIRMED' }),
@@ -84,8 +86,9 @@ test.describe('H07. One customer never sees another', () => {
   test.use(signedInAs('kefilwe'));
 
   test("H07 Kefilwe cannot open Thabo's order @p1", async ({ page }) => {
-    await page.goto('/orders/o041');
-    await expect(page.getByRole('heading', { name: 'AFD-24850' })).toHaveCount(0);
+    // o005 (AFD-24814) is Thabo's.
+    await page.goto('/orders/o005');
+    await expect(page.getByRole('heading', { name: 'AFD-24814' })).toHaveCount(0);
     await expect(page.getByText('Plot 5412, Extension 12')).toHaveCount(0);
   });
 });

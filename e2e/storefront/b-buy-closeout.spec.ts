@@ -177,6 +177,9 @@ test.describe('F. Runner deliveries (Collection Point)', () => {
 
   test('F04 runner delivers to a Collection Point and buyer confirms collection @p1', async ({ page, as, isMobile }) => {
     test.skip(isMobile, 'Multi-role relay flow runs once under desktop project');
+    // Three people and about ten saves, each 2 to 30 s from Botswana: the
+    // default 3 minutes ran out during the locker drop-off (2026-10-13).
+    test.setTimeout(10 * 60_000);
 
     // 1. Kefilwe places an order to a Collection Point
     await caption(page, 'F04 · 1. Kefilwe orders with Collection Point delivery');

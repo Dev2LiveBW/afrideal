@@ -2,6 +2,7 @@ import 'server-only';
 
 import { findById, mutate, nextIds, readAll } from '@/lib/db';
 import { EVENTS, audit, notify } from '@/lib/notifications';
+import { claimedAfterWindow } from '@/lib/payments/policy';
 import { selectSupplier } from '@/lib/supplier-selection';
 import type {
   Order,
@@ -95,8 +96,15 @@ export async function confirmPayment(input: ConfirmInput): Promise<ConfirmOutcom
 
   // AC-7: a late payment reopens an order the clock cancelled, but never one a
   // person cancelled on purpose. The money is real either way, so the refusal is
-  // reported rather than swallowed and the caller flags it for a human.
+  // recorded and sent to finance rather than swallowed.
   if (order.status === 'CANCELLED' && order.cancel_reason !== 'EXPIRED') {
+    await flagRefusedPayment({
+      order,
+      provider: input.provider,
+      providerReference: input.providerReference,
+      amount: input.amount,
+      why: 'the order was cancelled on purpose, so the payment was not applied',
+    });
     return { ok: false, reason: 'CANCELLED_BY_PERSON' };
   }
 
@@ -116,7 +124,16 @@ export async function confirmPayment(input: ConfirmInput): Promise<ConfirmOutcom
 
     // Another order's money. Refuse: confirming here would mark this order paid on
     // a payment that was never for it.
-    if (held.otherOrderId) return { ok: false, reason: 'REFERENCE_USED_ELSEWHERE' };
+    if (held.otherOrderId) {
+      await flagRefusedPayment({
+        order,
+        provider: input.provider,
+        providerReference: input.providerReference,
+        amount: input.amount,
+        why: `the reference is already settled against order ${held.otherOrderId}`,
+      });
+      return { ok: false, reason: 'REFERENCE_USED_ELSEWHERE' };
+    }
 
     // Our own order, so a genuine race: another caller claimed it first. Their row
     // wins and we still continue to step 2, because that caller may not have
@@ -125,32 +142,102 @@ export async function confirmPayment(input: ConfirmInput): Promise<ConfirmOutcom
     claim = { payment: held.mine, wonClaim: false };
   }
 
-  if (claim.conflict) return { ok: false, reason: 'ALREADY_PAID_DIFFERENTLY' };
+  if (claim.conflict) {
+    // A second, distinct payment for an order that is already paid: a double charge.
+    await flagRefusedPayment({
+      order,
+      provider: input.provider,
+      providerReference: input.providerReference,
+      amount: input.amount,
+      why: `the order is already paid under reference ${claim.payment.provider_reference}, so this looks like a double charge`,
+    });
+    return { ok: false, reason: 'ALREADY_PAID_DIFFERENTLY' };
+  }
 
   // ── 2. Legs ────────────────────────────────────────────────────────────────
   const raised = await raiseSupplierLegs(order, now);
 
   // ── 3. Finish ──────────────────────────────────────────────────────────────
-  const wasExpired = order.status === 'CANCELLED' && order.cancel_reason === 'EXPIRED';
-  const finished = await finishOrder(order, claim.payment, now, wasExpired);
+  const finish = await finishOrder(order, claim.payment, now);
+
+  // The order was cancelled by a person between the check at the top and the
+  // finish. The money is claimed and legs may exist, so a human has to decide.
+  if (finish.cancelledByPerson) {
+    await flagRefusedPayment({
+      order: finish.order,
+      provider: input.provider,
+      providerReference: input.providerReference,
+      amount: input.amount,
+      why: 'the order was cancelled while the payment was being confirmed; supplier orders may already exist',
+    });
+    return { ok: false, reason: 'CANCELLED_BY_PERSON' };
+  }
 
   // ── 4. After ───────────────────────────────────────────────────────────────
-  await announce({
-    order: finished,
-    payment: claim.payment,
-    raised,
-    actor: input.actor,
-    late: wasExpired,
-    amountMatches,
-  });
+  // Only the call that actually moved the order announces it. A replay, or a
+  // second click on "Mark paid", must not send the buyer a second "payment
+  // confirmed" or write a second audit line.
+  if (finish.transitioned) {
+    await announce({
+      order: finish.order,
+      payment: claim.payment,
+      raised,
+      actor: input.actor,
+      late: finish.late,
+      amountMatches,
+    });
+  }
 
   return {
     ok: true,
-    order: finished,
+    order: finish.order,
     payment: claim.payment,
     replayed: !claim.wonClaim,
-    late: wasExpired,
+    late: finish.late,
   };
+}
+
+/**
+ * Money arrived that we could not apply. Recorded and sent to finance.
+ *
+ * Every caller that refuses a confirmation comes through here, because a gateway
+ * only calls back after it has taken the money: a refusal with no trace would be
+ * a buyer's payment nobody knows about. The audit row is the record finance
+ * works from to refund or reassign it.
+ */
+export async function flagRefusedPayment(args: {
+  order: Pick<Order, 'id' | 'reference' | 'total'> | null;
+  provider: PaymentProvider;
+  providerReference: string;
+  amount: number;
+  why: string;
+}): Promise<void> {
+  const { order, provider, providerReference, amount, why } = args;
+  const subject = order ? order.reference : `reference ${providerReference}`;
+  const detail = `${provider} payment ${providerReference} of BWP ${amount.toFixed(2)} for ${subject} was not applied: ${why}. Needs finance to refund or reassign it.`;
+
+  console.error(`[payments] refused: ${detail}`);
+
+  await audit({
+    actorId: CALLBACK_ACTOR.id,
+    actorName: CALLBACK_ACTOR.name,
+    action: EVENTS.PAYMENT_REFUSED,
+    entity: 'order',
+    entityId: order?.id ?? providerReference,
+    detail,
+  });
+
+  const finance = (await readAll('users')).filter((user) =>
+    ['FINANCE_ADMIN', 'SUPER_ADMIN'].includes(user.role),
+  );
+  for (const member of finance) {
+    await notify({
+      userId: member.id,
+      title: 'Payment needs a decision',
+      body: detail,
+      kind: 'PAYMENT',
+    });
+  }
 }
 
 export type FailOutcome =
@@ -506,28 +593,58 @@ function resolveSupplier(item: OrderItem, offers: SupplierOffer[], suppliers: Su
   return selectSupplier(forProduct, suppliers, item.qty)?.supplier.id ?? item.supplier_id;
 }
 
-/** Flip the order to PROCESSING. The write that proves everything before it finished. */
-async function finishOrder(
-  order: Order,
-  payment: Payment,
-  now: string,
-  late: boolean,
-): Promise<Order> {
-  return mutate('orders', (rows) => {
+type FinishResult = {
+  order: Order;
+  /** True only for the call that moved the order to PROCESSING. */
+  transitioned: boolean;
+  /** The payment was claimed after the window closed, so the order reopened. */
+  late: boolean;
+  /** A person cancelled the order after this confirmation began. */
+  cancelledByPerson: boolean;
+};
+
+/**
+ * Flip the order to PROCESSING. The write that proves everything before it finished.
+ *
+ * Lateness is decided here, under the orders lock, from when the payment was
+ * claimed, not from whether something already wrote the expiry down. Before this
+ * only an order the retry route had persisted as EXPIRED counted as late, so the
+ * usual route (a buyer abandons the card page, the gateway calls back at minute
+ * 35, or a bank transfer lands on day 8) confirmed as an ordinary on time
+ * payment with nothing in the timeline or audit (AC-7). Using the claim time also
+ * keeps a crashed run honest: one resumed after the deadline is not late if the
+ * money was claimed before it.
+ */
+async function finishOrder(order: Order, payment: Payment, now: string): Promise<FinishResult> {
+  return mutate<'orders', FinishResult>('orders', (rows) => {
     const index = rows.findIndex((row) => row.id === order.id);
-    if (index === -1) return { rows, result: order };
+    if (index === -1) {
+      return { rows, result: { order, transitioned: false, late: false, cancelledByPerson: false } };
+    }
 
     const current = rows[index];
+    const storedExpired = current.status === 'CANCELLED' && current.cancel_reason === 'EXPIRED';
 
     // Only an order still waiting, or one the clock cancelled, may be moved to
     // PROCESSING. Without this a replayed callback dragged an IN_TRANSIT or
     // DELIVERED order backwards, and overwrote a cancellation that landed after
     // this function read its snapshot.
-    const mayStart =
-      current.status === 'AWAITING_PAYMENT' ||
-      (current.status === 'CANCELLED' && current.cancel_reason === 'EXPIRED');
+    const mayStart = current.status === 'AWAITING_PAYMENT' || storedExpired;
 
-    if (!mayStart) return { rows, result: current };
+    if (!mayStart) {
+      return {
+        rows,
+        result: {
+          order: current,
+          transitioned: false,
+          late: false,
+          cancelledByPerson: current.status === 'CANCELLED' && !storedExpired,
+        },
+      };
+    }
+
+    const claimedLate = claimedAfterWindow(current, payment, new Date(now));
+    const late = storedExpired || claimedLate;
 
     const next: Order = {
       ...current,
@@ -537,6 +654,18 @@ async function finishOrder(
       updated_at: now,
       timeline: [
         ...current.timeline,
+        // The expiry nothing had written down yet, so the timeline tells the
+        // whole story: held, released, then reopened by a late payment.
+        ...(claimedLate
+          ? [
+              {
+                status: 'CANCELLED' as const,
+                label: 'Cancelled, payment window closed',
+                at: current.payment_expires_at,
+                actor: 'System',
+              },
+            ]
+          : []),
         {
           status: 'PAID',
           label: late ? 'Payment confirmed late, order reopened' : 'Payment confirmed',
@@ -549,7 +678,10 @@ async function finishOrder(
 
     const copy = [...rows];
     copy[index] = next;
-    return { rows: copy, result: next };
+    return {
+      rows: copy,
+      result: { order: next, transitioned: true, late, cancelledByPerson: false },
+    };
   });
 }
 

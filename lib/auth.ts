@@ -125,15 +125,16 @@ async function resolveProfile(
 }
 
 /**
- * `currentUser()` with up to two retries.
+ * `currentUser()` with up to three retries.
  *
- * It is a Clerk API round trip on every request, and from Botswana one now and
- * then fails ("fetch failed") or times out; without a retry that one blip turns
- * the whole page into the error screen. Only transient failures are retried
- * (no HTTP status, 429, or 5xx); a 4xx answer is real and is thrown at once.
+ * It is a Clerk API round trip, and from Botswana one now and then fails
+ * ("fetch failed") or times out; without a retry that one blip turns the whole
+ * page into the error screen. Only transient failures are retried (no HTTP
+ * status, 429, or 5xx); a 4xx answer is real and is thrown at once. `auth()`
+ * only needs it on the slow path, so most requests never make the call.
  */
 async function currentUserWithRetry(): Promise<Awaited<ReturnType<typeof currentUser>>> {
-  const delays = [250, 750];
+  const delays = [250, 750, 2000];
   for (let attempt = 0; ; attempt++) {
     try {
       return await currentUser();
@@ -153,9 +154,23 @@ async function currentUserWithRetry(): Promise<Awaited<ReturnType<typeof current
  * them share one lookup per request instead of each calling Clerk.
  */
 export const auth = cache(async (): Promise<Session | null> => {
-  const { userId } = await clerkAuth();
+  const { userId, sessionClaims } = await clerkAuth();
   if (!userId) return null;
 
+  // Fast path, no call to Clerk's API: the signed session token already
+  // carries the authorisation fields (the same `metadata` claim middleware
+  // gates on), and a profile already linked to this Clerk account carries the
+  // name and e-mail. Calling Clerk on every request was what turned a network
+  // blip into the error screen.
+  const claims = sessionClaims?.metadata;
+  if (claims && isRole(claims.role)) {
+    const { readAll } = await import('@/lib/db');
+    const linked = (await readAll('users')).find((row) => row.clerk_user_id === userId);
+    if (linked) return toSession(userId, linked, claims, linked.email);
+  }
+
+  // Slow path: a first sign-in (the profile is claimed by e-mail or created),
+  // or a session token without the metadata claim.
   const account = await currentUserWithRetry();
   if (!account) return null;
 
@@ -164,6 +179,11 @@ export const auth = cache(async (): Promise<Session | null> => {
   const displayName = [account.firstName, account.lastName].filter(Boolean).join(' ').trim();
 
   const profile = await resolveProfile(userId, email, displayName, metadata);
+  return toSession(userId, profile, metadata, email);
+});
+
+/** The session for a profile, with authorisation fields from Clerk's metadata where present. */
+function toSession(userId: string, profile: User, metadata: AfriDealMetadata, email: string): Session | null {
   if (profile.status !== 'ACTIVE') return null;
 
   return {
@@ -181,7 +201,7 @@ export const auth = cache(async (): Promise<Session | null> => {
         : (profile.customer_type ?? 'RETAIL'),
     },
   };
-});
+}
 
 /** Session, or throw - for API routes that must have a signed-in user. */
 export async function requireSession(): Promise<Session> {

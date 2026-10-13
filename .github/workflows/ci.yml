@@ -58,6 +58,12 @@ jobs:
       - run: npm run seed
       - run: npm run build
       - name: Start the server
+        # `npm start` is a production build, where the mock payment provider is
+        # refused. ALLOW_MOCK_PAYMENTS is the deliberate opt in for test runs; it
+        # is ignored on Vercel, so it can never reach a deployed site.
+        env:
+          PAYMENTS_PROVIDER: mock
+          ALLOW_MOCK_PAYMENTS: '1'
         run: |
           npm start > server.log 2>&1 &
           for i in $(seq 1 60); do
