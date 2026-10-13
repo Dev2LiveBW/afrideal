@@ -53,9 +53,6 @@ const CheckoutSchema = z
     collection_point: z.string().optional(),
     delivery_address: z.string().optional(),
     delivery_city: z.string().optional(),
-    // `EFT` is accepted but has no card in GATEWAYS yet, so a buyer cannot pick it
-    // here. Spec 0003 needs the method to exist so finance can raise and confirm a
-    // bank transfer order; the checkout card for it comes with the phone checkout.
     payment_method: z.enum(['DPO_PAY', 'ORANGE_MONEY', 'PAYGATE', 'EFT']),
   })
   .superRefine((data, ctx) => {
@@ -97,6 +94,12 @@ const GATEWAYS: { value: PaymentMethod; name: string; monogram: string; blurb: s
     name: 'PayGate',
     monogram: 'PG',
     blurb: 'South African card acquiring.',
+  },
+  {
+    value: 'EFT',
+    name: 'Bank transfer',
+    monogram: 'EFT',
+    blurb: 'Pay from your bank. We hold your order until the transfer arrives.',
   },
 ];
 
@@ -407,8 +410,9 @@ export function CheckoutClient({
           <section className="rounded-md border border-hairline bg-surface-raised p-5">
             <h2 className="text-[15px] font-semibold text-ink">Payment method</h2>
             <p className="mt-1 text-[12.5px] text-body">
-              Payments are processed by licensed providers. AfriDeal does not see or store your
-              card or wallet details.
+              {selectedGateway === 'EFT'
+                ? 'We will give you our bank details and a reference once you place the order. Nothing is ordered from a supplier until your transfer reaches us.'
+                : 'Payments are processed by licensed providers. AfriDeal does not see or store your card or wallet details.'}
             </p>
 
             <div className="mt-5 space-y-2.5">
