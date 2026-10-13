@@ -636,7 +636,8 @@ section('9b. Payment expiry — a closed window reads as cancelled');
   const analytics = (await json(ops, '/api/analytics?days=3650')).body;
   const everyOrder = Array.isArray(list) ? list : [];
   const expectedBillable = everyOrder.filter(
-    (o) => o.status !== 'CANCELLED' && o.status !== 'AWAITING_PAYMENT',
+    // Refunded orders stopped counting as revenue with feature 14 (isBillable).
+    (o) => o.status !== 'CANCELLED' && o.status !== 'AWAITING_PAYMENT' && o.status !== 'REFUNDED',
   ).length;
   const unpaidOrDead = everyOrder.length - expectedBillable;
 
