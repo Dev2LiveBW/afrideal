@@ -633,7 +633,11 @@ section('9b. Payment expiry — a closed window reads as cancelled');
   // excluded CANCELLED but not AWAITING_PAYMENT.
   // Computed rather than hardcoded: earlier sections place orders of their own, so
   // any fixed number here would rot. The list already carries effective statuses.
-  const analytics = (await json(ops, '/api/analytics?days=3650')).body;
+  // `period=YTD` (365 days) so every seeded order is inside the window. This used
+  // to pass `days=3650`, which the route ignores: it fell back to the 30-day MTD
+  // window, and the check started failing on 2026-10-12, the day the oldest
+  // seeded order (o001, placed 2026-09-11) aged out of it.
+  const analytics = (await json(ops, '/api/analytics?period=YTD')).body;
   const everyOrder = Array.isArray(list) ? list : [];
   const expectedBillable = everyOrder.filter(
     // Refunded orders stopped counting as revenue with feature 14 (isBillable).
