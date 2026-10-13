@@ -833,6 +833,38 @@ section('9d. Refused payments — a cancelled order is not reopened, a paid one 
     `${paidEntries.length} PAID entries`);
 }
 
+// ── Feature 10: a collection point is charged the fee checkout shows ─────────
+section('9e. Collection points — the fee charged is the fee shown');
+{
+  const buyer = sessions['thabo@gmail.com'].jar;
+
+  const placeAt = (collection_point) =>
+    json(buyer, '/api/orders', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        lines: [{ product_id: 'p001', variant_id: 'p001v1', qty: 1 }],
+        payment_method: 'EFT',
+        delivery_method: 'COLLECTION_POINT',
+        collection_point,
+        delivery_address: collection_point ?? 'none',
+        delivery_city: 'Gaborone',
+      }),
+    });
+
+  // Checkout lists Francistown at BWP 30; the server used to charge 25 for every
+  // locker. Both now read lib/collection-points.ts.
+  const francistown = await placeAt('Francistown Main Mall Locker');
+  check('a Francistown locker order is placed', francistown.status === 201, `got ${francistown.status}`);
+  check('and charged the BWP 30 that checkout shows', francistown.body?.order?.delivery_fee === 30,
+    `charged ${francistown.body?.order?.delivery_fee}`);
+  check('and its town comes from the locker, not the request', francistown.body?.order?.delivery_city === 'Francistown',
+    `got ${francistown.body?.order?.delivery_city}`);
+
+  const unknown = await placeAt('A locker nobody listed');
+  check('an unlisted locker is refused, so it cannot set its own fee', unknown.status === 422, `got ${unknown.status}`);
+}
+
 // ── 10. Runner availability toggle ───────────────────────────────────────────
 
 section('10. Runner availability');
