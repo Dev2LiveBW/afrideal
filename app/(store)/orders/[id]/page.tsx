@@ -84,6 +84,27 @@ export default async function OrderTrackingPage({
   const lastFailed = latestAttempt?.status === 'FAILED';
   const bankDetails = awaitingPayment && isBankTransfer ? await bankTransferDetails() : null;
 
+  /*
+   * Which buyer-protection note the order earns.
+   *
+   * It cannot be read off the payables alone. Spec 0003 means a new order has
+   * no payable at all until payment is confirmed, so an empty set used to fall
+   * through to 'Refunded' and tell a buyer who had just placed an order that
+   * their money had been sent back. A real refund states itself above, with its
+   * amount and gateway reference (order.status === 'REFUNDED'), so this box
+   * never needs to claim one.
+   */
+  const protection: 'UNDER_REVIEW' | 'COMPLETE' | 'AWAITING_PAYMENT' | 'ACTIVE' =
+    underReview.length > 0
+      ? 'UNDER_REVIEW'
+      : outstanding.length > 0
+        ? 'ACTIVE'
+        : settled.length > 0
+          ? 'COMPLETE'
+          : awaitingPayment
+            ? 'AWAITING_PAYMENT'
+            : 'ACTIVE';
+
   const canConfirm =
     order.status === 'IN_TRANSIT' ||
     order.status === 'READY_FOR_COLLECTION' ||
@@ -388,11 +409,11 @@ export default async function OrderTrackingPage({
               */}
               <div
                 className={`rounded-md border px-5 py-4 ${
-                  underReview.length > 0
+                  protection === 'UNDER_REVIEW'
                     ? 'border-danger/25 bg-danger-wash'
-                    : outstanding.length > 0
-                      ? 'border-gold/25 bg-gold-50/70'
-                      : 'border-forest/25 bg-forest-wash'
+                    : protection === 'COMPLETE'
+                      ? 'border-forest/25 bg-forest-wash'
+                      : 'border-gold/25 bg-gold-50/70'
                 }`}
               >
                 <div className="flex items-start gap-3">
@@ -400,15 +421,15 @@ export default async function OrderTrackingPage({
                     size={16}
                     strokeWidth={1.5}
                     className={`mt-0.5 shrink-0 ${
-                      underReview.length > 0
+                      protection === 'UNDER_REVIEW'
                         ? 'text-danger-ink'
-                        : outstanding.length > 0
-                          ? 'text-gold-700'
-                          : 'text-forest'
+                        : protection === 'COMPLETE'
+                          ? 'text-forest'
+                          : 'text-gold-700'
                     }`}
                   />
                   <div className="min-w-0">
-                    {underReview.length > 0 ? (
+                    {protection === 'UNDER_REVIEW' ? (
                       <>
                         <p className="text-[13px] font-semibold text-danger-ink">Claim under review</p>
                         <p className="mt-1 text-[12.5px] leading-5 text-danger-ink/85">
@@ -417,7 +438,7 @@ export default async function OrderTrackingPage({
                           an explanation.
                         </p>
                       </>
-                    ) : outstanding.length > 0 ? (
+                    ) : protection === 'ACTIVE' ? (
                       <>
                         <p className="text-[13px] font-semibold text-gold-700">
                           Covered by AfriDeal buyer protection
@@ -428,7 +449,7 @@ export default async function OrderTrackingPage({
                           it or refund you.
                         </p>
                       </>
-                    ) : settled.length > 0 ? (
+                    ) : protection === 'COMPLETE' ? (
                       <>
                         <p className="text-[13px] font-semibold text-forest-ink">Order complete</p>
                         <p className="mt-1 text-[12.5px] leading-5 text-forest-ink/85">
@@ -438,9 +459,13 @@ export default async function OrderTrackingPage({
                       </>
                     ) : (
                       <>
-                        <p className="text-[13px] font-semibold text-forest-ink">Refunded</p>
-                        <p className="mt-1 text-[12.5px] leading-5 text-forest-ink/85">
-                          This order was cancelled and the money went back to you.
+                        <p className="text-[13px] font-semibold text-gold-700">
+                          Covered once your payment clears
+                        </p>
+                        <p className="mt-1 text-[12.5px] leading-5 text-gold-700/85">
+                          Nothing has been charged for this order yet. Once your payment is
+                          confirmed the order is ours to put right: if it arrives late, short or
+                          not as described, tell us and we will replace it or refund you.
                         </p>
                       </>
                     )}
