@@ -80,21 +80,21 @@ test.describe('B. Buying and tracking (Collection Point)', () => {
 test.describe('B. Buying and tracking (Customs & Duty)', () => {
   test.use(signedInAs('thabo'));
 
-  test('B11 customs and duty included in landed price @p1', async ({ page }) => {
-    // p002 is configured as an imported item (ZA) subject to cross-border duty
+  test('B11 customs on imported goods is cleared by the courier @p1', async ({ page }) => {
+    // p002 is an imported item (ZA). Since 2026-10-21 its price carries no
+    // customs: the buyer's courier clears it and charges in its fee (spec 0008).
     await page.goto('/products/p002');
-    await caption(page, 'B11 · 1. Add imported product to cart (landed price with duty included)');
-    await expect(page.getByText('Customs & duty included')).toBeVisible();
+    await caption(page, 'B11 · 1. Add imported product to cart (customs cleared by the courier)');
+    await expect(page.getByText('Customs cleared by courier')).toBeVisible();
     await page.getByRole('button', { name: 'Add to cart' }).click();
 
     await page.goto('/checkout');
     await ready(page);
 
-    await caption(page, 'B11 · 2. Checkout explicitly shows Customs & Duty line item covered by AfriDeal');
-    // Ensure the breakdown shows the duty
+    await caption(page, 'B11 · 2. Checkout shows the Customs & Duty line, cleared by the courier');
     const orderSummary = page.getByRole('heading', { name: 'Order summary' }).locator('xpath=..');
     await expect(orderSummary).toContainText('Customs & Duty');
-    await expect(orderSummary).toContainText('Covered by AfriDeal');
+    await expect(orderSummary).toContainText('Cleared by your courier');
   });
 });
 

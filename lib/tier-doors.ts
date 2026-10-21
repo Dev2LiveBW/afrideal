@@ -124,9 +124,17 @@ export function tierDoors(
   bands: CustomerPrice[],
   product: Product,
   customerType: CustomerType,
+  variantId: string | null = null,
 ): TierDoor[] {
-  const ownLadder = priceLadder(bands, product.id, customerType);
-  const ladder = ownLadder.length > 0 ? ownLadder : priceLadder(bands, product.id, 'RETAIL');
+  if (product.owner_type === 'SUPPLIER' || product.commercial_model === 'SUPPLIER_LED') {
+    return [];
+  }
+
+  // A product sold by length has a ladder per length; without one chosen, the
+  // product-level ladder reads as the "from" price.
+  const ownLadder = priceLadder(bands, product.id, customerType, variantId);
+  const ladder =
+    ownLadder.length > 0 ? ownLadder : priceLadder(bands, product.id, 'RETAIL', variantId);
   const retailBase = ladder[0]?.unit_price ?? product.price;
 
   return DOOR_TIERS.map((tier) => {

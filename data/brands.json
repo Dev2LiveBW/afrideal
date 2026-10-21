@@ -28,5 +28,10 @@
     "id": "b006",
     "name": "Bokamoso Apparel",
     "slug": "bokamoso-apparel"
+  },
+  {
+    "id": "b007",
+    "name": "AfriDeal",
+    "slug": "afrideal"
   }
 ]

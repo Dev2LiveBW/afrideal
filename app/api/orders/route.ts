@@ -3,7 +3,7 @@ import { z } from 'zod';
 import { fail, guard, handled, ok } from '@/lib/api';
 import { insert, insertMany, nextId, nextIds, readAll } from '@/lib/db';
 import { EVENTS, audit, notify } from '@/lib/notifications';
-import { resolvePrice } from '@/lib/pricing-tiers';
+import { offerLandedCost, priceLine, sellerQuantities } from '@/lib/pricing-tiers';
 import { selectSupplier } from '@/lib/supplier-selection';
 import { availablePaymentMethods, startPayment } from '@/lib/payments/adapters';
 import { allAsDisplayed } from '@/lib/payments/status';
@@ -121,6 +121,7 @@ export const POST = handled(async (request: Request) => {
   // 1 + 2 - resolve and route every line.
   const itemIds = await nextIds('order-items', 'oi', lines.length);
   const items: OrderItem[] = [];
+  const tierQuantityOf = sellerQuantities(lines, products);
 
   for (const line of lines) {
     const product = products.find((candidate) => candidate.id === line.product_id);
@@ -129,34 +130,59 @@ export const POST = handled(async (request: Request) => {
     const variant = product.variants.find((candidate) => candidate.id === line.variant_id);
     if (!variant) return fail(`That option is no longer available for ${product.name}.`, 422);
 
-    const route = selectSupplier(
-      offers.filter((offer) => offer.product_id === product.id),
-      suppliers,
-      line.qty,
-    );
+    const minOrderQty = product.owner_type === 'SUPPLIER' ? Math.max(1, product.moq ?? 1) : 1;
+    if (line.qty < minOrderQty) {
+      return fail(
+        `${product.name} requires a minimum order of ${minOrderQty} units.`,
+        422,
+      );
+    }
+
+    const candidateOffers = offers.filter((offer) => offer.product_id === product.id);
+    const preferredOffers =
+      product.owner_type === 'SUPPLIER' && product.supplier_id
+        ? candidateOffers.filter((offer) => offer.supplier_id === product.supplier_id)
+        : candidateOffers;
+
+    const route =
+      selectSupplier(
+        preferredOffers.length > 0 ? preferredOffers : candidateOffers,
+        suppliers,
+        line.qty,
+      ) ?? selectSupplier(candidateOffers, suppliers, line.qty);
 
     if (!route) return fail(`No verified supplier can currently fulfil ${product.name}.`, 409);
 
     /**
-     * §14 - price the line from the buyer's own tier ladder, at the server, for
-     * the quantity actually ordered. The client sends no prices at all, so a
-     * tampered cart cannot set its own, and a buyer who qualifies for wholesale
-     * gets it whether or not the page they came from showed it.
+     * §14 - price the line from the buyer's own tier ladder, at the server.
+     * Supplier-owned products use the supplier's set price directly; AfriDeal
+     * products use the ladder, on the rung chosen by every unit in this order
+     * from the same seller and category (spec 0007, AC-5). `priceLine()` is the
+     * function the cart and checkout show, so the charge matches the summary.
      */
     const productBands = bands.filter((band) => band.product_id === product.id);
-    const tiered = resolvePrice(productBands, product, line.qty, actor.customerType);
+    const priced = priceLine(
+      productBands,
+      product,
+      variant.id,
+      line.qty,
+      actor.customerType,
+      tierQuantityOf(product.id),
+    );
 
-    if (tiered.requires_rfq) {
+    if (priced.resolved.requires_rfq) {
       return fail(
         `${product.name} at ${line.qty} units is priced by quotation. Submit a quotation request rather than ordering directly.`,
         409,
       );
     }
 
-    // Variants carry an uplift over the product base; apply it as a ratio so a
-    // case is correctly dearer than a single unit at every rung of the ladder.
-    const variantRatio = product.price === 0 ? 1 : variant.price / product.price;
-    const unitPrice = Math.ceil(tiered.unit_price * variantRatio);
+    // Spec 0007, AC-7: what this unit cost us, fixed now so a later rate or
+    // cost change never rewrites a placed order or its payable.
+    const landed = offerLandedCost(route.offer, product, variant.id);
+    const supplierCost =
+      route.offer.variant_costs?.find((entry) => entry.variant_id === variant.id)?.cost ??
+      route.offer.supplier_cost;
 
     items.push({
       id: itemIds[items.length],
@@ -167,10 +193,13 @@ export const POST = handled(async (request: Request) => {
       variant_label: variant.label,
       emoji: product.emoji,
       qty: line.qty,
-      unit_price: unitPrice,
-      line_total: unitPrice * line.qty,
+      unit_price: priced.unit_price,
+      line_total: priced.line_total,
       supplier_id: route.supplier.id,
-      supplier_cost: route.offer.supplier_cost,
+      supplier_cost: supplierCost,
+      supplier_cost_currency: route.offer.cost_currency ?? 'BWP',
+      fx_rate: supplierCost === 0 ? 1 : landed.cost / supplierCost,
+      customs_amount: landed.customs,
     });
   }
 

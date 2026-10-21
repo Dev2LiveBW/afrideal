@@ -74,12 +74,20 @@ export default async function ProductPage({ params }: { params: { id: string } }
       null,
     );
 
+  const isSupplierOwned = product.owner_type === 'SUPPLIER' || product.commercial_model === 'SUPPLIER_LED';
+  const primaryOffer =
+    (isSupplierOwned && product.supplier_id
+      ? publicOffers.find((offer) => offer.supplier_id === product.supplier_id)
+      : undefined) ?? publicOffers.find((offer) => offer.is_primary) ?? publicOffers[0];
+
   return (
     <div className="mx-auto max-w-market px-3 pb-[100px] pt-[50px] lg:px-6 lg:pb-24 lg:pt-32">
       <Breadcrumb
         trail={[
           { label: 'Home', href: '/' },
-          { label: categoryName, href: `/browse?category=${product.category_id}` },
+          ...(isSupplierOwned && product.supplier_id && product.supplier_name
+            ? [{ label: product.supplier_name, href: `/suppliers/${product.supplier_id}` }]
+            : [{ label: categoryName, href: `/browse?category=${product.category_id}` }]),
           { label: product.name },
         ]}
       />
@@ -93,6 +101,15 @@ export default async function ProductPage({ params }: { params: { id: string } }
         {/* ── Buy panel ────────────────────────────────────────────────── */}
         <div>
           <div className="flex flex-wrap items-center gap-2">
+            {isSupplierOwned ? (
+              <span className="rounded-full bg-ocean-wash px-2.5 py-1 font-mono text-[10px] font-semibold uppercase tracking-[0.14em] text-ocean-ink">
+                Supplier product{product.supplier_name ? ` · ${product.supplier_name}` : ''}
+              </span>
+            ) : (
+              <span className="rounded-full bg-forest-wash px-2.5 py-1 font-mono text-[10px] font-semibold uppercase tracking-[0.14em] text-forest-ink">
+                AfriDeal Direct
+              </span>
+            )}
             {product.rating >= 4.5 && (
               <span className="rounded-full bg-forest-wash px-2.5 py-1 font-mono text-[10px] font-semibold uppercase tracking-[0.14em] text-forest-ink">
                 Top rated
@@ -136,13 +153,13 @@ export default async function ProductPage({ params }: { params: { id: string } }
             bands={bands}
             customerType={customerType}
             inStock={inStock}
-            primarySupplierId={selection.primary?.supplier.id ?? ''}
+            primarySupplierId={primaryOffer?.supplier_id ?? selection.primary?.supplier.id ?? ''}
             primaryImage={images.find((image) => image.sort_order === 0)}
             doors={productDoors}
           />
 
           <DeliveryEstimate offers={publicOffers} city="Gaborone" />
-          <SellerCard offer={publicOffers.find((offer) => offer.is_primary)} />
+          <SellerCard offer={primaryOffer} />
 
           <div className="mt-3 flex items-start gap-3 rounded-md border border-hairline bg-gold-50/60 px-4 py-3.5">
             <Lock size={15} strokeWidth={1.5} className="mt-0.5 shrink-0 text-gold-700" />

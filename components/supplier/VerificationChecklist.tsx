@@ -103,68 +103,78 @@ export function VerificationChecklist({
 
   return (
     <div>
-      <ul className="divide-y divide-hairline">
-        {documents.map((doc) => (
-          <li key={doc.id} className="flex items-start justify-between gap-4 py-4 first:pt-0 last:pb-0">
-            <div className="flex items-start gap-3">
-              <span
-                className={cn(
-                  'mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-full',
-                  doc.status === 'APPROVED'
-                    ? 'bg-forest-wash text-forest'
-                    : doc.status === 'REJECTED'
-                      ? 'bg-danger-wash text-danger-ink'
-                      : 'bg-gold-50 text-gold-dark',
-                )}
-              >
-                <FileText size={15} strokeWidth={1.5} />
-              </span>
-              <div className="min-w-0">
-                <p className="text-[13.5px] font-medium text-ink">{doc.label}</p>
-                <p className="mt-0.5 text-[11.5px] text-muted">
-                  {doc.uploaded_at ? `Uploaded ${dateTime(doc.uploaded_at)}` : 'Not yet uploaded'}
-                </p>
-                {doc.note && <p className="mt-1 text-[12px] text-danger-ink">{doc.note}</p>}
+      {documents.length === 0 ? (
+        <p className="py-2 text-[13px] text-muted">
+          No verification documents uploaded yet — onboarded with deferred KYC.
+        </p>
+      ) : (
+        <ul className="divide-y divide-hairline">
+          {documents.map((doc) => (
+            <li key={doc.id} className="flex items-start justify-between gap-4 py-4 first:pt-0 last:pb-0">
+              <div className="flex items-start gap-3">
+                <span
+                  className={cn(
+                    'mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-full',
+                    doc.status === 'APPROVED'
+                      ? 'bg-forest-wash text-forest'
+                      : doc.status === 'REJECTED'
+                        ? 'bg-danger-wash text-danger-ink'
+                        : 'bg-gold-50 text-gold-dark',
+                  )}
+                >
+                  <FileText size={15} strokeWidth={1.5} />
+                </span>
+                <div className="min-w-0">
+                  <p className="text-[13.5px] font-medium text-ink">{doc.label}</p>
+                  <p className="mt-0.5 text-[11.5px] text-muted">
+                    {doc.uploaded_at ? `Uploaded ${dateTime(doc.uploaded_at)}` : 'Not yet uploaded'}
+                  </p>
+                  {doc.note && <p className="mt-1 text-[12px] text-danger-ink">{doc.note}</p>}
+                </div>
               </div>
-            </div>
 
-            <div className="flex shrink-0 items-center gap-1.5">
-              <StatusBadge status={doc.status} size="sm" />
-              {canDecide && doc.status !== 'APPROVED' && (
-                <button
-                  type="button"
-                  onClick={() => setDocAction({ doc, status: 'APPROVED' })}
-                  className="rounded-full p-1.5 text-forest transition-colors hover:bg-forest-wash"
-                  title="Approve document"
-                  aria-label={`Approve ${doc.label}`}
-                >
-                  <Check size={14} strokeWidth={2} />
-                </button>
-              )}
-              {canDecide && doc.status !== 'REJECTED' && (
-                <button
-                  type="button"
-                  onClick={() => setDocAction({ doc, status: 'REJECTED' })}
-                  className="rounded-full p-1.5 text-danger-ink transition-colors hover:bg-danger-wash"
-                  title="Reject document"
-                  aria-label={`Reject ${doc.label}`}
-                >
-                  <X size={14} strokeWidth={2} />
-                </button>
-              )}
-            </div>
-          </li>
-        ))}
-      </ul>
+              <div className="flex shrink-0 items-center gap-1.5">
+                <StatusBadge status={doc.status} size="sm" />
+                {canDecide && doc.status !== 'APPROVED' && (
+                  <button
+                    type="button"
+                    onClick={() => setDocAction({ doc, status: 'APPROVED' })}
+                    className="rounded-full p-1.5 text-forest transition-colors hover:bg-forest-wash"
+                    title="Approve document"
+                    aria-label={`Approve ${doc.label}`}
+                  >
+                    <Check size={14} strokeWidth={2} />
+                  </button>
+                )}
+                {canDecide && doc.status !== 'REJECTED' && (
+                  <button
+                    type="button"
+                    onClick={() => setDocAction({ doc, status: 'REJECTED' })}
+                    className="rounded-full p-1.5 text-danger-ink transition-colors hover:bg-danger-wash"
+                    title="Reject document"
+                    aria-label={`Reject ${doc.label}`}
+                  >
+                    <X size={14} strokeWidth={2} />
+                  </button>
+                )}
+              </div>
+            </li>
+          ))}
+        </ul>
+      )}
 
       {canDecide && (
         <div className="mt-3 flex flex-wrap items-center justify-between gap-3 border-t border-hairline pt-4">
           <p className="text-[12px] text-muted">
-            {anyRejected
-              ? 'At least one document was rejected - the supplier can re-upload it.'
-              : anyPending
-                ? 'Some documents are still awaiting review.'
-                : 'Every document is approved and ready for a decision.'}
+            {documents.length === 0
+              ? 'KYC documents can be uploaded and reviewed here when collected.'
+              : anyRejected
+                ? 'At least one document was rejected - the supplier can re-upload it.'
+                : anyPending
+                  ? currentStatus === 'VERIFIED'
+                    ? 'Onboarded for launch — pending KYC documents can be collected and approved as they arrive.'
+                    : 'Some documents are still awaiting review.'
+                  : 'Every document is approved and ready for a decision.'}
           </p>
           <div className="flex flex-wrap gap-2">
             {currentStatus === 'PENDING' && (

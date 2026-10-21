@@ -194,9 +194,11 @@ export interface TieredPriceResult {
 export interface MarginBreakdown {
   supplier_cost: number;
   selling_price: number;
+  /** The 14% customs paid at the border on imported goods; 0 for local ones. */
+  customs_cost: number;
   logistics_cost: number;
   gateway_cost: number;
-  /** selling_price − supplier_cost − logistics − gateway */
+  /** selling_price − supplier_cost − customs − logistics − gateway */
   gross_margin: number;
   /** gross_margin ÷ selling_price */
   gross_margin_pct: number;

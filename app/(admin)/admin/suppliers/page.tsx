@@ -4,12 +4,17 @@ import { auth } from '@/lib/auth';
 import { readAll } from '@/lib/db';
 import { getNotifications } from '@/lib/queries';
 
+import { OnboardSupplierButton } from './OnboardSupplierButton';
 import { SuppliersTable } from './SuppliersTable';
 
 export const dynamic = 'force-dynamic';
 
 export default async function AdminSuppliersPage() {
-  const [session, suppliers] = await Promise.all([auth(), readAll('suppliers')]);
+  const [session, suppliers, categories] = await Promise.all([
+    auth(),
+    readAll('suppliers'),
+    readAll('categories'),
+  ]);
   const notifications = session?.user ? await getNotifications(session.user.id) : [];
   const canDecide = session?.user ? ['SUPER_ADMIN', 'OPERATIONS_ADMIN'].includes(session.user.role) : false;
 
@@ -33,6 +38,7 @@ export default async function AdminSuppliersPage() {
           eyebrow="Commerce"
           title="Suppliers"
           description={`${suppliers.length} suppliers registered across Botswana and South Africa.`}
+          action={canDecide ? <OnboardSupplierButton categories={categories} /> : undefined}
         />
 
         <SuppliersTable suppliers={sorted} canDecide={canDecide} />

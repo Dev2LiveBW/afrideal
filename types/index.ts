@@ -89,6 +89,15 @@ export interface Product {
   brand_id?: string | null;
   product_type?: string;
   country_of_origin?: string;
+  /** Whether this is an in-house AfriDeal product or a supplier's own product. */
+  owner_type?: 'AFRIDEAL' | 'SUPPLIER';
+  /** Set when owner_type === 'SUPPLIER': the supplier who owns and prices this product. */
+  supplier_id?: string | null;
+  supplier_name?: string | null;
+  /** Minimum order quantity set by the supplier (defaults to 1 for AfriDeal products). */
+  moq?: number;
+  /** AFRIDEAL_MANAGED uses the 4-tier ladder; SUPPLIER_LED uses supplier-set price & MOQ. */
+  commercial_model?: CommercialModel;
   /** Set only while a PROMOTIONAL band is live. The strikethrough figure. */
   compare_at_price?: number;
   promotion?: {
@@ -143,8 +152,15 @@ export interface SupplierOffer {
   id: string;
   product_id: string;
   supplier_id: string;
-  /** What the supplier charges AfriDeal, in Pula. */
+  /**
+   * What the supplier charges AfriDeal per unit, in `cost_currency`. For an
+   * offer with `variant_costs`, the cost of the cheapest option.
+   */
   supplier_cost: number;
+  /** The supplier's own currency. Missing means Pula (spec 0007, AC-1). */
+  cost_currency?: 'BWP' | 'ZAR';
+  /** One cost per option where they differ, e.g. a wig sold by length. */
+  variant_costs?: { variant_id: string; cost: number }[];
   stock: number;
   fulfilment_days: number;
   moq: number;
@@ -241,7 +257,13 @@ export interface OrderItem {
   unit_price: number;
   line_total: number;
   supplier_id: string;
+  /** Per unit, in the supplier's own currency (`supplier_cost_currency`). */
   supplier_cost: number;
+  /** Spec 0007, AC-7: the costs this line was priced on, fixed at order time. */
+  supplier_cost_currency?: 'BWP' | 'ZAR';
+  fx_rate?: number;
+  /** Customs per unit, in Pula. */
+  customs_amount?: number;
 }
 
 export type SupplierOrderStatus =

@@ -14,7 +14,7 @@ import { EmptyState, Enclosure } from '@/components/brand/Panel';
 import { CartLineThumb } from '@/components/storefront/CartLineThumb';
 import { useAfriDealStore } from '@/store/useAfriDealStore';
 import { COLLECTION_POINTS } from '@/lib/collection-points';
-import { resolvePrice } from '@/lib/pricing-tiers';
+import { priceLine, sellerQuantities } from '@/lib/pricing-tiers';
 import { cn } from '@/lib/utils';
 import type { CustomerPrice, CustomerType, PaymentMethod, Product } from '@/types';
 
@@ -131,19 +131,24 @@ export function CheckoutClient({
   const selectedPoint =
     COLLECTION_POINTS.find((p) => p.name === selectedCollectionPointName) ?? COLLECTION_POINTS[0];
   /*
-   * Resolved per line for the quantity actually being ordered, mirroring the
-   * orders route including the variant ratio. The summary a buyer approves must
-   * be the amount that gets charged.
+   * Resolved per line through `priceLine()`, the function the orders route
+   * charges with, on the same seller-and-category quantity. The summary a buyer
+   * approves must be the amount that gets charged.
    */
+  const tierQuantityOf = sellerQuantities(cart, products);
   const priced = cart.map((line) => {
     const product = products.find((candidate) => candidate.id === line.product_id);
     if (!product) return { line, unitPrice: line.unit_price };
 
-    const resolved = resolvePrice(bands, product, line.qty, customerType, line.variant_id);
-    const variant = product.variants.find((entry) => entry.id === line.variant_id);
-    const variantRatio = product.price === 0 || !variant ? 1 : variant.price / product.price;
-
-    return { line, unitPrice: Math.ceil(resolved.unit_price * variantRatio) };
+    const { unit_price } = priceLine(
+      bands,
+      product,
+      line.variant_id,
+      line.qty,
+      customerType,
+      tierQuantityOf(product.id),
+    );
+    return { line, unitPrice: unit_price };
   });
 
   const unitPriceFor = (line: (typeof cart)[number]) =>
@@ -507,13 +512,10 @@ export function CheckoutClient({
                   <div className="flex items-center justify-between">
                     <dt className="flex items-center gap-1.5 text-body">
                       <span>Customs & Duty</span>
-                      <span className="rounded bg-forest-wash px-1.5 py-0.5 font-mono text-[10px] font-medium uppercase tracking-wider text-forest-ink">
-                        Included
-                      </span>
                     </dt>
                     <dd className="text-right">
                       <span className="text-[12.5px] font-medium text-forest">
-                        Covered by AfriDeal
+                        Cleared by your courier
                       </span>
                     </dd>
                   </div>
@@ -542,8 +544,9 @@ export function CheckoutClient({
             <ShieldCheck size={16} strokeWidth={1.5} className="mt-0.5 shrink-0 text-gold-700" />
             <p className="text-[12.5px] leading-5 text-gold-700">
               Placing this order buys the goods from AfriDeal. We procure them from a verified
-              supplier, clear all border customs and duties, deliver them to you, and cover the
-              order under our returns and refunds policy until seven days after delivery.
+              supplier and hand them to your courier, who clears customs at the border and
+              delivers them to you. We cover the order under our returns and refunds policy until
+              seven days after delivery.
             </p>
           </div>
         </div>

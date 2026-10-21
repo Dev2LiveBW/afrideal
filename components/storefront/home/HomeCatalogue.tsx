@@ -302,9 +302,17 @@ function Feed({
   title: string;
   promos?: Promo[];
 }) {
+  const [sourceFilter, setSourceFilter] = useState<'all' | 'afrideal' | 'supplier'>('all');
   const [shown, setShown] = useState(BATCH);
   const sentinelRef = useRef<HTMLDivElement>(null);
-  const more = shown < items.length;
+
+  const filteredItems = items.filter((item) => {
+    if (sourceFilter === 'afrideal') return item.owner_type !== 'SUPPLIER';
+    if (sourceFilter === 'supplier') return item.owner_type === 'SUPPLIER';
+    return true;
+  });
+
+  const more = shown < filteredItems.length;
 
   /*
    * Re-armed after every batch: an observer only reports *changes* in
@@ -317,33 +325,63 @@ function Feed({
 
     const observer = new IntersectionObserver(
       ([entry]) => {
-        if (entry.isIntersecting) setShown((value) => Math.min(value + BATCH, items.length));
+        if (entry.isIntersecting) setShown((value) => Math.min(value + BATCH, filteredItems.length));
       },
       { rootMargin: '160px 0px' },
     );
     observer.observe(sentinel);
     return () => observer.disconnect();
-  }, [shown, more, items.length]);
+  }, [shown, more, filteredItems.length]);
 
   return (
     <section className="bg-surface-raised px-3 pb-2 pt-3 sm:px-4" aria-labelledby="home-feed">
       <div className="mx-auto max-w-market">
-        <div className="flex items-baseline justify-between gap-3">
-          <h2 id="home-feed" className="font-sans text-[1rem] font-bold leading-5 tracking-normal text-[#222]">
-            {title}
-          </h2>
-          <p className="text-[0.6875rem] text-[#767676]">
-            <span className="font-mono tabular-nums">{items.length}</span>{' '}
-            {items.length === 1 ? 'product' : 'products'}
-          </p>
+        <div className="flex flex-wrap items-center justify-between gap-2">
+          <div className="flex items-baseline gap-2.5">
+            <h2 id="home-feed" className="font-sans text-[1rem] font-bold leading-5 tracking-normal text-[#222]">
+              {title}
+            </h2>
+            <p className="text-[0.6875rem] text-[#767676]">
+              <span className="font-mono tabular-nums">{filteredItems.length}</span>{' '}
+              {filteredItems.length === 1 ? 'product' : 'products'}
+            </p>
+          </div>
+
+          <div className="flex items-center gap-1" role="group" aria-label="Filter by product source">
+            {(
+              [
+                { id: 'all', label: 'All' },
+                { id: 'afrideal', label: 'AfriDeal Direct' },
+                { id: 'supplier', label: 'Supplier Products' },
+              ] as const
+            ).map((tab) => (
+              <button
+                key={tab.id}
+                type="button"
+                onClick={() => {
+                  setSourceFilter(tab.id);
+                  setShown(BATCH);
+                }}
+                aria-pressed={sourceFilter === tab.id}
+                className={cn(
+                  'press-soft rounded-full px-2.5 py-1 text-[11px] font-medium transition-colors',
+                  sourceFilter === tab.id
+                    ? 'bg-forest text-white'
+                    : 'bg-[#f4f4f4] text-[#444] hover:bg-[#eaeaea]',
+                )}
+              >
+                {tab.label}
+              </button>
+            ))}
+          </div>
         </div>
 
-        {items.length === 0 ? (
+        {filteredItems.length === 0 ? (
           <p className="py-10 text-center text-[0.8125rem] text-[#767676]">Nothing listed in this category yet.</p>
         ) : (
           <div className="mt-2 grid grid-cols-5 gap-x-1 gap-y-1 sm:gap-x-4 sm:gap-y-5">
-            {promos && promos.length > 0 && <PromoCarousel promos={promos} />}
-            {items.slice(0, shown).map((product) => (
+            {promos && promos.length > 0 && sourceFilter === 'all' && <PromoCarousel promos={promos} />}
+            {filteredItems.slice(0, shown).map((product) => (
               <ProductCard
                 key={product.id}
                 product={product}

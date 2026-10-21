@@ -10,7 +10,7 @@ import { EmptyState, Enclosure } from '@/components/brand/Panel';
 import { CartLineThumb } from '@/components/storefront/CartLineThumb';
 import { NextRungNudge } from '@/components/storefront/NextRungNudge';
 import { useAfriDealStore } from '@/store/useAfriDealStore';
-import { resolvePrice } from '@/lib/pricing-tiers';
+import { priceLine, sellerQuantities } from '@/lib/pricing-tiers';
 import { nextRung } from '@/lib/tier-doors';
 import type { CustomerPrice, CustomerType, Product } from '@/types';
 
@@ -46,19 +46,24 @@ export function CartClient({
    * the offer immediately above it is worse than a wrong total: it is the one
    * claim this storefront cannot afford to break.
    *
-   * The arithmetic mirrors the orders route exactly, variant ratio included, so
-   * what the cart shows is what the order will charge.
+   * The arithmetic is `priceLine()`, the function the orders route charges
+   * with, on the same seller-and-category quantity (spec 0007, AC-5), so what
+   * the cart shows is what the order will charge.
    */
+  const tierQuantityOf = sellerQuantities(cart, products);
   const priced = cart.map((line) => {
     const product = products.find((candidate) => candidate.id === line.product_id);
     if (!product) return { line, unitPrice: line.unit_price };
 
-    const resolved = resolvePrice(bands, product, line.qty, customerType, line.variant_id);
-    const variant = product.variants.find((entry) => entry.id === line.variant_id);
-    const variantRatio =
-      product.price === 0 || !variant ? 1 : variant.price / product.price;
-
-    return { line, unitPrice: Math.ceil(resolved.unit_price * variantRatio) };
+    const { unit_price } = priceLine(
+      bands,
+      product,
+      line.variant_id,
+      line.qty,
+      customerType,
+      tierQuantityOf(product.id),
+    );
+    return { line, unitPrice: unit_price };
   });
 
   const unitPriceFor = (line: (typeof cart)[number]) =>
@@ -127,12 +132,15 @@ export function CartClient({
                * different prices for the same quantity.
                */
               const product = products.find((candidate) => candidate.id === line.product_id);
+              // The rung is decided by every unit of this seller and category,
+              // so the nudge counts from that total, not from this line alone.
+              const counted = product ? tierQuantityOf(product.id) : line.qty;
               const upcoming = product
-                ? nextRung(bands, product.id, line.qty, customerType, line.variant_id)
+                ? nextRung(bands, product.id, counted, customerType, line.variant_id)
                 : null;
 
               const here = product
-                ? resolvePrice(bands, product, line.qty, customerType, line.variant_id)
+                ? { unit_price: unitPriceFor(line) }
                 : null;
 
               return (
@@ -199,12 +207,16 @@ export function CartClient({
                   {upcoming && here && (
                     <NextRungNudge
                       className="mt-3"
-                      unitsAway={upcoming.band.minimum_quantity - line.qty}
+                      unitsAway={upcoming.band.minimum_quantity - counted}
                       nextUnitPrice={upcoming.band.unit_price}
                       currentUnitPrice={here.unit_price}
                       locked={upcoming.locked}
                       onTake={() =>
-                        setQty(line.product_id, line.variant_id, upcoming.band.minimum_quantity)
+                        setQty(
+                          line.product_id,
+                          line.variant_id,
+                          line.qty + upcoming.band.minimum_quantity - counted,
+                        )
                       }
                     />
                   )}
@@ -260,13 +272,10 @@ export function CartClient({
                     <div className="flex items-center justify-between">
                       <dt className="flex items-center gap-1.5 text-body">
                         <span>Customs & Duty</span>
-                        <span className="rounded bg-forest-wash px-1.5 py-0.5 font-mono text-[10px] font-medium uppercase tracking-wider text-forest-ink">
-                          Included
-                        </span>
                       </dt>
                       <dd className="text-right">
                         <span className="text-[12.5px] font-medium text-forest">
-                          Covered by AfriDeal
+                          Cleared by your courier
                         </span>
                       </dd>
                     </div>

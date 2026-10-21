@@ -377,13 +377,10 @@ export default async function OrderTrackingPage({
                       <div className="flex items-center justify-between">
                         <dt className="flex items-center gap-1.5 text-body">
                           <span>Customs & Duty</span>
-                          <span className="rounded bg-forest-wash px-1.5 py-0.5 font-mono text-[10px] font-medium uppercase tracking-wider text-forest-ink">
-                            Included
-                          </span>
                         </dt>
                         <dd className="text-right">
                           <span className="text-[12.5px] font-medium text-forest">
-                            Covered by AfriDeal
+                            Cleared by your courier
                           </span>
                         </dd>
                       </div>

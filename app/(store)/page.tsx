@@ -1,6 +1,7 @@
 import Link from 'next/link';
 import { ArrowRight } from 'lucide-react';
 
+import { HairFloor, HAIR_CATEGORY } from '@/components/storefront/home/HairFloor';
 import { HomeCatalogue, type FeedProduct } from '@/components/storefront/home/HomeCatalogue';
 import { HomeTabs } from '@/components/storefront/home/HomeTabs';
 import { HOME_PROMOS } from '@/components/storefront/home/promos';
@@ -12,11 +13,14 @@ import { StatsBanner } from '@/components/storefront/HomePromoSections';
 import { MockupHero } from '@/components/storefront/MockupHero';
 import { PopularCategories } from '@/components/storefront/PopularCategories';
 import { PathChooser } from '@/components/storefront/PathChooser';
-import { SupplierDirectorySection } from '@/components/storefront/SupplierDirectory';
+import {
+  AfriDealDirectSection,
+  SupplierDirectorySection,
+} from '@/components/storefront/SupplierDirectory';
 import { TrustStrip } from '@/components/storefront/TrustStrip';
 import { auth } from '@/lib/auth';
 import { readAll } from '@/lib/db';
-import { getDirectoryListings } from '@/lib/directory';
+import { getDirectoryListings, getSuppliersWithProducts } from '@/lib/directory';
 import {
   DIRECTORY_ON_HOMEPAGE,
   DIRECTORY_PREVIEW_COUNT,
@@ -39,16 +43,25 @@ const DEFAULT_QUANTITY = 1;
 const FLAGSHIP_CATEGORY = 'c1';
 
 export default async function LandingPage() {
-  const [{ categories, products }, images, bands, offers, suppliers, session, directory] =
-    await Promise.all([
-      getCatalogue(),
-      readAll('product-images'),
-      readAll('customer-prices'),
-      readAll('supplier-offers'),
-      readAll('suppliers'),
-      auth(),
-      getDirectoryListings({ limit: DIRECTORY_PREVIEW_COUNT }),
-    ]);
+  const [
+    { categories, products },
+    images,
+    bands,
+    offers,
+    suppliers,
+    session,
+    directory,
+    suppliersWithProducts,
+  ] = await Promise.all([
+    getCatalogue(),
+    readAll('product-images'),
+    readAll('customer-prices'),
+    readAll('supplier-offers'),
+    readAll('suppliers'),
+    auth(),
+    getDirectoryListings({ limit: DIRECTORY_PREVIEW_COUNT }),
+    getSuppliersWithProducts({ limit: 4 }),
+  ]);
 
 
   const primaryImage = new Map(
@@ -86,8 +99,8 @@ export default async function LandingPage() {
   /*
    * The feed: every listed product, in the benchmark's 2-column grid, with
    * the same routing the catalogue page does so a quick-add books against a
-   * real supplier. Featured first, then by rating - the default order the
-   * catalogue page opens on.
+   * real supplier. AfriDeal Direct products lead prominently first, followed
+   * by supplier-listed products.
    */
   const feed: FeedProduct[] = products
     .map((product) => ({
@@ -95,12 +108,32 @@ export default async function LandingPage() {
       image: primaryImage.get(product.id),
       categoryName: categoryName.get(product.category_id),
       primarySupplierId:
+        (product.owner_type === 'SUPPLIER' && product.supplier_id
+          ? offers.find(
+              (offer) =>
+                offer.product_id === product.id &&
+                offer.supplier_id === product.supplier_id &&
+                offer.active &&
+                offer.stock > 0,
+            )?.supplier_id
+          : undefined) ??
         rankOffers(
           offers.filter((offer) => offer.product_id === product.id),
           suppliers,
-        ).primary?.supplier.id ?? '',
+        ).primary?.supplier.id ??
+        '',
     }))
-    .sort((a, b) => Number(b.featured) - Number(a.featured) || b.rating - a.rating);
+    // Hair is AfriDeal's primary line (product owner, 2026-10-20), so within
+    // each group it leads the feed.
+    .sort(
+      (a, b) =>
+        Number(a.owner_type === 'SUPPLIER') - Number(b.owner_type === 'SUPPLIER') ||
+        Number(b.category_id === HAIR_CATEGORY) - Number(a.category_id === HAIR_CATEGORY) ||
+        Number(b.featured) - Number(a.featured) ||
+        b.rating - a.rating,
+    );
+
+  const afriDealProducts = feed.filter((product) => product.owner_type !== 'SUPPLIER');
 
   return (
     <>
@@ -131,22 +164,32 @@ export default async function LandingPage() {
           <InfoRibbon />
         </div>
 
+        {/* ── Hair, wigs & weaves ─────────────────────────────────────
+          AfriDeal's primary line (product owner, 2026-10-20), so it is the
+          first floor under the hero, ahead of the category grid.
+        */}
+        <HairFloor products={feed} className="border-t border-[#f5f5f5]" />
+
         {/* ── Popular Categories ──────────────────────────────────────
           TICKET-001. Exactly one block, and the heading lives inside the
           component so it cannot be duplicated from a call site.
         */}
         <PopularCategories className="border-t border-[#f5f5f5]" />
 
+        {/* ── AfriDeal Direct Products (Featured prominently first) ──── */}
+        <AfriDealDirectSection
+          products={afriDealProducts}
+          href="/browse"
+          className="border-t border-[#f5f5f5]"
+        />
 
         {/* ── Supplier / product directory ────────────────────────────
-          TICKET-007. TODO(TICKET-007): this homepage placement is temporary.
-          The directory also stands alone at DIRECTORY_ROUTE and appears in
-          the storefront nav; which of the three survives is the product
-          owner's call. Flip DIRECTORY_ON_HOMEPAGE in lib/directory-placement.ts.
+          Verified suppliers with their own respective products.
         */}
         {DIRECTORY_ON_HOMEPAGE && (
           <SupplierDirectorySection
             listings={directory}
+            suppliers={suppliersWithProducts}
             href={DIRECTORY_ROUTE}
             className="border-t border-[#f5f5f5]"
           />

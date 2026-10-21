@@ -34,30 +34,35 @@
         "id": "p001v1",
         "label": "Single tub",
         "sku": "SHB-500-1",
-        "price": 146
+        "price": 137
       },
       {
         "id": "p001v2",
         "label": "Case of 6",
         "sku": "SHB-500-6",
-        "price": 154
+        "price": 145
       },
       {
         "id": "p001v3",
         "label": "Case of 12",
         "sku": "SHB-500-12",
-        "price": 161
+        "price": 151
       }
     ],
-    "price": 146,
+    "price": 137,
     "status": "ACTIVE",
     "rating": 4.8,
     "review_count": 214,
     "featured": true,
-    "created_at": "2026-06-10T08:00:00.000Z",
+    "created_at": "2026-06-23T08:00:00.000Z",
     "brand_id": "b001",
     "product_type": "PHYSICAL",
-    "country_of_origin": "ZA"
+    "country_of_origin": "ZA",
+    "owner_type": "AFRIDEAL",
+    "supplier_id": null,
+    "supplier_name": null,
+    "moq": 1,
+    "commercial_model": "AFRIDEAL_MANAGED"
   },
   {
     "id": "p002",
@@ -94,42 +99,47 @@
         "id": "p002v1",
         "label": "Natural Black 1B",
         "sku": "BRD-26-1B",
-        "price": 85
+        "price": 82
       },
       {
         "id": "p002v2",
         "label": "Dark Brown 2",
         "sku": "BRD-26-2",
-        "price": 85
+        "price": 82
       },
       {
         "id": "p002v3",
         "label": "Burgundy 99J",
         "sku": "BRD-26-99J",
-        "price": 90
+        "price": 86
       },
       {
         "id": "p002v4",
         "label": "Honey Blonde 27",
         "sku": "BRD-26-27",
-        "price": 91
+        "price": 88
       }
     ],
-    "price": 85,
+    "price": 82,
     "status": "ACTIVE",
     "rating": 4.6,
     "review_count": 388,
     "featured": true,
-    "created_at": "2026-06-16T08:18:00.000Z",
+    "created_at": "2026-06-29T08:18:00.000Z",
     "brand_id": "b001",
     "product_type": "PHYSICAL",
     "country_of_origin": "ZA",
-    "compare_at_price": 93,
+    "owner_type": "AFRIDEAL",
+    "supplier_id": null,
+    "supplier_name": null,
+    "moq": 1,
+    "commercial_model": "AFRIDEAL_MANAGED",
+    "compare_at_price": 87,
     "promotion": {
-      "discount_pct": 9,
-      "ends_at": "2026-10-11T15:00:00.000Z",
-      "stock_allocated": 43,
-      "stock_sold": 7
+      "discount_pct": 6,
+      "ends_at": "2026-10-24T15:00:00.000Z",
+      "stock_allocated": 82,
+      "stock_sold": 24
     }
   },
   {
@@ -167,24 +177,29 @@
         "id": "p003v1",
         "label": "Single bottle",
         "sku": "ARG-100-1",
-        "price": 114
+        "price": 107
       },
       {
         "id": "p003v2",
         "label": "Case of 12",
         "sku": "ARG-100-12",
-        "price": 124
+        "price": 116
       }
     ],
-    "price": 114,
+    "price": 107,
     "status": "ACTIVE",
     "rating": 4.5,
     "review_count": 156,
     "featured": false,
-    "created_at": "2026-06-22T08:36:00.000Z",
+    "created_at": "2026-07-05T08:36:00.000Z",
     "brand_id": "b001",
     "product_type": "PHYSICAL",
-    "country_of_origin": "ZA"
+    "country_of_origin": "ZA",
+    "owner_type": "SUPPLIER",
+    "supplier_id": "s002",
+    "supplier_name": "GlowUp Distributors",
+    "moq": 6,
+    "commercial_model": "SUPPLIER_LED"
   },
   {
     "id": "p004",
@@ -225,30 +240,35 @@
         "id": "p004v1",
         "label": "Black",
         "sku": "SPB-20-BK",
-        "price": 644
+        "price": 603
       },
       {
         "id": "p004v2",
         "label": "Desert Sand",
         "sku": "SPB-20-DS",
-        "price": 644
+        "price": 603
       },
       {
         "id": "p004v3",
         "label": "Olive",
         "sku": "SPB-20-OL",
-        "price": 644
+        "price": 603
       }
     ],
-    "price": 644,
+    "price": 603,
     "status": "ACTIVE",
     "rating": 4.4,
     "review_count": 92,
     "featured": true,
-    "created_at": "2026-06-28T08:54:00.000Z",
+    "created_at": "2026-07-11T08:54:00.000Z",
     "brand_id": "b002",
     "product_type": "PHYSICAL",
-    "country_of_origin": "ZA"
+    "country_of_origin": "ZA",
+    "owner_type": "AFRIDEAL",
+    "supplier_id": null,
+    "supplier_name": null,
+    "moq": 1,
+    "commercial_model": "AFRIDEAL_MANAGED"
   },
   {
     "id": "p005",
@@ -289,24 +309,29 @@
         "id": "p005v1",
         "label": "Midnight",
         "sku": "WEP-ANC-MN",
-        "price": 879
+        "price": 824
       },
       {
         "id": "p005v2",
         "label": "Pearl",
         "sku": "WEP-ANC-PL",
-        "price": 879
+        "price": 824
       }
     ],
-    "price": 879,
+    "price": 824,
     "status": "ACTIVE",
     "rating": 4.2,
     "review_count": 141,
     "featured": false,
-    "created_at": "2026-07-04T08:12:00.000Z",
+    "created_at": "2026-07-17T08:12:00.000Z",
     "brand_id": "b002",
     "product_type": "PHYSICAL",
-    "country_of_origin": "ZA"
+    "country_of_origin": "ZA",
+    "owner_type": "SUPPLIER",
+    "supplier_id": "s003",
+    "supplier_name": "Kalahari Electronics",
+    "moq": 2,
+    "commercial_model": "SUPPLIER_LED"
   },
   {
     "id": "p006",
@@ -343,30 +368,35 @@
         "id": "p006v1",
         "label": "Single bag",
         "sku": "CEM-425-1",
-        "price": 138
+        "price": 129
       },
       {
         "id": "p006v2",
         "label": "Half pallet — 20 bags",
         "sku": "CEM-425-20",
-        "price": 138
+        "price": 129
       },
       {
         "id": "p006v3",
         "label": "Full pallet — 40 bags",
         "sku": "CEM-425-40",
-        "price": 138
+        "price": 129
       }
     ],
-    "price": 138,
+    "price": 129,
     "status": "ACTIVE",
     "rating": 4.9,
     "review_count": 67,
     "featured": true,
-    "created_at": "2026-07-10T08:30:00.000Z",
+    "created_at": "2026-07-23T08:30:00.000Z",
     "brand_id": "b003",
     "product_type": "PHYSICAL",
-    "country_of_origin": "BW"
+    "country_of_origin": "BW",
+    "owner_type": "AFRIDEAL",
+    "supplier_id": null,
+    "supplier_name": null,
+    "moq": 1,
+    "commercial_model": "AFRIDEAL_MANAGED"
   },
   {
     "id": "p007",
@@ -407,30 +437,35 @@
         "id": "p007v1",
         "label": "Galvanised",
         "sku": "IBR-36-GV",
-        "price": 370
+        "price": 347
       },
       {
         "id": "p007v2",
         "label": "Charcoal coated",
         "sku": "IBR-36-CH",
-        "price": 415
+        "price": 389
       },
       {
         "id": "p007v3",
         "label": "Brick red coated",
         "sku": "IBR-36-BR",
-        "price": 415
+        "price": 389
       }
     ],
-    "price": 370,
+    "price": 347,
     "status": "ACTIVE",
     "rating": 4.7,
     "review_count": 44,
     "featured": false,
-    "created_at": "2026-07-16T08:48:00.000Z",
+    "created_at": "2026-07-29T08:48:00.000Z",
     "brand_id": "b003",
     "product_type": "PHYSICAL",
-    "country_of_origin": "BW"
+    "country_of_origin": "BW",
+    "owner_type": "SUPPLIER",
+    "supplier_id": "s004",
+    "supplier_name": "Motswedi Building Supplies",
+    "moq": 10,
+    "commercial_model": "SUPPLIER_LED"
   },
   {
     "id": "p008",
@@ -467,30 +502,35 @@
         "id": "p008v1",
         "label": "Single bag",
         "sku": "MZE-125-1",
-        "price": 140
+        "price": 136
       },
       {
         "id": "p008v2",
         "label": "Bale of 4",
         "sku": "MZE-125-4",
-        "price": 140
+        "price": 136
       }
     ],
-    "price": 140,
+    "price": 136,
     "status": "ACTIVE",
     "rating": 4.6,
     "review_count": 302,
     "featured": true,
-    "created_at": "2026-07-22T08:06:00.000Z",
+    "created_at": "2026-08-04T08:06:00.000Z",
     "brand_id": "b004",
     "product_type": "PHYSICAL",
     "country_of_origin": "BW",
-    "compare_at_price": 154,
+    "owner_type": "AFRIDEAL",
+    "supplier_id": null,
+    "supplier_name": null,
+    "moq": 1,
+    "commercial_model": "AFRIDEAL_MANAGED",
+    "compare_at_price": 144,
     "promotion": {
-      "discount_pct": 9,
-      "ends_at": "2026-10-10T15:00:00.000Z",
-      "stock_allocated": 43,
-      "stock_sold": 7
+      "discount_pct": 6,
+      "ends_at": "2026-10-23T15:00:00.000Z",
+      "stock_allocated": 82,
+      "stock_sold": 24
     }
   },
   {
@@ -532,24 +572,29 @@
         "id": "p009v1",
         "label": "25kg bag",
         "sku": "SRG-25-1",
-        "price": 738
+        "price": 692
       },
       {
         "id": "p009v2",
         "label": "Pallet — 20 bags",
         "sku": "SRG-25-20",
-        "price": 738
+        "price": 692
       }
     ],
-    "price": 738,
+    "price": 692,
     "status": "ACTIVE",
     "rating": 4.8,
     "review_count": 38,
     "featured": false,
-    "created_at": "2026-07-28T08:24:00.000Z",
+    "created_at": "2026-08-10T08:24:00.000Z",
     "brand_id": "b004",
     "product_type": "PHYSICAL",
-    "country_of_origin": "BW"
+    "country_of_origin": "BW",
+    "owner_type": "SUPPLIER",
+    "supplier_id": "s005",
+    "supplier_name": "Highveld Trade Co",
+    "moq": 5,
+    "commercial_model": "SUPPLIER_LED"
   },
   {
     "id": "p010",
@@ -590,24 +635,29 @@
         "id": "p010v1",
         "label": "Single box",
         "sku": "A4-80-1",
-        "price": 292
+        "price": 273
       },
       {
         "id": "p010v2",
         "label": "Carton of 5 boxes",
         "sku": "A4-80-5",
-        "price": 292
+        "price": 273
       }
     ],
-    "price": 292,
+    "price": 273,
     "status": "ACTIVE",
     "rating": 4.3,
     "review_count": 89,
     "featured": false,
-    "created_at": "2026-08-03T08:42:00.000Z",
+    "created_at": "2026-08-16T08:42:00.000Z",
     "brand_id": "b005",
     "product_type": "PHYSICAL",
-    "country_of_origin": "ZA"
+    "country_of_origin": "ZA",
+    "owner_type": "SUPPLIER",
+    "supplier_id": "s005",
+    "supplier_name": "Highveld Trade Co",
+    "moq": 5,
+    "commercial_model": "SUPPLIER_LED"
   },
   {
     "id": "p011",
@@ -648,30 +698,35 @@
         "id": "p011v1",
         "label": "Navy",
         "sku": "OVR-D59-NV",
-        "price": 319
+        "price": 299
       },
       {
         "id": "p011v2",
         "label": "Royal Blue",
         "sku": "OVR-D59-RB",
-        "price": 319
+        "price": 299
       },
       {
         "id": "p011v3",
         "label": "Hi-Viz Orange",
         "sku": "OVR-D59-OR",
-        "price": 367
+        "price": 344
       }
     ],
-    "price": 319,
+    "price": 299,
     "status": "ACTIVE",
     "rating": 4.5,
     "review_count": 73,
     "featured": false,
-    "created_at": "2026-08-09T08:00:00.000Z",
+    "created_at": "2026-08-22T08:00:00.000Z",
     "brand_id": "b006",
     "product_type": "PHYSICAL",
-    "country_of_origin": "ZA"
+    "country_of_origin": "ZA",
+    "owner_type": "SUPPLIER",
+    "supplier_id": "s002",
+    "supplier_name": "GlowUp Distributors",
+    "moq": 10,
+    "commercial_model": "SUPPLIER_LED"
   },
   {
     "id": "p012",
@@ -708,36 +763,41 @@
         "id": "p012v1",
         "label": "Age 5–7",
         "sku": "UNI-PRI-57",
-        "price": 227
+        "price": 219
       },
       {
         "id": "p012v2",
         "label": "Age 8–10",
         "sku": "UNI-PRI-810",
-        "price": 246
+        "price": 238
       },
       {
         "id": "p012v3",
         "label": "Age 11–13",
         "sku": "UNI-PRI-1113",
-        "price": 264
+        "price": 255
       }
     ],
-    "price": 227,
+    "price": 219,
     "status": "ACTIVE",
     "rating": 4.4,
     "review_count": 218,
     "featured": true,
-    "created_at": "2026-08-15T08:18:00.000Z",
+    "created_at": "2026-08-28T08:18:00.000Z",
     "brand_id": "b006",
     "product_type": "PHYSICAL",
     "country_of_origin": "ZA",
-    "compare_at_price": 247,
+    "owner_type": "AFRIDEAL",
+    "supplier_id": null,
+    "supplier_name": null,
+    "moq": 1,
+    "commercial_model": "AFRIDEAL_MANAGED",
+    "compare_at_price": 231,
     "promotion": {
-      "discount_pct": 8,
-      "ends_at": "2026-10-14T15:00:00.000Z",
-      "stock_allocated": 96,
-      "stock_sold": 30
+      "discount_pct": 5,
+      "ends_at": "2026-10-27T15:00:00.000Z",
+      "stock_allocated": 75,
+      "stock_sold": 21
     }
   },
   {
@@ -779,36 +839,41 @@
         "id": "p013v1",
         "label": "Natural Black 1B",
         "sku": "BBW-20-1B",
-        "price": 799
+        "price": 774
       },
       {
         "id": "p013v2",
         "label": "Off Black 2",
         "sku": "BBW-20-2",
-        "price": 799
+        "price": 774
       },
       {
         "id": "p013v3",
         "label": "Ombre 1B/27",
         "sku": "BBW-20-OMB",
-        "price": 872
+        "price": 845
       }
     ],
-    "price": 799,
+    "price": 774,
     "status": "ACTIVE",
     "rating": 4.8,
     "review_count": 412,
     "featured": true,
-    "created_at": "2026-08-21T08:36:00.000Z",
+    "created_at": "2026-09-03T08:36:00.000Z",
     "brand_id": null,
     "product_type": "PHYSICAL",
     "country_of_origin": "ZA",
-    "compare_at_price": 872,
+    "owner_type": "AFRIDEAL",
+    "supplier_id": null,
+    "supplier_name": null,
+    "moq": 1,
+    "commercial_model": "AFRIDEAL_MANAGED",
+    "compare_at_price": 818,
     "promotion": {
-      "discount_pct": 8,
-      "ends_at": "2026-10-13T15:00:00.000Z",
-      "stock_allocated": 96,
-      "stock_sold": 30
+      "discount_pct": 5,
+      "ends_at": "2026-10-26T15:00:00.000Z",
+      "stock_allocated": 75,
+      "stock_sold": 21
     }
   },
   {
@@ -850,30 +915,35 @@
         "id": "p014v1",
         "label": "Natural Black 1B",
         "sku": "HDF-134-18-1B",
-        "price": 1144
+        "price": 1073
       },
       {
         "id": "p014v2",
         "label": "Straight",
         "sku": "HDF-134-18-ST",
-        "price": 1144
+        "price": 1073
       },
       {
         "id": "p014v3",
         "label": "Body Wave",
         "sku": "HDF-134-18-BW",
-        "price": 1213
+        "price": 1138
       }
     ],
-    "price": 1144,
+    "price": 1073,
     "status": "ACTIVE",
     "rating": 4.7,
     "review_count": 236,
     "featured": true,
-    "created_at": "2026-08-27T08:54:00.000Z",
+    "created_at": "2026-09-09T08:54:00.000Z",
     "brand_id": null,
     "product_type": "PHYSICAL",
-    "country_of_origin": "ZA"
+    "country_of_origin": "ZA",
+    "owner_type": "AFRIDEAL",
+    "supplier_id": null,
+    "supplier_name": null,
+    "moq": 1,
+    "commercial_model": "AFRIDEAL_MANAGED"
   },
   {
     "id": "p015",
@@ -914,30 +984,35 @@
         "id": "p015v1",
         "label": "Natural Black 1B",
         "sku": "BST-24-1B",
-        "price": 781
+        "price": 732
       },
       {
         "id": "p015v2",
         "label": "Dark Brown 2",
         "sku": "BST-24-2",
-        "price": 781
+        "price": 732
       },
       {
         "id": "p015v3",
         "label": "Honey Blonde 27",
         "sku": "BST-24-27",
-        "price": 867
+        "price": 813
       }
     ],
-    "price": 781,
+    "price": 732,
     "status": "ACTIVE",
     "rating": 4.6,
     "review_count": 318,
     "featured": true,
-    "created_at": "2026-09-02T08:12:00.000Z",
+    "created_at": "2026-09-15T08:12:00.000Z",
     "brand_id": null,
     "product_type": "PHYSICAL",
-    "country_of_origin": "ZA"
+    "country_of_origin": "ZA",
+    "owner_type": "SUPPLIER",
+    "supplier_id": "s001",
+    "supplier_name": "Naledi Beauty Supplies",
+    "moq": 3,
+    "commercial_model": "SUPPLIER_LED"
   },
   {
     "id": "p016",
@@ -978,42 +1053,47 @@
         "id": "p016v1",
         "label": "Natural Black 1B",
         "sku": "PTC-18-1B",
-        "price": 135
+        "price": 131
       },
       {
         "id": "p016v2",
         "label": "Dark Brown 4",
         "sku": "PTC-18-4",
-        "price": 135
+        "price": 131
       },
       {
         "id": "p016v3",
         "label": "Burgundy 99J",
         "sku": "PTC-18-99J",
-        "price": 143
+        "price": 138
       },
       {
         "id": "p016v4",
         "label": "Honey Blonde 27",
         "sku": "PTC-18-27",
-        "price": 143
+        "price": 138
       }
     ],
-    "price": 135,
+    "price": 131,
     "status": "ACTIVE",
     "rating": 4.5,
     "review_count": 527,
     "featured": true,
-    "created_at": "2026-09-08T08:30:00.000Z",
+    "created_at": "2026-09-21T08:30:00.000Z",
     "brand_id": null,
     "product_type": "PHYSICAL",
     "country_of_origin": "ZA",
-    "compare_at_price": 148,
+    "owner_type": "AFRIDEAL",
+    "supplier_id": null,
+    "supplier_name": null,
+    "moq": 1,
+    "commercial_model": "AFRIDEAL_MANAGED",
+    "compare_at_price": 138,
     "promotion": {
-      "discount_pct": 9,
-      "ends_at": "2026-10-11T15:00:00.000Z",
-      "stock_allocated": 43,
-      "stock_sold": 7
+      "discount_pct": 6,
+      "ends_at": "2026-10-24T15:00:00.000Z",
+      "stock_allocated": 82,
+      "stock_sold": 24
     }
   },
   {
@@ -1055,29 +1135,528 @@
         "id": "p017v1",
         "label": "Natural Black 1B",
         "sku": "GBW-12-1B",
-        "price": 1248
+        "price": 1170
       },
       {
         "id": "p017v2",
         "label": "Dark Brown 2",
         "sku": "GBW-12-2",
-        "price": 1248
+        "price": 1170
       },
       {
         "id": "p017v3",
         "label": "Auburn 30",
         "sku": "GBW-12-30",
-        "price": 1348
+        "price": 1264
       }
     ],
-    "price": 1248,
+    "price": 1170,
     "status": "ACTIVE",
     "rating": 4.6,
     "review_count": 189,
     "featured": true,
-    "created_at": "2026-09-14T08:48:00.000Z",
+    "created_at": "2026-09-27T08:48:00.000Z",
     "brand_id": null,
     "product_type": "PHYSICAL",
-    "country_of_origin": "ZA"
+    "country_of_origin": "ZA",
+    "owner_type": "SUPPLIER",
+    "supplier_id": "s001",
+    "supplier_name": "Naledi Beauty Supplies",
+    "moq": 2,
+    "commercial_model": "SUPPLIER_LED"
+  },
+  {
+    "id": "p018",
+    "name": "Sleek Straight Lace Bob Wig",
+    "slug": "sleek-straight-lace-bob-wig",
+    "category_id": "c1",
+    "emoji": "💇🏾‍♀️",
+    "swatch": [
+      "#1c1714",
+      "#0a0a0a"
+    ],
+    "short_description": "A sleek, straight bob on a lace front. 8 to 16 inch.",
+    "description": "A sleek, straight bob on a lace front, cut to sit at the jaw with a natural parting. Sold by length from 8 to 16 inches. Mix lengths and styles from the AfriDeal hair range and they count together towards the multi-buy and bulk prices.",
+    "specs": [
+      {
+        "label": "Lengths",
+        "value": "8 inch to 16 inch"
+      },
+      {
+        "label": "Style",
+        "value": "Straight bob"
+      },
+      {
+        "label": "Front",
+        "value": "Lace front"
+      },
+      {
+        "label": "Sold by",
+        "value": "Length, one wig per unit"
+      },
+      {
+        "label": "Brand",
+        "value": "AfriDeal"
+      }
+    ],
+    "variants": [
+      {
+        "id": "p018v1",
+        "label": "8 inch",
+        "sku": "P018-8",
+        "price": 420
+      },
+      {
+        "id": "p018v2",
+        "label": "10 inch",
+        "sku": "P018-10",
+        "price": 675
+      },
+      {
+        "id": "p018v3",
+        "label": "12 inch",
+        "sku": "P018-12",
+        "price": 945
+      },
+      {
+        "id": "p018v4",
+        "label": "14 inch",
+        "sku": "P018-14",
+        "price": 1245
+      },
+      {
+        "id": "p018v5",
+        "label": "16 inch",
+        "sku": "P018-16",
+        "price": 1590
+      }
+    ],
+    "price": 420,
+    "status": "ACTIVE",
+    "rating": 0,
+    "review_count": 0,
+    "featured": true,
+    "created_at": "2026-10-03T08:06:00.000Z",
+    "brand_id": "b007",
+    "product_type": "PHYSICAL",
+    "country_of_origin": "ZA",
+    "owner_type": "AFRIDEAL",
+    "supplier_id": null,
+    "supplier_name": null,
+    "moq": 1,
+    "commercial_model": "AFRIDEAL_MANAGED"
+  },
+  {
+    "id": "p019",
+    "name": "Straight Bob Wig with Fringe",
+    "slug": "straight-bob-wig-with-fringe",
+    "category_id": "c1",
+    "emoji": "👩🏾",
+    "swatch": [
+      "#211812",
+      "#0d0b0a"
+    ],
+    "short_description": "A straight bob with a full fringe. 8 to 12 inch.",
+    "description": "A straight bob with a full fringe, finished at the jaw. Sold by length from 8 to 12 inches. Mix lengths and styles from the AfriDeal hair range and they count together towards the multi-buy and bulk prices.",
+    "specs": [
+      {
+        "label": "Lengths",
+        "value": "8 inch to 12 inch"
+      },
+      {
+        "label": "Style",
+        "value": "Straight bob, fringe"
+      },
+      {
+        "label": "Sold by",
+        "value": "Length, one wig per unit"
+      },
+      {
+        "label": "Brand",
+        "value": "AfriDeal"
+      }
+    ],
+    "variants": [
+      {
+        "id": "p019v1",
+        "label": "8 inch",
+        "sku": "P019-8",
+        "price": 300
+      },
+      {
+        "id": "p019v2",
+        "label": "10 inch",
+        "sku": "P019-10",
+        "price": 375
+      },
+      {
+        "id": "p019v3",
+        "label": "12 inch",
+        "sku": "P019-12",
+        "price": 450
+      }
+    ],
+    "price": 300,
+    "status": "ACTIVE",
+    "rating": 0,
+    "review_count": 0,
+    "featured": true,
+    "created_at": "2026-10-09T08:24:00.000Z",
+    "brand_id": "b007",
+    "product_type": "PHYSICAL",
+    "country_of_origin": "ZA",
+    "owner_type": "AFRIDEAL",
+    "supplier_id": null,
+    "supplier_name": null,
+    "moq": 1,
+    "commercial_model": "AFRIDEAL_MANAGED"
+  },
+  {
+    "id": "p020",
+    "name": "Long Straight Lace Wig",
+    "slug": "long-straight-lace-wig",
+    "category_id": "c1",
+    "emoji": "✨",
+    "swatch": [
+      "#18120f",
+      "#060606"
+    ],
+    "short_description": "Long, sleek and straight on a lace front. 20 to 32 inch.",
+    "description": "Long, sleek and straight on a lace front, with a middle parting. Sold by length from 20 to 32 inches. Mix lengths and styles from the AfriDeal hair range and they count together towards the multi-buy and bulk prices.",
+    "specs": [
+      {
+        "label": "Lengths",
+        "value": "20 inch to 32 inch"
+      },
+      {
+        "label": "Style",
+        "value": "Long straight"
+      },
+      {
+        "label": "Front",
+        "value": "Lace front"
+      },
+      {
+        "label": "Sold by",
+        "value": "Length, one wig per unit"
+      },
+      {
+        "label": "Brand",
+        "value": "AfriDeal"
+      }
+    ],
+    "variants": [
+      {
+        "id": "p020v1",
+        "label": "20 inch",
+        "sku": "P020-20",
+        "price": 1500
+      },
+      {
+        "id": "p020v2",
+        "label": "22 inch",
+        "sku": "P020-22",
+        "price": 1650
+      },
+      {
+        "id": "p020v3",
+        "label": "24 inch",
+        "sku": "P020-24",
+        "price": 1950
+      },
+      {
+        "id": "p020v4",
+        "label": "26 inch",
+        "sku": "P020-26",
+        "price": 2175
+      },
+      {
+        "id": "p020v5",
+        "label": "28 inch",
+        "sku": "P020-28",
+        "price": 2625
+      },
+      {
+        "id": "p020v6",
+        "label": "30 inch",
+        "sku": "P020-30",
+        "price": 2775
+      },
+      {
+        "id": "p020v7",
+        "label": "32 inch",
+        "sku": "P020-32",
+        "price": 3150
+      }
+    ],
+    "price": 1500,
+    "status": "ACTIVE",
+    "rating": 0,
+    "review_count": 0,
+    "featured": true,
+    "created_at": "2026-10-15T08:42:00.000Z",
+    "brand_id": "b007",
+    "product_type": "PHYSICAL",
+    "country_of_origin": "ZA",
+    "owner_type": "AFRIDEAL",
+    "supplier_id": null,
+    "supplier_name": null,
+    "moq": 1,
+    "commercial_model": "AFRIDEAL_MANAGED"
+  },
+  {
+    "id": "p021",
+    "name": "Deep Curly Lace Wig",
+    "slug": "deep-curly-lace-wig",
+    "category_id": "c1",
+    "emoji": "👩🏾‍🦱",
+    "swatch": [
+      "#231a14",
+      "#0b0908"
+    ],
+    "short_description": "Full, defined curls on a lace front. 20 to 32 inch.",
+    "description": "Full, defined curls with plenty of volume, on a lace front. Sold by length from 20 to 32 inches. Mix lengths and styles from the AfriDeal hair range and they count together towards the multi-buy and bulk prices.",
+    "specs": [
+      {
+        "label": "Lengths",
+        "value": "20 inch to 32 inch"
+      },
+      {
+        "label": "Style",
+        "value": "Deep curly"
+      },
+      {
+        "label": "Front",
+        "value": "Lace front"
+      },
+      {
+        "label": "Sold by",
+        "value": "Length, one wig per unit"
+      },
+      {
+        "label": "Brand",
+        "value": "AfriDeal"
+      }
+    ],
+    "variants": [
+      {
+        "id": "p021v1",
+        "label": "20 inch",
+        "sku": "P021-20",
+        "price": 1425
+      },
+      {
+        "id": "p021v2",
+        "label": "22 inch",
+        "sku": "P021-22",
+        "price": 1575
+      },
+      {
+        "id": "p021v3",
+        "label": "24 inch",
+        "sku": "P021-24",
+        "price": 1770
+      },
+      {
+        "id": "p021v4",
+        "label": "26 inch",
+        "sku": "P021-26",
+        "price": 2100
+      },
+      {
+        "id": "p021v5",
+        "label": "28 inch",
+        "sku": "P021-28",
+        "price": 2400
+      },
+      {
+        "id": "p021v6",
+        "label": "30 inch",
+        "sku": "P021-30",
+        "price": 2700
+      },
+      {
+        "id": "p021v7",
+        "label": "32 inch",
+        "sku": "P021-32",
+        "price": 3000
+      }
+    ],
+    "price": 1425,
+    "status": "ACTIVE",
+    "rating": 0,
+    "review_count": 0,
+    "featured": true,
+    "created_at": "2026-10-20T08:17:00.000Z",
+    "brand_id": "b007",
+    "product_type": "PHYSICAL",
+    "country_of_origin": "ZA",
+    "owner_type": "AFRIDEAL",
+    "supplier_id": null,
+    "supplier_name": null,
+    "moq": 1,
+    "commercial_model": "AFRIDEAL_MANAGED"
+  },
+  {
+    "id": "p022",
+    "name": "Kinky Curly Lace Wig",
+    "slug": "kinky-curly-lace-wig",
+    "category_id": "c1",
+    "emoji": "🌀",
+    "swatch": [
+      "#2a1f17",
+      "#0e0b09"
+    ],
+    "short_description": "Natural, voluminous kinky curls on a lace front. 20 to 24 inch.",
+    "description": "Natural, voluminous kinky curls on a lace front. Sold by length from 20 to 24 inches. Mix lengths and styles from the AfriDeal hair range and they count together towards the multi-buy and bulk prices.",
+    "specs": [
+      {
+        "label": "Lengths",
+        "value": "20 inch to 24 inch"
+      },
+      {
+        "label": "Style",
+        "value": "Kinky curly"
+      },
+      {
+        "label": "Front",
+        "value": "Lace front"
+      },
+      {
+        "label": "Sold by",
+        "value": "Length, one wig per unit"
+      },
+      {
+        "label": "Brand",
+        "value": "AfriDeal"
+      }
+    ],
+    "variants": [
+      {
+        "id": "p022v1",
+        "label": "20 inch",
+        "sku": "P022-20",
+        "price": 1425
+      },
+      {
+        "id": "p022v2",
+        "label": "22 inch",
+        "sku": "P022-22",
+        "price": 1575
+      },
+      {
+        "id": "p022v3",
+        "label": "24 inch",
+        "sku": "P022-24",
+        "price": 1770
+      }
+    ],
+    "price": 1425,
+    "status": "ACTIVE",
+    "rating": 0,
+    "review_count": 0,
+    "featured": true,
+    "created_at": "2026-10-20T08:17:00.000Z",
+    "brand_id": "b007",
+    "product_type": "PHYSICAL",
+    "country_of_origin": "ZA",
+    "owner_type": "AFRIDEAL",
+    "supplier_id": null,
+    "supplier_name": null,
+    "moq": 1,
+    "commercial_model": "AFRIDEAL_MANAGED"
+  },
+  {
+    "id": "p023",
+    "name": "Kinky Straight Lace Wig",
+    "slug": "kinky-straight-lace-wig",
+    "category_id": "c1",
+    "emoji": "🖤",
+    "swatch": [
+      "#1a1410",
+      "#070605"
+    ],
+    "short_description": "Long, full kinky-straight hair on a lace front. 20 to 32 inch.",
+    "description": "Long, full hair with a natural kinky-straight texture, on a lace front with a middle parting. Sold by length from 20 to 32 inches. Mix lengths and styles from the AfriDeal hair range and they count together towards the multi-buy and bulk prices.",
+    "specs": [
+      {
+        "label": "Lengths",
+        "value": "20 inch to 32 inch"
+      },
+      {
+        "label": "Style",
+        "value": "Kinky straight"
+      },
+      {
+        "label": "Front",
+        "value": "Lace front"
+      },
+      {
+        "label": "Sold by",
+        "value": "Length, one wig per unit"
+      },
+      {
+        "label": "Brand",
+        "value": "AfriDeal"
+      }
+    ],
+    "variants": [
+      {
+        "id": "p023v1",
+        "label": "20 inch",
+        "sku": "P023-20",
+        "price": 1575
+      },
+      {
+        "id": "p023v2",
+        "label": "22 inch",
+        "sku": "P023-22",
+        "price": 1725
+      },
+      {
+        "id": "p023v3",
+        "label": "24 inch",
+        "sku": "P023-24",
+        "price": 1875
+      },
+      {
+        "id": "p023v4",
+        "label": "26 inch",
+        "sku": "P023-26",
+        "price": 2175
+      },
+      {
+        "id": "p023v5",
+        "label": "28 inch",
+        "sku": "P023-28",
+        "price": 2400
+      },
+      {
+        "id": "p023v6",
+        "label": "30 inch",
+        "sku": "P023-30",
+        "price": 2775
+      },
+      {
+        "id": "p023v7",
+        "label": "32 inch",
+        "sku": "P023-32",
+        "price": 3000
+      }
+    ],
+    "price": 1575,
+    "status": "ACTIVE",
+    "rating": 0,
+    "review_count": 0,
+    "featured": true,
+    "created_at": "2026-10-20T08:17:00.000Z",
+    "brand_id": "b007",
+    "product_type": "PHYSICAL",
+    "country_of_origin": "ZA",
+    "owner_type": "AFRIDEAL",
+    "supplier_id": null,
+    "supplier_name": null,
+    "moq": 1,
+    "commercial_model": "AFRIDEAL_MANAGED"
   }
 ]

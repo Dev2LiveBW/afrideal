@@ -119,7 +119,7 @@ export function SellerCard({ offer }: { offer: PublicOffer | undefined }) {
       </div>
 
       <Link
-        href="/browse"
+        href={`/suppliers/${offer.supplier_id}`}
         className="inline-flex shrink-0 items-center gap-1.5 rounded-full border border-hairline-strong px-3 py-1.5 text-[12px] font-medium text-ink transition-colors hover:bg-ink/[0.04]"
       >
         <Store size={13} strokeWidth={1.5} />

@@ -5,7 +5,7 @@ import { BadgeCheck } from "lucide-react";
 import { HomeTabs } from "@/components/storefront/home/HomeTabs";
 import { SupplierDirectory } from "@/components/storefront/SupplierDirectory";
 import { readAll } from "@/lib/db";
-import { getDirectoryListings } from "@/lib/directory";
+import { getSuppliersWithProducts } from "@/lib/directory";
 import { DIRECTORY_LABEL } from "@/lib/directory-placement";
 import { cn } from "@/lib/utils";
 
@@ -13,14 +13,7 @@ import { cn } from "@/lib/utils";
  * The supplier / product directory. (TICKET-007)
  *
  * Header drawn to the Alibaba benchmark §1: a compact title bar and a row of
- * filter chips, then the rows. The prose introduction it used to open with
- * put the first listing 450px down a phone screen - two and a bit rows
- * visible where the benchmark shows four and a half. The chips do the
- * introducing now; a buyer who wants the terms reads /how-it-works.
- *
- * TODO(TICKET-007): placement is unresolved. This page is the durable home
- * for the grid; whether it is *also* a homepage section and a nav tab is
- * decided by the flags in `lib/directory-placement.ts`.
+ * filter chips, then verified suppliers with their respective products.
  */
 
 export const dynamic = "force-dynamic";
@@ -37,8 +30,8 @@ export default async function SupplierDirectoryPage({
 }: {
   searchParams: { category?: string };
 }) {
-  const [all, categories] = await Promise.all([
-    getDirectoryListings(),
+  const [allSuppliers, categories] = await Promise.all([
+    getSuppliersWithProducts(),
     readAll("categories"),
   ]);
 
@@ -47,12 +40,22 @@ export default async function SupplierDirectoryPage({
       category.slug === searchParams.category ||
       category.id === searchParams.category,
   );
-  const listings = activeCategory
-    ? all.filter((listing) => listing.category_id === activeCategory.id)
-    : all;
 
-  const companies = new Set(listings.map((listing) => listing.supplier_id))
-    .size;
+  const suppliers = activeCategory
+    ? allSuppliers
+        .map((group) => ({
+          ...group,
+          listings: group.listings.filter(
+            (listing) => listing.category_id === activeCategory.id,
+          ),
+        }))
+        .filter((group) => group.listings.length > 0)
+    : allSuppliers;
+
+  const totalProducts = suppliers.reduce(
+    (sum, group) => sum + group.listings.length,
+    0,
+  );
 
   return (
     <div className="pb-24">
@@ -67,10 +70,10 @@ export default async function SupplierDirectoryPage({
         {/* ── Title bar ─────────────────────────────────────────────────── */}
         <header className="flex items-baseline justify-between gap-3 px-4 pb-1 pt-4">
           <h1 className="truncate font-display text-[18px] font-bold text-ink">
-            Verified suppliers
+            Verified suppliers & their products
           </h1>
           <p className="shrink-0 font-mono text-[11.5px] tabular-nums text-muted">
-            {listings.length} listings · {companies} companies
+            {suppliers.length} suppliers · {totalProducts} products
           </p>
         </header>
 
@@ -105,7 +108,7 @@ export default async function SupplierDirectoryPage({
         </nav>
 
         <div className="px-4">
-          <SupplierDirectory listings={listings} />
+          <SupplierDirectory suppliers={suppliers} />
         </div>
       </div>
     </div>

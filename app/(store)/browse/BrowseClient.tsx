@@ -53,6 +53,7 @@ export function BrowseClient({
   tierOptions: TierSwitchOption[];
 }) {
   const [category, setCategory] = useState(initialCategory);
+  const [source, setSource] = useState<'all' | 'afrideal' | 'supplier'>('all');
   const [query, setQuery] = useState(initialQuery);
   const [sort, setSort] = useState<Sort>('featured');
 
@@ -61,10 +62,13 @@ export function BrowseClient({
 
     const filtered = products.filter((product) => {
       if (category !== 'all' && product.category_id !== category) return false;
+      if (source === 'afrideal' && product.owner_type === 'SUPPLIER') return false;
+      if (source === 'supplier' && product.owner_type !== 'SUPPLIER') return false;
       if (!needle) return true;
       return (
         product.name.toLowerCase().includes(needle) ||
-        product.short_description.toLowerCase().includes(needle)
+        product.short_description.toLowerCase().includes(needle) ||
+        (product.supplier_name?.toLowerCase().includes(needle) ?? false)
       );
     });
 
@@ -87,11 +91,16 @@ export function BrowseClient({
         sorted.sort((a, b) => b.created_at.localeCompare(a.created_at));
         break;
       default:
-        sorted.sort((a, b) => Number(b.featured) - Number(a.featured) || b.rating - a.rating);
+        sorted.sort(
+          (a, b) =>
+            Number(a.owner_type === 'SUPPLIER') - Number(b.owner_type === 'SUPPLIER') ||
+            Number(b.featured) - Number(a.featured) ||
+            b.rating - a.rating,
+        );
     }
 
     return sorted;
-  }, [products, category, query, sort]);
+  }, [products, category, source, query, sort]);
 
   const activeCategory = categories.find((entry) => entry.id === category);
 
@@ -201,6 +210,31 @@ export function BrowseClient({
         </div>
 
         <div className="flex flex-wrap items-center gap-3">
+          <div className="flex items-center gap-1" role="group" aria-label="Filter by product source">
+            {(
+              [
+                { id: 'all', label: 'All' },
+                { id: 'afrideal', label: 'AfriDeal Direct' },
+                { id: 'supplier', label: 'Supplier Products' },
+              ] as const
+            ).map((item) => (
+              <button
+                key={item.id}
+                type="button"
+                onClick={() => setSource(item.id)}
+                aria-pressed={source === item.id}
+                className={cn(
+                  'h-8 whitespace-nowrap rounded-full px-3 text-[12px] font-medium transition-colors',
+                  source === item.id
+                    ? 'bg-ink text-white'
+                    : 'bg-surface-raised text-body ring-1 ring-inset ring-hairline-strong hover:bg-ink/[0.04] hover:text-ink',
+                )}
+              >
+                {item.label}
+              </button>
+            ))}
+          </div>
+
           <div className="relative flex-1 sm:max-w-xs">
             <Search
               size={15}
@@ -259,6 +293,7 @@ export function BrowseClient({
               onClick={() => {
                 setQuery('');
                 setCategory('all');
+                setSource('all');
               }}
             >
               Clear filters

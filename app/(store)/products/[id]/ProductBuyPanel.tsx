@@ -10,7 +10,8 @@ import { MoneyText } from '@/components/brand/MoneyText';
 import { VariantSelector } from '@/components/products/VariantSelector';
 import { RfqModal } from '@/components/procurement/RfqModal';
 import { TieredPriceCalculator } from '@/components/procurement/TieredPriceCalculator';
-import { TIER_LABELS, resolvePrice } from '@/lib/pricing-tiers';
+import { TIER_LABELS, hasVariantLadder, priceLine } from '@/lib/pricing-tiers';
+import { tierDoors } from '@/lib/tier-doors';
 import { useAfriDealStore } from '@/store/useAfriDealStore';
 import { PriceLadder } from '@/components/storefront/PriceLadder';
 import { photoUrl } from '@/components/storefront/Swatch';
@@ -40,22 +41,30 @@ export function ProductBuyPanel({
 }) {
   const addToCart = useAfriDealStore((state) => state.addToCart);
 
+  const isSupplierOwned =
+    product.owner_type === 'SUPPLIER' || product.commercial_model === 'SUPPLIER_LED';
+  const minQty = isSupplierOwned ? Math.max(1, product.moq ?? 1) : 1;
+
   const [variantId, setVariantId] = useState(product.variants[0]?.id ?? '');
-  const [qty, setQty] = useState(1);
+  const [qty, setQty] = useState(minQty);
   const [rfqOpen, setRfqOpen] = useState(false);
   const [cartSheetOpen, setCartSheetOpen] = useState(false);
 
   const variant = product.variants.find((entry) => entry.id === variantId) ?? product.variants[0];
 
   /**
-   * Tiers are per product; variants carry their own uplift over the base price.
-   * Composing them as a ratio keeps a case-of-12 correctly more expensive than a
-   * single tub at every rung of the ladder, without needing a band per variant.
+   * `priceLine()` is what the cart, checkout and the orders route charge with.
+   * A wig sold by length has a ladder per length, so its packages follow the
+   * length chosen; anything else keeps the ladder resolved on the server.
    */
-  const resolved = resolvePrice(bands, product, qty, customerType);
-  const variantRatio = product.price === 0 ? 1 : (variant?.price ?? product.price) / product.price;
-  const unitPrice = Math.ceil(resolved.unit_price * variantRatio);
-  const lineTotal = unitPrice * qty;
+  const priced = priceLine(bands, product, variant?.id ?? null, qty, customerType);
+  const resolved = priced.resolved;
+  const unitPrice = priced.unit_price;
+  const lineTotal = priced.line_total;
+  const shownDoors =
+    variant && hasVariantLadder(bands, product.id, variant.id)
+      ? tierDoors(bands, product, customerType, variant.id)
+      : doors;
 
   function add() {
     if (!variant) return;
@@ -84,8 +93,8 @@ export function ProductBuyPanel({
           <div>
             <div className="flex flex-wrap items-center gap-1.5">
               <p className="text-[11.5px] text-muted">
-                Price per unit
-                {resolved.tier !== 'RETAIL' && (
+                {isSupplierOwned ? 'Supplier unit price' : 'Price per unit'}
+                {!isSupplierOwned && resolved.tier !== 'RETAIL' && (
                   <span className="ml-1.5 text-forest">
                     · {TIER_LABELS[resolved.tier]}
                   </span>
@@ -93,7 +102,7 @@ export function ProductBuyPanel({
               </p>
               {product.country_of_origin && product.country_of_origin !== 'BW' && (
                 <span className="rounded bg-forest-wash px-1.5 py-0.5 font-mono text-[9.5px] font-semibold uppercase tracking-wider text-forest-ink">
-                  Customs & duty included
+                  Customs cleared by courier
                 </span>
               )}
             </div>
@@ -107,6 +116,30 @@ export function ProductBuyPanel({
             </span>
           )}
         </div>
+
+        {isSupplierOwned && (
+          <div className="mt-4 flex flex-wrap items-center justify-between gap-2 rounded-md border border-ocean/25 bg-ocean-wash px-3.5 py-2.5 text-[12px] text-ocean-ink">
+            <span>
+              Listed by{' '}
+              <strong className="font-semibold">{product.supplier_name ?? 'Verified Supplier'}</strong>
+              {minQty > 1 ? (
+                <>
+                  {' '}· Minimum order <span className="font-mono font-semibold">{minQty}</span> units
+                </>
+              ) : (
+                ' · No minimum order'
+              )}
+            </span>
+            {product.supplier_id && (
+              <Link
+                href={`/suppliers/${product.supplier_id}`}
+                className="font-semibold text-ocean underline underline-offset-4 hover:text-ocean-ink"
+              >
+                View supplier products →
+              </Link>
+            )}
+          </div>
+        )}
 
         {product.variants.length > 1 && (
           <VariantSelector
@@ -124,7 +157,7 @@ export function ProductBuyPanel({
           sets this product to that band rather than navigating away from the
           product the buyer is already looking at.
         */}
-        {doors && doors.length > 1 && (
+        {!isSupplierOwned && shownDoors && shownDoors.length > 1 && (
           <div className="mt-6">
             <div className="mb-2.5 flex items-baseline justify-between gap-3">
               <p className="text-[13px] font-semibold text-ink">Price by quantity</p>
@@ -132,7 +165,7 @@ export function ProductBuyPanel({
             </div>
 
             <PriceLadder
-              doors={doors}
+              doors={shownDoors}
               productName={product.name}
               tone="light"
               stagger={false}
@@ -142,17 +175,30 @@ export function ProductBuyPanel({
                 if (Number.isFinite(band)) setQty(Math.max(1, band));
               }}
             />
+
+            <p className="mt-2.5 text-[11.5px] leading-5 text-muted">
+              Retail multi-buy: 2% off each for 2, 3% for 3, 5% for 4. Mix{' '}
+              {product.category_id === 'c1' ? 'lengths and styles' : 'products'} from the same
+              category and they count together.
+            </p>
           </div>
         )}
 
         <div className="mt-6">
-          <p className="eyebrow mb-2.5">Quantity</p>
+          <div className="mb-2.5 flex items-baseline justify-between gap-2">
+            <p className="eyebrow">Quantity</p>
+            {minQty > 1 && (
+              <span className="font-mono text-[11px] text-muted">
+                Min. order: {minQty} units
+              </span>
+            )}
+          </div>
           <div className="flex items-center gap-4">
             <div className="flex items-center rounded-full ring-1 ring-inset ring-hairline-strong">
               <button
                 type="button"
-                onClick={() => setQty((value) => Math.max(1, value - 1))}
-                disabled={qty <= 1}
+                onClick={() => setQty((value) => Math.max(minQty, value - 1))}
+                disabled={qty <= minQty}
                 aria-label="Decrease quantity"
                 className="flex h-10 w-10 items-center justify-center rounded-l-full text-body transition-colors hover:bg-ink/[0.04] hover:text-ink disabled:opacity-35"
               >
@@ -160,10 +206,10 @@ export function ProductBuyPanel({
               </button>
               <input
                 type="number"
-                min={1}
+                min={minQty}
                 max={9999}
                 value={qty}
-                onChange={(event) => setQty(Math.max(1, Number(event.target.value) || 1))}
+                onChange={(event) => setQty(Math.max(minQty, Number(event.target.value) || minQty))}
                 aria-label="Quantity"
                 className="w-14 bg-transparent text-center font-mono text-[14px] font-medium tabular-nums text-ink outline-none [appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none"
               />
@@ -223,17 +269,19 @@ export function ProductBuyPanel({
         </p>
       </div>
 
-      <TieredPriceCalculator
-        product={product}
-        bands={bands}
-        customerType={customerType}
-        quantity={qty}
-        onQuantityChange={setQty}
-        onRequestRfq={(quantity) => {
-          setQty(quantity);
-          setRfqOpen(true);
-        }}
-      />
+      {!isSupplierOwned && (
+        <TieredPriceCalculator
+          product={product}
+          bands={bands}
+          customerType={customerType}
+          quantity={qty}
+          onQuantityChange={setQty}
+          onRequestRfq={(quantity) => {
+            setQty(quantity);
+            setRfqOpen(true);
+          }}
+        />
+      )}
 
       <RfqModal
         isOpen={rfqOpen}
