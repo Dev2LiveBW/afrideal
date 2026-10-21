@@ -240,8 +240,10 @@ section('4. Catalogue — no product sells below cost');
   const products = (await json(jar, '/api/products')).body ?? [];
   const offers = (await json(jar, '/api/supplier-offers')).body ?? [];
 
-  // 17 demo products plus AfriDeal's six wigs (spec 0007: Products 1 to 5 and 8).
-  check('23 products seeded', products.length === 23, `got ${products.length}`);
+  // 11 demo products outside hair, plus AfriDeal's seven wigs (spec 0007:
+  // Products 1 to 5, 8 and 9). Hair holds only AfriDeal's own range since
+  // 2026-10-21.
+  check('18 products seeded', products.length === 18, `got ${products.length}`);
 
   let violations = 0;
   for (const product of products) {

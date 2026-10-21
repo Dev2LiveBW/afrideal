@@ -79,7 +79,7 @@ const RETAIL_MARKUP_PCT = pct('RETAIL');
 // ─── Categories ──────────────────────────────────────────────────────────────
 
 const categories = [
-  { id: 'c1', name: 'Hair, Weaves & Extensions', slug: 'hair-weaves-extensions', emoji: '💇🏾‍♀️', sort_order: 1, blurb: 'Bundles, frontals, closures, wigs and braiding hair. The category the platform sells most of.' },
+  { id: 'c1', name: 'Hair, Weaves & Extensions', slug: 'hair-weaves-extensions', emoji: '💇🏾‍♀️', sort_order: 1, blurb: 'AfriDeal lace wigs, from short bobs to 32 inch, sold by length.' },
   { id: 'c7', name: 'Beauty & Personal Care', slug: 'beauty-personal-care', emoji: '💄', sort_order: 2, blurb: 'Treatments, serums and salon consumables from verified regional distributors.' },
   { id: 'c2', name: 'Electronics', slug: 'electronics', emoji: '🔌', sort_order: 3, blurb: 'Consumer and off-grid electronics, landed and warranty-backed.' },
   { id: 'c6', name: 'Clothing & Uniforms', slug: 'clothing-uniforms', emoji: '👕', sort_order: 4, blurb: 'Workwear, school uniforms and retail apparel at trade quantities.' },
@@ -258,17 +258,6 @@ const productSpecs = [
     rating: 4.8, review_count: 214, featured: true,
   },
   {
-    id: 'p002', name: 'Premium Braiding Hair Bundle', category_id: 'c1', emoji: '💇🏾‍♀️',
-    swatch: ['#2a2a2a', '#111111'],
-    short_description: 'Heat-resistant kanekalon, 26 inch, salon-grade tension.',
-    description:
-      'The braiding bundle most requested by salons on the platform. Kanekalon fibre rated to 180°C, pre-stretched, with a consistent tension that holds a knotless braid without slipping. Ships in sealed retail packs of five.',
-    specs: [['Length', '26 inch'], ['Fibre', 'Kanekalon'], ['Heat rating', '180°C'], ['Pack', '5 bundles']],
-    variants: [['Natural Black 1B', 'BRD-26-1B', 0], ['Dark Brown 2', 'BRD-26-2', 0], ['Burgundy 99J', 'BRD-26-99J', 4.5], ['Honey Blonde 27', 'BRD-26-27', 6.0]],
-    offers: [['s001', 58, 620, 1, 5], ['s002', 54, 410, 3, 10]],
-    rating: 4.6, review_count: 388, featured: true,
-  },
-  {
     id: 'p003', name: 'Argan Repair Serum 100ml', category_id: 'c7', emoji: '💧',
     swatch: ['#f0c040', '#D4920A'],
     short_description: 'Cold-pressed Moroccan argan with a lightweight silicone carrier.',
@@ -378,62 +367,6 @@ const productSpecs = [
     offers: [['s002', 142, 380, 3, 10], ['s005', 154, 90, 6, 20]],
     rating: 4.4, review_count: 218, featured: true,
   },
-
-  {
-    id: 'p013', name: 'Brazilian Body Wave Bundle — 20 inch', category_id: 'c1', emoji: '💇🏾‍♀️',
-    swatch: ['#3a2418', '#111111'],
-    short_description: '100% unprocessed human hair, double machine weft, 100g.',
-    description:
-      'The bundle salons in Gaborone reorder most often. Unprocessed human hair on a double machine weft that holds through repeated installs, with a loose body wave that keeps its pattern after washing. Sold at 100g a bundle; a full head is normally three bundles, and most salons buy them three at a time.',
-    specs: [['Length', '20 inch'], ['Weight', '100g per bundle'], ['Texture', 'Body wave'], ['Weft', 'Double machine'], ['Grade', 'Unprocessed human hair']],
-    variants: [['Natural Black 1B', 'BBW-20-1B', 0], ['Off Black 2', 'BBW-20-2', 0], ['Ombre 1B/27', 'BBW-20-OMB', 9.0]],
-    offers: [['s001', 520, 180, 2, 3], ['s002', 545, 240, 4, 3]],
-    rating: 4.8, review_count: 412, featured: true,
-  },
-  {
-    id: 'p014', name: 'HD Lace Frontal 13×4 — 18 inch', category_id: 'c1', emoji: '✨',
-    swatch: ['#2a1c14', '#0d0d0d'],
-    short_description: 'Swiss HD lace, pre-plucked hairline, bleached knots.',
-    description:
-      'A 13×4 frontal in Swiss HD lace that melts against a range of complexions rather than only the lightest. Pre-plucked hairline with bleached knots, so the install does not start with an hour of preparation. This is the line that decides whether a salon can charge for a frontal install at all, which is why it is stocked deeper than its volume alone would justify.',
-    specs: [['Size', '13×4'], ['Length', '18 inch'], ['Lace', 'Swiss HD'], ['Density', '150%'], ['Knots', 'Bleached, pre-plucked']],
-    variants: [['Natural Black 1B', 'HDF-134-18-1B', 0], ['Straight', 'HDF-134-18-ST', 0], ['Body Wave', 'HDF-134-18-BW', 6.0]],
-    offers: [['s002', 680, 95, 3, 1], ['s001', 715, 60, 2, 1]],
-    rating: 4.7, review_count: 236, featured: true,
-  },
-  {
-    id: 'p015', name: 'Bone Straight Weave Bundle — 24 inch', category_id: 'c1', emoji: '💫',
-    swatch: ['#1f1a17', '#0a0a0a'],
-    short_description: 'Silk-press straight, no chemical processing, 100g.',
-    description:
-      'Straight from the weft without a chemical relaxer, so it takes heat without the frizz that gives a processed bundle away by the second wash. Twenty-four inches is the length most requested for a sew-in in the region. Sold per bundle at 100g.',
-    specs: [['Length', '24 inch'], ['Weight', '100g per bundle'], ['Texture', 'Bone straight'], ['Weft', 'Double machine'], ['Heat rating', '200°C']],
-    variants: [['Natural Black 1B', 'BST-24-1B', 0], ['Dark Brown 2', 'BST-24-2', 0], ['Honey Blonde 27', 'BST-24-27', 11.0]],
-    offers: [['s001', 465, 210, 2, 3], ['s002', 488, 150, 4, 3]],
-    rating: 4.6, review_count: 318, featured: true,
-  },
-  {
-    id: 'p016', name: 'Passion Twist Crochet Hair — 18 inch', category_id: 'c1', emoji: '🌀',
-    swatch: ['#4a3123', '#1a1a1a'],
-    short_description: 'Pre-twisted synthetic, 8 packs to a full head.',
-    description:
-      'Pre-twisted crochet hair that turns a six-hour protective style into a two-hour one, which is the whole reason a salon stocks it. Water-wave synthetic fibre, springy rather than limp, and it holds the twist without unravelling at the ends. Eight packs does a full head on most heads.',
-    specs: [['Length', '18 inch'], ['Fibre', 'Low-temperature synthetic'], ['Strands', '18 per pack'], ['Full head', '≈8 packs'], ['Style', 'Pre-twisted']],
-    variants: [['Natural Black 1B', 'PTC-18-1B', 0], ['Dark Brown 4', 'PTC-18-4', 0], ['Burgundy 99J', 'PTC-18-99J', 5.0], ['Honey Blonde 27', 'PTC-18-27', 5.0]],
-    offers: [['s001', 92, 860, 1, 8], ['s002', 88, 620, 3, 8]],
-    rating: 4.5, review_count: 527, featured: true,
-  },
-  {
-    id: 'p017', name: 'Glueless Bob Wig — 12 inch', category_id: 'c1', emoji: '👩🏾‍🦱',
-    swatch: ['#241a13', '#111111'],
-    short_description: 'Adjustable band, no glue, wear-and-go in under a minute.',
-    description:
-      'A glueless unit on an adjustable elastic band with pre-installed combs, so it goes on without adhesive and comes off at the end of the day. The bob length has moved from a seasonal line to a standing one over the last two years, and it sells to customers who have never bought a wig before as much as to regulars.',
-    specs: [['Length', '12 inch'], ['Cap', 'Glueless, adjustable band'], ['Density', '180%'], ['Lace', '4×4 closure'], ['Fitting', 'Pre-installed combs']],
-    variants: [['Natural Black 1B', 'GBW-12-1B', 0], ['Dark Brown 2', 'GBW-12-2', 0], ['Auburn 30', 'GBW-12-30', 8.0]],
-    offers: [['s002', 742, 74, 3, 1], ['s001', 780, 45, 2, 1]],
-    rating: 4.6, review_count: 189, featured: true,
-  },
 ];
 
 /**
@@ -442,11 +375,13 @@ const productSpecs = [
  * price in rand, so each length is a variant with its own cost and its own
  * ladder rather than an uplift over a base price.
  *
- * Still to confirm with her, so kept honest here: the names describe what the
- * photos show and nothing more (no hair grade, density or cap claims); the
- * supplier is unnamed, so the offers sit with AfriDeal's own sourcing record
- * (s009); stock and lead time are placeholders; no ratings or reviews exist yet.
- * Product 1's lengths come from her price list CSV, sent with its photo.
+ * Names follow her AfriDeal product boards (the second photo of each product,
+ * in public/products as <id>-1.jpg; the model shot is <id>-0.jpg). Still to
+ * confirm with her, so kept honest here: no hair grade, density or cap claims
+ * in the specs beyond what the boards print; the supplier is unnamed, so the
+ * offers sit with AfriDeal's own sourcing record (s009); stock and lead time
+ * are placeholders; no ratings or reviews exist yet. Product 1's lengths come
+ * from her price list CSV, sent with its photo.
  */
 const HAIR_SOURCING = { supplier_id: 's009', stock: 50, fulfilment_days: 5, moq: 1 };
 
@@ -457,6 +392,8 @@ const afridealWigSpecs = [
     description:
       'A sleek, straight bob on a lace front, cut to sit at the jaw with a natural parting. Sold by length from 8 to 16 inches. Mix lengths and styles from the AfriDeal hair range and they count together towards the multi-buy and bulk prices.',
     style: 'Straight bob', front: 'Lace front',
+    // Her board shows the crown from above in place of a back view.
+    views: ['Front view', 'Side view', 'Top view'],
     lengths: [['8 inch', 280], ['10 inch', 450], ['12 inch', 630], ['14 inch', 830], ['16 inch', 1060]],
   },
   {
@@ -465,6 +402,8 @@ const afridealWigSpecs = [
     description:
       'A straight bob with a full fringe, finished at the jaw. Sold by length from 8 to 12 inches. Mix lengths and styles from the AfriDeal hair range and they count together towards the multi-buy and bulk prices.',
     style: 'Straight bob, fringe', front: null,
+    // Her board for this one is a single side-on photograph.
+    views: ['Side view'],
     lengths: [['8 inch', 200], ['10 inch', 250], ['12 inch', 300]],
   },
   {
@@ -476,19 +415,21 @@ const afridealWigSpecs = [
     lengths: [['20 inch', 1000], ['22 inch', 1100], ['24 inch', 1300], ['26 inch', 1450], ['28 inch', 1750], ['30 inch', 1850], ['32 inch', 2100]],
   },
   {
-    id: 'p021', name: 'Deep Curly Lace Wig', emoji: '👩🏾‍🦱', swatch: ['#231a14', '#0b0908'],
-    short_description: 'Full, defined curls on a lace front. 20 to 32 inch.',
+    // Product 4. Her board: "13*4 Waterwave hair 200% density".
+    id: 'p021', name: 'Water Wave Lace Wig', emoji: '👩🏾‍🦱', swatch: ['#231a14', '#0b0908'],
+    short_description: 'Full, defined water-wave curls on a lace front. 20 to 32 inch.',
     description:
-      'Full, defined curls with plenty of volume, on a lace front. Sold by length from 20 to 32 inches. Mix lengths and styles from the AfriDeal hair range and they count together towards the multi-buy and bulk prices.',
-    style: 'Deep curly', front: 'Lace front',
+      'Full, defined water-wave curls with plenty of volume, on a lace front. Sold by length from 20 to 32 inches. Mix lengths and styles from the AfriDeal hair range and they count together towards the multi-buy and bulk prices.',
+    style: 'Water wave', front: 'Lace front',
     lengths: [['20 inch', 950], ['22 inch', 1050], ['24 inch', 1180], ['26 inch', 1400], ['28 inch', 1600], ['30 inch', 1800], ['32 inch', 2000]],
   },
   {
-    id: 'p022', name: 'Kinky Curly Lace Wig', emoji: '🌀', swatch: ['#2a1f17', '#0e0b09'],
-    short_description: 'Natural, voluminous kinky curls on a lace front. 20 to 24 inch.',
+    // Product 5. Her board: "13*4 Pixie Curl 200% density".
+    id: 'p022', name: 'Pixie Curl Lace Wig', emoji: '🌀', swatch: ['#2a1f17', '#0e0b09'],
+    short_description: 'Natural, voluminous pixie curls on a lace front. 20 to 24 inch.',
     description:
-      'Natural, voluminous kinky curls on a lace front. Sold by length from 20 to 24 inches. Mix lengths and styles from the AfriDeal hair range and they count together towards the multi-buy and bulk prices.',
-    style: 'Kinky curly', front: 'Lace front',
+      'Natural, voluminous pixie curls on a lace front. Sold by length from 20 to 24 inches. Mix lengths and styles from the AfriDeal hair range and they count together towards the multi-buy and bulk prices.',
+    style: 'Pixie curl', front: 'Lace front',
     lengths: [['20 inch', 950], ['22 inch', 1050], ['24 inch', 1180]],
   },
   {
@@ -500,7 +441,26 @@ const afridealWigSpecs = [
     style: 'Kinky straight', front: 'Lace front',
     lengths: [['20 inch', 1050], ['22 inch', 1150], ['24 inch', 1250], ['26 inch', 1450], ['28 inch', 1600], ['30 inch', 1850], ['32 inch', 2000]],
   },
+  {
+    // Product 9, sent 2026-10-21 12:55. Her board: "13*4 Jerry Curl 200%".
+    id: 'p024', name: 'Jerry Curl Lace Wig', emoji: '➰', swatch: ['#241a15', '#0a0807'],
+    short_description: 'Long, tight jerry curls on a lace front. 20 to 32 inch.',
+    description:
+      'Long, tight jerry curls with full volume from root to tip, on a lace front. Sold by length from 20 to 32 inches. Mix lengths and styles from the AfriDeal hair range and they count together towards the multi-buy and bulk prices.',
+    style: 'Jerry curl', front: 'Lace front',
+    lengths: [['20 inch', 950], ['22 inch', 1050], ['24 inch', 1180], ['26 inch', 1400], ['28 inch', 1600], ['30 inch', 1800], ['32 inch', 2000]],
+  },
 ];
+
+/*
+ * What each wig photo shows. Slot 0 is her styled shot; slots 1 to 3 are the
+ * views cut out of her product board (never the whole board, which carries
+ * her marketing copy). The crops are made by hand and dropped into
+ * public/products; the seed only names them.
+ */
+const WIG_PHOTO_CAPTIONS = new Map(
+  afridealWigSpecs.map((wig) => [wig.id, ['Styled', ...(wig.views ?? ['Front view', 'Side view', 'Back view'])]]),
+);
 
 for (const wig of afridealWigSpecs) {
   const code = wig.id.toUpperCase();
@@ -805,10 +765,10 @@ const orderSpecs = [
   ['DELIVERED', 'u007', 24, 'ORANGE_MONEY', 'Gaborone', 'Plot 220, Block 6, Broadhurst', [['p006', 2, 1]]],
   ['DELIVERED', 'u006', 19, 'PAYGATE', 'Gaborone', 'Plot 5412, Extension 12', [['p004', 0, 1], ['p005', 0, 1]]],
   ['DELIVERED', 'u007', 15, 'DPO_PAY', 'Francistown', 'Plot 1180, Tati Siding', [['p008', 1, 4], ['p010', 0, 2]]],
-  ['IN_TRANSIT', 'u006', 6, 'ORANGE_MONEY', 'Gaborone', 'Plot 5412, Extension 12', [['p002', 0, 5]]],
+  ['IN_TRANSIT', 'u006', 6, 'ORANGE_MONEY', 'Gaborone', 'Plot 5412, Extension 12', [['p001', 0, 5]]],
   ['IN_TRANSIT', 'u007', 5, 'DPO_PAY', 'Gaborone', 'Plot 220, Block 6, Broadhurst', [['p007', 0, 8], ['p006', 0, 12]]],
   ['IN_TRANSIT', 'u006', 4, 'PAYGATE', 'Lobatse', 'Plot 88, Peleng Ward', [['p012', 1, 3], ['p011', 0, 2]]],
-  ['PROCESSING', 'u007', 3, 'DPO_PAY', 'Gaborone', 'Plot 220, Block 6, Broadhurst', [['p001', 2, 1], ['p002', 3, 2], ['p003', 1, 1]]],
+  ['PROCESSING', 'u007', 3, 'DPO_PAY', 'Gaborone', 'Plot 220, Block 6, Broadhurst', [['p001', 2, 1], ['p003', 1, 1]]],
   ['PROCESSING', 'u006', 2, 'ORANGE_MONEY', 'Gaborone', 'Plot 5412, Extension 12', [['p009', 0, 2]]],
   ['PROCESSING', 'u007', 2, 'PAYGATE', 'Maun', 'Plot 3301, Boseja Ward', [['p008', 0, 6]]],
   ['AWAITING_PAYMENT', 'u006', 1, 'DPO_PAY', 'Gaborone', 'Plot 5412, Extension 12', [['p005', 1, 1]]],
@@ -1182,7 +1142,7 @@ const supplierUsers = users
 // ─── §8/§26 brands ───────────────────────────────────────────────────────────
 
 const BRAND_BY_PRODUCT = {
-  p001: 'b001', p002: 'b001', p003: 'b001',
+  p001: 'b001', p003: 'b001',
   p004: 'b002', p005: 'b002',
   p006: 'b003', p007: 'b003',
   p008: 'b004', p009: 'b004',
@@ -1209,8 +1169,6 @@ const SUPPLIER_OWNED_PRODUCTS = {
   p009: { supplier_id: 's005', moq: 5 },
   p010: { supplier_id: 's005', moq: 5 },
   p011: { supplier_id: 's002', moq: 10 },
-  p015: { supplier_id: 's001', moq: 3 },
-  p017: { supplier_id: 's001', moq: 2 },
 };
 
 for (const product of products) {
@@ -1281,13 +1239,24 @@ const photosOnDisk = await (async () => {
   }
 })();
 
-const productImages = products.flatMap((product, i) =>
-  IMAGE_ROLES.map(([role, angle], j) => {
+/*
+ * A product with any photograph on disk shows only its photographs: the
+ * product owner's wigs come with two (the model and a front / side / back
+ * board), and padding them with gradients would put fake views beside real
+ * ones. A product with none keeps the four gradient slots.
+ */
+let imageSeq = 0;
+const productImages = products.flatMap((product) => {
+  const photoSlots = IMAGE_ROLES.filter((_, j) => photosOnDisk.has(`${product.id}-${j}.jpg`));
+  const slots = photoSlots.length > 0 ? photoSlots : IMAGE_ROLES;
+
+  return slots.map(([role, angle]) => {
+    const j = IMAGE_ROLES.findIndex(([r]) => r === role);
     const filename = `${product.id}-${j}.jpg`;
     const hasPhoto = photosOnDisk.has(filename);
 
     return {
-      id: `img${String(i * IMAGE_ROLES.length + j + 1).padStart(3, '0')}`,
+      id: `img${String(++imageSeq).padStart(3, '0')}`,
       product_id: product.id,
       variant_id: null,
       // A real photograph if `npm run images` has fetched one for this slot,
@@ -1298,6 +1267,9 @@ const productImages = products.flatMap((product, i) =>
         ? `/products/${filename}`
         : `swatch:${shiftHex(product.swatch[0], j * 0.14)},${shiftHex(product.swatch[1], j * 0.1)},${angle}`,
       image_type: role,
+      ...(hasPhoto && WIG_PHOTO_CAPTIONS.get(product.id)?.[j]
+        ? { caption: WIG_PHOTO_CAPTIONS.get(product.id)[j] }
+        : {}),
       sort_order: j,
       // Stays AFRIDEAL either way: `source` is the party that supplied the
       // asset, and the platform did. Per-file provenance for the fetched
@@ -1306,8 +1278,8 @@ const productImages = products.flatMap((product, i) =>
       permission_status: 'CLEARED',
       created_at: product.created_at,
     };
-  }),
-);
+  });
+});
 
 
 // ─── §14–§20 pricing ladder ──────────────────────────────────────────────────
@@ -1496,10 +1468,9 @@ for (const product of products) {
  * one. Moving every rung by the same percentage keeps the shape, keeps the
  * descent strictly monotonic, and keeps the argument.
  */
+// None on the hair range: it is the product owner's own stock, priced by her
+// ladder, and she has not asked for a deal on it.
 const PROMOTIONS = [
-  ['p016', 15, 3],
-  ['p002', 16, 3],
-  ['p013', 12, 5],
   ['p008', 14, 2],
   ['p012', 18, 6],
 ];
@@ -1597,7 +1568,7 @@ for (let [productId, discountPct, endsInDays] of PROMOTIONS) {
 const RFQ_SPECS = [
   ['u007', 'BUSINESS', 'p012', 240, 300, 'Gaborone', 'QUOTED', 6, 'School intake order for a private group of three campuses. Delivery must land before the January term.'],
   ['u007', 'BUSINESS', 'p006', 800, null, 'Francistown', 'SOURCING', 3, 'Slab pour scheduled. Needs to be palletised and delivered to site, not to a depot.'],
-  ['u006', 'RETAIL', 'p002', 150, 60, 'Gaborone', 'SUBMITTED', 1, 'Opening a salon. Want a standing monthly order if the first one goes well.'],
+  ['u006', 'RETAIL', 'p001', 150, 80, 'Gaborone', 'SUBMITTED', 1, 'Opening a salon. Want a standing monthly order if the first one goes well.'],
 ];
 
 const rfqs = [];

@@ -87,6 +87,8 @@ export interface ProductImage {
   variant_id: string | null;
   image_url: string;
   image_type: 'PRIMARY' | 'GALLERY' | 'SPEC' | 'PACKAGING';
+  /** What the photo shows ("Side view"). Without it the gallery names the slot by its role. */
+  caption?: string;
   sort_order: number;
   source: 'AFRIDEAL' | 'SUPPLIER' | 'BRAND';
   permission_status: 'CLEARED' | 'PENDING' | 'RESTRICTED';

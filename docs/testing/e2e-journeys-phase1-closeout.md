@@ -36,7 +36,7 @@ Drafted 2026-10-09. This document extends the core journeys in `e2e-journeys.md`
 
 ### B11 Customs and duty included in landed price
 
-**Start:** signed out, product `p002` (an imported item subject to duty) detail page.
+**Start:** signed out, product `p018` (an imported item; customs cleared by the courier) detail page.
 
 1. View the price breakdown.
 2. Add to cart and proceed to checkout.

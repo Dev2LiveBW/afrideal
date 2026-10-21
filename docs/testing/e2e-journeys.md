@@ -301,7 +301,7 @@ That is 49 journeys. 46 have a screen to test (C02 to C04 do not yet, see Findin
 
 ### B11 Customs and duty included in landed price
 
-**Start:** signed out, product `p002` (an imported item subject to duty) detail page.
+**Start:** signed out, product `p018` (an imported item; customs cleared by the courier) detail page.
 
 1. View the price breakdown.
 2. Add to cart and proceed to checkout.

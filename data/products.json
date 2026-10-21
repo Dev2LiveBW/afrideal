@@ -65,84 +65,6 @@
     "commercial_model": "AFRIDEAL_MANAGED"
   },
   {
-    "id": "p002",
-    "name": "Premium Braiding Hair Bundle",
-    "slug": "premium-braiding-hair-bundle",
-    "category_id": "c1",
-    "emoji": "💇🏾‍♀️",
-    "swatch": [
-      "#2a2a2a",
-      "#111111"
-    ],
-    "short_description": "Heat-resistant kanekalon, 26 inch, salon-grade tension.",
-    "description": "The braiding bundle most requested by salons on the platform. Kanekalon fibre rated to 180°C, pre-stretched, with a consistent tension that holds a knotless braid without slipping. Ships in sealed retail packs of five.",
-    "specs": [
-      {
-        "label": "Length",
-        "value": "26 inch"
-      },
-      {
-        "label": "Fibre",
-        "value": "Kanekalon"
-      },
-      {
-        "label": "Heat rating",
-        "value": "180°C"
-      },
-      {
-        "label": "Pack",
-        "value": "5 bundles"
-      }
-    ],
-    "variants": [
-      {
-        "id": "p002v1",
-        "label": "Natural Black 1B",
-        "sku": "BRD-26-1B",
-        "price": 82
-      },
-      {
-        "id": "p002v2",
-        "label": "Dark Brown 2",
-        "sku": "BRD-26-2",
-        "price": 82
-      },
-      {
-        "id": "p002v3",
-        "label": "Burgundy 99J",
-        "sku": "BRD-26-99J",
-        "price": 86
-      },
-      {
-        "id": "p002v4",
-        "label": "Honey Blonde 27",
-        "sku": "BRD-26-27",
-        "price": 88
-      }
-    ],
-    "price": 82,
-    "status": "ACTIVE",
-    "rating": 4.6,
-    "review_count": 388,
-    "featured": true,
-    "created_at": "2026-06-29T08:18:00.000Z",
-    "brand_id": "b001",
-    "product_type": "PHYSICAL",
-    "country_of_origin": "ZA",
-    "owner_type": "AFRIDEAL",
-    "supplier_id": null,
-    "supplier_name": null,
-    "moq": 1,
-    "commercial_model": "AFRIDEAL_MANAGED",
-    "compare_at_price": 87,
-    "promotion": {
-      "discount_pct": 6,
-      "ends_at": "2026-10-24T15:00:00.000Z",
-      "stock_allocated": 82,
-      "stock_sold": 24
-    }
-  },
-  {
     "id": "p003",
     "name": "Argan Repair Serum 100ml",
     "slug": "argan-repair-serum-100ml",
@@ -191,7 +113,7 @@
     "rating": 4.5,
     "review_count": 156,
     "featured": false,
-    "created_at": "2026-07-05T08:36:00.000Z",
+    "created_at": "2026-06-29T08:18:00.000Z",
     "brand_id": "b001",
     "product_type": "PHYSICAL",
     "country_of_origin": "ZA",
@@ -260,7 +182,7 @@
     "rating": 4.4,
     "review_count": 92,
     "featured": true,
-    "created_at": "2026-07-11T08:54:00.000Z",
+    "created_at": "2026-07-05T08:36:00.000Z",
     "brand_id": "b002",
     "product_type": "PHYSICAL",
     "country_of_origin": "ZA",
@@ -323,7 +245,7 @@
     "rating": 4.2,
     "review_count": 141,
     "featured": false,
-    "created_at": "2026-07-17T08:12:00.000Z",
+    "created_at": "2026-07-11T08:54:00.000Z",
     "brand_id": "b002",
     "product_type": "PHYSICAL",
     "country_of_origin": "ZA",
@@ -388,7 +310,7 @@
     "rating": 4.9,
     "review_count": 67,
     "featured": true,
-    "created_at": "2026-07-23T08:30:00.000Z",
+    "created_at": "2026-07-17T08:12:00.000Z",
     "brand_id": "b003",
     "product_type": "PHYSICAL",
     "country_of_origin": "BW",
@@ -457,7 +379,7 @@
     "rating": 4.7,
     "review_count": 44,
     "featured": false,
-    "created_at": "2026-07-29T08:48:00.000Z",
+    "created_at": "2026-07-23T08:30:00.000Z",
     "brand_id": "b003",
     "product_type": "PHYSICAL",
     "country_of_origin": "BW",
@@ -516,7 +438,7 @@
     "rating": 4.6,
     "review_count": 302,
     "featured": true,
-    "created_at": "2026-08-04T08:06:00.000Z",
+    "created_at": "2026-07-29T08:48:00.000Z",
     "brand_id": "b004",
     "product_type": "PHYSICAL",
     "country_of_origin": "BW",
@@ -586,7 +508,7 @@
     "rating": 4.8,
     "review_count": 38,
     "featured": false,
-    "created_at": "2026-08-10T08:24:00.000Z",
+    "created_at": "2026-08-04T08:06:00.000Z",
     "brand_id": "b004",
     "product_type": "PHYSICAL",
     "country_of_origin": "BW",
@@ -649,7 +571,7 @@
     "rating": 4.3,
     "review_count": 89,
     "featured": false,
-    "created_at": "2026-08-16T08:42:00.000Z",
+    "created_at": "2026-08-10T08:24:00.000Z",
     "brand_id": "b005",
     "product_type": "PHYSICAL",
     "country_of_origin": "ZA",
@@ -718,7 +640,7 @@
     "rating": 4.5,
     "review_count": 73,
     "featured": false,
-    "created_at": "2026-08-22T08:00:00.000Z",
+    "created_at": "2026-08-16T08:42:00.000Z",
     "brand_id": "b006",
     "product_type": "PHYSICAL",
     "country_of_origin": "ZA",
@@ -783,7 +705,7 @@
     "rating": 4.4,
     "review_count": 218,
     "featured": true,
-    "created_at": "2026-08-28T08:18:00.000Z",
+    "created_at": "2026-08-22T08:00:00.000Z",
     "brand_id": "b006",
     "product_type": "PHYSICAL",
     "country_of_origin": "ZA",
@@ -799,371 +721,6 @@
       "stock_allocated": 75,
       "stock_sold": 21
     }
-  },
-  {
-    "id": "p013",
-    "name": "Brazilian Body Wave Bundle — 20 inch",
-    "slug": "brazilian-body-wave-bundle-20-inch",
-    "category_id": "c1",
-    "emoji": "💇🏾‍♀️",
-    "swatch": [
-      "#3a2418",
-      "#111111"
-    ],
-    "short_description": "100% unprocessed human hair, double machine weft, 100g.",
-    "description": "The bundle salons in Gaborone reorder most often. Unprocessed human hair on a double machine weft that holds through repeated installs, with a loose body wave that keeps its pattern after washing. Sold at 100g a bundle; a full head is normally three bundles, and most salons buy them three at a time.",
-    "specs": [
-      {
-        "label": "Length",
-        "value": "20 inch"
-      },
-      {
-        "label": "Weight",
-        "value": "100g per bundle"
-      },
-      {
-        "label": "Texture",
-        "value": "Body wave"
-      },
-      {
-        "label": "Weft",
-        "value": "Double machine"
-      },
-      {
-        "label": "Grade",
-        "value": "Unprocessed human hair"
-      }
-    ],
-    "variants": [
-      {
-        "id": "p013v1",
-        "label": "Natural Black 1B",
-        "sku": "BBW-20-1B",
-        "price": 774
-      },
-      {
-        "id": "p013v2",
-        "label": "Off Black 2",
-        "sku": "BBW-20-2",
-        "price": 774
-      },
-      {
-        "id": "p013v3",
-        "label": "Ombre 1B/27",
-        "sku": "BBW-20-OMB",
-        "price": 845
-      }
-    ],
-    "price": 774,
-    "status": "ACTIVE",
-    "rating": 4.8,
-    "review_count": 412,
-    "featured": true,
-    "created_at": "2026-09-03T08:36:00.000Z",
-    "brand_id": null,
-    "product_type": "PHYSICAL",
-    "country_of_origin": "ZA",
-    "owner_type": "AFRIDEAL",
-    "supplier_id": null,
-    "supplier_name": null,
-    "moq": 1,
-    "commercial_model": "AFRIDEAL_MANAGED",
-    "compare_at_price": 818,
-    "promotion": {
-      "discount_pct": 5,
-      "ends_at": "2026-10-26T15:00:00.000Z",
-      "stock_allocated": 75,
-      "stock_sold": 21
-    }
-  },
-  {
-    "id": "p014",
-    "name": "HD Lace Frontal 13×4 — 18 inch",
-    "slug": "hd-lace-frontal-13-4-18-inch",
-    "category_id": "c1",
-    "emoji": "✨",
-    "swatch": [
-      "#2a1c14",
-      "#0d0d0d"
-    ],
-    "short_description": "Swiss HD lace, pre-plucked hairline, bleached knots.",
-    "description": "A 13×4 frontal in Swiss HD lace that melts against a range of complexions rather than only the lightest. Pre-plucked hairline with bleached knots, so the install does not start with an hour of preparation. This is the line that decides whether a salon can charge for a frontal install at all, which is why it is stocked deeper than its volume alone would justify.",
-    "specs": [
-      {
-        "label": "Size",
-        "value": "13×4"
-      },
-      {
-        "label": "Length",
-        "value": "18 inch"
-      },
-      {
-        "label": "Lace",
-        "value": "Swiss HD"
-      },
-      {
-        "label": "Density",
-        "value": "150%"
-      },
-      {
-        "label": "Knots",
-        "value": "Bleached, pre-plucked"
-      }
-    ],
-    "variants": [
-      {
-        "id": "p014v1",
-        "label": "Natural Black 1B",
-        "sku": "HDF-134-18-1B",
-        "price": 1073
-      },
-      {
-        "id": "p014v2",
-        "label": "Straight",
-        "sku": "HDF-134-18-ST",
-        "price": 1073
-      },
-      {
-        "id": "p014v3",
-        "label": "Body Wave",
-        "sku": "HDF-134-18-BW",
-        "price": 1138
-      }
-    ],
-    "price": 1073,
-    "status": "ACTIVE",
-    "rating": 4.7,
-    "review_count": 236,
-    "featured": true,
-    "created_at": "2026-09-09T08:54:00.000Z",
-    "brand_id": null,
-    "product_type": "PHYSICAL",
-    "country_of_origin": "ZA",
-    "owner_type": "AFRIDEAL",
-    "supplier_id": null,
-    "supplier_name": null,
-    "moq": 1,
-    "commercial_model": "AFRIDEAL_MANAGED"
-  },
-  {
-    "id": "p015",
-    "name": "Bone Straight Weave Bundle — 24 inch",
-    "slug": "bone-straight-weave-bundle-24-inch",
-    "category_id": "c1",
-    "emoji": "💫",
-    "swatch": [
-      "#1f1a17",
-      "#0a0a0a"
-    ],
-    "short_description": "Silk-press straight, no chemical processing, 100g.",
-    "description": "Straight from the weft without a chemical relaxer, so it takes heat without the frizz that gives a processed bundle away by the second wash. Twenty-four inches is the length most requested for a sew-in in the region. Sold per bundle at 100g.",
-    "specs": [
-      {
-        "label": "Length",
-        "value": "24 inch"
-      },
-      {
-        "label": "Weight",
-        "value": "100g per bundle"
-      },
-      {
-        "label": "Texture",
-        "value": "Bone straight"
-      },
-      {
-        "label": "Weft",
-        "value": "Double machine"
-      },
-      {
-        "label": "Heat rating",
-        "value": "200°C"
-      }
-    ],
-    "variants": [
-      {
-        "id": "p015v1",
-        "label": "Natural Black 1B",
-        "sku": "BST-24-1B",
-        "price": 732
-      },
-      {
-        "id": "p015v2",
-        "label": "Dark Brown 2",
-        "sku": "BST-24-2",
-        "price": 732
-      },
-      {
-        "id": "p015v3",
-        "label": "Honey Blonde 27",
-        "sku": "BST-24-27",
-        "price": 813
-      }
-    ],
-    "price": 732,
-    "status": "ACTIVE",
-    "rating": 4.6,
-    "review_count": 318,
-    "featured": true,
-    "created_at": "2026-09-15T08:12:00.000Z",
-    "brand_id": null,
-    "product_type": "PHYSICAL",
-    "country_of_origin": "ZA",
-    "owner_type": "SUPPLIER",
-    "supplier_id": "s001",
-    "supplier_name": "Naledi Beauty Supplies",
-    "moq": 3,
-    "commercial_model": "SUPPLIER_LED"
-  },
-  {
-    "id": "p016",
-    "name": "Passion Twist Crochet Hair — 18 inch",
-    "slug": "passion-twist-crochet-hair-18-inch",
-    "category_id": "c1",
-    "emoji": "🌀",
-    "swatch": [
-      "#4a3123",
-      "#1a1a1a"
-    ],
-    "short_description": "Pre-twisted synthetic, 8 packs to a full head.",
-    "description": "Pre-twisted crochet hair that turns a six-hour protective style into a two-hour one, which is the whole reason a salon stocks it. Water-wave synthetic fibre, springy rather than limp, and it holds the twist without unravelling at the ends. Eight packs does a full head on most heads.",
-    "specs": [
-      {
-        "label": "Length",
-        "value": "18 inch"
-      },
-      {
-        "label": "Fibre",
-        "value": "Low-temperature synthetic"
-      },
-      {
-        "label": "Strands",
-        "value": "18 per pack"
-      },
-      {
-        "label": "Full head",
-        "value": "≈8 packs"
-      },
-      {
-        "label": "Style",
-        "value": "Pre-twisted"
-      }
-    ],
-    "variants": [
-      {
-        "id": "p016v1",
-        "label": "Natural Black 1B",
-        "sku": "PTC-18-1B",
-        "price": 131
-      },
-      {
-        "id": "p016v2",
-        "label": "Dark Brown 4",
-        "sku": "PTC-18-4",
-        "price": 131
-      },
-      {
-        "id": "p016v3",
-        "label": "Burgundy 99J",
-        "sku": "PTC-18-99J",
-        "price": 138
-      },
-      {
-        "id": "p016v4",
-        "label": "Honey Blonde 27",
-        "sku": "PTC-18-27",
-        "price": 138
-      }
-    ],
-    "price": 131,
-    "status": "ACTIVE",
-    "rating": 4.5,
-    "review_count": 527,
-    "featured": true,
-    "created_at": "2026-09-21T08:30:00.000Z",
-    "brand_id": null,
-    "product_type": "PHYSICAL",
-    "country_of_origin": "ZA",
-    "owner_type": "AFRIDEAL",
-    "supplier_id": null,
-    "supplier_name": null,
-    "moq": 1,
-    "commercial_model": "AFRIDEAL_MANAGED",
-    "compare_at_price": 138,
-    "promotion": {
-      "discount_pct": 6,
-      "ends_at": "2026-10-24T15:00:00.000Z",
-      "stock_allocated": 82,
-      "stock_sold": 24
-    }
-  },
-  {
-    "id": "p017",
-    "name": "Glueless Bob Wig — 12 inch",
-    "slug": "glueless-bob-wig-12-inch",
-    "category_id": "c1",
-    "emoji": "👩🏾‍🦱",
-    "swatch": [
-      "#241a13",
-      "#111111"
-    ],
-    "short_description": "Adjustable band, no glue, wear-and-go in under a minute.",
-    "description": "A glueless unit on an adjustable elastic band with pre-installed combs, so it goes on without adhesive and comes off at the end of the day. The bob length has moved from a seasonal line to a standing one over the last two years, and it sells to customers who have never bought a wig before as much as to regulars.",
-    "specs": [
-      {
-        "label": "Length",
-        "value": "12 inch"
-      },
-      {
-        "label": "Cap",
-        "value": "Glueless, adjustable band"
-      },
-      {
-        "label": "Density",
-        "value": "180%"
-      },
-      {
-        "label": "Lace",
-        "value": "4×4 closure"
-      },
-      {
-        "label": "Fitting",
-        "value": "Pre-installed combs"
-      }
-    ],
-    "variants": [
-      {
-        "id": "p017v1",
-        "label": "Natural Black 1B",
-        "sku": "GBW-12-1B",
-        "price": 1170
-      },
-      {
-        "id": "p017v2",
-        "label": "Dark Brown 2",
-        "sku": "GBW-12-2",
-        "price": 1170
-      },
-      {
-        "id": "p017v3",
-        "label": "Auburn 30",
-        "sku": "GBW-12-30",
-        "price": 1264
-      }
-    ],
-    "price": 1170,
-    "status": "ACTIVE",
-    "rating": 4.6,
-    "review_count": 189,
-    "featured": true,
-    "created_at": "2026-09-27T08:48:00.000Z",
-    "brand_id": null,
-    "product_type": "PHYSICAL",
-    "country_of_origin": "ZA",
-    "owner_type": "SUPPLIER",
-    "supplier_id": "s001",
-    "supplier_name": "Naledi Beauty Supplies",
-    "moq": 2,
-    "commercial_model": "SUPPLIER_LED"
   },
   {
     "id": "p018",
@@ -1236,7 +793,7 @@
     "rating": 0,
     "review_count": 0,
     "featured": true,
-    "created_at": "2026-10-03T08:06:00.000Z",
+    "created_at": "2026-08-28T08:18:00.000Z",
     "brand_id": "b007",
     "product_type": "PHYSICAL",
     "country_of_origin": "ZA",
@@ -1301,7 +858,7 @@
     "rating": 0,
     "review_count": 0,
     "featured": true,
-    "created_at": "2026-10-09T08:24:00.000Z",
+    "created_at": "2026-09-03T08:36:00.000Z",
     "brand_id": "b007",
     "product_type": "PHYSICAL",
     "country_of_origin": "ZA",
@@ -1394,7 +951,7 @@
     "rating": 0,
     "review_count": 0,
     "featured": true,
-    "created_at": "2026-10-15T08:42:00.000Z",
+    "created_at": "2026-09-09T08:54:00.000Z",
     "brand_id": "b007",
     "product_type": "PHYSICAL",
     "country_of_origin": "ZA",
@@ -1406,16 +963,16 @@
   },
   {
     "id": "p021",
-    "name": "Deep Curly Lace Wig",
-    "slug": "deep-curly-lace-wig",
+    "name": "Water Wave Lace Wig",
+    "slug": "water-wave-lace-wig",
     "category_id": "c1",
     "emoji": "👩🏾‍🦱",
     "swatch": [
       "#231a14",
       "#0b0908"
     ],
-    "short_description": "Full, defined curls on a lace front. 20 to 32 inch.",
-    "description": "Full, defined curls with plenty of volume, on a lace front. Sold by length from 20 to 32 inches. Mix lengths and styles from the AfriDeal hair range and they count together towards the multi-buy and bulk prices.",
+    "short_description": "Full, defined water-wave curls on a lace front. 20 to 32 inch.",
+    "description": "Full, defined water-wave curls with plenty of volume, on a lace front. Sold by length from 20 to 32 inches. Mix lengths and styles from the AfriDeal hair range and they count together towards the multi-buy and bulk prices.",
     "specs": [
       {
         "label": "Lengths",
@@ -1423,7 +980,7 @@
       },
       {
         "label": "Style",
-        "value": "Deep curly"
+        "value": "Water wave"
       },
       {
         "label": "Front",
@@ -1487,7 +1044,7 @@
     "rating": 0,
     "review_count": 0,
     "featured": true,
-    "created_at": "2026-10-20T08:17:00.000Z",
+    "created_at": "2026-09-15T08:12:00.000Z",
     "brand_id": "b007",
     "product_type": "PHYSICAL",
     "country_of_origin": "ZA",
@@ -1499,16 +1056,16 @@
   },
   {
     "id": "p022",
-    "name": "Kinky Curly Lace Wig",
-    "slug": "kinky-curly-lace-wig",
+    "name": "Pixie Curl Lace Wig",
+    "slug": "pixie-curl-lace-wig",
     "category_id": "c1",
     "emoji": "🌀",
     "swatch": [
       "#2a1f17",
       "#0e0b09"
     ],
-    "short_description": "Natural, voluminous kinky curls on a lace front. 20 to 24 inch.",
-    "description": "Natural, voluminous kinky curls on a lace front. Sold by length from 20 to 24 inches. Mix lengths and styles from the AfriDeal hair range and they count together towards the multi-buy and bulk prices.",
+    "short_description": "Natural, voluminous pixie curls on a lace front. 20 to 24 inch.",
+    "description": "Natural, voluminous pixie curls on a lace front. Sold by length from 20 to 24 inches. Mix lengths and styles from the AfriDeal hair range and they count together towards the multi-buy and bulk prices.",
     "specs": [
       {
         "label": "Lengths",
@@ -1516,7 +1073,7 @@
       },
       {
         "label": "Style",
-        "value": "Kinky curly"
+        "value": "Pixie curl"
       },
       {
         "label": "Front",
@@ -1556,7 +1113,7 @@
     "rating": 0,
     "review_count": 0,
     "featured": true,
-    "created_at": "2026-10-20T08:17:00.000Z",
+    "created_at": "2026-09-21T08:30:00.000Z",
     "brand_id": "b007",
     "product_type": "PHYSICAL",
     "country_of_origin": "ZA",
@@ -1649,7 +1206,100 @@
     "rating": 0,
     "review_count": 0,
     "featured": true,
-    "created_at": "2026-10-20T08:17:00.000Z",
+    "created_at": "2026-09-27T08:48:00.000Z",
+    "brand_id": "b007",
+    "product_type": "PHYSICAL",
+    "country_of_origin": "ZA",
+    "owner_type": "AFRIDEAL",
+    "supplier_id": null,
+    "supplier_name": null,
+    "moq": 1,
+    "commercial_model": "AFRIDEAL_MANAGED"
+  },
+  {
+    "id": "p024",
+    "name": "Jerry Curl Lace Wig",
+    "slug": "jerry-curl-lace-wig",
+    "category_id": "c1",
+    "emoji": "➰",
+    "swatch": [
+      "#241a15",
+      "#0a0807"
+    ],
+    "short_description": "Long, tight jerry curls on a lace front. 20 to 32 inch.",
+    "description": "Long, tight jerry curls with full volume from root to tip, on a lace front. Sold by length from 20 to 32 inches. Mix lengths and styles from the AfriDeal hair range and they count together towards the multi-buy and bulk prices.",
+    "specs": [
+      {
+        "label": "Lengths",
+        "value": "20 inch to 32 inch"
+      },
+      {
+        "label": "Style",
+        "value": "Jerry curl"
+      },
+      {
+        "label": "Front",
+        "value": "Lace front"
+      },
+      {
+        "label": "Sold by",
+        "value": "Length, one wig per unit"
+      },
+      {
+        "label": "Brand",
+        "value": "AfriDeal"
+      }
+    ],
+    "variants": [
+      {
+        "id": "p024v1",
+        "label": "20 inch",
+        "sku": "P024-20",
+        "price": 1425
+      },
+      {
+        "id": "p024v2",
+        "label": "22 inch",
+        "sku": "P024-22",
+        "price": 1575
+      },
+      {
+        "id": "p024v3",
+        "label": "24 inch",
+        "sku": "P024-24",
+        "price": 1770
+      },
+      {
+        "id": "p024v4",
+        "label": "26 inch",
+        "sku": "P024-26",
+        "price": 2100
+      },
+      {
+        "id": "p024v5",
+        "label": "28 inch",
+        "sku": "P024-28",
+        "price": 2400
+      },
+      {
+        "id": "p024v6",
+        "label": "30 inch",
+        "sku": "P024-30",
+        "price": 2700
+      },
+      {
+        "id": "p024v7",
+        "label": "32 inch",
+        "sku": "P024-32",
+        "price": 3000
+      }
+    ],
+    "price": 1425,
+    "status": "ACTIVE",
+    "rating": 0,
+    "review_count": 0,
+    "featured": true,
+    "created_at": "2026-10-03T08:06:00.000Z",
     "brand_id": "b007",
     "product_type": "PHYSICAL",
     "country_of_origin": "ZA",

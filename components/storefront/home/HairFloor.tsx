@@ -42,7 +42,7 @@ export function HairFloor({
     <Floor
       id="hair-floor"
       title="Hair, wigs & weaves"
-      subtitle="AfriDeal wigs by length, plus weaves, frontals and braiding hair"
+      subtitle="AfriDeal wigs, sold by length"
       href="/browse?category=hair-weaves-extensions"
       icon={Sparkles}
       iconClassName="text-forest"

@@ -100,16 +100,16 @@
   {
     "id": "oi008",
     "order_id": "o005",
-    "product_id": "p002",
-    "variant_id": "p002v1",
-    "product_name": "Premium Braiding Hair Bundle",
-    "variant_label": "Natural Black 1B",
-    "emoji": "💇🏾‍♀️",
+    "product_id": "p001",
+    "variant_id": "p001v1",
+    "product_name": "Shea Butter Deep Treatment 500ml",
+    "variant_label": "Single tub",
+    "emoji": "🧴",
     "qty": 5,
-    "unit_price": 87,
-    "line_total": 435,
+    "unit_price": 137,
+    "line_total": 685,
     "supplier_id": "s001",
-    "supplier_cost": 58
+    "supplier_cost": 82
   },
   {
     "id": "oi009",
@@ -184,20 +184,6 @@
   {
     "id": "oi014",
     "order_id": "o008",
-    "product_id": "p002",
-    "variant_id": "p002v4",
-    "product_name": "Premium Braiding Hair Bundle",
-    "variant_label": "Honey Blonde 27",
-    "emoji": "💇🏾‍♀️",
-    "qty": 2,
-    "unit_price": 93,
-    "line_total": 186,
-    "supplier_id": "s001",
-    "supplier_cost": 58
-  },
-  {
-    "id": "oi015",
-    "order_id": "o008",
     "product_id": "p003",
     "variant_id": "p003v2",
     "product_name": "Argan Repair Serum 100ml",
@@ -210,7 +196,7 @@
     "supplier_cost": 71
   },
   {
-    "id": "oi016",
+    "id": "oi015",
     "order_id": "o009",
     "product_id": "p009",
     "variant_id": "p009v1",
@@ -224,7 +210,7 @@
     "supplier_cost": 461
   },
   {
-    "id": "oi017",
+    "id": "oi016",
     "order_id": "o010",
     "product_id": "p008",
     "variant_id": "p008v1",
@@ -238,7 +224,7 @@
     "supplier_cost": 96
   },
   {
-    "id": "oi018",
+    "id": "oi017",
     "order_id": "o011",
     "product_id": "p005",
     "variant_id": "p005v2",
@@ -252,7 +238,7 @@
     "supplier_cost": 512
   },
   {
-    "id": "oi019",
+    "id": "oi018",
     "order_id": "o012",
     "product_id": "p010",
     "variant_id": "p010v2",
@@ -266,7 +252,7 @@
     "supplier_cost": 182
   },
   {
-    "id": "oi020",
+    "id": "oi019",
     "order_id": "o012",
     "product_id": "p001",
     "variant_id": "p001v1",
@@ -280,7 +266,7 @@
     "supplier_cost": 82
   },
   {
-    "id": "oi021",
+    "id": "oi020",
     "order_id": "o013",
     "product_id": "p005",
     "variant_id": "p005v1",
@@ -294,7 +280,7 @@
     "supplier_cost": 512
   },
   {
-    "id": "oi022",
+    "id": "oi021",
     "order_id": "o014",
     "product_id": "p007",
     "variant_id": "p007v2",
@@ -308,7 +294,7 @@
     "supplier_cost": 214
   },
   {
-    "id": "oi023",
+    "id": "oi022",
     "order_id": "o015",
     "product_id": "p004",
     "variant_id": "p004v3",

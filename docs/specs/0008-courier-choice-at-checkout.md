@@ -88,7 +88,16 @@ at 08:10:
   Gorosa's flat fee is P250, and AfriDeal carries the P50. At Gorosa's P130
   cost to AfriDeal, the P200 still leaves P70.
 
-Questions 5 to 8 are not answered yet.
+- **12:52, answer 5:** "We will upload the second courier with time. Looks
+  like Kedi's is the cheapest and I have used it before and know her." Read
+  as: the second courier is **Kedi's**, added later; no fee rule yet.
+- **12:55, answer 6:** "Since courier is external, we will charge client as
+  charged by Gorosa. We may only offer discounts here and there." Read as:
+  the buyer pays **the courier's own rate**; a saving from consolidated trips
+  is not passed on as a rule, and any discount is an occasional,
+  deliberate exception.
+
+Questions 7 and 8 are not answered yet.
 
 What the code does today:
 
@@ -229,11 +238,15 @@ What the code does today:
    after a month or two. Still open: does it apply to Francistown (P300) too,
    and if so at what price? And the date it ends, so `launch_until` can be
    set.
-5. **The second courier.** "Will add the everyday one": its name and fee rule
-   when she has it. AC-2 already lists any number.
-6. **Consolidation.** Gorosa accepts consolidated orders. Do buyers get a lower
-   fee when their order rides with others on the same trip, or does AfriDeal
-   keep the saving? Out of the first release either way.
+5. **The second courier. Answered (2026-10-21 12:52):** Kedi's, "the
+   cheapest", uploaded "with time". Still open: its fee rule, destinations and
+   depot, which she will send when it is added. AC-2 already lists any number
+   of couriers, so adding it is a data change.
+6. **Consolidation. Answered (2026-10-21 12:55):** buyers are charged the
+   courier's own rate ("as charged by Gorosa"); consolidation savings are not
+   passed on by rule. Occasional discounts ("here and there") are a
+   promotion, not part of the fee rule; how they are set is out of the first
+   release.
 7. **Other towns.** The poster prices Gaborone and Francistown only. Does
    Gorosa deliver elsewhere (Maun, Palapye, Lobatse...), and at what rate? Until
    then, buyers in other towns are not offered Gorosa.

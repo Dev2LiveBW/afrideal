@@ -81,9 +81,9 @@ test.describe('B. Buying and tracking (Customs & Duty)', () => {
   test.use(signedInAs('thabo'));
 
   test('B11 customs on imported goods is cleared by the courier @p1', async ({ page }) => {
-    // p002 is an imported item (ZA). Since 2026-10-21 its price carries no
+    // p018 is an imported item (ZA). Since 2026-10-21 its price carries no
     // customs: the buyer's courier clears it and charges in its fee (spec 0008).
-    await page.goto('/products/p002');
+    await page.goto('/products/p018');
     await caption(page, 'B11 · 1. Add imported product to cart (customs cleared by the courier)');
     await expect(page.getByText('Customs cleared by courier')).toBeVisible();
     await page.getByRole('button', { name: 'Add to cart' }).click();
