@@ -43,6 +43,7 @@
 import type { PricingTier } from '@/types';
 
 import {
+  HAIR_LADDER_RUNGS,
   LADDER_RUNGS,
   QUOTATION_THRESHOLD as THRESHOLD,
   unitPrice,
@@ -102,10 +103,21 @@ export function rungRange(rung: LadderRung): string {
   return `${rung.minimum_quantity}–${rung.maximum_quantity}`;
 }
 
+const markupPct = (ladder: LadderRung[]) =>
+  Object.fromEntries(
+    ladder.map((rung) => [rung.tier, Math.round(rung.markup * 1000) / 10]),
+  ) as Record<PublishedTier, number>;
+
 /** Markup on the landed cost, in whole percent: `{ RETAIL: 50, … }`. */
-export const MARKUP_PCT: Record<PublishedTier, number> = Object.fromEntries(
-  LADDER.map((rung) => [rung.tier, Math.round(rung.markup * 1000) / 10]),
-) as Record<PublishedTier, number>;
+export const MARKUP_PCT: Record<PublishedTier, number> = markupPct(LADDER);
+
+/**
+ * The hair category's own, leaner ladder (2026-10-21): same quantity breaks,
+ * markups of 25 / 12 / 10 / 8%. Prices themselves come from the stored bands;
+ * this is for copy that quotes the percentages.
+ */
+export const HAIR_LADDER: LadderRung[] = HAIR_LADDER_RUNGS.map((rung) => ({ ...rung }));
+export const HAIR_MARKUP_PCT: Record<PublishedTier, number> = markupPct(HAIR_LADDER);
 
 /**
  * What a buyer saves per unit by moving from the retail rung to another one, on

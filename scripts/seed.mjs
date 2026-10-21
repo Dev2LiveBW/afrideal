@@ -18,8 +18,8 @@ import { fileURLToPath } from 'node:url';
 
 import {
   GATEWAY_RATE,
-  LADDER_RUNGS,
   QUOTATION_THRESHOLD,
+  ladderFor,
   landedCost,
   marginPct,
   unitPrice,
@@ -73,8 +73,10 @@ const pick = (arr) => arr[Math.floor(rand() * arr.length)];
  * running app reads too, so the bands written here are the prices it charges.
  * Delivery is quoted separately at checkout rather than smeared across units.
  */
-const pct = (tier) => Math.round(LADDER_RUNGS.find((rung) => rung.tier === tier).markup * 1000) / 10;
-const RETAIL_MARKUP_PCT = pct('RETAIL');
+/** A rung's markup in percent, on the ladder of the category it prices. */
+const pct = (rung) => Math.round(rung.markup * 1000) / 10;
+/** The retail markup a category opens at: 50% by default, 25% for hair. */
+const retailMarkupPct = (categoryId) => pct(ladderFor(categoryId)[0]);
 
 // ─── Categories ──────────────────────────────────────────────────────────────
 
@@ -97,7 +99,7 @@ const pricingRules = categories.map((category, i) => ({
   markup_type: 'PERCENTAGE',
   // The platform retail markup. One figure across the catalogue, so a buyer
   // comparing two categories is comparing supplier costs, not our arithmetic.
-  markup_value: RETAIL_MARKUP_PCT,
+  markup_value: retailMarkupPct(category.id),
   // Zero, deliberately. Delivery is quoted at checkout against the real
   // address, so folding a per-unit contribution in here would charge for it
   // twice and would punish the cheapest lines hardest.
@@ -1312,16 +1314,17 @@ const PRICED_CUSTOMER_TYPES = ['GUEST', 'RETAIL', 'BUSINESS', 'RESELLER', 'INSTI
  * to its floor, so each rung is given the floor its own arithmetic can actually
  * clear against the worst routable supplier cost.
  */
-const TIER_PLAN = PRICED_CUSTOMER_TYPES.flatMap((customer_type) =>
-  LADDER_RUNGS.map((rung) => ({
-    customer_type,
-    tier: rung.tier,
-    min: rung.minimum_quantity,
-    max: rung.maximum_quantity,
-    markup: pct(rung.tier),
-    floor: rung.floor,
-  })),
-);
+const tierPlanFor = (categoryId) =>
+  PRICED_CUSTOMER_TYPES.flatMap((customer_type) =>
+    ladderFor(categoryId).map((rung) => ({
+      customer_type,
+      tier: rung.tier,
+      min: rung.minimum_quantity,
+      max: rung.maximum_quantity,
+      markup: pct(rung),
+      floor: rung.floor,
+    })),
+  );
 
 /**
  * Margin floors.
@@ -1342,7 +1345,7 @@ for (const category of categories) {
   const base = ruleFor(category.id);
   const overrides = FLOOR_OVERRIDES[category.id];
 
-  for (const plan of TIER_PLAN) {
+  for (const plan of tierPlanFor(category.id)) {
     const key = `${category.id}|${plan.customer_type}|${plan.tier}`;
     if (seenRule.has(key)) continue;
     seenRule.add(key);
@@ -1375,7 +1378,7 @@ for (const category of categories) {
  */
 for (const category of categories) {
   const base = ruleFor(category.id);
-  const retailFloor = FLOOR_OVERRIDES[category.id]?.RETAIL ?? 20;
+  const retailFloor = FLOOR_OVERRIDES[category.id]?.RETAIL ?? ladderFor(category.id)[0].floor;
 
   for (const customerType of PRICED_CUSTOMER_TYPES) {
     marginRules.push({
@@ -1385,7 +1388,7 @@ for (const category of categories) {
       customer_type: customerType,
       pricing_tier: 'PROMOTIONAL',
       margin_type: 'PERCENTAGE_MARKUP',
-      margin_value: Math.round(RETAIL_MARKUP_PCT * 0.8 * 10) / 10,
+      margin_value: Math.round(retailMarkupPct(category.id) * 0.8 * 10) / 10,
       fixed_component: 0,
       logistics_cost: base.logistics_cost,
       gateway_rate: base.gateway_rate,
@@ -1418,7 +1421,7 @@ function worstLanded(product, variantId = null) {
 const customerPrices = [];
 
 function pushLadder(product, variantId, landedThebe) {
-  for (const plan of TIER_PLAN) {
+  for (const plan of tierPlanFor(product.category_id)) {
     customerPrices.push({
       id: `cp${String(customerPrices.length + 1).padStart(4, '0')}`,
       product_id: product.id,

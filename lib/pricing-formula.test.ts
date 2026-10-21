@@ -1,9 +1,12 @@
 import { describe, expect, it } from 'vitest';
 
 import {
+  HAIR_CATEGORY_ID,
+  HAIR_LADDER_RUNGS,
   LADDER_RUNGS,
   QUOTATION_THRESHOLD,
   applyMultiBuy,
+  ladderFor,
   landedCost,
   marginPct,
   unitPrice,
@@ -172,6 +175,92 @@ describe('the ladder', () => {
       retail,
       applyMultiBuy(retail, 4),
       ...LADDER_RUNGS.slice(1).map((rung) => unitPrice(landed_thebe, rung.markup)),
+    ];
+    for (let i = 1; i < prices.length; i += 1) {
+      expect(prices[i]).toBeLessThan(prices[i - 1]);
+    }
+  });
+});
+
+/**
+ * The hair ladder, against her sheet of 2026-10-21 13:55
+ * (`AfriDeal_Retail_Wholesale_Pricing_No_14pct.xlsx`): supplier cost at 1:1, no
+ * customs, retail +25% with 2 / 3 / 5% off for 2 / 3 / 4+ pieces, wholesale
+ * +12% (5–10), +10% (11–20), +8% (21+). Her cells are formulas; these are their
+ * values. Ours round up to the Pula.
+ */
+// [length, cost, retail, 2 pcs, 3 pcs, 4+ pcs, 5–10, 11–20, 21+]
+const HER_HAIR_SHEET: [string, number, number, number, number, number, number, number, number][] = [
+  ['8 inches', 280, 350, 343, 339.5, 332.5, 313.6, 308, 302.4],
+  ['10 inches', 450, 562.5, 551.25, 545.625, 534.375, 504, 495, 486],
+  ['12 inches', 630, 787.5, 771.75, 763.875, 748.125, 705.6, 693, 680.4],
+  ['14 inches', 830, 1037.5, 1016.75, 1006.375, 985.625, 929.6, 913, 896.4],
+  ['16 inches', 1060, 1325, 1298.5, 1285.25, 1258.75, 1187.2, 1166, 1144.8],
+];
+
+const hairMarkup = (tier: string) => HAIR_LADDER_RUNGS.find((rung) => rung.tier === tier)!.markup;
+
+describe('the hair ladder', () => {
+  it('applies to hair only; every other category keeps the default ladder', () => {
+    expect(ladderFor(HAIR_CATEGORY_ID)).toBe(HAIR_LADDER_RUNGS);
+    expect(ladderFor('c7')).toBe(LADDER_RUNGS);
+    expect(HAIR_LADDER_RUNGS.map((rung) => rung.markup)).toEqual([0.25, 0.12, 0.1, 0.08]);
+  });
+
+  it('keeps the default quantity breaks', () => {
+    expect(HAIR_LADDER_RUNGS.map((rung) => [rung.minimum_quantity, rung.maximum_quantity])).toEqual(
+      LADDER_RUNGS.map((rung) => [rung.minimum_quantity, rung.maximum_quantity]),
+    );
+  });
+
+  it.each(HER_HAIR_SHEET)('%s: every price is her figure rounded up to the Pula (multi-buy within two)', (
+    _,
+    cost,
+    retail,
+    two,
+    three,
+    four,
+    bulk,
+    wholesale,
+    wholesalePlus,
+  ) => {
+    const { landed_thebe } = landedCost({ cost, currency: 'ZAR', imported: true });
+    const ours = unitPrice(landed_thebe, hairMarkup('RETAIL'));
+
+    expect(ours).toBe(Math.ceil(retail - 1e-9));
+    // The multi-buy comes off the published (rounded-up) retail price, so it
+    // can sit up to two Pula above her unrounded figure, never below it.
+    for (const [quantity, hers] of [
+      [2, two],
+      [3, three],
+      [4, four],
+    ] as const) {
+      const multi = applyMultiBuy(ours, quantity);
+      expect(multi).toBeGreaterThanOrEqual(hers);
+      expect(multi - hers).toBeLessThan(2);
+    }
+    expect(unitPrice(landed_thebe, hairMarkup('BULK'))).toBe(Math.ceil(bulk - 1e-9));
+    expect(unitPrice(landed_thebe, hairMarkup('WHOLESALE'))).toBe(Math.ceil(wholesale - 1e-9));
+    expect(unitPrice(landed_thebe, hairMarkup('WHOLESALE_PLUS'))).toBe(Math.ceil(wholesalePlus - 1e-9));
+  });
+
+  it.each(HER_HAIR_SHEET)('%s: every rung, and the 4-piece multi-buy, clears its hair floor', (_, cost) => {
+    const { landed_thebe } = landedCost({ cost, currency: 'ZAR', imported: true });
+
+    for (const rung of HAIR_LADDER_RUNGS) {
+      expect(marginPct(unitPrice(landed_thebe, rung.markup), landed_thebe)).toBeGreaterThanOrEqual(rung.floor);
+    }
+    const retail = unitPrice(landed_thebe, hairMarkup('RETAIL'));
+    expect(marginPct(applyMultiBuy(retail, 4), landed_thebe)).toBeGreaterThanOrEqual(HAIR_LADDER_RUNGS[0].floor);
+  });
+
+  it('gets cheaper at every rung', () => {
+    const { landed_thebe } = landedCost({ cost: 280, currency: 'ZAR', imported: true });
+    const retail = unitPrice(landed_thebe, hairMarkup('RETAIL'));
+    const prices = [
+      retail,
+      applyMultiBuy(retail, 4),
+      ...HAIR_LADDER_RUNGS.slice(1).map((rung) => unitPrice(landed_thebe, rung.markup)),
     ];
     for (let i = 1; i < prices.length; i += 1) {
       expect(prices[i]).toBeLessThan(prices[i - 1]);

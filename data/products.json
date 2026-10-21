@@ -761,34 +761,34 @@
         "id": "p018v1",
         "label": "8 inch",
         "sku": "P018-8",
-        "price": 420
+        "price": 350
       },
       {
         "id": "p018v2",
         "label": "10 inch",
         "sku": "P018-10",
-        "price": 675
+        "price": 563
       },
       {
         "id": "p018v3",
         "label": "12 inch",
         "sku": "P018-12",
-        "price": 945
+        "price": 788
       },
       {
         "id": "p018v4",
         "label": "14 inch",
         "sku": "P018-14",
-        "price": 1245
+        "price": 1038
       },
       {
         "id": "p018v5",
         "label": "16 inch",
         "sku": "P018-16",
-        "price": 1590
+        "price": 1325
       }
     ],
-    "price": 420,
+    "price": 350,
     "status": "ACTIVE",
     "rating": 0,
     "review_count": 0,
@@ -838,22 +838,22 @@
         "id": "p019v1",
         "label": "8 inch",
         "sku": "P019-8",
-        "price": 300
+        "price": 250
       },
       {
         "id": "p019v2",
         "label": "10 inch",
         "sku": "P019-10",
-        "price": 375
+        "price": 313
       },
       {
         "id": "p019v3",
         "label": "12 inch",
         "sku": "P019-12",
-        "price": 450
+        "price": 375
       }
     ],
-    "price": 300,
+    "price": 250,
     "status": "ACTIVE",
     "rating": 0,
     "review_count": 0,
@@ -907,46 +907,46 @@
         "id": "p020v1",
         "label": "20 inch",
         "sku": "P020-20",
-        "price": 1500
+        "price": 1250
       },
       {
         "id": "p020v2",
         "label": "22 inch",
         "sku": "P020-22",
-        "price": 1650
+        "price": 1375
       },
       {
         "id": "p020v3",
         "label": "24 inch",
         "sku": "P020-24",
-        "price": 1950
+        "price": 1625
       },
       {
         "id": "p020v4",
         "label": "26 inch",
         "sku": "P020-26",
-        "price": 2175
+        "price": 1813
       },
       {
         "id": "p020v5",
         "label": "28 inch",
         "sku": "P020-28",
-        "price": 2625
+        "price": 2188
       },
       {
         "id": "p020v6",
         "label": "30 inch",
         "sku": "P020-30",
-        "price": 2775
+        "price": 2313
       },
       {
         "id": "p020v7",
         "label": "32 inch",
         "sku": "P020-32",
-        "price": 3150
+        "price": 2625
       }
     ],
-    "price": 1500,
+    "price": 1250,
     "status": "ACTIVE",
     "rating": 0,
     "review_count": 0,
@@ -1000,46 +1000,46 @@
         "id": "p021v1",
         "label": "20 inch",
         "sku": "P021-20",
-        "price": 1425
+        "price": 1188
       },
       {
         "id": "p021v2",
         "label": "22 inch",
         "sku": "P021-22",
-        "price": 1575
+        "price": 1313
       },
       {
         "id": "p021v3",
         "label": "24 inch",
         "sku": "P021-24",
-        "price": 1770
+        "price": 1475
       },
       {
         "id": "p021v4",
         "label": "26 inch",
         "sku": "P021-26",
-        "price": 2100
+        "price": 1750
       },
       {
         "id": "p021v5",
         "label": "28 inch",
         "sku": "P021-28",
-        "price": 2400
+        "price": 2000
       },
       {
         "id": "p021v6",
         "label": "30 inch",
         "sku": "P021-30",
-        "price": 2700
+        "price": 2250
       },
       {
         "id": "p021v7",
         "label": "32 inch",
         "sku": "P021-32",
-        "price": 3000
+        "price": 2500
       }
     ],
-    "price": 1425,
+    "price": 1188,
     "status": "ACTIVE",
     "rating": 0,
     "review_count": 0,
@@ -1093,22 +1093,22 @@
         "id": "p022v1",
         "label": "20 inch",
         "sku": "P022-20",
-        "price": 1425
+        "price": 1188
       },
       {
         "id": "p022v2",
         "label": "22 inch",
         "sku": "P022-22",
-        "price": 1575
+        "price": 1313
       },
       {
         "id": "p022v3",
         "label": "24 inch",
         "sku": "P022-24",
-        "price": 1770
+        "price": 1475
       }
     ],
-    "price": 1425,
+    "price": 1188,
     "status": "ACTIVE",
     "rating": 0,
     "review_count": 0,
@@ -1162,46 +1162,46 @@
         "id": "p023v1",
         "label": "20 inch",
         "sku": "P023-20",
-        "price": 1575
+        "price": 1313
       },
       {
         "id": "p023v2",
         "label": "22 inch",
         "sku": "P023-22",
-        "price": 1725
+        "price": 1438
       },
       {
         "id": "p023v3",
         "label": "24 inch",
         "sku": "P023-24",
-        "price": 1875
+        "price": 1563
       },
       {
         "id": "p023v4",
         "label": "26 inch",
         "sku": "P023-26",
-        "price": 2175
+        "price": 1813
       },
       {
         "id": "p023v5",
         "label": "28 inch",
         "sku": "P023-28",
-        "price": 2400
+        "price": 2000
       },
       {
         "id": "p023v6",
         "label": "30 inch",
         "sku": "P023-30",
-        "price": 2775
+        "price": 2313
       },
       {
         "id": "p023v7",
         "label": "32 inch",
         "sku": "P023-32",
-        "price": 3000
+        "price": 2500
       }
     ],
-    "price": 1575,
+    "price": 1313,
     "status": "ACTIVE",
     "rating": 0,
     "review_count": 0,
@@ -1255,46 +1255,46 @@
         "id": "p024v1",
         "label": "20 inch",
         "sku": "P024-20",
-        "price": 1425
+        "price": 1188
       },
       {
         "id": "p024v2",
         "label": "22 inch",
         "sku": "P024-22",
-        "price": 1575
+        "price": 1313
       },
       {
         "id": "p024v3",
         "label": "24 inch",
         "sku": "P024-24",
-        "price": 1770
+        "price": 1475
       },
       {
         "id": "p024v4",
         "label": "26 inch",
         "sku": "P024-26",
-        "price": 2100
+        "price": 1750
       },
       {
         "id": "p024v5",
         "label": "28 inch",
         "sku": "P024-28",
-        "price": 2400
+        "price": 2000
       },
       {
         "id": "p024v6",
         "label": "30 inch",
         "sku": "P024-30",
-        "price": 2700
+        "price": 2250
       },
       {
         "id": "p024v7",
         "label": "32 inch",
         "sku": "P024-32",
-        "price": 3000
+        "price": 2500
       }
     ],
-    "price": 1425,
+    "price": 1188,
     "status": "ACTIVE",
     "rating": 0,
     "review_count": 0,

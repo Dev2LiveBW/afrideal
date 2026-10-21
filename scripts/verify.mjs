@@ -190,7 +190,8 @@ section('3. Pricing engine — margins are arithmetically correct');
 {
   const { jar } = sessions['admin@afrideal.co.bw'];
 
-  // Hair is the retail markup (50%, spec 0007), no logistics, 2.5% gateway.
+  // Hair's retail markup is 25% (its own ladder since 2026-10-21, spec 0007),
+  // no logistics, 2.5% gateway.
   const { body } = await json(jar, '/api/pricing', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
@@ -201,7 +202,7 @@ section('3. Pricing engine — margins are arithmetically correct');
   check('returns a result', r != null);
 
   if (r) {
-    check('markup is 50% of cost', r.markup === 50, `got ${r.markup}`);
+    check('markup is 25% of cost', r.markup === 25, `got ${r.markup}`);
     check(
       'no per-unit logistics is folded into the price',
       r.logistics_cost === 0,
@@ -209,17 +210,17 @@ section('3. Pricing engine — margins are arithmetically correct');
     );
     check(
       'gateway is 2.5% of the selling price',
-      r.gateway_cost === 3.75,
+      r.gateway_cost === 3.125,
       `got ${r.gateway_cost}`,
     );
     check(
-      'price = ceil(100 x 1.50) = 150',
-      r.recommended_price === 150,
+      'price = ceil(100 x 1.25) = 125',
+      r.recommended_price === 125,
       `got ${r.recommended_price}`,
     );
     check(
       'margin_pct is margin over selling price',
-      Math.abs(r.margin_pct - ((150 - 100 - 3.75) / 150) * 100) < 0.001,
+      Math.abs(r.margin_pct - ((125 - 100 - 3.125) / 125) * 100) < 0.001,
       `got ${r.margin_pct}`,
     );
   }
@@ -1078,10 +1079,10 @@ section('13. Tiered pricing — the ladder is real, not hard-coded');
 
   /*
    * Spec 0007: AfriDeal's wigs are sold by length, priced from the product
-   * owner's rand costs (no customs since 2026-10-21; the courier clears it), and
-   * counted across lengths. Three 8" and three 10" are six units, so both lines
-   * stand on the bulk rung: 280 × 1.33 = 372.40 and 450 × 1.33 = 598.50,
-   * published rounded up.
+   * owner's rand costs (no customs since 2026-10-21; the courier clears it), on
+   * the hair ladder (25 / 12 / 10 / 8%), and counted across lengths. Three 8" and
+   * three 10" are six units, so both lines stand on the bulk rung:
+   * 280 × 1.12 = 313.60 and 450 × 1.12 = 504, published rounded up.
    */
   const wigs = await json(retail, '/api/orders', {
     method: 'POST',
@@ -1097,8 +1098,8 @@ section('13. Tiered pricing — the ladder is real, not hard-coded');
     }),
   });
   const [wig8, wig10] = wigs.body?.items ?? [];
-  check('mixed wig lengths count together: 8" at the bulk price', wig8?.unit_price === 373, `got ${wig8?.unit_price}`);
-  check('mixed wig lengths count together: 10" at the bulk price', wig10?.unit_price === 599, `got ${wig10?.unit_price}`);
+  check('mixed wig lengths count together: 8" at the bulk price', wig8?.unit_price === 314, `got ${wig8?.unit_price}`);
+  check('mixed wig lengths count together: 10" at the bulk price', wig10?.unit_price === 504, `got ${wig10?.unit_price}`);
   check(
     'the order fixes the rand cost and the customs it was priced on (none)',
     wig8?.supplier_cost === 280 && wig8?.supplier_cost_currency === 'ZAR' && wig8?.customs_amount === 0,
@@ -1119,10 +1120,10 @@ section('13. Tiered pricing — the ladder is real, not hard-coded');
       delivery_city: 'Gaborone',
     }),
   });
-  // Three 8" wigs alone: retail 420 less the 3% multi-buy, 407.40 rounded up.
+  // Three 8" wigs alone: hair retail 350 less the 3% multi-buy, 339.50 rounded up.
   check(
     'a beauty product does not count towards the hair rung',
-    mixed.body?.items?.[0]?.unit_price === 408,
+    mixed.body?.items?.[0]?.unit_price === 340,
     `got ${mixed.body?.items?.[0]?.unit_price}`,
   );
 

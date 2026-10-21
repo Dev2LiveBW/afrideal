@@ -4,7 +4,7 @@
     "category_id": "c1",
     "category_name": "Hair, Weaves & Extensions",
     "markup_type": "PERCENTAGE",
-    "markup_value": 50,
+    "markup_value": 25,
     "logistics_cost": 0,
     "gateway_rate": 0.025,
     "active": true

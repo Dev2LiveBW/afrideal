@@ -80,6 +80,44 @@ copy, e2e B11, and a reseed. The same day Product 8 (sent 2026-10-20 23:55)
 joined as `p023`, Kinky Straight Lace Wig, 20" R1,050 to 32" R2,000. The chat
 has no Product 6; Product 7 (Straight Pixie, R200) is not loaded yet.
 
+## Amendment 2026-10-21 (2): hair runs on its own, leaner ladder
+
+**Decision (product owner, WhatsApp 2026-10-21 13:55–13:56):** "I have been
+sampling these numbers as though I am a customer. Comparing with competitors.
+They didn't make sense. Sorry but we have to make these changes for this to
+make sense." … "We want volumes, so our margins have to make sense." With it,
+`AfriDeal_Retail_Wholesale_Pricing_No_14pct.xlsx`: supplier cost "(P)" at
+1:1, no VAT or courier in the price, and new markups on cost. Applied to the
+**hair category only** (developer's decision with the owner's sign-off the
+same day); every other category keeps the ladder above.
+
+| Rung | Quantity | Default | Hair | Hair floor | Hair keeps* |
+|---|---|---|---|---|---|
+| `RETAIL` | 1–4 | +50% | +25% | 13% | 17.5% (13.3% at 4 pcs) |
+| `BULK` | 5–10 | +33% | +12% | 8% | 8.2% |
+| `WHOLESALE` | 11–20 | +25% | +10% | 6% | 6.6% |
+| `WHOLESALE_PLUS` | 21–99 | +18% | +8% | 4% | 4.9% |
+
+\* Share of the selling price left after cost and the 2.5% card fee.
+
+The retail multi-buy (2 / 3 / 5% off for 2 / 3 / 4+ pieces), the quantity
+breaks, the per-seller-per-category counting and 100+ by quotation are
+unchanged. Worked, 8" at R280: retail 350; 2 pieces 343; 3 pieces 340;
+4 pieces 333; 5–10 314; 11–20 308; 21+ 303 (her sheet: 350 / 343 / 339.50 /
+332.50 / 313.60 / 308 / 302.40; ours round up to the Pula, and the multi-buy
+comes off the published retail price, so it can sit up to P2 above hers).
+
+Built: `HAIR_LADDER_RUNGS` and `ladderFor(categoryId)` in
+`lib/pricing-formula.mjs`; the seed writes hair's bands, retail markup
+(`pricing-rules`), margin floors and promotional floor from it; the
+how-it-works copy quotes both ladders; unit tests against every cell of her
+sheet and every hair floor; `verify.mjs` (8" bulk 314, 10" bulk 504,
+3 × 8" 340).
+
+The thin wholesale floors leave little room: a hair promotion, a card fee
+above 2.5% or a rate move against the pula would put the 21+ rung under cost.
+Hair carries no promotions today.
+
 ## Context
 
 How the rule was settled, 2026-10-19 to 2026-10-20:

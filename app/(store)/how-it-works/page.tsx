@@ -10,7 +10,7 @@ import { PathChooser } from '@/components/storefront/PathChooser';
 import { TrustStrip } from '@/components/storefront/TrustStrip';
 import { auth } from '@/lib/auth';
 import { readAll } from '@/lib/db';
-import { LADDER, MARKUP_PCT, QUOTATION_THRESHOLD } from '@/lib/pricing-model';
+import { HAIR_MARKUP_PCT, LADDER, MARKUP_PCT, QUOTATION_THRESHOLD } from '@/lib/pricing-model';
 import { getCatalogue } from '@/lib/queries';
 import { doorForQuantity, tierDoors } from '@/lib/tier-doors';
 
@@ -173,7 +173,13 @@ export default async function HowItWorksPage() {
                 <span className="font-mono tabular-nums text-ink">
                   {LADDER[LADDER.length - 1].minimum_quantity}
                 </span>{' '}
-                units, and two to four units at retail earn a multi-buy discount. Past{' '}
+                units (for AfriDeal&apos;s hair range,{' '}
+                <span className="font-mono tabular-nums text-ink">{HAIR_MARKUP_PCT.RETAIL}%</span>{' '}
+                down to{' '}
+                <span className="font-mono tabular-nums text-ink">
+                  {HAIR_MARKUP_PCT.WHOLESALE_PLUS}%
+                </span>
+                ), and two to four units at retail earn a multi-buy discount. Past{' '}
                 <span className="font-mono tabular-nums text-ink">{QUOTATION_THRESHOLD}</span> units
                 we quote rather than list, because the figure then depends on your delivery point
                 and lead time.
