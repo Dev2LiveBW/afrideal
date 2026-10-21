@@ -214,6 +214,10 @@ from the Sanity people directory - never by hand in the Clerk dashboard.
 - Motion follows §4b: press states (`.press`, `.press-soft`) on everything
   tappable, a push between screens on phones and none on wide screens, no
   entrance animation on any list or grid.
+- A floor's rail never leaves the right of the row empty (2026-10-21): when
+  its cards fit, they grow from 136px up to 220px to fill the row, gaps
+  staying at 4px; when they do not fit, they stay 136px and the rail scrolls.
+  The sizing lives on `RailCard` in `components/storefront/home/Floor.tsx`.
 - Badge and banner strips (stats banner, info ribbon) stay on **one row** at
   every width - shrink type and padding, do not wrap.
 - Sections that display artwork reflow normally on their own pages
