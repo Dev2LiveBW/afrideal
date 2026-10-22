@@ -9,15 +9,17 @@ import { AlertCircle, ShieldCheck, ShoppingBag } from 'lucide-react';
 import { z } from 'zod';
 
 import { ActionButton } from '@/components/brand/ActionButton';
+import { PriceText } from '@/components/brand/BuyerCurrency';
 import { MoneyText } from '@/components/brand/MoneyText';
 import { EmptyState, Enclosure } from '@/components/brand/Panel';
 import { CartLineThumb } from '@/components/storefront/CartLineThumb';
 import { DEFAULT_DELIVER_TO, useAfriDealStore } from '@/store/useAfriDealStore';
 import { COLLECTION_POINTS } from '@/lib/collection-points';
+import { courierFee, couriersForLane } from '@/lib/couriers.mjs';
 import { isCrossBorder } from '@/lib/lanes.mjs';
 import { priceLine, sellerQuantities } from '@/lib/pricing-tiers';
 import { cn } from '@/lib/utils';
-import type { Country, CustomerPrice, CustomerType, PaymentMethod, Product } from '@/types';
+import type { Country, Courier, CustomerPrice, CustomerType, PaymentMethod, Product } from '@/types';
 
 const DOORSTEP_DELIVERY_FEE = 45;
 const COLLECTION_POINT_DELIVERY_FEE = 25;
@@ -54,32 +56,21 @@ const CheckoutSchema = z
 
 type CheckoutValues = z.infer<typeof CheckoutSchema>;
 
-const GATEWAYS: { value: PaymentMethod; name: string; monogram: string; blurb: string }[] = [
-  {
-    value: 'DPO_PAY',
-    name: 'DPO Pay',
-    monogram: 'DPO',
-    blurb: 'Card and bank transfer across SADC.',
-  },
-  {
-    value: 'ORANGE_MONEY',
-    name: 'Orange Money',
-    monogram: 'OM',
-    blurb: 'Mobile money, Botswana numbers.',
-  },
-  {
-    value: 'PAYGATE',
-    name: 'PayGate',
-    monogram: 'PG',
-    blurb: 'South African card acquiring.',
-  },
-  {
-    value: 'EFT',
-    name: 'Bank transfer',
-    monogram: 'EFT',
-    blurb: 'Pay from your bank. We start sourcing once it reaches us, usually 1 to 3 working days.',
-  },
-];
+/** A short label for a method's tile. */
+const MONOGRAM: Partial<Record<PaymentMethod, string>> = {
+  DPO_PAY: 'CARD',
+  PAYGATE: 'CARD',
+  ORANGE_MONEY: 'OM',
+  EFT: 'EFT',
+};
+const monogramFor = (name: string, method?: PaymentMethod) =>
+  (method && MONOGRAM[method]) ??
+  name
+    .split(/[\s/]+/)
+    .map((word) => word[0])
+    .join('')
+    .slice(0, 4)
+    .toUpperCase();
 
 export function CheckoutClient({
   customerName,
@@ -89,6 +80,7 @@ export function CheckoutClient({
   customerType,
   methods,
   countries,
+  couriers,
 }: {
   customerName: string;
   customerEmail: string;
@@ -104,6 +96,8 @@ export function CheckoutClient({
   methods: PaymentMethod[];
   /** Active countries and their towns (spec 0009); checkout starts from "Deliver to". */
   countries: Country[];
+  /** Listed couriers and their routes (spec 0008), to quote the courier's own fee. */
+  couriers: Courier[];
 }) {
   const router = useRouter();
   const cart = useAfriDealStore((state) => state.cart);
@@ -204,8 +198,54 @@ export function CheckoutClient({
     return product ? isCrossBorder(product.country_of_origin, deliveryCountry) : false;
   });
 
+  /*
+   * Spec 0009, answer 2: the delivery country's payment methods, in its order.
+   * One is selectable when the platform can take money through it now; the
+   * rest are listed as "coming soon".
+   */
+  const countryMethods = (countryEntry?.payment_methods ?? []).map((entry) => ({
+    ...entry,
+    live: entry.method !== undefined && methods.includes(entry.method),
+  }));
+  const firstLive = countryMethods.find((entry) => entry.live)?.method;
+  const selectedIsLive = countryMethods.some((entry) => entry.live && entry.method === selectedGateway);
+  useEffect(() => {
+    if (!selectedIsLive && firstLive) setValue('payment_method', firstLive);
+  }, [selectedCountry, firstLive, selectedIsLive, setValue]);
+
+  /*
+   * Spec 0008: the courier's own fee for each cross-border origin on this lane,
+   * shown so the buyer knows it, but paid to the courier and never in the total.
+   */
+  const laneCountry =
+    selectedDeliveryMethod === 'COLLECTION_POINT' && selectedPoint ? selectedPoint.country : selectedCountry;
+  const laneTown =
+    selectedDeliveryMethod === 'COLLECTION_POINT' && selectedPoint
+      ? selectedPoint.city
+      : (watch('delivery_city') ?? '');
+  const goodsByOrigin = new Map<string, number>();
+  for (const entry of priced) {
+    const origin = products.find((candidate) => candidate.id === entry.line.product_id)?.country_of_origin;
+    if (!origin || !isCrossBorder(origin, laneCountry)) continue;
+    goodsByOrigin.set(origin, (goodsByOrigin.get(origin) ?? 0) + entry.unitPrice * entry.line.qty);
+  }
+  const courierQuotes = [...goodsByOrigin].map(([origin, goods]) => {
+    const found = couriersForLane(couriers, {
+      fromCountry: origin,
+      toCountry: laneCountry,
+      toCity: laneTown,
+    })[0];
+    return { origin, courier: found?.courier ?? null, quote: found ? courierFee(found.route, goods) : null };
+  });
+
   const onSubmit = handleSubmit(async (values) => {
     setApiError(null);
+    if (!countryMethods.some((entry) => entry.live && entry.method === values.payment_method)) {
+      setApiError(
+        `No payment method is live for ${countryEntry?.name ?? 'this country'} yet. Card payments open at launch.`,
+      );
+      return;
+    }
 
     const point =
       pointsHere.find((p) => p.name === values.collection_point) ?? pointsHere[0] ?? null;
@@ -340,7 +380,7 @@ export function CheckoutClient({
                 <span className="min-w-0 flex-1">
                   <span className="block text-[13.5px] font-medium text-ink">Doorstep delivery</span>
                   <span className="mt-0.5 block text-[12px] text-body">
-                    By runner to your home or office (BWP 45.00)
+                    By runner to your home or office (<PriceText amount={DOORSTEP_DELIVERY_FEE} />)
                   </span>
                 </span>
               </label>
@@ -369,7 +409,7 @@ export function CheckoutClient({
                 <span className="min-w-0 flex-1">
                   <span className="block text-[13.5px] font-medium text-ink">Collection Point</span>
                   <span className="mt-0.5 block text-[12px] text-body">
-                    Pickup from smart locker (from BWP 25.00)
+                    Pickup from smart locker (from <PriceText amount={COLLECTION_POINT_DELIVERY_FEE} />)
                   </span>
                 </span>
               </label>
@@ -469,24 +509,28 @@ export function CheckoutClient({
             </p>
 
             <div className="mt-5 space-y-2.5">
-              {GATEWAYS.filter((gateway) => methods.includes(gateway.value)).map((gateway) => {
-                const active = selectedGateway === gateway.value;
+              {countryMethods.map((gateway) => {
+                const active = gateway.live && selectedGateway === gateway.method;
 
                 return (
                   <label
-                    key={gateway.value}
+                    key={gateway.name}
+                    aria-disabled={!gateway.live}
                     className={cn(
-                      'flex cursor-pointer items-center gap-4 rounded-md border p-4 transition-all duration-250 ease-[cubic-bezier(0.16,1,0.3,1)]',
-                      active
-                        ? 'border-gold bg-gold-50/60 ring-1 ring-inset ring-gold/30'
-                        : 'border-hairline-strong bg-surface hover:border-ink/25',
+                      'flex items-center gap-4 rounded-md border p-4 transition-all duration-250 ease-[cubic-bezier(0.16,1,0.3,1)]',
+                      !gateway.live
+                        ? 'cursor-not-allowed border-hairline bg-surface opacity-60'
+                        : active
+                          ? 'cursor-pointer border-gold bg-gold-50/60 ring-1 ring-inset ring-gold/30'
+                          : 'cursor-pointer border-hairline-strong bg-surface hover:border-ink/25',
                     )}
                   >
                     <input
                       type="radio"
-                      value={gateway.value}
+                      value={gateway.method ?? gateway.name}
                       checked={active}
-                      onChange={() => setValue('payment_method', gateway.value)}
+                      disabled={!gateway.live}
+                      onChange={() => gateway.method && setValue('payment_method', gateway.method)}
                       className="sr-only"
                     />
 
@@ -496,11 +540,18 @@ export function CheckoutClient({
                         active ? 'bg-ink text-gold-light' : 'bg-ink/[0.06] text-body',
                       )}
                     >
-                      {gateway.monogram}
+                      {monogramFor(gateway.name, gateway.method)}
                     </span>
 
                     <span className="min-w-0 flex-1">
-                      <span className="block text-[14px] font-medium text-ink">{gateway.name}</span>
+                      <span className="flex items-center gap-2 text-[14px] font-medium text-ink">
+                        {gateway.name}
+                        {!gateway.live && (
+                          <span className="rounded bg-ink/[0.06] px-1.5 py-0.5 font-mono text-[9.5px] font-semibold uppercase tracking-wider text-body">
+                            Coming soon
+                          </span>
+                        )}
+                      </span>
                       <span className="mt-0.5 block text-[12.5px] text-body">{gateway.blurb}</span>
                     </span>
 
@@ -586,6 +637,24 @@ export function CheckoutClient({
                     </dd>
                   </div>
                 )}
+                {courierQuotes.map(({ origin, courier, quote }) => (
+                  <div key={origin}>
+                    <div className="flex items-center justify-between">
+                      <dt className="text-body">Courier{courier ? ` · ${courier.name}` : ''}</dt>
+                      <dd className="text-right">
+                        {courier && quote ? (
+                          <MoneyText currency="BWP" amount={quote.fee} size="sm" tone="muted" />
+                        ) : (
+                          <span className="text-[12.5px] text-body">Arranged after you order</span>
+                        )}
+                      </dd>
+                    </div>
+                    <p className="mt-0.5 text-[11.5px] leading-4 text-muted">
+                      Paid to {courier ? courier.name : 'the courier'} on arrival, not to AfriDeal, so it is
+                      not in your total. VAT and duty are paid at the border.
+                    </p>
+                  </div>
+                ))}
                 <div className="flex items-baseline justify-between border-t border-hairline pt-3">
                   <dt className="font-medium text-ink">Total to pay</dt>
                   <dd>

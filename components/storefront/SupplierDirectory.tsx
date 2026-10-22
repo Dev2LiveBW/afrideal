@@ -4,7 +4,8 @@ import { ArrowRight, BadgeCheck, CheckCircle2, MapPin, ShieldCheck, Star } from 
 import { PriceTag } from '@/components/brand/MoneyText';
 import { Floor, Rail, RailCard } from '@/components/storefront/home/Floor';
 import { Swatch } from '@/components/storefront/Swatch';
-import { humanise, pulaTag } from '@/lib/format';
+import { PriceText } from '@/components/brand/BuyerCurrency';
+import { humanise } from '@/lib/format';
 import { cn } from '@/lib/utils';
 import type { DirectoryListing, SupplierWithProducts } from '@/lib/directory';
 import type { Product, ProductImage } from '@/types';
@@ -57,7 +58,7 @@ export function AfriDealDirectSection({
               </span>
             }
             tag="Tiered pricing"
-            primary={pulaTag(product.price)}
+            primary={<PriceText amount={product.price} />}
             secondary={product.name}
           />
         ))}
@@ -387,7 +388,7 @@ export function SupplierDirectorySection({
                       </div>
                       <div className="mt-1 px-0.5">
                         <div className="font-mono text-[11px] font-bold tabular-nums text-ink sm:text-[12px]">
-                          {pulaTag(item.price)}
+                          <PriceText amount={item.price} />
                         </div>
                         <div className="truncate text-[10px] font-medium text-[#222] transition-colors group-hover:text-forest sm:text-[11px]">
                           {item.product_name}
@@ -442,7 +443,7 @@ export function SupplierDirectorySection({
               <div className="mt-1.5 px-0.5">
                 <div className="flex flex-wrap items-baseline gap-1">
                   <span className="font-mono text-[0.5rem] font-bold tabular-nums text-ink sm:text-[0.875rem]">
-                    {pulaTag(listing.price)}
+                    <PriceText amount={listing.price} />
                   </span>
                   <span className="text-[0.375rem] text-[#666] sm:text-[0.6875rem]">
                     MOQ <span className="font-mono tabular-nums">{listing.moq}</span>

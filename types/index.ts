@@ -118,14 +118,33 @@ export type CountryCode = string;
 /** An ISO 4217 currency code (`BWP`, `ZAR`, `LSL`). */
 export type CurrencyCode = string;
 
+/** A payment method as a country's buyers see it at checkout. */
+export interface CountryPaymentMethod {
+  name: string;
+  blurb: string;
+  /** The platform method behind it, once one exists; missing means "coming soon". */
+  method?: PaymentMethod;
+}
+
 /** One country AfriDeal trades in: buyers, suppliers, runners or couriers there. */
 export interface Country {
   /** The country code, e.g. `LS`. */
   id: CountryCode;
   code: CountryCode;
   name: string;
-  /** The country's own currency. Buyers still pay in pula until spec 0009, open question 1. */
+  /** The country's own currency. */
   currency: CurrencyCode;
+  /**
+   * What its buyers pay in (spec 0009, answer 1): pula in Botswana, rand in
+   * South Africa, Lesotho and Eswatini.
+   */
+  buyer_currency: CurrencyCode;
+  /**
+   * The payment methods this country's buyers are offered, in order. One with
+   * a `method` the platform can take money through right now is selectable;
+   * the rest show as "coming soon" (spec 0009, answer 2).
+   */
+  payment_methods: CountryPaymentMethod[];
   /**
    * The towns "Deliver to" offers, busiest first. A buyer can still type any
    * other town at checkout; this is the shortlist, not a limit.
@@ -244,6 +263,12 @@ export interface Order {
   customer_id: string;
   customer_name: string;
   status: OrderStatus;
+  /**
+   * What the buyer is charged in (spec 0009): pula or rand. Every amount on
+   * the order and its items is in it. Missing on orders before 2026-10-22,
+   * which were all pula.
+   */
+  currency?: CurrencyCode;
   subtotal: number;
   delivery_fee: number;
   total: number;

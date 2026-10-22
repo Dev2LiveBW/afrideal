@@ -6,7 +6,7 @@ import { Heart, Plus, ShieldCheck, Star } from 'lucide-react';
 import toast from 'react-hot-toast';
 
 import { PriceTag } from '@/components/brand/MoneyText';
-import { pulaTag } from '@/lib/format';
+import { PriceText } from '@/components/brand/BuyerCurrency';
 import { Swatch, photoUrl } from '@/components/storefront/Swatch';
 import { useAfriDealStore } from '@/store/useAfriDealStore';
 import { cn } from '@/lib/utils';
@@ -205,13 +205,13 @@ export function ProductCard({
             {showingTier ? (
               tierPrice! < product.price && (
                 <span className="text-[0.34375rem] tabular-nums text-muted line-through sm:text-[0.6875rem]">
-                  {pulaTag(product.price)}
+                  <PriceText amount={product.price} />
                 </span>
               )
             ) : (
               product.compare_at_price && (
                 <span className="text-[0.34375rem] tabular-nums text-muted line-through sm:text-[0.6875rem]">
-                  {pulaTag(product.compare_at_price)}
+                  <PriceText amount={product.compare_at_price} />
                 </span>
               )
             )}

@@ -1150,6 +1150,28 @@ section('13. Tiered pricing — the ladder is real, not hard-coded');
   });
   check('an order to a country AfriDeal does not trade in is refused', nowhere.status === 422, `got ${nowhere.status}`);
 
+  /*
+   * Spec 0009, answers 1 and 2: a Botswana buyer pays in pula, a Lesotho buyer
+   * in rand; each country takes only the methods it lists.
+   */
+  check('a Botswana order is charged in pula', wigs.body?.order?.currency === 'BWP', `got ${wigs.body?.order?.currency}`);
+  const maseruOrder = (payment_method) =>
+    json(retail, '/api/orders', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        lines: [{ product_id: 'p001', variant_id: 'p001v1', qty: 1 }],
+        payment_method,
+        delivery_address: 'Kingsway Road 12',
+        delivery_city: 'Maseru',
+        delivery_country: 'LS',
+      }),
+    });
+  const inRand = await maseruOrder('DPO_PAY');
+  check('a Lesotho order is charged in rand', inRand.body?.order?.currency === 'ZAR', `got ${inRand.status} ${inRand.body?.order?.currency}`);
+  const eftInLesotho = await maseruOrder('EFT');
+  check('a method Lesotho does not list (bank transfer) is refused', eftInLesotho.status === 422, `got ${eftInLesotho.status}`);
+
   const admin = sessions['admin@afrideal.co.bw'].jar;
   const onboard = (country) =>
     json(admin, '/api/suppliers', {

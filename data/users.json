@@ -49,7 +49,8 @@
     "role": "CUSTOMER",
     "avatar": "TM",
     "status": "ACTIVE",
-    "customer_type": "RETAIL"
+    "customer_type": "RETAIL",
+    "clerk_user_id": "user_3JSB0KZtCOAfnIKjo8pCtYeJ3JZ"
   },
   {
     "id": "u007",

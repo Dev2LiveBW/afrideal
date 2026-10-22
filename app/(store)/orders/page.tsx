@@ -132,7 +132,7 @@ export default async function OrdersPage() {
                     </div>
 
                     <div className="shrink-0 text-right">
-                      <MoneyText amount={order.total} size="sm" tone="ink" />
+                      <MoneyText currency={order.currency ?? 'BWP'} amount={order.total} size="sm" tone="ink" />
                       <span className="mt-0.5 block font-mono text-[10px] uppercase tracking-[0.14em] text-muted transition-colors group-hover:text-ink">
                         Track →
                       </span>

@@ -16,6 +16,24 @@
       "Palapye",
       "Mahalapye"
     ],
+    "buyer_currency": "BWP",
+    "payment_methods": [
+      {
+        "name": "Visa / Mastercard",
+        "blurb": "Pay by card through our secure gateway.",
+        "method": "DPO_PAY"
+      },
+      {
+        "name": "Bank transfer",
+        "blurb": "Pay from your bank; we start sourcing once it reaches us, usually 1 to 3 working days.",
+        "method": "EFT"
+      },
+      {
+        "name": "Orange Money",
+        "blurb": "Mobile money from a Botswana number.",
+        "method": "ORANGE_MONEY"
+      }
+    ],
     "active": true,
     "sort_order": 1
   },
@@ -33,6 +51,22 @@
       "Mahikeng",
       "Bloemfontein"
     ],
+    "buyer_currency": "ZAR",
+    "payment_methods": [
+      {
+        "name": "Visa / Mastercard",
+        "blurb": "Pay by card through our secure gateway.",
+        "method": "DPO_PAY"
+      },
+      {
+        "name": "Instant EFT",
+        "blurb": "Pay straight from a South African bank account."
+      },
+      {
+        "name": "SnapScan",
+        "blurb": "Scan and pay from the SnapScan app."
+      }
+    ],
     "active": true,
     "sort_order": 2
   },
@@ -49,6 +83,22 @@
       "Hlotse",
       "Mohale's Hoek"
     ],
+    "buyer_currency": "ZAR",
+    "payment_methods": [
+      {
+        "name": "Visa / Mastercard",
+        "blurb": "Pay by card through our secure gateway.",
+        "method": "DPO_PAY"
+      },
+      {
+        "name": "M-Pesa",
+        "blurb": "Mobile money from a Vodacom Lesotho number."
+      },
+      {
+        "name": "EcoCash",
+        "blurb": "Mobile money from an Econet number."
+      }
+    ],
     "active": true,
     "sort_order": 3
   },
@@ -63,6 +113,18 @@
       "Matsapha",
       "Nhlangano",
       "Siteki"
+    ],
+    "buyer_currency": "ZAR",
+    "payment_methods": [
+      {
+        "name": "Visa / Mastercard",
+        "blurb": "Pay by card through our secure gateway.",
+        "method": "DPO_PAY"
+      },
+      {
+        "name": "MTN MoMo",
+        "blurb": "Mobile money from an MTN Eswatini number."
+      }
     ],
     "active": true,
     "sort_order": 4

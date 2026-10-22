@@ -325,11 +325,11 @@ export default async function OrderTrackingPage({
                       </Link>
                       <p className="mt-0.5 text-[12.5px] text-body">
                         {item.variant_label} · {item.qty} ×{' '}
-                        <MoneyText amount={item.unit_price} size="xs" tone="muted" bare />
+                        <MoneyText currency={order.currency ?? 'BWP'} amount={item.unit_price} size="xs" tone="muted" bare />
                       </p>
                     </div>
 
-                    <MoneyText amount={item.line_total} size="sm" />
+                    <MoneyText currency={order.currency ?? 'BWP'} amount={item.line_total} size="sm" />
                   </li>
                 );
               })}
@@ -366,13 +366,13 @@ export default async function OrderTrackingPage({
                     <div className="flex items-center justify-between">
                       <dt className="text-body">Subtotal</dt>
                       <dd>
-                        <MoneyText amount={order.subtotal} size="sm" />
+                        <MoneyText currency={order.currency ?? 'BWP'} amount={order.subtotal} size="sm" />
                       </dd>
                     </div>
                     <div className="flex items-center justify-between">
                       <dt className="text-body">Delivery</dt>
                       <dd>
-                        <MoneyText amount={order.delivery_fee} size="sm" />
+                        <MoneyText currency={order.currency ?? 'BWP'} amount={order.delivery_fee} size="sm" />
                       </dd>
                     </div>
                     {items.some((item) => {
@@ -394,7 +394,7 @@ export default async function OrderTrackingPage({
                     <div className="flex items-baseline justify-between border-t border-hairline pt-3">
                       <dt className="font-medium text-ink">Total</dt>
                       <dd>
-                        <MoneyText amount={order.total} size="lg" tone="ink" />
+                        <MoneyText currency={order.currency ?? 'BWP'} amount={order.total} size="lg" tone="ink" />
                       </dd>
                     </div>
                     <div className="flex items-center justify-between pt-1">
@@ -523,7 +523,7 @@ export default async function OrderTrackingPage({
                       {entry.reference}
                     </p>
                     <p className="mt-1">
-                      <MoneyText amount={entry.total} size="sm" tone="ink" />
+                      <MoneyText currency={order.currency ?? 'BWP'} amount={entry.total} size="sm" tone="ink" />
                     </p>
 
                     <div className="mt-3.5">

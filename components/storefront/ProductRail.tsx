@@ -6,7 +6,7 @@ import { ChevronLeft, ChevronRight, Heart, Plus } from 'lucide-react';
 import toast from 'react-hot-toast';
 
 import { PriceTag } from '@/components/brand/MoneyText';
-import { pulaTag } from '@/lib/format';
+import { PriceText } from '@/components/brand/BuyerCurrency';
 import { CategoryIcon } from '@/components/storefront/CategoryIcon';
 import { Swatch, photoUrl } from '@/components/storefront/Swatch';
 import { useAfriDealStore } from '@/store/useAfriDealStore';
@@ -183,7 +183,7 @@ export function ProductRail({
                     <PriceTag amount={product.price} size="sm" tone="ink" className="text-[0.75rem] sm:text-[0.875rem]" />
                     {product.compare_at_price && (
                       <span className="text-[0.625rem] sm:text-[0.78125rem] tabular-nums text-muted line-through">
-                        {pulaTag(product.compare_at_price)}
+                        <PriceText amount={product.compare_at_price} />
                       </span>
                     )}
                   </div>

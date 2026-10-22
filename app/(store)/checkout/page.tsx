@@ -42,10 +42,11 @@ export default async function CheckoutPage() {
    * the ladder is resolved here rather than trusting the price frozen onto each
    * cart line when it was added.
    */
-  const [bands, products, countries] = await Promise.all([
+  const [bands, products, countries, couriers] = await Promise.all([
     readAll('customer-prices'),
     readAll('products'),
     activeCountries(),
+    readAll('couriers'),
   ]);
 
   return (
@@ -58,6 +59,7 @@ export default async function CheckoutPage() {
         customerType={session.user.customer_type ?? 'RETAIL'}
         methods={availablePaymentMethods()}
         countries={countries}
+        couriers={couriers.filter((courier) => courier.active)}
       />
     </div>
   );

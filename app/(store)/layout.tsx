@@ -3,6 +3,7 @@ import {
   StorefrontFooter,
   StorefrontNav,
 } from '@/components/layout/StorefrontNav';
+import { BuyerCurrencyProvider } from '@/components/brand/BuyerCurrency';
 import { activeCountries } from '@/lib/countries';
 import { readAll } from '@/lib/db';
 
@@ -29,7 +30,13 @@ export default async function StoreLayout({ children }: { children: React.ReactN
     .slice(0, 6)
     .map((product) => product.name);
 
+  // Spec 0009: what each country's buyers pay in, for the storefront's prices.
+  const buyerCurrencies = Object.fromEntries(
+    countries.map((country) => [country.code, country.buyer_currency]),
+  );
+
   return (
+    <BuyerCurrencyProvider buyerCurrencies={buyerCurrencies}>
     <div className="flex min-h-[100dvh] flex-col">
       <StorefrontNav categories={categories} hotSearches={hotSearches} countries={countries} />
       {/*
@@ -51,5 +58,6 @@ export default async function StoreLayout({ children }: { children: React.ReactN
       />
       <MobileTabBar />
     </div>
+    </BuyerCurrencyProvider>
   );
 }

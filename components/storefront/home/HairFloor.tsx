@@ -2,7 +2,7 @@ import { Sparkles } from 'lucide-react';
 
 import { Floor, Rail, RailCard } from '@/components/storefront/home/Floor';
 import { Swatch } from '@/components/storefront/Swatch';
-import { pulaTag } from '@/lib/format';
+import { PriceText } from '@/components/brand/BuyerCurrency';
 import type { Product, ProductImage } from '@/types';
 
 /** The hair category: wigs, weaves, frontals and braiding hair. */
@@ -78,7 +78,15 @@ export function HairFloor({
                 ) : undefined
               }
               tag={byLength ? `${product.variants.length} lengths` : undefined}
-              primary={byLength ? `From ${pulaTag(product.price)}` : pulaTag(product.price)}
+              primary={
+                byLength ? (
+                  <>
+                    From <PriceText amount={product.price} />
+                  </>
+                ) : (
+                  <PriceText amount={product.price} />
+                )
+              }
               secondary={product.name}
             />
           );

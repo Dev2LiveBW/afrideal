@@ -152,6 +152,23 @@ const docTemplate = (status, uploadedDaysAgo) => [
  * admin, later), never a code change. Lesotho is in from the start so the
  * any-to-any paths are exercised by verify and e2e, not just Botswana's.
  */
+/*
+ * Spec 0009, answer 2: each country lists its own payment methods. One with a
+ * `method` is taken once that method is live on the platform (a card through
+ * Stripe or DPO at launch); one without is shown as "coming soon".
+ */
+const CARD = { name: 'Visa / Mastercard', blurb: 'Pay by card through our secure gateway.', method: 'DPO_PAY' };
+const PAYMENT_METHODS = {
+  BW: [
+    CARD,
+    { name: 'Bank transfer', blurb: 'Pay from your bank; we start sourcing once it reaches us, usually 1 to 3 working days.', method: 'EFT' },
+    { name: 'Orange Money', blurb: 'Mobile money from a Botswana number.', method: 'ORANGE_MONEY' },
+  ],
+  ZA: [CARD, { name: 'Instant EFT', blurb: 'Pay straight from a South African bank account.' }, { name: 'SnapScan', blurb: 'Scan and pay from the SnapScan app.' }],
+  LS: [CARD, { name: 'M-Pesa', blurb: 'Mobile money from a Vodacom Lesotho number.' }, { name: 'EcoCash', blurb: 'Mobile money from an Econet number.' }],
+  SZ: [CARD, { name: 'MTN MoMo', blurb: 'Mobile money from an MTN Eswatini number.' }],
+};
+
 const countries = [
   [
     'BW', 'Botswana', 'BWP',
@@ -162,7 +179,11 @@ const countries = [
   // A launch country since 2026-10-22 (spec 0009, answer 4).
   ['SZ', 'Eswatini', 'SZL', ['Mbabane', 'Manzini', 'Matsapha', 'Nhlangano', 'Siteki']],
 ].map(([code, name, currency, towns], i) => ({
-  id: code, code, name, currency, towns, active: true, sort_order: i + 1,
+  id: code, code, name, currency, towns,
+  // Spec 0009, answer 1: pula in Botswana, rand everywhere else we trade.
+  buyer_currency: code === 'BW' ? 'BWP' : 'ZAR',
+  payment_methods: PAYMENT_METHODS[code],
+  active: true, sort_order: i + 1,
 }));
 
 const suppliers = [

@@ -8,7 +8,8 @@ import { selectSupplier } from '@/lib/supplier-selection';
 import { availablePaymentMethods, startPayment } from '@/lib/payments/adapters';
 import { allAsDisplayed } from '@/lib/payments/status';
 import { findCollectionPoint } from '@/lib/collection-points';
-import { isActiveCountry } from '@/lib/countries';
+import { activeCountries } from '@/lib/countries';
+import { fromPula } from '@/lib/currency.mjs';
 import { DEFAULT_DELIVERY_COUNTRY } from '@/lib/lanes.mjs';
 import { checkoutIsPaused } from '@/lib/settings';
 import { paymentExpiresAt } from '@/lib/payments/policy';
@@ -117,8 +118,16 @@ export const POST = handled(async (request: Request) => {
   // the buyer's. Customs and courier clearance key off it, never off Botswana.
   const locker = delivery_method === 'COLLECTION_POINT' ? findCollectionPoint(collection_point) : null;
   const deliveryCountry = locker?.country ?? delivery_country ?? DEFAULT_DELIVERY_COUNTRY;
-  if (!(await isActiveCountry(deliveryCountry))) {
+  const country = (await activeCountries()).find((entry) => entry.code === deliveryCountry);
+  if (!country) {
     return fail('We do not deliver to that country yet.', 422);
+  }
+  // Spec 0009, answers 1 and 2: the buyer pays in their country's currency,
+  // with one of the methods offered there.
+  const currency = country.buyer_currency;
+  const offered = country.payment_methods.map((entry) => entry.method).filter(Boolean);
+  if (!offered.includes(payment_method)) {
+    return fail(`That payment method is not offered in ${country.name} yet.`, 422);
   }
 
   // A method nothing can take money through would leave the order waiting for a
@@ -213,8 +222,9 @@ export const POST = handled(async (request: Request) => {
       variant_label: variant.label,
       emoji: product.emoji,
       qty: line.qty,
-      unit_price: priced.unit_price,
-      line_total: priced.line_total,
+      // Priced in pula, charged in the buyer's currency (spec 0009).
+      unit_price: fromPula(priced.unit_price, currency),
+      line_total: fromPula(priced.line_total, currency),
       supplier_id: route.supplier.id,
       supplier_cost: supplierCost,
       supplier_cost_currency: route.offer.cost_currency ?? 'BWP',
@@ -235,7 +245,7 @@ export const POST = handled(async (request: Request) => {
   // from the request: checkout shows the same fee it reads from there.
   const isCollectionPoint = delivery_method === 'COLLECTION_POINT';
   const point = isCollectionPoint ? findCollectionPoint(collection_point) : null;
-  const delivery_fee = point ? point.fee : DOORSTEP_DELIVERY_FEE;
+  const delivery_fee = fromPula(point ? point.fee : DOORSTEP_DELIVERY_FEE, currency);
   const resolvedAddress = point ? point.name : delivery_address;
 
   // 3 - the customer-facing order. The reference follows the id (the seed
@@ -247,6 +257,7 @@ export const POST = handled(async (request: Request) => {
     customer_id: actor.id,
     customer_name: actor.name,
     status: 'AWAITING_PAYMENT',
+    currency,
     subtotal,
     delivery_fee,
     total: subtotal + delivery_fee,
