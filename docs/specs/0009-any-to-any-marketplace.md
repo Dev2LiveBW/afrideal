@@ -31,7 +31,18 @@ checkout courier choice itself is spec 0008's build and waits on its open
 question 2 (when the buyer pays). The copy sweep removed "Botswana and South
 Africa" from the tagline, site description and trust strip, names the order's
 country from the data, and starts the delivery estimate and RFQ location
-from "Deliver to". Step 6 and the open questions remain.
+from "Deliver to". Step 6 is done (2026-10-22): countries carry
+`buyer_currency` and `payment_methods`; `lib/currency.mjs` converts pula to
+the buyer's currency at spec 0007's rate (1:1 for now); the storefront shows
+prices in it (`BuyerCurrencyProvider` around the store layout; console
+screens stay in pula); orders record `currency` and are charged in it; the
+order route refuses a method the delivery country does not list; checkout
+lists each country's methods with "coming soon" for those not live, and shows
+the courier's own fee per cross-border lane as paid to the courier, outside
+the total. Checked in the browser: Maseru shows rand, card live, M-Pesa and
+EcoCash coming soon; Gaborone shows Gorosa's P200 launch fee outside a pula
+total. Settlement and payouts across currencies, and the remaining open
+questions, are still to do.
 
 ## Summary
 
