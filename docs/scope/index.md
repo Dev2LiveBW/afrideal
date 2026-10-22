@@ -50,7 +50,7 @@ _These are recommendations to keep your build orderly, not requirements. Skip an
 | 16 | Error monitoring & backups | platform | Slice 6 | planned |
 | 17 | Legal pages & cookie notice | reach | Slice 6 | planned |
 | 18 | SEO basics | reach | Slice 7 | planned |
-| 19 | English & Setswana | reach | Slice 7 | planned |
+| 19 | English, Setswana & Sesotho | reach | Slice 7 | planned |
 | 20 | Orders list clean up | buying | Slice 7 | done |
 | 21 | Real catalogue & photography | reach | Slice 8 | planned |
 | 22 | Launch checks | platform | Slice 8 | planned |

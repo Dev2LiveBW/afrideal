@@ -16,10 +16,10 @@ Every public page can be found and shared well: titles and descriptions, a sitem
 **Done when:** every public route has a unique title and description; the sitemap lists products and categories; product pages validate as structured data; a shared product link shows its image, name and price.
 - [ ] Design it (spec): `/architect seo basics`
 
-### 19. English & Setswana · needs a decision
-The storefront in both English and Setswana at launch, with a language switch that remembers the choice. Catalogue text from the Studio needs a Setswana field or a fallback rule.
-**Done when:** every storefront screen, email and SMS reads fully in either language; the switch persists across visits; missing Setswana catalogue text falls back to English without breaking layout at 390px.
-- [ ] Design it (spec): `/architect english & setswana`
+### 19. English, Setswana & Sesotho · needs a decision
+The storefront in English, Setswana and Sesotho at launch (Sesotho added 2026-10-22 for Lesotho, spec 0009 answer 6), with a language switch that remembers the choice. Catalogue text from the Studio needs a field per language or a fallback rule.
+**Done when:** every storefront screen, email and SMS reads fully in each language; the switch persists across visits; missing Setswana or Sesotho catalogue text falls back to English without breaking layout at 390px.
+- [ ] Design it (spec): `/architect english, setswana & sesotho`
 
 ## Slice 8: Launch
 

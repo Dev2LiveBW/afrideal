@@ -51,5 +51,20 @@
     ],
     "active": true,
     "sort_order": 3
+  },
+  {
+    "id": "SZ",
+    "code": "SZ",
+    "name": "Eswatini",
+    "currency": "SZL",
+    "towns": [
+      "Mbabane",
+      "Manzini",
+      "Matsapha",
+      "Nhlangano",
+      "Siteki"
+    ],
+    "active": true,
+    "sort_order": 4
   }
 ]

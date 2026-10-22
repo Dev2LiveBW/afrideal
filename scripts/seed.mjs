@@ -159,6 +159,8 @@ const countries = [
   ],
   ['ZA', 'South Africa', 'ZAR', ['Johannesburg', 'Pretoria', 'Cape Town', 'Durban', 'Polokwane', 'Mahikeng', 'Bloemfontein']],
   ['LS', 'Lesotho', 'LSL', ['Maseru', 'Teyateyaneng', 'Maputsoe', 'Mafeteng', 'Hlotse', "Mohale's Hoek"]],
+  // A launch country since 2026-10-22 (spec 0009, answer 4).
+  ['SZ', 'Eswatini', 'SZL', ['Mbabane', 'Manzini', 'Matsapha', 'Nhlangano', 'Siteki']],
 ].map(([code, name, currency, towns], i) => ({
   id: code, code, name, currency, towns, active: true, sort_order: i + 1,
 }));
@@ -720,7 +722,8 @@ const couriers = [
     trips_per_week: 2, insured: true, phone: '+27 73 932 7292',
     depot: { country: 'ZA', city: 'Johannesburg', address: '2A Kikuyu Road, Sunninghill Self-Storage, Sunninghill' },
     consignee_format: '{first} {last} Gorosa',
-    payment_options: ['AT_CHECKOUT', 'ON_ARRIVAL'],
+    // Paid to Gorosa directly, never through AfriDeal (spec 0008, answer of 2026-10-22).
+    payment_options: ['ON_ARRIVAL'],
     routes: [
       {
         from: { country: 'ZA' },

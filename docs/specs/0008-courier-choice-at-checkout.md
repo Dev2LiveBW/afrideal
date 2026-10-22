@@ -16,6 +16,16 @@ couriers whose routes cover the order's lane, beside runners and collection
 points. Read "destination", "Gaborone" and "Francistown" below as Gorosa's
 routes, not as the only places a buyer can be.
 
+**Answer (2026-10-22, relayed by the developer)**: the courier fee is **paid
+separately from the platform**, to the courier, and is **never collected by
+AfriDeal**. Checkout shows the courier's fee for the lane as a clearly
+flagged estimate ("paid to Gorosa, not to AfriDeal"), and it is not added to
+the total. This settles open question 2 as `ON_ARRIVAL` (pay the courier
+directly) for Gorosa, pending the product owner's confirmation; AC-9's
+at-checkout path stays in the model for a courier that later wants it.
+VAT and import duty on cross-border lanes are the buyer's, paid at the
+border through the courier (spec 0009, answer 3).
+
 ## Summary
 
 Product sales and delivery are kept apart. Product prices no longer carry

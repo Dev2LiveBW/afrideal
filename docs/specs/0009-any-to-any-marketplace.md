@@ -138,26 +138,40 @@ model. It is cheapest to change now, while the data is seed data.
 3. "Deliver to" country + town in the header and checkout.
 4. Courier routes (spec 0008 build) and runner service areas with countries.
 5. Copy sweep (footer, scope, emails).
-6. After open questions 1 to 3: buyer currency, gateways per country, tax.
+6. Buyer currency per country, the payment-method list per country with
+   "coming soon", and card by Stripe or DPO (answers below).
+
+## Answers (2026-10-22)
+
+Relayed by the developer for the product owner, 2026-10-22 (from a voice
+note: "VW Puller" read as BW pula, "runs" as rand, "Sotona" as Setswana).
+
+1. **Currency.** Buyers in Botswana pay in **pula**; buyers in South Africa,
+   Lesotho and Eswatini pay in **rand** (it circulates in both and the loti and
+   lilangeni are pegged to it). So a country carries a `buyer_currency`
+   (BWP for BW, ZAR for ZA, LS, SZ) beside its own currency, and prices are
+   converted from the supplier's currency to the buyer's.
+2. **Payment methods.** Each country lists its own methods; the ones not live
+   yet show as **"coming soon"**. At launch the live method is **Visa card,
+   through Stripe** (or DPO if that application is approved).
+3. **Tax.** Import rules apply the same way on every lane: **VAT and import
+   duty are paid by the buyer at the border** (through the courier), never in
+   AfriDeal's price. AfriDeal sells the same way to every country; the seller
+   of record per country is open question 1 below.
+4. **Launch countries.** **Botswana, South Africa, Lesotho and Eswatini.**
+   Eswatini joins the `countries` data (2026-10-22).
+5. **Runners.** Runners work **within their own country** and couriers cross
+   borders, **but in some cases a runner may cross a border too**: a runner
+   can be marked as willing to (`cross_border`, a follow-up to step 4).
+6. **Language.** **Setswana and Sesotho** both (scope feature 19).
 
 ## Open questions
 
-1. **Currency the buyer pays in.** Does a buyer in Lesotho pay in maloti (or
-   rand, which circulates there), or does everyone pay in pula? This decides
-   checkout, the gateway and reconciliation.
-2. **Payment gateways per country.** Orange Money and the card gateway are
-   Botswana arrangements. What does a Lesotho or South African buyer pay with
-   (M-Pesa, EcoCash, SA cards)?
-3. **Merchant of record and tax per country.** AfriDeal is the merchant of
-   record in Botswana (not yet VAT registered). Who is the seller of record
-   for a Lesotho buyer, and whose VAT and import rules apply on each lane?
-4. **Launch countries.** Botswana, South Africa and Lesotho first? Namibia,
-   Eswatini, Zimbabwe, Zambia later?
-5. **Runners across borders.** May a runner carry goods across a border, or
-   only within their country, with couriers for the border?
-6. **Language.** Setswana is planned (scope feature 19); does Lesotho need
-   Sesotho at launch?
-7. **Data protection.** Botswana's Data Protection Act 2018 governs today;
+1. **Seller of record per country** (from answer 3): which AfriDeal entity
+   invoices a buyer in South Africa, Lesotho or Eswatini.
+2. **Stripe or DPO.** Which card gateway goes live first, and for which
+   countries Stripe can settle.
+3. **Data protection.** Botswana's Data Protection Act 2018 governs today;
    Lesotho and South Africa (POPIA) have their own. Hosting and consent
    wording may need to cover each.
 
