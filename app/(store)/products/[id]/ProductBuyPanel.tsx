@@ -1,7 +1,7 @@
 'use client';
 
 import Link from 'next/link';
-import { useState, type ReactNode } from 'react';
+import { useEffect, useState, type ReactNode } from 'react';
 import { FileText, Minus, PackageX, Plus, ShoppingBag } from 'lucide-react';
 import toast from 'react-hot-toast';
 
@@ -47,6 +47,11 @@ export function ProductBuyPanel({
   aside: ReactNode;
 }) {
   const addToCart = useAfriDealStore((state) => state.addToCart);
+  const deliverTo = useAfriDealStore((state) => state.deliverTo);
+  // The persisted "Deliver to" is read only after hydration, as in the header.
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => setMounted(true), []);
+  const deliveryCountry = mounted ? deliverTo.country : DEFAULT_DELIVERY_COUNTRY;
 
   const isSupplierOwned =
     product.owner_type === 'SUPPLIER' || product.commercial_model === 'SUPPLIER_LED';
@@ -116,7 +121,7 @@ export function ProductBuyPanel({
                     </span>
                   )}
                 </p>
-                {isCrossBorder(product.country_of_origin, DEFAULT_DELIVERY_COUNTRY) && (
+                {isCrossBorder(product.country_of_origin, deliveryCountry) && (
                   <span className="rounded bg-forest-wash px-1.5 py-0.5 font-mono text-[9.5px] font-semibold uppercase tracking-wider text-forest-ink">
                     Customs cleared by courier
                   </span>

@@ -8,9 +8,17 @@ codes from data with every `'BW' | 'ZA'` union and enum gone, a Lesotho
 supplier (Maluti Workwear, Maseru, quoting in maloti) in the seed, and
 `lib/lanes.mjs` (`laneFor`, `isCrossBorder`, `DEFAULT_DELIVERY_COUNTRY`)
 replacing every "not Botswana" check; orders record `delivery_country`, and
-the order route refuses a country AfriDeal does not trade in. Every buyer is
-still delivered to Botswana by default until step 3. Steps 3 to 6 and the
-open questions remain.
+the order route refuses a country AfriDeal does not trade in.
+Step 3 is done (2026-10-22): each country carries the `towns` "Deliver to"
+offers; the header picker lists them grouped by country and persists
+`{ country, city }` (store version 1 migrates a saved town as Botswana); the
+cart and product page work out customs from that lane; checkout opens a
+Country field from it, offers only that country's lockers (none outside
+Botswana yet), suggests its towns, and sends `delivery_country` with the
+order. Checked in the browser: Maseru shows customs on South African wigs,
+Johannesburg does not, and an order to Maseru records `LS`.
+`DEFAULT_DELIVERY_COUNTRY` is now only the first-visit default. Steps 4 to 6
+and the open questions remain.
 
 ## Summary
 

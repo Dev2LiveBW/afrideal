@@ -4,6 +4,18 @@
     "code": "BW",
     "name": "Botswana",
     "currency": "BWP",
+    "towns": [
+      "Gaborone",
+      "Francistown",
+      "Molepolole",
+      "Maun",
+      "Serowe",
+      "Selebi-Phikwe",
+      "Kanye",
+      "Lobatse",
+      "Palapye",
+      "Mahalapye"
+    ],
     "active": true,
     "sort_order": 1
   },
@@ -12,6 +24,15 @@
     "code": "ZA",
     "name": "South Africa",
     "currency": "ZAR",
+    "towns": [
+      "Johannesburg",
+      "Pretoria",
+      "Cape Town",
+      "Durban",
+      "Polokwane",
+      "Mahikeng",
+      "Bloemfontein"
+    ],
     "active": true,
     "sort_order": 2
   },
@@ -20,6 +41,14 @@
     "code": "LS",
     "name": "Lesotho",
     "currency": "LSL",
+    "towns": [
+      "Maseru",
+      "Teyateyaneng",
+      "Maputsoe",
+      "Mafeteng",
+      "Hlotse",
+      "Mohale's Hoek"
+    ],
     "active": true,
     "sort_order": 3
   }

@@ -28,6 +28,7 @@ export function CartClient({
   customerType: CustomerType;
 }) {
   const cart = useAfriDealStore((state) => state.cart);
+  const deliverTo = useAfriDealStore((state) => state.deliverTo);
   const setQty = useAfriDealStore((state) => state.setQty);
   const removeFromCart = useAfriDealStore((state) => state.removeFromCart);
 
@@ -80,8 +81,8 @@ export function CartClient({
 
   const hasImported = cart.some((line) => {
     const p = products.find((candidate) => candidate.id === line.product_id);
-    // Spec 0009: the cart has no delivery country yet, so it uses the default lane.
-    return p ? isCrossBorder(p.country_of_origin, DEFAULT_DELIVERY_COUNTRY) : false;
+    // Spec 0009: the lane runs to the header's "Deliver to" country.
+    return p ? isCrossBorder(p.country_of_origin, mounted ? deliverTo.country : DEFAULT_DELIVERY_COUNTRY) : false;
   });
 
   if (!mounted) {

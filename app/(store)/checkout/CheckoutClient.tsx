@@ -12,12 +12,12 @@ import { ActionButton } from '@/components/brand/ActionButton';
 import { MoneyText } from '@/components/brand/MoneyText';
 import { EmptyState, Enclosure } from '@/components/brand/Panel';
 import { CartLineThumb } from '@/components/storefront/CartLineThumb';
-import { useAfriDealStore } from '@/store/useAfriDealStore';
+import { DEFAULT_DELIVER_TO, useAfriDealStore } from '@/store/useAfriDealStore';
 import { COLLECTION_POINTS } from '@/lib/collection-points';
-import { DEFAULT_DELIVERY_COUNTRY, isCrossBorder } from '@/lib/lanes.mjs';
+import { isCrossBorder } from '@/lib/lanes.mjs';
 import { priceLine, sellerQuantities } from '@/lib/pricing-tiers';
 import { cn } from '@/lib/utils';
-import type { CustomerPrice, CustomerType, PaymentMethod, Product } from '@/types';
+import type { Country, CustomerPrice, CustomerType, PaymentMethod, Product } from '@/types';
 
 const DOORSTEP_DELIVERY_FEE = 45;
 const COLLECTION_POINT_DELIVERY_FEE = 25;
@@ -25,6 +25,8 @@ const COLLECTION_POINT_DELIVERY_FEE = 25;
 
 const CheckoutSchema = z
   .object({
+    /** Spec 0009: any active country; the server checks it against the data. */
+    delivery_country: z.string().length(2, 'Choose a country.'),
     delivery_method: z.enum(['DOORSTEP', 'COLLECTION_POINT']),
     collection_point: z.string().optional(),
     delivery_address: z.string().optional(),
@@ -86,6 +88,7 @@ export function CheckoutClient({
   products,
   customerType,
   methods,
+  countries,
 }: {
   customerName: string;
   customerEmail: string;
@@ -99,10 +102,13 @@ export function CheckoutClient({
    * card that could never complete is not shown at all.
    */
   methods: PaymentMethod[];
+  /** Active countries and their towns (spec 0009); checkout starts from "Deliver to". */
+  countries: Country[];
 }) {
   const router = useRouter();
   const cart = useAfriDealStore((state) => state.cart);
   const clearCart = useAfriDealStore((state) => state.clearCart);
+  const deliverTo = useAfriDealStore((state) => state.deliverTo);
 
   const [mounted, setMounted] = useState(false);
   const [apiError, setApiError] = useState<string | null>(null);
@@ -118,19 +124,40 @@ export function CheckoutClient({
   } = useForm<CheckoutValues>({
     resolver: zodResolver(CheckoutSchema),
     defaultValues: {
+      delivery_country: DEFAULT_DELIVER_TO.country,
       delivery_method: 'DOORSTEP',
-      collection_point: 'Gaborone Central Locker',
+      collection_point: '',
       delivery_address: '',
-      delivery_city: 'Gaborone',
+      delivery_city: DEFAULT_DELIVER_TO.city,
       payment_method: methods[0] ?? 'EFT',
     },
   });
 
+  /*
+   * Start from the header's "Deliver to" once the persisted value is readable
+   * (spec 0009). The buyer can still change the country or town here.
+   */
+  useEffect(() => {
+    if (!mounted) return;
+    setValue('delivery_country', deliverTo.country);
+    setValue('delivery_city', deliverTo.city);
+  }, [mounted, deliverTo.country, deliverTo.city, setValue]);
+
   const selectedGateway = watch('payment_method');
+  const selectedCountry = watch('delivery_country') ?? DEFAULT_DELIVER_TO.country;
+  const countryEntry = countries.find((country) => country.code === selectedCountry);
   const selectedDeliveryMethod = watch('delivery_method') ?? 'DOORSTEP';
-  const selectedCollectionPointName = watch('collection_point') ?? 'Gaborone Central Locker';
+  // Only the lockers in the delivery country; a country with none offers doorstep alone.
+  const pointsHere = COLLECTION_POINTS.filter((point) => point.country === selectedCountry);
+  const selectedCollectionPointName = watch('collection_point');
   const selectedPoint =
-    COLLECTION_POINTS.find((p) => p.name === selectedCollectionPointName) ?? COLLECTION_POINTS[0];
+    pointsHere.find((p) => p.name === selectedCollectionPointName) ?? pointsHere[0] ?? null;
+
+  useEffect(() => {
+    if (selectedDeliveryMethod === 'COLLECTION_POINT' && pointsHere.length === 0) {
+      setValue('delivery_method', 'DOORSTEP');
+    }
+  }, [selectedDeliveryMethod, pointsHere.length, setValue]);
   /*
    * Resolved per line through `priceLine()`, the function the orders route
    * charges with, on the same seller-and-category quantity. The summary a buyer
@@ -162,27 +189,29 @@ export function CheckoutClient({
     ? priced.reduce((sum, entry) => sum + entry.unitPrice * entry.line.qty, 0)
     : 0;
   const deliveryFee =
-    selectedDeliveryMethod === 'COLLECTION_POINT' ? selectedPoint.fee : DOORSTEP_DELIVERY_FEE;
+    selectedDeliveryMethod === 'COLLECTION_POINT' && selectedPoint
+      ? selectedPoint.fee
+      : DOORSTEP_DELIVERY_FEE;
   const total = subtotal + deliveryFee;
 
   const hasImportedItems = cart.some((line) => {
     const product = products.find((candidate) => candidate.id === line.product_id);
     // Spec 0009: cross-border on this order's lane, to the locker's country or the buyer's.
     const deliveryCountry =
-      selectedDeliveryMethod === 'COLLECTION_POINT' ? selectedPoint.country : DEFAULT_DELIVERY_COUNTRY;
+      selectedDeliveryMethod === 'COLLECTION_POINT' && selectedPoint
+        ? selectedPoint.country
+        : selectedCountry;
     return product ? isCrossBorder(product.country_of_origin, deliveryCountry) : false;
   });
 
   const onSubmit = handleSubmit(async (values) => {
     setApiError(null);
 
-    const isCollection = values.delivery_method === 'COLLECTION_POINT';
     const point =
-      COLLECTION_POINTS.find((p) => p.name === values.collection_point) ?? COLLECTION_POINTS[0];
-    const finalAddress = isCollection
-      ? (values.collection_point ?? point.name)
-      : (values.delivery_address ?? '');
-    const finalCity = isCollection ? point.city : (values.delivery_city ?? 'Gaborone');
+      pointsHere.find((p) => p.name === values.collection_point) ?? pointsHere[0] ?? null;
+    const isCollection = values.delivery_method === 'COLLECTION_POINT' && point !== null;
+    const finalAddress = isCollection ? point.name : (values.delivery_address ?? '');
+    const finalCity = isCollection ? point.city : (values.delivery_city ?? '');
 
     const response = await fetch('/api/orders', {
       method: 'POST',
@@ -199,6 +228,7 @@ export function CheckoutClient({
         collection_point: isCollection ? finalAddress : null,
         delivery_address: finalAddress,
         delivery_city: finalCity,
+        delivery_country: isCollection ? point.country : values.delivery_country,
       }),
     });
 
@@ -266,6 +296,30 @@ export function CheckoutClient({
               {customerEmail && ` (${customerEmail})`}.
             </p>
 
+            {/* Spec 0009: a buyer can be in any country AfriDeal trades in. */}
+            <div className="mt-4">
+              <label htmlFor="delivery_country" className="mb-1.5 block text-[13px] font-medium text-ink">
+                Country
+              </label>
+              <select
+                id="delivery_country"
+                {...register('delivery_country', {
+                  onChange: (event) => {
+                    const next = countries.find((country) => country.code === event.target.value);
+                    setValue('delivery_city', next?.towns[0] ?? '');
+                    setValue('collection_point', '');
+                  },
+                })}
+                className="w-full rounded border border-hairline-strong bg-surface px-3.5 py-2.5 text-[14px] text-ink outline-none transition-colors focus:border-gold/60"
+              >
+                {countries.map((country) => (
+                  <option key={country.code} value={country.code}>
+                    {country.name}
+                  </option>
+                ))}
+              </select>
+            </div>
+
             {/* Delivery method choice */}
             <div className="mt-4 grid gap-3 sm:grid-cols-2">
               <label
@@ -291,6 +345,7 @@ export function CheckoutClient({
                 </span>
               </label>
 
+              {pointsHere.length > 0 && (
               <label
                 className={cn(
                   'flex cursor-pointer items-start gap-3 rounded-md border p-3.5 transition-all',
@@ -306,7 +361,7 @@ export function CheckoutClient({
                   onChange={() => {
                     setValue('delivery_method', 'COLLECTION_POINT');
                     if (!watch('collection_point')) {
-                      setValue('collection_point', 'Gaborone Central Locker');
+                      setValue('collection_point', pointsHere[0]?.name ?? '');
                     }
                   }}
                   className="mt-0.5 accent-gold"
@@ -318,9 +373,10 @@ export function CheckoutClient({
                   </span>
                 </span>
               </label>
+              )}
             </div>
 
-            {selectedDeliveryMethod === 'COLLECTION_POINT' ? (
+            {selectedDeliveryMethod === 'COLLECTION_POINT' && selectedPoint ? (
               <div className="mt-5 space-y-4 rounded-md border border-hairline bg-surface p-4">
                 <div>
                   <label htmlFor="collection_point" className="mb-1.5 block text-[13px] font-medium text-ink">
@@ -332,7 +388,7 @@ export function CheckoutClient({
                     {...register('collection_point')}
                     className="w-full rounded border border-hairline-strong bg-surface px-3.5 py-2.5 text-[14px] text-ink outline-none transition-colors focus:border-gold/60"
                   >
-                    {COLLECTION_POINTS.map((point) => (
+                    {pointsHere.map((point) => (
                       <option key={point.id} value={point.name}>
                         {point.name}
                       </option>
@@ -377,7 +433,8 @@ export function CheckoutClient({
                   <input
                     id="city"
                     {...register('delivery_city')}
-                    placeholder="Gaborone"
+                    list="delivery-towns"
+                    placeholder={countryEntry?.towns[0] ?? 'Town or city'}
                     autoComplete="address-level2"
                     aria-invalid={errors.delivery_city ? 'true' : undefined}
                     aria-describedby={errors.delivery_city ? 'city-error' : undefined}
@@ -387,6 +444,11 @@ export function CheckoutClient({
                       errors.delivery_city ? 'border-danger/60' : 'border-hairline-strong',
                     )}
                   />
+                  <datalist id="delivery-towns">
+                    {(countryEntry?.towns ?? []).map((town) => (
+                      <option key={town} value={town} />
+                    ))}
+                  </datalist>
                   {errors.delivery_city && (
                     <p id="city-error" role="alert" className="mt-1.5 text-[12px] text-danger-ink">
                       {errors.delivery_city.message}

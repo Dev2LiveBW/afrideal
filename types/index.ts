@@ -126,6 +126,11 @@ export interface Country {
   name: string;
   /** The country's own currency. Buyers still pay in pula until spec 0009, open question 1. */
   currency: CurrencyCode;
+  /**
+   * The towns "Deliver to" offers, busiest first. A buyer can still type any
+   * other town at checkout; this is the shortlist, not a limit.
+   */
+  towns: string[];
   active: boolean;
   sort_order: number;
 }

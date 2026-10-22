@@ -153,10 +153,15 @@ const docTemplate = (status, uploadedDaysAgo) => [
  * any-to-any paths are exercised by verify and e2e, not just Botswana's.
  */
 const countries = [
-  ['BW', 'Botswana', 'BWP'],
-  ['ZA', 'South Africa', 'ZAR'],
-  ['LS', 'Lesotho', 'LSL'],
-].map(([code, name, currency], i) => ({ id: code, code, name, currency, active: true, sort_order: i + 1 }));
+  [
+    'BW', 'Botswana', 'BWP',
+    ['Gaborone', 'Francistown', 'Molepolole', 'Maun', 'Serowe', 'Selebi-Phikwe', 'Kanye', 'Lobatse', 'Palapye', 'Mahalapye'],
+  ],
+  ['ZA', 'South Africa', 'ZAR', ['Johannesburg', 'Pretoria', 'Cape Town', 'Durban', 'Polokwane', 'Mahikeng', 'Bloemfontein']],
+  ['LS', 'Lesotho', 'LSL', ['Maseru', 'Teyateyaneng', 'Maputsoe', 'Mafeteng', 'Hlotse', "Mohale's Hoek"]],
+].map(([code, name, currency, towns], i) => ({
+  id: code, code, name, currency, towns, active: true, sort_order: i + 1,
+}));
 
 const suppliers = [
   {
