@@ -47,7 +47,7 @@ export function DeliveryEstimate({
 
   if (inStock.length === 0) {
     return (
-      <div className="mt-4 rounded-md border border-hairline bg-surface p-4">
+      <div className="rounded-md border border-hairline bg-surface p-4">
         <p className="text-[13px] text-body">
           No supplier is currently holding stock, so we cannot quote a delivery window. Request a
           quotation and we will source it.
@@ -62,7 +62,7 @@ export function DeliveryEstimate({
   const high = Math.max(low, slowest + 1);
 
   return (
-    <div className="mt-4 rounded-md border border-hairline bg-surface p-4">
+    <div className="rounded-md border border-hairline bg-surface p-4">
       <div className="flex items-center gap-2.5">
         <Truck size={16} strokeWidth={1.5} className="shrink-0 text-muted" />
         <div>
@@ -103,7 +103,7 @@ export function SellerCard({ offer }: { offer: PublicOffer | undefined }) {
   if (!offer) return null;
 
   return (
-    <div className="mt-3 flex items-center gap-3 rounded-md border border-hairline bg-surface-raised p-4">
+    <div className="flex items-center gap-3 rounded-md border border-hairline bg-surface-raised p-4">
       <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-forest-wash font-mono text-[12px] font-semibold text-forest">
         {offer.supplier_initials}
       </span>

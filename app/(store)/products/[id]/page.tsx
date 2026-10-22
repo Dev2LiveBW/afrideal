@@ -92,84 +92,93 @@ export default async function ProductPage({ params }: { params: { id: string } }
         ]}
       />
 
-      <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_minmax(0,420px)] lg:gap-14">
+      {/*
+        Row 2 is 1fr so the buy box, which spans both rows, stretches only the
+        second: row 1 stays the gallery's height and the cards under it start
+        where the photos end.
+      */}
+      <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_minmax(0,420px)] lg:grid-rows-[auto_1fr] lg:gap-x-14">
         {/* ── Gallery ──────────────────────────────────────────────────── */}
-        <div>
+        <div className="lg:col-start-1 lg:row-start-1">
           <ProductGallery product={product} images={images} />
         </div>
 
-        {/* ── Buy panel ────────────────────────────────────────────────── */}
-        <div>
-          <div className="flex flex-wrap items-center gap-2">
-            {isSupplierOwned ? (
-              <span className="rounded-full bg-ocean-wash px-2.5 py-1 font-mono text-[10px] font-semibold uppercase tracking-[0.14em] text-ocean-ink">
-                Supplier product{product.supplier_name ? ` · ${product.supplier_name}` : ''}
-              </span>
-            ) : (
-              <span className="rounded-full bg-forest-wash px-2.5 py-1 font-mono text-[10px] font-semibold uppercase tracking-[0.14em] text-forest-ink">
-                AfriDeal Direct
-              </span>
-            )}
-            {product.rating >= 4.5 && (
-              <span className="rounded-full bg-forest-wash px-2.5 py-1 font-mono text-[10px] font-semibold uppercase tracking-[0.14em] text-forest-ink">
-                Top rated
-              </span>
-            )}
-            {product.promotion && (
-              <span className="rounded-full bg-danger px-2.5 py-1 font-mono text-[10px] font-semibold uppercase tracking-[0.14em] text-white">
-                −{product.promotion.discount_pct}% this week
-              </span>
-            )}
-            <span className="inline-flex items-center gap-1.5 text-[12.5px] text-body">
-              <Star size={13} strokeWidth={1.5} className="fill-gold text-gold" />
-              <span className="font-mono tabular-nums text-ink">{product.rating.toFixed(1)}</span>
-              <span className="text-muted">({product.review_count} reviews)</span>
-            </span>
-          </div>
+        {/* ── Buy panel, then the cards that wrap under the gallery ───── */}
+        <ProductBuyPanel
+          product={product}
+          bands={bands}
+          customerType={customerType}
+          inStock={inStock}
+          primarySupplierId={primaryOffer?.supplier_id ?? selection.primary?.supplier.id ?? ''}
+          primaryImage={images.find((image) => image.sort_order === 0)}
+          doors={productDoors}
+          intro={
+            <>
+              <div className="flex flex-wrap items-center gap-2">
+                {isSupplierOwned ? (
+                  <span className="rounded-full bg-ocean-wash px-2.5 py-1 font-mono text-[10px] font-semibold uppercase tracking-[0.14em] text-ocean-ink">
+                    Supplier product{product.supplier_name ? ` · ${product.supplier_name}` : ''}
+                  </span>
+                ) : (
+                  <span className="rounded-full bg-forest-wash px-2.5 py-1 font-mono text-[10px] font-semibold uppercase tracking-[0.14em] text-forest-ink">
+                    AfriDeal Direct
+                  </span>
+                )}
+                {product.rating >= 4.5 && (
+                  <span className="rounded-full bg-forest-wash px-2.5 py-1 font-mono text-[10px] font-semibold uppercase tracking-[0.14em] text-forest-ink">
+                    Top rated
+                  </span>
+                )}
+                {product.promotion && (
+                  <span className="rounded-full bg-danger px-2.5 py-1 font-mono text-[10px] font-semibold uppercase tracking-[0.14em] text-white">
+                    −{product.promotion.discount_pct}% this week
+                  </span>
+                )}
+                <span className="inline-flex items-center gap-1.5 text-[12.5px] text-body">
+                  <Star size={13} strokeWidth={1.5} className="fill-gold text-gold" />
+                  <span className="font-mono tabular-nums text-ink">{product.rating.toFixed(1)}</span>
+                  <span className="text-muted">({product.review_count} reviews)</span>
+                </span>
+              </div>
 
-          <h1 className="mt-3 font-display text-[28px] font-bold leading-[1.15] tracking-[-0.025em] text-ink">
-            {product.name}
-          </h1>
-          <p className="measure mt-3 text-[14px] leading-6 text-body">{product.short_description}</p>
+              <h1 className="mt-3 font-display text-[28px] font-bold leading-[1.15] tracking-[-0.025em] text-ink">
+                {product.name}
+              </h1>
+              <p className="measure mt-3 text-[14px] leading-6 text-body">{product.short_description}</p>
 
-          <div className="mt-4 flex flex-wrap items-center gap-4 text-[12.5px]">
-            {publicOffers.length > 0 && (
-              <span className="inline-flex items-center gap-1.5 text-forest">
-                <BadgeCheck size={13} strokeWidth={1.5} />
-                {publicOffers.length} verified{' '}
-                {publicOffers.length === 1 ? 'supplier' : 'suppliers'}
-              </span>
-            )}
-            {fastest !== null && (
-              <span className="inline-flex items-center gap-1.5 text-body">
-                <Truck size={13} strokeWidth={1.5} className="text-muted" />
-                From {fastest} {fastest === 1 ? 'day' : 'days'}
-              </span>
-            )}
-          </div>
+              <div className="mt-4 flex flex-wrap items-center gap-4 text-[12.5px]">
+                {publicOffers.length > 0 && (
+                  <span className="inline-flex items-center gap-1.5 text-forest">
+                    <BadgeCheck size={13} strokeWidth={1.5} />
+                    {publicOffers.length} verified{' '}
+                    {publicOffers.length === 1 ? 'supplier' : 'suppliers'}
+                  </span>
+                )}
+                {fastest !== null && (
+                  <span className="inline-flex items-center gap-1.5 text-body">
+                    <Truck size={13} strokeWidth={1.5} className="text-muted" />
+                    From {fastest} {fastest === 1 ? 'day' : 'days'}
+                  </span>
+                )}
+              </div>
+            </>
+          }
+          aside={
+            <>
+              <DeliveryEstimate offers={publicOffers} city="Gaborone" />
+              <SellerCard offer={primaryOffer} />
 
-          <ProductBuyPanel
-            product={product}
-            bands={bands}
-            customerType={customerType}
-            inStock={inStock}
-            primarySupplierId={primaryOffer?.supplier_id ?? selection.primary?.supplier.id ?? ''}
-            primaryImage={images.find((image) => image.sort_order === 0)}
-            doors={productDoors}
-          />
-
-          <DeliveryEstimate offers={publicOffers} city="Gaborone" />
-          <SellerCard offer={primaryOffer} />
-
-          <div className="mt-3 flex items-start gap-3 rounded-md border border-hairline bg-gold-50/60 px-4 py-3.5">
-            <Lock size={15} strokeWidth={1.5} className="mt-0.5 shrink-0 text-gold-700" />
-            <p className="text-[12.5px] leading-5 text-gold-700">
-              You pay AfriDeal, and the supplier is settled only once you confirm the order
-              arrived. If it does not, you raise a dispute and nothing is paid outward until it is
-              resolved.
-            </p>
-          </div>
-        </div>
+              <div className="flex items-start gap-3 rounded-md border border-hairline bg-gold-50/60 px-4 py-3.5">
+                <Lock size={15} strokeWidth={1.5} className="mt-0.5 shrink-0 text-gold-700" />
+                <p className="text-[12.5px] leading-5 text-gold-700">
+                  You pay AfriDeal, and the supplier is settled only once you confirm the order
+                  arrived. If it does not, you raise a dispute and nothing is paid outward until it
+                  is resolved.
+                </p>
+              </div>
+            </>
+          }
+        />
       </div>
 
       <ProductTabs product={product} image={images.find((image) => image.sort_order === 0)} />

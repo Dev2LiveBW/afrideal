@@ -43,7 +43,7 @@ export function TieredPriceCalculator({
   const retailBase = ladder[0]?.unit_price ?? product.price;
 
   return (
-    <div className="mt-5 rounded-md border border-hairline bg-surface-raised p-5">
+    <div className="rounded-md border border-hairline bg-surface-raised p-5">
       <div className="flex items-baseline justify-between gap-3">
         <h3 className="text-[14px] font-semibold text-ink">Buy more, pay less</h3>
         <span className="font-mono text-[10px] uppercase tracking-[0.14em] text-muted">
