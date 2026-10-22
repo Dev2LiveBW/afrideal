@@ -14,6 +14,7 @@ import { readAll } from '@/lib/db';
 import { PAYMENT_LABELS, dateTime, shortDate } from '@/lib/format';
 import { getOrderDetail } from '@/lib/queries';
 import { findById } from '@/lib/db';
+import { isCrossBorder } from '@/lib/lanes.mjs';
 
 import { OrderActions } from './OrderActions';
 import { RetryPaymentButton } from './RetryPaymentButton';
@@ -372,7 +373,8 @@ export default async function OrderTrackingPage({
                     </div>
                     {items.some((item) => {
                       const p = products.find((prod) => prod.id === item.product_id);
-                      return p ? p.country_of_origin !== 'BW' : false;
+                      // Spec 0009: the lane this order actually took.
+                      return p ? isCrossBorder(p.country_of_origin, order.delivery_country) : false;
                     }) && (
                       <div className="flex items-center justify-between">
                         <dt className="flex items-center gap-1.5 text-body">

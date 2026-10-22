@@ -15,6 +15,8 @@ export type CollectionPoint = {
   name: string;
   address: string;
   city: string;
+  /** The locker's country (spec 0009): an order collected here is delivered to it. */
+  country: string;
   /** Delivery fee in BWP for an order collected here. */
   fee: number;
   blurb: string;
@@ -26,6 +28,7 @@ export const COLLECTION_POINTS: readonly CollectionPoint[] = [
     name: 'Gaborone Central Locker',
     address: 'Station Mall, Plot 4931',
     city: 'Gaborone',
+    country: 'BW',
     fee: 25,
     blurb: '24/7 Smart Locker pickup (BWP 25.00)',
   },
@@ -34,6 +37,7 @@ export const COLLECTION_POINTS: readonly CollectionPoint[] = [
     name: 'Francistown Main Mall Locker',
     address: 'Blue Jacket St, Main Mall',
     city: 'Francistown',
+    country: 'BW',
     fee: 30,
     blurb: '24/7 Smart Locker pickup (BWP 30.00)',
   },
@@ -42,6 +46,7 @@ export const COLLECTION_POINTS: readonly CollectionPoint[] = [
     name: 'Maun Airport Locker',
     address: 'Airport Road',
     city: 'Maun',
+    country: 'BW',
     fee: 35,
     blurb: 'Smart Locker pickup 06:00 - 22:00 (BWP 35.00)',
   },

@@ -108,6 +108,28 @@ export interface Product {
   };
 }
 
+/**
+ * An ISO 3166-1 alpha-2 country code (`BW`, `ZA`, `LS`). Countries are data
+ * (the `countries` collection), so any active one is valid: the market is
+ * any-to-any (spec 0009), never a fixed list in code.
+ */
+export type CountryCode = string;
+
+/** An ISO 4217 currency code (`BWP`, `ZAR`, `LSL`). */
+export type CurrencyCode = string;
+
+/** One country AfriDeal trades in: buyers, suppliers, runners or couriers there. */
+export interface Country {
+  /** The country code, e.g. `LS`. */
+  id: CountryCode;
+  code: CountryCode;
+  name: string;
+  /** The country's own currency. Buyers still pay in pula until spec 0009, open question 1. */
+  currency: CurrencyCode;
+  active: boolean;
+  sort_order: number;
+}
+
 export type SupplierStatus = 'VERIFIED' | 'PENDING' | 'SUSPENDED' | 'REJECTED';
 
 export interface VerificationDoc {
@@ -123,7 +145,7 @@ export interface Supplier {
   name: string;
   legal_name: string;
   initials: string;
-  country: 'BW' | 'ZA';
+  country: CountryCode;
   city: string;
   status: SupplierStatus;
   contact_email: string;
@@ -158,7 +180,7 @@ export interface SupplierOffer {
    */
   supplier_cost: number;
   /** The supplier's own currency. Missing means Pula (spec 0007, AC-1). */
-  cost_currency?: 'BWP' | 'ZAR';
+  cost_currency?: CurrencyCode;
   /** One cost per option where they differ, e.g. a wig sold by length. */
   variant_costs?: { variant_id: string; cost: number }[];
   stock: number;
@@ -233,6 +255,11 @@ export interface Order {
   cancel_reason: CancelReason | null;
   delivery_address: string;
   delivery_city: string;
+  /**
+   * Where the order is going (spec 0009). Missing on orders placed before
+   * 2026-10-22, which all went to Botswana.
+   */
+  delivery_country?: CountryCode;
   delivery_method?: 'DOORSTEP' | 'COLLECTION_POINT';
   collection_point?: string | null;
   placed_at: string;
@@ -260,7 +287,7 @@ export interface OrderItem {
   /** Per unit, in the supplier's own currency (`supplier_cost_currency`). */
   supplier_cost: number;
   /** Spec 0007, AC-7: the costs this line was priced on, fixed at order time. */
-  supplier_cost_currency?: 'BWP' | 'ZAR';
+  supplier_cost_currency?: CurrencyCode;
   fx_rate?: number;
   /** Customs per unit, in Pula. */
   customs_amount?: number;

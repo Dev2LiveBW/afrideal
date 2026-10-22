@@ -9,11 +9,6 @@ import { cn } from '@/lib/utils';
 import type { DirectoryListing, SupplierWithProducts } from '@/lib/directory';
 import type { Product, ProductImage } from '@/types';
 
-const COUNTRY_NAME: Record<'BW' | 'ZA', string> = {
-  BW: 'Botswana',
-  ZA: 'South Africa',
-};
-
 /**
  * Prominent AfriDeal Direct floor on the home page: showcases AfriDeal's own
  * catalogue products on the benchmark's 136px RailCard floor before the
@@ -91,7 +86,7 @@ export function SupplierDirectory({
   if (suppliers && suppliers.length > 0) {
     return (
       <div className={cn('space-y-4 sm:space-y-5', className)}>
-        {suppliers.map(({ supplier, listings: supplierListings }) => {
+        {suppliers.map(({ supplier, country_name: countryName, listings: supplierListings }) => {
           const isVerified = supplier.status === 'VERIFIED';
           return (
             <section
@@ -128,7 +123,7 @@ export function SupplierDirectory({
                     <p className="mt-0.5 flex flex-wrap items-center gap-x-2 gap-y-0.5 text-[11px] text-body sm:text-[12px]">
                       <span className="inline-flex items-center gap-0.5">
                         <MapPin size={10} strokeWidth={1.75} className="text-muted" aria-hidden="true" />
-                        {supplier.city}, {COUNTRY_NAME[supplier.country]}
+                        {supplier.city}, {countryName}
                       </span>
                       <span className="text-muted">·</span>
                       <span>{humanise(supplier.supplier_type ?? 'WHOLESALER')}</span>

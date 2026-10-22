@@ -1127,6 +1127,41 @@ section('13. Tiered pricing — the ladder is real, not hard-coded');
     `got ${mixed.body?.items?.[0]?.unit_price}`,
   );
 
+  /*
+   * Spec 0009: the market is any-to-any. An order records the country it is
+   * going to (Botswana until "Deliver to" sends one), and a country AfriDeal
+   * does not trade in is refused rather than priced on a guess.
+   */
+  check(
+    'an order records its delivery country',
+    wigs.body?.order?.delivery_country === 'BW',
+    `got ${wigs.body?.order?.delivery_country}`,
+  );
+  const nowhere = await json(retail, '/api/orders', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      lines: [{ product_id: 'p001', variant_id: 'p001v1', qty: 1 }],
+      payment_method: 'DPO_PAY',
+      delivery_address: 'Somewhere',
+      delivery_city: 'Nowhere',
+      delivery_country: 'XX',
+    }),
+  });
+  check('an order to a country AfriDeal does not trade in is refused', nowhere.status === 422, `got ${nowhere.status}`);
+
+  const admin = sessions['admin@afrideal.co.bw'].jar;
+  const onboard = (country) =>
+    json(admin, '/api/suppliers', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ name: `Verify supplier ${country}`, country, city: 'Maseru', supplier_type: 'WHOLESALER' }),
+    });
+  const lesotho = await onboard('LS');
+  check('a supplier can be onboarded in Lesotho', lesotho.status === 200 || lesotho.status === 201, `got ${lesotho.status}`);
+  const unknown = await onboard('XX');
+  check('a supplier in an unknown country is refused', unknown.status === 422, `got ${unknown.status}`);
+
   // Past the top band the answer is a quotation, not a guessed price.
   const order100 = await json(business, '/api/orders', {
     method: 'POST',

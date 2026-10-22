@@ -56,6 +56,7 @@ export const DOC_STATUS = [
 export const COUNTRIES = [
   {title: 'Botswana', value: 'BW'},
   {title: 'South Africa', value: 'ZA'},
+  {title: 'Lesotho', value: 'LS'},
   {title: 'Ghana', value: 'GH'},
   {title: 'Nigeria', value: 'NG'},
   {title: 'China', value: 'CN'},

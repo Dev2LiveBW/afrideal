@@ -98,7 +98,7 @@ export interface PublicOffer {
   supplier_name: string;
   supplier_initials: string;
   city: string;
-  country: 'BW' | 'ZA';
+  country: string;
   supplier_type: string;
   rating: number;
   fulfilment_rate: number;

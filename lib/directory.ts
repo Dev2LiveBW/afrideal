@@ -1,7 +1,7 @@
 import 'server-only';
 
 import { readAll } from '@/lib/db';
-import type { Product, ProductImage, Supplier } from '@/types';
+import type { CountryCode, Product, ProductImage, Supplier } from '@/types';
 
 /**
  * The supplier / product directory read model. (TICKET-007)
@@ -29,7 +29,7 @@ export interface DirectoryListing {
   supplier_name: string;
   supplier_initials: string;
   city: string;
-  country: 'BW' | 'ZA';
+  country: CountryCode;
   /** §11 - manufacturer, wholesaler, distributor and so on. */
   supplier_type: string;
   verified: boolean;
@@ -59,6 +59,8 @@ export interface SupplierProductListing extends DirectoryListing {
 
 export interface SupplierWithProducts {
   supplier: Supplier;
+  /** The supplier's country by name, from the `countries` collection (spec 0009). */
+  country_name: string;
   categoryNames: string[];
   listings: SupplierProductListing[];
 }
@@ -151,13 +153,15 @@ export async function getSuppliersWithProducts({
   verifiedOnly?: boolean;
   limit?: number;
 } = {}): Promise<SupplierWithProducts[]> {
-  const [products, offers, suppliers, categories, images] = await Promise.all([
+  const [products, offers, suppliers, categories, images, countries] = await Promise.all([
     readAll('products'),
     readAll('supplier-offers'),
     readAll('suppliers'),
     readAll('categories'),
     readAll('product-images'),
+    readAll('countries'),
   ]);
+  const countryName = new Map(countries.map((country) => [country.code, country.name]));
 
   const productById = new Map<string, Product>(products.map((product) => [product.id, product]));
   const categoryName = new Map(categories.map((category) => [category.id, category.name]));
@@ -228,6 +232,7 @@ export async function getSuppliersWithProducts({
 
       return {
         supplier,
+        country_name: countryName.get(supplier.country) ?? supplier.country,
         categoryNames,
         listings,
       };
@@ -242,6 +247,7 @@ export async function getSuppliersWithProducts({
  */
 export async function getSupplierStorefront(supplierId: string): Promise<{
   supplier: Supplier;
+  country_name: string;
   categories: { id: string; name: string; slug: string; emoji: string }[];
   listings: SupplierProductListing[];
 } | null> {
@@ -258,6 +264,7 @@ export async function getSupplierStorefront(supplierId: string): Promise<{
 
   return {
     supplier: group.supplier,
+    country_name: group.country_name,
     categories,
     listings: group.listings,
   };

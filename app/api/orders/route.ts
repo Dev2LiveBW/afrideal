@@ -8,6 +8,8 @@ import { selectSupplier } from '@/lib/supplier-selection';
 import { availablePaymentMethods, startPayment } from '@/lib/payments/adapters';
 import { allAsDisplayed } from '@/lib/payments/status';
 import { findCollectionPoint } from '@/lib/collection-points';
+import { isActiveCountry } from '@/lib/countries';
+import { DEFAULT_DELIVERY_COUNTRY } from '@/lib/lanes.mjs';
 import { checkoutIsPaused } from '@/lib/settings';
 import { paymentExpiresAt } from '@/lib/payments/policy';
 import type { Order, OrderItem, OrderTimelineEntry, Payment } from '@/types';
@@ -31,6 +33,8 @@ const CheckoutSchema = z.object({
   collection_point: z.string().nullish(),
   delivery_address: z.string().min(4, 'Enter a delivery address.'),
   delivery_city: z.string().min(2, 'Enter a city.'),
+  /** Spec 0009: where the order is going. Botswana until "Deliver to" sends one. */
+  delivery_country: z.string().trim().toUpperCase().length(2).optional(),
 });
 
 // ── GET /api/orders ──────────────────────────────────────────────────────────
@@ -87,7 +91,15 @@ export const POST = handled(async (request: Request) => {
     return fail(parsed.error.issues[0]?.message ?? 'Invalid checkout payload.', 422);
   }
 
-  const { lines, payment_method, delivery_method, collection_point, delivery_address, delivery_city } = parsed.data;
+  const {
+    lines,
+    payment_method,
+    delivery_method,
+    collection_point,
+    delivery_address,
+    delivery_city,
+    delivery_country,
+  } = parsed.data;
 
   // Spec 0003, AC-8: checked before any pricing or supplier work, so a pause stops
   // an order at the door rather than part way through building one.
@@ -99,6 +111,14 @@ export const POST = handled(async (request: Request) => {
   // from that list, so an unknown name cannot pick its own price.
   if (delivery_method === 'COLLECTION_POINT' && !findCollectionPoint(collection_point)) {
     return fail('Choose one of the collection points listed at checkout.', 422);
+  }
+
+  // Spec 0009: the lane runs to the locker's country when one is chosen, else to
+  // the buyer's. Customs and courier clearance key off it, never off Botswana.
+  const locker = delivery_method === 'COLLECTION_POINT' ? findCollectionPoint(collection_point) : null;
+  const deliveryCountry = locker?.country ?? delivery_country ?? DEFAULT_DELIVERY_COUNTRY;
+  if (!(await isActiveCountry(deliveryCountry))) {
+    return fail('We do not deliver to that country yet.', 422);
   }
 
   // A method nothing can take money through would leave the order waiting for a
@@ -179,7 +199,7 @@ export const POST = handled(async (request: Request) => {
 
     // Spec 0007, AC-7: what this unit cost us, fixed now so a later rate or
     // cost change never rewrites a placed order or its payable.
-    const landed = offerLandedCost(route.offer, product, variant.id);
+    const landed = offerLandedCost(route.offer, product, variant.id, deliveryCountry);
     const supplierCost =
       route.offer.variant_costs?.find((entry) => entry.variant_id === variant.id)?.cost ??
       route.offer.supplier_cost;
@@ -238,6 +258,7 @@ export const POST = handled(async (request: Request) => {
     cancel_reason: null,
     delivery_address: resolvedAddress,
     delivery_city: point ? point.city : delivery_city,
+    delivery_country: deliveryCountry,
     delivery_method,
     collection_point: point ? point.name : null,
     placed_at: now,

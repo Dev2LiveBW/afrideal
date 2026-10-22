@@ -12,6 +12,7 @@ import type {
   AuditEntry,
   Brand,
   Category,
+  Country,
   CustomerPrice,
   Dispute,
   SupplierPayable,
@@ -110,6 +111,9 @@ export interface Schema {
   // order; `settings` holds platform switches, starting with `checkout_paused`.
   payments: Payment;
   settings: Setting;
+
+  // The countries AfriDeal trades in (spec 0009): reference data, not code.
+  countries: Country;
 }
 
 export type Collection = keyof Schema;

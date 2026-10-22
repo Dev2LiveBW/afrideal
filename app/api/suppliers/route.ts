@@ -1,6 +1,7 @@
 import { z } from 'zod';
 
 import { fail, guard, handled, ok } from '@/lib/api';
+import { isActiveCountry } from '@/lib/countries';
 import { insert, nextId, readAll } from '@/lib/db';
 import { EVENTS, audit } from '@/lib/notifications';
 import type { Supplier, VerificationDoc } from '@/types';
@@ -12,7 +13,8 @@ export const GET = handled(async () => ok(await readAll('suppliers')));
 const CreateSupplierSchema = z.object({
   name: z.string().trim().min(1, 'Trading name is required.'),
   legal_name: z.string().trim().optional(),
-  country: z.enum(['BW', 'ZA']).default('BW'),
+  // Any active country (spec 0009); checked against the `countries` data below.
+  country: z.string().trim().toUpperCase().length(2, 'Choose a country.'),
   city: z.string().trim().min(1, 'City is required.'),
   supplier_type: z
     .enum(['MANUFACTURER', 'WHOLESALER', 'DISTRIBUTOR', 'RETAILER', 'IMPORTER', 'BRAND', 'AGENT'])
@@ -57,6 +59,9 @@ export const POST = handled(async (request: Request) => {
   if (!parsed.success) {
     const issue = parsed.error.issues[0];
     return fail(issue?.message ?? 'Invalid supplier details.', 422);
+  }
+  if (!(await isActiveCountry(parsed.data.country))) {
+    return fail('AfriDeal does not trade in that country yet.', 422);
   }
 
   const data = parsed.data;

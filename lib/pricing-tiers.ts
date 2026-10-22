@@ -11,6 +11,7 @@ import type {
   TieredPriceResult,
 } from '@/types';
 
+import { DEFAULT_DELIVERY_COUNTRY, isCrossBorder } from './lanes.mjs';
 import { applyMultiBuy, landedCost } from './pricing-formula.mjs';
 
 /**
@@ -99,12 +100,15 @@ export function marginBreakdown(
 /**
  * What one unit of an offer costs AfriDeal in Pula once it is landed: the
  * supplier's price in their own currency (one per length where the offer has
- * them), converted, plus customs when the goods are imported.
+ * them), converted, plus customs when the goods cross a border on their way to
+ * the buyer (spec 0009: goods' country ≠ delivery country, not "≠ Botswana").
  */
 export function offerLandedCost(
   offer: SupplierOffer,
   product: Product,
   variantId: string | null = null,
+  /** Where the order is going; the default until "Deliver to" carries a country. */
+  deliveryCountry: string = DEFAULT_DELIVERY_COUNTRY,
 ): { cost: number; customs: number; landed: number } {
   const perVariant = variantId
     ? offer.variant_costs?.find((entry) => entry.variant_id === variantId)?.cost
@@ -112,7 +116,7 @@ export function offerLandedCost(
   const { cost_thebe, customs_thebe, landed_thebe } = landedCost({
     cost: perVariant ?? offer.supplier_cost,
     currency: offer.cost_currency ?? 'BWP',
-    imported: (product.country_of_origin ?? 'BW') !== 'BW',
+    imported: isCrossBorder(product.country_of_origin, deliveryCountry),
   });
   return { cost: cost_thebe / 100, customs: customs_thebe / 100, landed: landed_thebe / 100 };
 }

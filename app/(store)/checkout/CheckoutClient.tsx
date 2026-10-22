@@ -14,6 +14,7 @@ import { EmptyState, Enclosure } from '@/components/brand/Panel';
 import { CartLineThumb } from '@/components/storefront/CartLineThumb';
 import { useAfriDealStore } from '@/store/useAfriDealStore';
 import { COLLECTION_POINTS } from '@/lib/collection-points';
+import { DEFAULT_DELIVERY_COUNTRY, isCrossBorder } from '@/lib/lanes.mjs';
 import { priceLine, sellerQuantities } from '@/lib/pricing-tiers';
 import { cn } from '@/lib/utils';
 import type { CustomerPrice, CustomerType, PaymentMethod, Product } from '@/types';
@@ -166,7 +167,10 @@ export function CheckoutClient({
 
   const hasImportedItems = cart.some((line) => {
     const product = products.find((candidate) => candidate.id === line.product_id);
-    return product ? product.country_of_origin !== 'BW' : false;
+    // Spec 0009: cross-border on this order's lane, to the locker's country or the buyer's.
+    const deliveryCountry =
+      selectedDeliveryMethod === 'COLLECTION_POINT' ? selectedPoint.country : DEFAULT_DELIVERY_COUNTRY;
+    return product ? isCrossBorder(product.country_of_origin, deliveryCountry) : false;
   });
 
   const onSubmit = handleSubmit(async (values) => {

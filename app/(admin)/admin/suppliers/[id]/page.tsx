@@ -7,6 +7,7 @@ import { PageHeader, Panel, PanelBody } from '@/components/brand/Panel';
 import { StatusBadge } from '@/components/brand/StatusBadge';
 import { ConsoleTopbar } from '@/components/layout/ConsoleTopbar';
 import { auth } from '@/lib/auth';
+import { countryNames } from '@/lib/countries';
 import { readAll } from '@/lib/db';
 import { shortDate } from '@/lib/format';
 import { getNotifications, getSupplierWorkspace } from '@/lib/queries';
@@ -16,10 +17,11 @@ import { SupplierDetailTabs } from './SupplierDetailTabs';
 export const dynamic = 'force-dynamic';
 
 export default async function AdminSupplierDetailPage({ params }: { params: { id: string } }) {
-  const [session, workspace, allSuppliers] = await Promise.all([
+  const [session, workspace, allSuppliers, names] = await Promise.all([
     auth(),
     getSupplierWorkspace(params.id),
     readAll('suppliers'),
+    countryNames(),
   ]);
 
   if (!workspace.supplier) notFound();
@@ -73,7 +75,7 @@ export default async function AdminSupplierDetailPage({ params }: { params: { id
 
       <div className="mx-auto max-w-console space-y-5 px-6 py-6">
         <PageHeader
-          eyebrow={`${supplier.country === 'BW' ? 'Botswana' : 'South Africa'} · ${supplier.city}`}
+          eyebrow={`${names[supplier.country] ?? supplier.country} · ${supplier.city}`}
           title={supplier.name}
           description={supplier.legal_name}
           action={<StatusBadge status={supplier.status} />}

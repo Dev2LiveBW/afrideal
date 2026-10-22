@@ -8,7 +8,7 @@ import toast from 'react-hot-toast';
 
 import { ActionButton } from '@/components/brand/ActionButton';
 import { cn } from '@/lib/utils';
-import type { Category, SupplierType } from '@/types';
+import type { Category, Country, SupplierType } from '@/types';
 
 const SUPPLIER_TYPES: { value: SupplierType; label: string }[] = [
   { value: 'WHOLESALER', label: 'Wholesaler' },
@@ -20,15 +20,23 @@ const SUPPLIER_TYPES: { value: SupplierType; label: string }[] = [
   { value: 'AGENT', label: 'Agent' },
 ];
 
-export function OnboardSupplierButton({ categories }: { categories: Category[] }) {
+export function OnboardSupplierButton({
+  categories,
+  countries,
+}: {
+  categories: Category[];
+  /** Active countries from the `countries` data: a supplier can be anywhere (spec 0009). */
+  countries: Country[];
+}) {
+  const firstCountry = countries[0]?.code ?? '';
   const router = useRouter();
   const [open, setOpen] = useState(false);
   const [saving, setSaving] = useState(false);
   const panelRef = useRef<HTMLDivElement>(null);
 
   const [name, setName] = useState('');
-  const [country, setCountry] = useState<'BW' | 'ZA'>('BW');
-  const [city, setCity] = useState('Gaborone');
+  const [country, setCountry] = useState(firstCountry);
+  const [city, setCity] = useState('');
   const [supplierType, setSupplierType] = useState<SupplierType>('WHOLESALER');
   const [contactPhone, setContactPhone] = useState('');
   const [contactEmail, setContactEmail] = useState('');
@@ -54,8 +62,8 @@ export function OnboardSupplierButton({ categories }: { categories: Category[] }
 
   function resetForm() {
     setName('');
-    setCountry('BW');
-    setCity('Gaborone');
+    setCountry(firstCountry);
+    setCity('');
     setSupplierType('WHOLESALER');
     setContactPhone('');
     setContactEmail('');
@@ -192,16 +200,14 @@ export function OnboardSupplierButton({ categories }: { categories: Category[] }
                       <select
                         id="supplier-country"
                         value={country}
-                        onChange={(event) => {
-                          const nextCountry = event.target.value as 'BW' | 'ZA';
-                          setCountry(nextCountry);
-                          if (nextCountry === 'BW' && city === 'Johannesburg') setCity('Gaborone');
-                          if (nextCountry === 'ZA' && city === 'Gaborone') setCity('Johannesburg');
-                        }}
+                        onChange={(event) => setCountry(event.target.value)}
                         className="mt-1.5 w-full rounded border border-hairline-strong bg-surface px-3 py-2 text-[13.5px] text-ink outline-none focus:border-forest"
                       >
-                        <option value="BW">Botswana (BW)</option>
-                        <option value="ZA">South Africa (ZA)</option>
+                        {countries.map((option) => (
+                          <option key={option.code} value={option.code}>
+                            {option.name} ({option.code})
+                          </option>
+                        ))}
                       </select>
                     </div>
 
@@ -215,7 +221,7 @@ export function OnboardSupplierButton({ categories }: { categories: Category[] }
                         required
                         value={city}
                         onChange={(event) => setCity(event.target.value)}
-                        placeholder="Gaborone"
+                        placeholder="Town or city"
                         className="mt-1.5 w-full rounded border border-hairline-strong bg-surface px-3 py-2 text-[13.5px] text-ink outline-none focus:border-forest"
                       />
                     </div>

@@ -36,6 +36,7 @@ export type DocTable = ReturnType<typeof docTable>;
 export const auditLog = docTable('audit_log');
 export const brands = docTable('brands');
 export const categories = docTable('categories');
+export const countries = docTable('countries');
 export const customerPrices = docTable('customer_prices');
 export const disputes = docTable('disputes');
 export const inventory = docTable('inventory');
@@ -66,6 +67,7 @@ export const tables = {
   'audit-log': auditLog,
   brands,
   categories,
+  countries,
   'customer-prices': customerPrices,
   disputes,
   inventory,

@@ -76,8 +76,8 @@ Buyers, suppliers, runners and couriers in any country; every order a lane from 
 spec [0009](../specs/0009-any-to-any-marketplace.md)
 - [x] Design it (spec): `/architect any-to-any marketplace`
 - [ ] Build it: `/develop any-to-any marketplace`
-  - [ ] Countries as data; `'BW' | 'ZA'` unions and enums gone; Lesotho in the seed
-  - [ ] `laneFor()` replaces every "not Botswana" check; customs row per lane
+  - [x] Countries as data; `'BW' | 'ZA'` unions and enums gone; Lesotho in the seed
+  - [x] `laneFor()` replaces every "not Botswana" check; customs row per lane
   - [ ] "Deliver to" country and town in the header and checkout
   - [ ] Courier routes and runner service areas carry countries
   - [ ] Copy sweep

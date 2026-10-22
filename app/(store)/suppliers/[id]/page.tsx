@@ -12,11 +12,6 @@ import { cn } from '@/lib/utils';
 
 export const dynamic = 'force-dynamic';
 
-const COUNTRY_NAME: Record<'BW' | 'ZA', string> = {
-  BW: 'Botswana',
-  ZA: 'South Africa',
-};
-
 export async function generateMetadata({
   params,
 }: {
@@ -27,7 +22,7 @@ export async function generateMetadata({
 
   return {
     title: `${store.supplier.name} · Verified Supplier`,
-    description: `Browse ${store.listings.length} products supplied by ${store.supplier.name} (${store.supplier.city}, ${COUNTRY_NAME[store.supplier.country]}).`,
+    description: `Browse ${store.listings.length} products supplied by ${store.supplier.name} (${store.supplier.city}, ${store.country_name}).`,
   };
 }
 
@@ -42,7 +37,7 @@ export default async function SupplierStorefrontPage({
 
   if (!store) notFound();
 
-  const { supplier, categories: supplierCategories, listings } = store;
+  const { supplier, country_name: countryName, categories: supplierCategories, listings } = store;
   const isVerified = supplier.status === 'VERIFIED';
 
   const activeCategory = supplierCategories.find(
@@ -98,7 +93,7 @@ export default async function SupplierStorefrontPage({
                 <p className="mt-1 flex flex-wrap items-center gap-x-2 gap-y-1 text-[12.5px] text-body">
                   <span className="inline-flex items-center gap-1">
                     <MapPin size={12} strokeWidth={1.75} className="text-muted" aria-hidden="true" />
-                    {supplier.city}, {COUNTRY_NAME[supplier.country]}
+                    {supplier.city}, {countryName}
                   </span>
                   <span className="text-muted">·</span>
                   <span>{humanise(supplier.supplier_type ?? 'WHOLESALER')}</span>

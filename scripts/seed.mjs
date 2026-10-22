@@ -24,6 +24,7 @@ import {
   marginPct,
   unitPrice,
 } from '../lib/pricing-formula.mjs';
+import { DEFAULT_DELIVERY_COUNTRY, isCrossBorder } from '../lib/lanes.mjs';
 
 const ROOT_DIR = path.join(path.dirname(fileURLToPath(import.meta.url)), '..');
 const DATA_DIR = path.join(ROOT_DIR, 'data');
@@ -118,8 +119,14 @@ const ruleFor = (categoryId) => pricingRules.find((r) => r.category_id === categ
 const originFor = (categoryId) => (categoryId === 'c3' || categoryId === 'c4' ? 'BW' : 'ZA');
 
 /** Landed cost in thebe: the supplier's price, converted, plus customs if imported. */
+/*
+ * Published bands are for the default delivery country until "Deliver to"
+ * carries one (spec 0009), so "imported" is the lane from the goods' country to
+ * that default, never a test against Botswana.
+ */
 const landedFor = (cost, currency, categoryId) =>
-  landedCost({ cost, currency, imported: originFor(categoryId) !== 'BW' }).landed_thebe;
+  landedCost({ cost, currency, imported: isCrossBorder(originFor(categoryId), DEFAULT_DELIVERY_COUNTRY) })
+    .landed_thebe;
 
 /** The retail price on a landed cost, under a category's pricing rule. */
 function calculatePrice(landedThebe, rule) {
@@ -136,6 +143,20 @@ const docTemplate = (status, uploadedDaysAgo) => [
   { id: 'd3', label: 'Proof of Bank Account', status, uploaded_at: uploadedDaysAgo == null ? null : daysAgo(uploadedDaysAgo) },
   { id: 'd4', label: 'Directors ID Documents', status, uploaded_at: uploadedDaysAgo == null ? null : daysAgo(uploadedDaysAgo) },
 ];
+
+// ─── Countries ───────────────────────────────────────────────────────────────
+
+/**
+ * The countries AfriDeal trades in (spec 0009). Buyers, suppliers, runners and
+ * couriers can be in any of them, and adding one is a row here (or in the
+ * admin, later), never a code change. Lesotho is in from the start so the
+ * any-to-any paths are exercised by verify and e2e, not just Botswana's.
+ */
+const countries = [
+  ['BW', 'Botswana', 'BWP'],
+  ['ZA', 'South Africa', 'ZAR'],
+  ['LS', 'Lesotho', 'LSL'],
+].map(([code, name, currency], i) => ({ id: code, code, name, currency, active: true, sort_order: i + 1 }));
 
 const suppliers = [
   {
@@ -236,6 +257,17 @@ const suppliers = [
     rating: 0, fulfilment_rate: 0, reliability_score: 60, avg_fulfilment_days: 5,
     total_gmv: 0, products_count: 5, orders_count: 0,
     verification_docs: docTemplate('APPROVED', 1), categories: ['c1'],
+  },
+  {
+    // The first supplier outside Botswana and South Africa (spec 0009): a
+    // Maseru workwear maker, quoting in maloti.
+    id: 's010', name: 'Maluti Workwear', legal_name: 'Maluti Workwear (Pty) Ltd', initials: 'MW',
+    country: 'LS', city: 'Maseru', status: 'VERIFIED',
+    contact_email: 'orders@malutiworkwear.co.ls', contact_phone: '+266 2231 4470',
+    registration_no: 'LS-2018/04417', joined_at: daysAgo(60),
+    rating: 4.3, fulfilment_rate: 90, reliability_score: 80, avg_fulfilment_days: 5,
+    total_gmv: 0, products_count: 1, orders_count: 0,
+    verification_docs: docTemplate('APPROVED', 58), categories: ['c6'],
   },
 ];
 
@@ -568,6 +600,24 @@ for (const spec of productSpecs) {
     });
   }
 }
+
+/*
+ * Maluti Workwear's offer on the work overall, in maloti (spec 0009). Below the
+ * dearest existing offer, so the published price (set from the worst routable
+ * cost) does not move; its date is fixed so the seeded random stream does not.
+ */
+supplierOffers.push({
+  id: `so${String(offerSeq++).padStart(3, '0')}`,
+  product_id: 'p011',
+  supplier_id: 's010',
+  supplier_cost: 180,
+  cost_currency: 'LSL',
+  stock: 160,
+  fulfilment_days: 5,
+  moq: 10,
+  last_updated: daysAgo(3),
+  active: true,
+});
 
 // ─── Supplier selection (mirrors lib/supplier-selection.ts) ──────────────────
 
@@ -1675,6 +1725,7 @@ const settings = [
 const files = {
   users,
   categories,
+  countries,
   products,
   suppliers,
   'supplier-offers': supplierOffers,

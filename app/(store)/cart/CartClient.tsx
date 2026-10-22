@@ -10,6 +10,7 @@ import { EmptyState, Enclosure } from '@/components/brand/Panel';
 import { CartLineThumb } from '@/components/storefront/CartLineThumb';
 import { NextRungNudge } from '@/components/storefront/NextRungNudge';
 import { useAfriDealStore } from '@/store/useAfriDealStore';
+import { DEFAULT_DELIVERY_COUNTRY, isCrossBorder } from '@/lib/lanes.mjs';
 import { priceLine, sellerQuantities } from '@/lib/pricing-tiers';
 import { nextRung } from '@/lib/tier-doors';
 import type { CustomerPrice, CustomerType, Product } from '@/types';
@@ -79,7 +80,8 @@ export function CartClient({
 
   const hasImported = cart.some((line) => {
     const p = products.find((candidate) => candidate.id === line.product_id);
-    return p ? p.country_of_origin !== 'BW' : false;
+    // Spec 0009: the cart has no delivery country yet, so it uses the default lane.
+    return p ? isCrossBorder(p.country_of_origin, DEFAULT_DELIVERY_COUNTRY) : false;
   });
 
   if (!mounted) {

@@ -1,8 +1,16 @@
 # 0009. Any-to-any marketplace: buyers, suppliers, runners and couriers anywhere
 
 **Date**: 2026-10-22
-**Status**: Proposed. The principle is decided (product owner, 2026-10-22);
-the build waits on the open questions. Nothing in the code has changed yet.
+**Status**: Building. The principle is decided (product owner, 2026-10-22).
+Build steps 1 and 2 are done (2026-10-22): the `countries` collection
+(Botswana, South Africa, Lesotho; migration `0003`), country and currency as
+codes from data with every `'BW' | 'ZA'` union and enum gone, a Lesotho
+supplier (Maluti Workwear, Maseru, quoting in maloti) in the seed, and
+`lib/lanes.mjs` (`laneFor`, `isCrossBorder`, `DEFAULT_DELIVERY_COUNTRY`)
+replacing every "not Botswana" check; orders record `delivery_country`, and
+the order route refuses a country AfriDeal does not trade in. Every buyer is
+still delivered to Botswana by default until step 3. Steps 3 to 6 and the
+open questions remain.
 
 ## Summary
 

@@ -426,21 +426,37 @@
   {
     "id": "inv0054",
     "product_id": "p011",
-    "variant_id": "p011v2",
-    "supplier_id": "s002",
-    "on_hand": 80,
-    "reserved": 6
+    "variant_id": "p011v1",
+    "supplier_id": "s010",
+    "on_hand": 53,
+    "reserved": 4
   },
   {
     "id": "inv0055",
     "product_id": "p011",
     "variant_id": "p011v2",
+    "supplier_id": "s002",
+    "on_hand": 80,
+    "reserved": 6
+  },
+  {
+    "id": "inv0056",
+    "product_id": "p011",
+    "variant_id": "p011v2",
     "supplier_id": "s005",
     "on_hand": 43,
     "reserved": 3
   },
   {
-    "id": "inv0056",
+    "id": "inv0057",
+    "product_id": "p011",
+    "variant_id": "p011v2",
+    "supplier_id": "s010",
+    "on_hand": 53,
+    "reserved": 4
+  },
+  {
+    "id": "inv0058",
     "product_id": "p011",
     "variant_id": "p011v3",
     "supplier_id": "s002",
@@ -448,7 +464,7 @@
     "reserved": 6
   },
   {
-    "id": "inv0057",
+    "id": "inv0059",
     "product_id": "p011",
     "variant_id": "p011v3",
     "supplier_id": "s005",
@@ -456,39 +472,47 @@
     "reserved": 3
   },
   {
-    "id": "inv0058",
-    "product_id": "p012",
-    "variant_id": "p012v1",
-    "supplier_id": "s002",
-    "on_hand": 127,
-    "reserved": 10
-  },
-  {
-    "id": "inv0059",
-    "product_id": "p012",
-    "variant_id": "p012v1",
-    "supplier_id": "s005",
-    "on_hand": 30,
-    "reserved": 2
-  },
-  {
     "id": "inv0060",
-    "product_id": "p012",
-    "variant_id": "p012v2",
-    "supplier_id": "s002",
-    "on_hand": 127,
-    "reserved": 10
+    "product_id": "p011",
+    "variant_id": "p011v3",
+    "supplier_id": "s010",
+    "on_hand": 53,
+    "reserved": 4
   },
   {
     "id": "inv0061",
     "product_id": "p012",
+    "variant_id": "p012v1",
+    "supplier_id": "s002",
+    "on_hand": 127,
+    "reserved": 10
+  },
+  {
+    "id": "inv0062",
+    "product_id": "p012",
+    "variant_id": "p012v1",
+    "supplier_id": "s005",
+    "on_hand": 30,
+    "reserved": 2
+  },
+  {
+    "id": "inv0063",
+    "product_id": "p012",
+    "variant_id": "p012v2",
+    "supplier_id": "s002",
+    "on_hand": 127,
+    "reserved": 10
+  },
+  {
+    "id": "inv0064",
+    "product_id": "p012",
     "variant_id": "p012v2",
     "supplier_id": "s005",
     "on_hand": 30,
     "reserved": 2
   },
   {
-    "id": "inv0062",
+    "id": "inv0065",
     "product_id": "p012",
     "variant_id": "p012v3",
     "supplier_id": "s002",
@@ -496,7 +520,7 @@
     "reserved": 10
   },
   {
-    "id": "inv0063",
+    "id": "inv0066",
     "product_id": "p012",
     "variant_id": "p012v3",
     "supplier_id": "s005",
@@ -504,7 +528,7 @@
     "reserved": 2
   },
   {
-    "id": "inv0064",
+    "id": "inv0067",
     "product_id": "p018",
     "variant_id": "p018v1",
     "supplier_id": "s009",
@@ -512,7 +536,7 @@
     "reserved": 1
   },
   {
-    "id": "inv0065",
+    "id": "inv0068",
     "product_id": "p018",
     "variant_id": "p018v2",
     "supplier_id": "s009",
@@ -520,7 +544,7 @@
     "reserved": 1
   },
   {
-    "id": "inv0066",
+    "id": "inv0069",
     "product_id": "p018",
     "variant_id": "p018v3",
     "supplier_id": "s009",
@@ -528,7 +552,7 @@
     "reserved": 1
   },
   {
-    "id": "inv0067",
+    "id": "inv0070",
     "product_id": "p018",
     "variant_id": "p018v4",
     "supplier_id": "s009",
@@ -536,7 +560,7 @@
     "reserved": 1
   },
   {
-    "id": "inv0068",
+    "id": "inv0071",
     "product_id": "p018",
     "variant_id": "p018v5",
     "supplier_id": "s009",
@@ -544,7 +568,7 @@
     "reserved": 1
   },
   {
-    "id": "inv0069",
+    "id": "inv0072",
     "product_id": "p019",
     "variant_id": "p019v1",
     "supplier_id": "s009",
@@ -552,7 +576,7 @@
     "reserved": 1
   },
   {
-    "id": "inv0070",
+    "id": "inv0073",
     "product_id": "p019",
     "variant_id": "p019v2",
     "supplier_id": "s009",
@@ -560,7 +584,7 @@
     "reserved": 1
   },
   {
-    "id": "inv0071",
+    "id": "inv0074",
     "product_id": "p019",
     "variant_id": "p019v3",
     "supplier_id": "s009",
@@ -568,7 +592,7 @@
     "reserved": 1
   },
   {
-    "id": "inv0072",
+    "id": "inv0075",
     "product_id": "p020",
     "variant_id": "p020v1",
     "supplier_id": "s009",
@@ -576,7 +600,7 @@
     "reserved": 1
   },
   {
-    "id": "inv0073",
+    "id": "inv0076",
     "product_id": "p020",
     "variant_id": "p020v2",
     "supplier_id": "s009",
@@ -584,7 +608,7 @@
     "reserved": 1
   },
   {
-    "id": "inv0074",
+    "id": "inv0077",
     "product_id": "p020",
     "variant_id": "p020v3",
     "supplier_id": "s009",
@@ -592,7 +616,7 @@
     "reserved": 1
   },
   {
-    "id": "inv0075",
+    "id": "inv0078",
     "product_id": "p020",
     "variant_id": "p020v4",
     "supplier_id": "s009",
@@ -600,7 +624,7 @@
     "reserved": 1
   },
   {
-    "id": "inv0076",
+    "id": "inv0079",
     "product_id": "p020",
     "variant_id": "p020v5",
     "supplier_id": "s009",
@@ -608,7 +632,7 @@
     "reserved": 1
   },
   {
-    "id": "inv0077",
+    "id": "inv0080",
     "product_id": "p020",
     "variant_id": "p020v6",
     "supplier_id": "s009",
@@ -616,7 +640,7 @@
     "reserved": 1
   },
   {
-    "id": "inv0078",
+    "id": "inv0081",
     "product_id": "p020",
     "variant_id": "p020v7",
     "supplier_id": "s009",
@@ -624,7 +648,7 @@
     "reserved": 1
   },
   {
-    "id": "inv0079",
+    "id": "inv0082",
     "product_id": "p021",
     "variant_id": "p021v1",
     "supplier_id": "s009",
@@ -632,7 +656,7 @@
     "reserved": 1
   },
   {
-    "id": "inv0080",
+    "id": "inv0083",
     "product_id": "p021",
     "variant_id": "p021v2",
     "supplier_id": "s009",
@@ -640,7 +664,7 @@
     "reserved": 1
   },
   {
-    "id": "inv0081",
+    "id": "inv0084",
     "product_id": "p021",
     "variant_id": "p021v3",
     "supplier_id": "s009",
@@ -648,7 +672,7 @@
     "reserved": 1
   },
   {
-    "id": "inv0082",
+    "id": "inv0085",
     "product_id": "p021",
     "variant_id": "p021v4",
     "supplier_id": "s009",
@@ -656,7 +680,7 @@
     "reserved": 1
   },
   {
-    "id": "inv0083",
+    "id": "inv0086",
     "product_id": "p021",
     "variant_id": "p021v5",
     "supplier_id": "s009",
@@ -664,7 +688,7 @@
     "reserved": 1
   },
   {
-    "id": "inv0084",
+    "id": "inv0087",
     "product_id": "p021",
     "variant_id": "p021v6",
     "supplier_id": "s009",
@@ -672,7 +696,7 @@
     "reserved": 1
   },
   {
-    "id": "inv0085",
+    "id": "inv0088",
     "product_id": "p021",
     "variant_id": "p021v7",
     "supplier_id": "s009",
@@ -680,7 +704,7 @@
     "reserved": 1
   },
   {
-    "id": "inv0086",
+    "id": "inv0089",
     "product_id": "p022",
     "variant_id": "p022v1",
     "supplier_id": "s009",
@@ -688,7 +712,7 @@
     "reserved": 1
   },
   {
-    "id": "inv0087",
+    "id": "inv0090",
     "product_id": "p022",
     "variant_id": "p022v2",
     "supplier_id": "s009",
@@ -696,7 +720,7 @@
     "reserved": 1
   },
   {
-    "id": "inv0088",
+    "id": "inv0091",
     "product_id": "p022",
     "variant_id": "p022v3",
     "supplier_id": "s009",
@@ -704,7 +728,7 @@
     "reserved": 1
   },
   {
-    "id": "inv0089",
+    "id": "inv0092",
     "product_id": "p023",
     "variant_id": "p023v1",
     "supplier_id": "s009",
@@ -712,7 +736,7 @@
     "reserved": 1
   },
   {
-    "id": "inv0090",
+    "id": "inv0093",
     "product_id": "p023",
     "variant_id": "p023v2",
     "supplier_id": "s009",
@@ -720,7 +744,7 @@
     "reserved": 1
   },
   {
-    "id": "inv0091",
+    "id": "inv0094",
     "product_id": "p023",
     "variant_id": "p023v3",
     "supplier_id": "s009",
@@ -728,7 +752,7 @@
     "reserved": 1
   },
   {
-    "id": "inv0092",
+    "id": "inv0095",
     "product_id": "p023",
     "variant_id": "p023v4",
     "supplier_id": "s009",
@@ -736,7 +760,7 @@
     "reserved": 1
   },
   {
-    "id": "inv0093",
+    "id": "inv0096",
     "product_id": "p023",
     "variant_id": "p023v5",
     "supplier_id": "s009",
@@ -744,7 +768,7 @@
     "reserved": 1
   },
   {
-    "id": "inv0094",
+    "id": "inv0097",
     "product_id": "p023",
     "variant_id": "p023v6",
     "supplier_id": "s009",
@@ -752,7 +776,7 @@
     "reserved": 1
   },
   {
-    "id": "inv0095",
+    "id": "inv0098",
     "product_id": "p023",
     "variant_id": "p023v7",
     "supplier_id": "s009",
@@ -760,7 +784,7 @@
     "reserved": 1
   },
   {
-    "id": "inv0096",
+    "id": "inv0099",
     "product_id": "p024",
     "variant_id": "p024v1",
     "supplier_id": "s009",
@@ -768,7 +792,7 @@
     "reserved": 1
   },
   {
-    "id": "inv0097",
+    "id": "inv0100",
     "product_id": "p024",
     "variant_id": "p024v2",
     "supplier_id": "s009",
@@ -776,7 +800,7 @@
     "reserved": 1
   },
   {
-    "id": "inv0098",
+    "id": "inv0101",
     "product_id": "p024",
     "variant_id": "p024v3",
     "supplier_id": "s009",
@@ -784,7 +808,7 @@
     "reserved": 1
   },
   {
-    "id": "inv0099",
+    "id": "inv0102",
     "product_id": "p024",
     "variant_id": "p024v4",
     "supplier_id": "s009",
@@ -792,7 +816,7 @@
     "reserved": 1
   },
   {
-    "id": "inv0100",
+    "id": "inv0103",
     "product_id": "p024",
     "variant_id": "p024v5",
     "supplier_id": "s009",
@@ -800,7 +824,7 @@
     "reserved": 1
   },
   {
-    "id": "inv0101",
+    "id": "inv0104",
     "product_id": "p024",
     "variant_id": "p024v6",
     "supplier_id": "s009",
@@ -808,7 +832,7 @@
     "reserved": 1
   },
   {
-    "id": "inv0102",
+    "id": "inv0105",
     "product_id": "p024",
     "variant_id": "p024v7",
     "supplier_id": "s009",

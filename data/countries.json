@@ -1,0 +1,26 @@
+[
+  {
+    "id": "BW",
+    "code": "BW",
+    "name": "Botswana",
+    "currency": "BWP",
+    "active": true,
+    "sort_order": 1
+  },
+  {
+    "id": "ZA",
+    "code": "ZA",
+    "name": "South Africa",
+    "currency": "ZAR",
+    "active": true,
+    "sort_order": 2
+  },
+  {
+    "id": "LS",
+    "code": "LS",
+    "name": "Lesotho",
+    "currency": "LSL",
+    "active": true,
+    "sort_order": 3
+  }
+]

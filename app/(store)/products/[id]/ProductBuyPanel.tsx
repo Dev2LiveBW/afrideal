@@ -16,6 +16,7 @@ import { useAfriDealStore } from '@/store/useAfriDealStore';
 import { PriceLadder } from '@/components/storefront/PriceLadder';
 import { photoUrl } from '@/components/storefront/Swatch';
 import { CartSheet } from '@/components/storefront/CartSheet';
+import { DEFAULT_DELIVERY_COUNTRY, isCrossBorder } from '@/lib/lanes.mjs';
 import type { TierDoor } from '@/lib/tier-doors';
 import type { CustomerPrice, CustomerType, Product, ProductImage } from '@/types';
 
@@ -115,7 +116,7 @@ export function ProductBuyPanel({
                     </span>
                   )}
                 </p>
-                {product.country_of_origin && product.country_of_origin !== 'BW' && (
+                {isCrossBorder(product.country_of_origin, DEFAULT_DELIVERY_COUNTRY) && (
                   <span className="rounded bg-forest-wash px-1.5 py-0.5 font-mono text-[9.5px] font-semibold uppercase tracking-wider text-forest-ink">
                     Customs cleared by courier
                   </span>
