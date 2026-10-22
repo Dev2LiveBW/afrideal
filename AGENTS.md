@@ -7,6 +7,22 @@
 - **Key dependencies**: `@clerk/nextjs` (auth), `@sanity/client` (catalogue), `@neondatabase/serverless` + `drizzle-orm` (Postgres), `framer-motion`, `zod` + `react-hook-form`
 - **Package manager**: npm
 
+## The market is any-to-any
+
+Product owner, 2026-10-22: AfriDeal is **not** "Botswana buying from South
+Africa". A buyer in any country orders goods held in any country (Maseru from
+Johannesburg or Gaborone; Gaborone from Gaborone); suppliers, runners and
+couriers are onboarded wherever they are; after a purchase the buyer requests
+a runner or picks a courier that serves the route. Every order is a **lane**,
+goods' country and town → delivery country and town. See
+[spec 0009](docs/specs/0009-any-to-any-marketplace.md).
+
+- Never write new code that assumes a Botswana buyer, pula, or "imported
+  means not from Botswana". Cross-border means goods' country ≠ delivery
+  country. Countries are data, not a `'BW' | 'ZA'` union.
+- The existing Botswana assumptions are listed in spec 0009's inventory and
+  are being removed in its build order; do not add to them.
+
 ## Build approach
 
 **Tracer Bullet**: prove one real thread through every layer, then thicken

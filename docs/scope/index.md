@@ -1,6 +1,6 @@
 # Scope: AfriDeal
 
-An Alibaba style marketplace for buyers in Botswana. AfriDeal sources products from South African suppliers, sells them at one landed price as merchant of record, and brings them across the border by runner or to a collection point.
+An Alibaba style marketplace where a buyer in any country orders goods held in any country: Lesotho from South Africa or Botswana, Botswana from South Africa or from Gaborone itself. AfriDeal onboards suppliers, runners and couriers wherever they are, sells at one published price as merchant of record, and gets each order from the goods' town to the buyer's by runner, a listed courier for that route, or a collection point. Botswana buying from South Africa is the first lane, not the business ([spec 0009](../specs/0009-any-to-any-marketplace.md), 2026-10-22).
 
 **Build approach:** Tracer Bullet (prove one real thread through every layer, then thicken it one strand at a time).
 **Workflow:** GA (after `/develop`: `/check verify`, `/test`, a fresh model `/check review`, then `/document`). The project default level of rigor, chosen because the product takes card payments, holds personal data under Botswana's Data Protection Act 2018, and crosses a border. `/architect` is the recommended first stop for a feature with a real decision, but skippable when you already know the build. Any feature can carry its own tag (e.g. `· Beta`) to do more or less.
@@ -63,6 +63,7 @@ _These are recommendations to keep your build orderly, not requirements. Skip an
 | 29 | Team console gaps | delivery | Close out | planned |
 | 30 | Team user management | delivery | Close out | in-progress |
 | 31 | What a supplier sees on an order | delivery | Close out | planned |
+| 32 | Any-to-any marketplace: countries, lanes, deliver to | platform | Close out | in-progress |
 
 Deferred features are listed at the end of each epic file.
 

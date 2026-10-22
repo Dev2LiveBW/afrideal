@@ -8,6 +8,14 @@ the product owner: when the buyer pays the courier fee (open question 2) and
 what the last mile costs (open question 3). Launch subsidy: P200 instead of
 P250 (open question 4).
 
+**Market (2026-10-22)**: Gorosa's Johannesburg → Gaborone / Francistown run
+is one **route**, not the shape of the feature. Per [spec 0009](0009-any-to-any-marketplace.md)
+a courier lists the routes it serves (origin country and town → destination
+country and town), each with its own fee rule, and checkout offers the
+couriers whose routes cover the order's lane, beside runners and collection
+points. Read "destination", "Gaborone" and "Francistown" below as Gorosa's
+routes, not as the only places a buyer can be.
+
 ## Summary
 
 Product sales and delivery are kept apart. Product prices no longer carry

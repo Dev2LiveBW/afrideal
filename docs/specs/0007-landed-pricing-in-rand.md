@@ -1,6 +1,10 @@
 # 0007. Landed pricing: rand supplier costs, customs at 14%, the owner's tier ladder
 
 **Date**: 2026-10-20
+**Market (2026-10-22)**: buyers are not only in Botswana. Read "buyers in
+Botswana see pula" and "imported" through [spec 0009](0009-any-to-any-marketplace.md):
+the ladders hold for every lane; conversion is from the supplier's currency to
+the buyer's, and cross-border means goods' country ≠ delivery country.
 **Amended**: 2026-10-21. **Customs is out of the product price**; see
 [Amendment](#amendment-2026-10-21-customs-leaves-the-product-price). Where the
 text below says 1.14, read 1.00.
