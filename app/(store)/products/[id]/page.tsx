@@ -165,7 +165,7 @@ export default async function ProductPage({ params }: { params: { id: string } }
           }
           aside={
             <>
-              <DeliveryEstimate offers={publicOffers} city="Gaborone" />
+              <DeliveryEstimate offers={publicOffers} />
               <SellerCard offer={primaryOffer} />
 
               <div className="flex items-start gap-3 rounded-md border border-hairline bg-gold-50/60 px-4 py-3.5">

@@ -438,7 +438,15 @@ export interface Runner {
   phone: string;
   vehicle: string;
   plate: string;
+  /** Home town. */
   city: string;
+  /** The country the runner works in (spec 0009). Runners are onboarded anywhere. */
+  country: CountryCode;
+  /**
+   * The towns the runner takes jobs in, in `country`. A job alerts the runners
+   * who serve its pickup town; spec 0005 adds the 30-minute widening.
+   */
+  towns: string[];
   online: boolean;
   rating: number;
   deliveries_completed: number;
@@ -462,12 +470,60 @@ export interface Shipment {
   status: ShipmentStatus;
   pickup_name: string;
   pickup_address: string;
+  /** Spec 0009: where the job starts and ends, so it reaches runners there. */
+  pickup_country?: CountryCode;
+  pickup_town?: string;
   dropoff_name: string;
   dropoff_address: string;
+  dropoff_country?: CountryCode;
+  dropoff_town?: string;
   distance_km: number;
   payout: number;
   created_at: string;
   delivered_at: string | null;
+}
+
+/** How a buyer pays a courier's fee (spec 0008, AC-9). */
+export type CourierPaymentOption = 'AT_CHECKOUT' | 'ON_ARRIVAL';
+
+/**
+ * One route a courier serves (spec 0008 as generalised by spec 0009): from a
+ * country (and, if it only collects there, a town) to a destination town, with
+ * its own fee rule. All amounts are pula.
+ */
+export interface CourierRoute {
+  from: { country: CountryCode; city?: string };
+  to: { country: CountryCode; city: string };
+  fee: {
+    /** Goods subtotal at or below which the flat fee applies. */
+    threshold: number;
+    flat: number;
+    /** Share of the goods subtotal charged above the threshold, e.g. 0.16. */
+    pct: number;
+    /** A launch price in place of `flat` while it lasts (2026-10-21: P200). */
+    launch_flat?: number | null;
+    /** When the launch price ends; null means until someone changes it. */
+    launch_until?: string | null;
+  };
+  /** What AfriDeal owes the courier on this route, where known (spec 0008, Q8). */
+  payable?: { flat?: number | null; pct?: number | null };
+}
+
+/** A listed courier and clearance partner (spec 0008). */
+export interface Courier {
+  id: string;
+  name: string;
+  role: 'CROSS_BORDER_CLEARANCE' | 'DOMESTIC';
+  sort_order: number;
+  active: boolean;
+  trips_per_week: number | null;
+  insured: boolean;
+  phone: string;
+  depot: { country: CountryCode; city: string; address: string };
+  /** How the supplier labels the parcel, e.g. "{first} {last} Gorosa". */
+  consignee_format: string | null;
+  payment_options: CourierPaymentOption[];
+  routes: CourierRoute[];
 }
 
 export interface Settlement {

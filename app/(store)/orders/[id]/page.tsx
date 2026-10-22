@@ -14,7 +14,8 @@ import { readAll } from '@/lib/db';
 import { PAYMENT_LABELS, dateTime, shortDate } from '@/lib/format';
 import { getOrderDetail } from '@/lib/queries';
 import { findById } from '@/lib/db';
-import { isCrossBorder } from '@/lib/lanes.mjs';
+import { countryNames as readCountryNames } from '@/lib/countries';
+import { DEFAULT_DELIVERY_COUNTRY, isCrossBorder } from '@/lib/lanes.mjs';
 
 import { OrderActions } from './OrderActions';
 import { RetryPaymentButton } from './RetryPaymentButton';
@@ -52,12 +53,13 @@ export default async function OrderTrackingPage({
   const isStaff = ['SUPER_ADMIN', 'OPERATIONS_ADMIN', 'FINANCE_ADMIN'].includes(session.user.role);
   if (order.customer_id !== session.user.id && !isStaff) notFound();
 
-  const [shipments, runners, allOrders, images, products] = await Promise.all([
+  const [shipments, runners, allOrders, images, products, countryNames] = await Promise.all([
     readAll('shipments'),
     readAll('runners'),
     readAll('orders'),
     readAll('product-images'),
     readAll('products'),
+    readCountryNames(),
   ]);
 
   // The runner card appears only once someone is actually carrying the order.
@@ -343,7 +345,9 @@ export default async function OrderTrackingPage({
                 <MapPin size={16} strokeWidth={1.5} className="mt-0.5 shrink-0 text-muted" />
                 <div>
                   <p className="text-[14px] font-medium text-ink">{order.delivery_address}</p>
-                  <p className="text-[13px] text-body">{order.delivery_city}, Botswana</p>
+                  <p className="text-[13px] text-body">
+                    {order.delivery_city}, {countryNames[order.delivery_country ?? DEFAULT_DELIVERY_COUNTRY] ?? order.delivery_country}
+                  </p>
                   {order.delivery_method === 'COLLECTION_POINT' && (
                     <p className="mt-2 text-[12px] text-muted">
                       Your order will be held in a secure locker. You will receive your locker PIN once runner drop-off is complete.

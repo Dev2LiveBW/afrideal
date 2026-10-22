@@ -674,21 +674,67 @@ const users = [
 
 // ─── Runners ─────────────────────────────────────────────────────────────────
 
+/*
+ * Runners work where they are (spec 0009): each has a country and the towns
+ * they take jobs in. A job alerts the online runners serving its pickup town.
+ */
 const runners = [
   {
     id: 'r001', user_id: 'u005', name: 'Kagiso Sithole', initials: 'KS', phone: '+267 72 118 449',
     vehicle: 'Toyota Hilux single cab', plate: 'B 481 AQR', city: 'Gaborone',
+    country: 'BW', towns: ['Gaborone', 'Mogoditshane', 'Tlokweng'],
     online: true, rating: 4.9, deliveries_completed: 312, earnings_mtd: 4_180, earnings_total: 61_420,
   },
   {
     id: 'r002', user_id: null, name: 'Onalenna Phiri', initials: 'OP', phone: '+267 71 903 226',
     vehicle: 'Nissan NP200', plate: 'B 772 BKM', city: 'Gaborone',
+    country: 'BW', towns: ['Gaborone', 'Lobatse', 'Kanye'],
     online: false, rating: 4.7, deliveries_completed: 198, earnings_mtd: 2_640, earnings_total: 38_900,
   },
   {
     id: 'r003', user_id: null, name: 'Lesedi Kgosi', initials: 'LK', phone: '+267 74 552 018',
     vehicle: 'Motorcycle — Honda CG125', plate: 'B 219 CDN', city: 'Francistown',
+    country: 'BW', towns: ['Francistown'],
     online: true, rating: 4.6, deliveries_completed: 141, earnings_mtd: 1_980, earnings_total: 22_150,
+  },
+  {
+    // The first runner outside Botswana (spec 0009).
+    id: 'r004', user_id: null, name: 'Palesa Mokoena', initials: 'PM', phone: '+266 5884 2210',
+    vehicle: 'Toyota Quantum', plate: 'A 4471', city: 'Maseru',
+    country: 'LS', towns: ['Maseru', 'Teyateyaneng', 'Maputsoe'],
+    online: false, rating: 4.8, deliveries_completed: 37, earnings_mtd: 620, earnings_total: 5_410,
+  },
+];
+
+/*
+ * Listed courier and clearance partners (spec 0008, generalised by spec 0009):
+ * each lists the routes it serves with a fee rule per route. Gorosa's two
+ * routes are from the product owner's messages of 2026-10-20/21: cut-off P2,000,
+ * Gaborone P250 or 16%, Francistown P300 or 21%, P200 for launch to Gaborone
+ * (she gave no end date), P130 of the Gaborone fee owed to Gorosa. Kedi's is
+ * the second courier she named; it joins once she sends its routes and fees.
+ */
+const couriers = [
+  {
+    id: 'cr001', name: 'Gorosa Express Logistics', role: 'CROSS_BORDER_CLEARANCE', sort_order: 1, active: true,
+    trips_per_week: 2, insured: true, phone: '+27 73 932 7292',
+    depot: { country: 'ZA', city: 'Johannesburg', address: '2A Kikuyu Road, Sunninghill Self-Storage, Sunninghill' },
+    consignee_format: '{first} {last} Gorosa',
+    payment_options: ['AT_CHECKOUT', 'ON_ARRIVAL'],
+    routes: [
+      {
+        from: { country: 'ZA' },
+        to: { country: 'BW', city: 'Gaborone' },
+        fee: { threshold: 2000, flat: 250, pct: 0.16, launch_flat: 200, launch_until: null },
+        payable: { flat: 130, pct: null },
+      },
+      {
+        from: { country: 'ZA' },
+        to: { country: 'BW', city: 'Francistown' },
+        fee: { threshold: 2000, flat: 300, pct: 0.21, launch_flat: null, launch_until: null },
+        payable: { flat: null, pct: null },
+      },
+    ],
   },
 ];
 
@@ -1034,8 +1080,12 @@ orderSpecs.forEach((spec, index) => {
         status: delivered ? 'DELIVERED' : 'IN_TRANSIT',
         pickup_name: supplier.name,
         pickup_address: `${supplier.city} depot`,
+        pickup_country: supplier.country,
+        pickup_town: supplier.city,
         dropoff_name: customer.name,
         dropoff_address: `${address}, ${city}`,
+        dropoff_country: DEFAULT_DELIVERY_COUNTRY,
+        dropoff_town: city,
         distance_km: Math.round((4 + rand() * 26) * 10) / 10,
         payout: Math.round(35 + rand() * 55),
         created_at: placedAt,
@@ -1731,6 +1781,7 @@ const files = {
   users,
   categories,
   countries,
+  couriers,
   products,
   suppliers,
   'supplier-offers': supplierOffers,

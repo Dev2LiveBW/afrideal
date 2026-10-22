@@ -2,6 +2,7 @@ import Link from 'next/link';
 import { BadgeCheck, ChevronRight, Store, Truck } from 'lucide-react';
 
 import { MoneyText } from '@/components/brand/MoneyText';
+import { DeliverToTown } from '@/components/storefront/DeliverToTown';
 import type { PublicOffer } from '@/lib/queries';
 
 /** Breadcrumb, delivery estimate and seller card for the product detail page. */
@@ -40,7 +41,8 @@ export function DeliveryEstimate({
   fee = 45,
 }: {
   offers: PublicOffer[];
-  city: string;
+  /** A fixed town; otherwise the shopper's "Deliver to" choice (spec 0009). */
+  city?: string;
   fee?: number;
 }) {
   const inStock = offers.filter((offer) => offer.in_stock);
@@ -67,7 +69,7 @@ export function DeliveryEstimate({
         <Truck size={16} strokeWidth={1.5} className="shrink-0 text-muted" />
         <div>
           <p className="text-[13px] font-medium text-ink">Delivery estimate</p>
-          <p className="text-[11.5px] text-muted">To {city}</p>
+          <p className="text-[11.5px] text-muted">To {city ?? <DeliverToTown />}</p>
         </div>
       </div>
 

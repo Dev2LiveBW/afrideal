@@ -546,7 +546,7 @@ export function StorefrontFooter() {
           <div>
             <AfriDealLogo variant="dark" size="md" withTagline />
             <p className="mt-4 max-w-[280px] text-[13.5px] leading-6 text-white/65">
-              A procurement marketplace for Botswana and South Africa. Verified suppliers, published pricing, and runner-assisted sourcing.
+              A procurement marketplace for southern Africa: order from suppliers in any country we trade in, delivered to yours. Verified suppliers, published pricing, and runner-assisted sourcing.
             </p>
           </div>
 

@@ -39,7 +39,7 @@ export default async function AdminSuppliersPage() {
         <PageHeader
           eyebrow="Commerce"
           title="Suppliers"
-          description={`${suppliers.length} suppliers registered across Botswana and South Africa.`}
+          description={`${suppliers.length} suppliers registered across ${new Set(suppliers.map((supplier) => supplier.country)).size} countries.`}
           action={canDecide ? <OnboardSupplierButton categories={categories} countries={countries} /> : undefined}
         />
 

@@ -79,8 +79,8 @@ spec [0009](../specs/0009-any-to-any-marketplace.md)
   - [x] Countries as data; `'BW' | 'ZA'` unions and enums gone; Lesotho in the seed
   - [x] `laneFor()` replaces every "not Botswana" check; customs row per lane
   - [x] "Deliver to" country and town in the header and checkout
-  - [ ] Courier routes and runner service areas carry countries
-  - [ ] Copy sweep
+  - [x] Courier routes and runner service areas carry countries
+  - [x] Copy sweep
 - [ ] Verify it: `/check verify any-to-any marketplace`
 - [ ] Test it: `/test`
 - [ ] Review it: `/check review`

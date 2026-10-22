@@ -8,6 +8,12 @@
     "vehicle": "Toyota Hilux single cab",
     "plate": "B 481 AQR",
     "city": "Gaborone",
+    "country": "BW",
+    "towns": [
+      "Gaborone",
+      "Mogoditshane",
+      "Tlokweng"
+    ],
     "online": true,
     "rating": 4.9,
     "deliveries_completed": 312,
@@ -23,6 +29,12 @@
     "vehicle": "Nissan NP200",
     "plate": "B 772 BKM",
     "city": "Gaborone",
+    "country": "BW",
+    "towns": [
+      "Gaborone",
+      "Lobatse",
+      "Kanye"
+    ],
     "online": false,
     "rating": 4.7,
     "deliveries_completed": 198,
@@ -38,10 +50,35 @@
     "vehicle": "Motorcycle — Honda CG125",
     "plate": "B 219 CDN",
     "city": "Francistown",
+    "country": "BW",
+    "towns": [
+      "Francistown"
+    ],
     "online": true,
     "rating": 4.6,
     "deliveries_completed": 141,
     "earnings_mtd": 1980,
     "earnings_total": 22150
+  },
+  {
+    "id": "r004",
+    "user_id": null,
+    "name": "Palesa Mokoena",
+    "initials": "PM",
+    "phone": "+266 5884 2210",
+    "vehicle": "Toyota Quantum",
+    "plate": "A 4471",
+    "city": "Maseru",
+    "country": "LS",
+    "towns": [
+      "Maseru",
+      "Teyateyaneng",
+      "Maputsoe"
+    ],
+    "online": false,
+    "rating": 4.8,
+    "deliveries_completed": 37,
+    "earnings_mtd": 620,
+    "earnings_total": 5410
   }
 ]

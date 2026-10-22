@@ -17,8 +17,21 @@ Country field from it, offers only that country's lockers (none outside
 Botswana yet), suggests its towns, and sends `delivery_country` with the
 order. Checked in the browser: Maseru shows customs on South African wigs,
 Johannesburg does not, and an order to Maseru records `LS`.
-`DEFAULT_DELIVERY_COUNTRY` is now only the first-visit default. Steps 4 to 6
-and the open questions remain.
+`DEFAULT_DELIVERY_COUNTRY` is now only the first-visit default.
+Steps 4 and 5 are done (2026-10-22). Runners carry a `country` and the
+`towns` they serve; runner jobs record pickup and drop-off country and town,
+and a new job alerts the online runners serving its pickup town
+(`lib/runner-match.ts`), falling back to every online runner so no job goes
+unseen until spec 0005's 30-minute widening replaces that. A Maseru runner is
+seeded. Couriers are data (`couriers`, migration `0004`): each lists routes
+from a country (optionally a town) to a destination town with its own fee
+rule, launch price and payable; `lib/couriers.mjs` finds the couriers for a
+lane and computes the fee (Gorosa's two routes seeded and unit-tested). The
+checkout courier choice itself is spec 0008's build and waits on its open
+question 2 (when the buyer pays). The copy sweep removed "Botswana and South
+Africa" from the tagline, site description and trust strip, names the order's
+country from the data, and starts the delivery estimate and RFQ location
+from "Deliver to". Step 6 and the open questions remain.
 
 ## Summary
 

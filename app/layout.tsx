@@ -34,7 +34,7 @@ export const metadata: Metadata = {
     template: '%s · AfriDeal',
   },
   description:
-    'A procurement marketplace for Botswana and South Africa. Published prices at every quantity, verified suppliers, and delivery you can follow.',
+    'A procurement marketplace for southern Africa: order from suppliers in any country we trade in, delivered to yours. Published prices at every quantity, verified suppliers, and delivery you can follow.',
   icons: { icon: '/afrideal-mark.svg' },
 };
 

@@ -13,6 +13,7 @@ import type {
   Brand,
   Category,
   Country,
+  Courier,
   CustomerPrice,
   Dispute,
   SupplierPayable,
@@ -114,6 +115,8 @@ export interface Schema {
 
   // The countries AfriDeal trades in (spec 0009): reference data, not code.
   countries: Country;
+  // Listed courier and clearance partners and the routes they serve (spec 0008, 0009).
+  couriers: Courier;
 }
 
 export type Collection = keyof Schema;
