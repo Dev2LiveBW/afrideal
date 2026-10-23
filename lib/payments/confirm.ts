@@ -66,6 +66,12 @@ export type ConfirmInput = {
   providerReference: string;
   /** What the provider says was actually paid. Compared with the order total. */
   amount: number;
+  /**
+   * The currency it was paid in, when the provider says (spec 0010). A payment
+   * in another currency than the order's is a mismatch however the numbers
+   * compare. Omitted means the order's own currency.
+   */
+  currency?: string;
   actor: ConfirmActor;
   /** A finance admin's words when confirming a bank transfer by hand. */
   note?: string | null;
@@ -109,7 +115,9 @@ export async function confirmPayment(input: ConfirmInput): Promise<ConfirmOutcom
   }
 
   const now = new Date().toISOString();
-  const amountMatches = input.amount === order.total;
+  const orderCurrency = order.currency ?? 'BWP';
+  const currencyMatches = !input.currency || input.currency.toUpperCase() === orderCurrency;
+  const amountMatches = currencyMatches && input.amount === order.total;
 
   // ── 1. Claim ───────────────────────────────────────────────────────────────
   let claim: ClaimResult;

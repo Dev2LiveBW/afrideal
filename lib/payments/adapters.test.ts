@@ -27,7 +27,7 @@ function order(over: Partial<Order> = {}): Order {
     subtotal: 284,
     delivery_fee: 45,
     total: 329,
-    payment_method: 'DPO_PAY',
+    payment_method: 'CARD',
     payment_reference: null,
     payment_expires_at: '2026-10-06T11:00:00.000Z',
     cancel_reason: null,
@@ -50,15 +50,15 @@ describe('providerFor', () => {
   it('routes a card method to the mock while PAYMENTS_PROVIDER is mock', () => {
     vi.stubEnv('PAYMENTS_PROVIDER', 'mock');
 
-    expect(providerFor('DPO_PAY')).toBe('MOCK');
+    expect(providerFor('CARD')).toBe('MOCK');
     expect(providerFor('PAYGATE')).toBe('MOCK');
     expect(providerFor('ORANGE_MONEY')).toBe('MOCK');
   });
 
-  it('routes a card method to itself when the mock is off', () => {
+  it('routes a card to Stripe when the mock is off (spec 0010)', () => {
     vi.stubEnv('PAYMENTS_PROVIDER', 'live');
 
-    expect(providerFor('DPO_PAY')).toBe('DPO_PAY');
+    expect(providerFor('CARD')).toBe('STRIPE');
   });
 
   // Mocking a bank transfer would mean mocking a human reading a statement.
@@ -72,14 +72,14 @@ describe('providerFor', () => {
     vi.stubEnv('PAYMENTS_PROVIDER', 'mock');
     vi.stubEnv('NODE_ENV', 'production');
 
-    expect(() => providerFor('DPO_PAY')).toThrow(MockProviderInProductionError);
+    expect(() => providerFor('CARD')).toThrow(MockProviderInProductionError);
   });
 
   it('is unaffected in production when the mock is not requested', () => {
     vi.stubEnv('NODE_ENV', 'production');
     vi.stubEnv('PAYMENTS_PROVIDER', 'live');
 
-    expect(providerFor('DPO_PAY')).toBe('DPO_PAY');
+    expect(providerFor('CARD')).toBe('STRIPE');
   });
 });
 
@@ -163,12 +163,20 @@ describe('startPayment, for a card', () => {
     expect(started.redirectUrl).not.toContain('329');
   });
 
-  it('has nowhere to send the buyer for a real provider until its adapter exists', async () => {
+  it('has nowhere to send the buyer for a wallet whose gateway does not exist yet', async () => {
     vi.stubEnv('PAYMENTS_PROVIDER', 'live');
 
-    const started = await startPayment(order());
+    const started = await startPayment(order({ payment_method: 'ORANGE_MONEY' }));
 
     expect(started.redirectUrl).toBeNull();
+  });
+
+  // Spec 0010: DPO is a provider behind CARD, and until it is built a card
+  // routed to it must fail at checkout rather than open an unpayable attempt.
+  it('refuses a card routed to DPO until its adapter exists', async () => {
+    vi.stubEnv('CARD_PROVIDER', 'dpo');
+
+    await expect(startPayment(order())).rejects.toThrow(/DPO Pay is not connected/);
   });
 });
 
@@ -210,7 +218,7 @@ describe('the production opt in for the mock', () => {
     vi.stubEnv('PAYMENTS_PROVIDER', 'mock');
     vi.stubEnv('ALLOW_MOCK_PAYMENTS', '1');
 
-    expect(providerFor('DPO_PAY')).toBe('MOCK');
+    expect(providerFor('CARD')).toBe('MOCK');
   });
 
   it('ignores ALLOW_MOCK_PAYMENTS on Vercel, so a deployed site can never use the mock', () => {
@@ -219,7 +227,7 @@ describe('the production opt in for the mock', () => {
     vi.stubEnv('PAYMENTS_PROVIDER', 'mock');
     vi.stubEnv('ALLOW_MOCK_PAYMENTS', '1');
 
-    expect(() => providerFor('DPO_PAY')).toThrow(MockProviderInProductionError);
+    expect(() => providerFor('CARD')).toThrow(MockProviderInProductionError);
   });
 });
 
@@ -243,6 +251,60 @@ describe('availablePaymentMethods', () => {
     vi.stubEnv('NODE_ENV', 'development');
     vi.stubEnv('PAYMENTS_PROVIDER', 'mock');
 
-    expect(availablePaymentMethods()).toEqual(['DPO_PAY', 'ORANGE_MONEY', 'PAYGATE', 'EFT']);
+    expect(availablePaymentMethods()).toEqual(['CARD', 'ORANGE_MONEY', 'PAYGATE', 'EFT']);
+  });
+});
+
+describe('the card provider (spec 0010)', () => {
+  function withStripeKeys() {
+    vi.stubEnv('STRIPE_SECRET_KEY', 'sk_test_unit');
+    vi.stubEnv('STRIPE_WEBHOOK_SECRET', 'whsec_unit');
+  }
+
+  it('sends cards to Stripe and leaves wallets on the mock when CARD_PROVIDER is stripe', () => {
+    vi.stubEnv('PAYMENTS_PROVIDER', 'mock');
+    vi.stubEnv('CARD_PROVIDER', 'stripe');
+    withStripeKeys();
+
+    expect(providerFor('CARD')).toBe('STRIPE');
+    expect(providerFor('ORANGE_MONEY')).toBe('MOCK');
+    expect(availablePaymentMethods()).toEqual(['CARD', 'ORANGE_MONEY', 'PAYGATE', 'EFT']);
+  });
+
+  it('offers the card only once Stripe has both a test key and a webhook secret', () => {
+    vi.stubEnv('PAYMENTS_PROVIDER', 'live');
+    vi.stubEnv('STRIPE_SECRET_KEY', 'sk_test_unit');
+    vi.stubEnv('STRIPE_WEBHOOK_SECRET', '');
+    expect(availablePaymentMethods()).toEqual(['EFT']);
+
+    vi.stubEnv('STRIPE_WEBHOOK_SECRET', 'whsec_unit');
+    expect(availablePaymentMethods()).toEqual(['CARD', 'EFT']);
+  });
+
+  it('never offers the card on a live key, and refuses to start a payment with one', async () => {
+    vi.stubEnv('PAYMENTS_PROVIDER', 'live');
+    vi.stubEnv('STRIPE_SECRET_KEY', 'sk_live_unit');
+    vi.stubEnv('STRIPE_WEBHOOK_SECRET', 'whsec_unit');
+
+    expect(availablePaymentMethods()).toEqual(['EFT']);
+    await expect(startPayment(order({ payment_method: 'CARD' }), { origin: 'http://localhost' })).rejects.toThrow(
+      /live key/,
+    );
+  });
+
+  it('holds CARD_PROVIDER=mock to the same production gate as the mock', () => {
+    vi.stubEnv('NODE_ENV', 'production');
+    vi.stubEnv('VERCEL', '1');
+    vi.stubEnv('CARD_PROVIDER', 'mock');
+
+    expect(() => providerFor('CARD')).toThrow(MockProviderInProductionError);
+    expect(availablePaymentMethods()).toEqual(['EFT']);
+  });
+
+  it('does not offer a card through DPO until its adapter exists', () => {
+    vi.stubEnv('CARD_PROVIDER', 'dpo');
+
+    expect(providerFor('CARD')).toBe('DPO_PAY');
+    expect(availablePaymentMethods()).toEqual(['EFT']);
   });
 });

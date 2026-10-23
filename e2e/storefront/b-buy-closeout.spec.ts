@@ -136,7 +136,7 @@ test.describe('C. Request for quotation (Chosen quote to order)', () => {
 
     // 3. Buyer accepts the quote (or staff selects), converting it into an order
     const acceptRes = await page.request.patch(`/api/rfqs/${rfq.id}`, {
-      data: { action: 'ACCEPT_QUOTE', customer_unit_price: 85, payment_method: 'DPO_PAY' },
+      data: { action: 'ACCEPT_QUOTE', customer_unit_price: 85, payment_method: 'CARD' },
     });
     expect(acceptRes.ok(), `accept quote failed: ${await acceptRes.text()}`).toBeTruthy();
     const { order, rfq: updatedRfq } = await acceptRes.json();

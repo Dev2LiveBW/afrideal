@@ -118,6 +118,8 @@ async function json(jar, path, init) {
 const MOCK_SECRET = process.env.PAYMENT_SECRET_MOCK ?? 'afrideal-dev-mock-secret';
 
 async function payCallback(orderId, attempt, options = {}) {
+  if (attempt?.provider === 'STRIPE') return payStripe(attempt, options);
+
   const body = JSON.stringify({
     reference: attempt?.provider_reference ?? attempt?.reference ?? null,
     status: options.status ?? 'CONFIRMED',
@@ -140,6 +142,69 @@ async function payCallback(orderId, attempt, options = {}) {
   });
 
   return { status: response.status, body: await response.json().catch(() => null) };
+}
+
+// ── Spec 0010: confirming a card the way Stripe does ─────────────────────────
+//
+// With CARD_PROVIDER=stripe the server opens real test-mode Checkout sessions,
+// and Stripe would confirm them through a signed webhook. These helpers sign
+// the same event shape with the same secret, so every card order in this suite
+// goes through the real webhook route, signature check and confirmPayment().
+const STRIPE_WEBHOOK_SECRET = process.env.STRIPE_WEBHOOK_SECRET ?? '';
+const STRIPE_SECRET_KEY = process.env.STRIPE_SECRET_KEY ?? '';
+
+function stripeSignature(payload, { secret = STRIPE_WEBHOOK_SECRET, timestamp } = {}) {
+  const t = timestamp ?? Math.floor(Date.now() / 1000);
+  const v1 = createHmac('sha256', secret).update(`${t}.${payload}`, 'utf8').digest('hex');
+  return `t=${t},v1=${v1}`;
+}
+
+function stripeEvent(type, session) {
+  return JSON.stringify({
+    id: `evt_verify_${Date.now().toString(36)}${Math.random().toString(36).slice(2, 8)}`,
+    object: 'event',
+    type,
+    data: { object: { object: 'checkout.session', payment_status: 'paid', status: 'complete', ...session } },
+  });
+}
+
+async function postStripe(payload, signature) {
+  const headers = { 'Content-Type': 'application/json' };
+  if (signature) headers['stripe-signature'] = signature;
+  const response = await fetch(`${BASE}/api/payments/stripe/webhook`, { method: 'POST', headers, body: payload });
+  return { status: response.status, body: await response.json().catch(() => null) };
+}
+
+/**
+ * Pay a Stripe attempt, answering in the generic callback's terms so the spec
+ * 0003 checks read the same either way. The one translation: Stripe's route
+ * answers a business refusal with 200 (Stripe retries anything else for three
+ * days), and the generic callback with 409, so a REFUSED body reads as 409 here.
+ */
+async function payStripe(attempt, options = {}) {
+  const reference = attempt?.provider_reference ?? attempt?.reference;
+  const failed = options.status === 'FAILED';
+  const payload = stripeEvent(failed ? 'checkout.session.async_payment_failed' : 'checkout.session.completed', {
+    id: reference,
+    amount_total: Math.round((options.amount ?? 0) * 100),
+    currency: (options.currency ?? 'BWP').toLowerCase(),
+    ...(failed ? { payment_status: 'unpaid' } : {}),
+  });
+
+  let signature = null;
+  if (options.sign !== false) signature = options.signature ? `t=${Math.floor(Date.now() / 1000)},v1=${options.signature}` : stripeSignature(payload);
+
+  const result = await postStripe(payload, signature);
+  if (result.status === 200 && result.body?.status === 'REFUSED') return { status: 409, body: result.body };
+  return result;
+}
+
+/** A Checkout session as Stripe holds it, read with the test key. */
+async function stripeSession(id) {
+  const response = await fetch(`https://api.stripe.com/v1/checkout/sessions/${encodeURIComponent(id)}`, {
+    headers: { Authorization: `Bearer ${STRIPE_SECRET_KEY}` },
+  });
+  return response.ok ? response.json() : null;
 }
 
 // ── 1. Every seeded login works and carries the right role ───────────────────
@@ -545,7 +610,7 @@ section('9. Checkout — the order split engine');
           { product_id: 'p001', variant_id: 'p001v1', qty: 1 },
           { product_id: 'p006', variant_id: 'p006v1', qty: 1 },
         ],
-        payment_method: 'DPO_PAY',
+        payment_method: 'CARD',
         delivery_address: 'Plot 1, Gaborone',
         delivery_city: 'Gaborone',
       }),
@@ -585,7 +650,7 @@ section('9. Checkout — the order split engine');
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({
       lines: [],
-      payment_method: 'DPO_PAY',
+      payment_method: 'CARD',
       delivery_address: 'x',
       delivery_city: 'Gaborone',
     }),
@@ -795,7 +860,7 @@ section('9d. Refused payments — a cancelled order is not reopened, a paid one 
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         lines: [{ product_id: 'p001', variant_id: 'p001v1', qty: 1 }],
-        payment_method: 'DPO_PAY',
+        payment_method: 'CARD',
         delivery_address: 'Plot 1, Gaborone',
         delivery_city: 'Gaborone',
       }),
@@ -842,6 +907,150 @@ section('9d. Refused payments — a cancelled order is not reopened, a paid one 
   const paidEntries = (replayed?.order?.timeline ?? []).filter((entry) => entry.status === 'PAID');
   check('a replayed confirmation adds nothing to the timeline', paidEntries.length === 1,
     `${paidEntries.length} PAID entries`);
+}
+
+// ── Spec 0010: cards through Stripe ──────────────────────────────────────────
+section('9f. Card payments through Stripe — signed webhook, one confirmation');
+{
+  // The webhook is the only way Stripe's word reaches an order, so whatever the
+  // server's configuration, an unsigned event must never be accepted.
+  const stray = stripeEvent('checkout.session.completed', { id: 'cs_test_verify_unknown', amount_total: 100, currency: 'bwp' });
+  const unsigned = await postStripe(stray, null);
+  check('an unsigned Stripe event is refused', unsigned.status === 401 || unsigned.status === 404, `got ${unsigned.status}`);
+
+  if (!STRIPE_WEBHOOK_SECRET) {
+    console.log('  · STRIPE_WEBHOOK_SECRET is not set here; the signed Stripe checks are skipped.');
+  } else {
+    check('an unsigned Stripe event is refused with 401', unsigned.status === 401, `got ${unsigned.status}`);
+
+    const forged = await postStripe(stray, stripeSignature(stray, { secret: 'whsec_not_ours' }));
+    check('an event signed with another secret is refused', forged.status === 401, `got ${forged.status}`);
+
+    const stale = await postStripe(stray, stripeSignature(stray, { timestamp: Math.floor(Date.now() / 1000) - 600 }));
+    check('a captured event replayed ten minutes later is refused', stale.status === 401, `got ${stale.status}`);
+
+    const unknown = await postStripe(stray, stripeSignature(stray));
+    check('a session this environment never opened is acknowledged and ignored',
+      unknown.status === 200 && typeof unknown.body?.ignored === 'string', `${unknown.status} ${JSON.stringify(unknown.body)}`);
+
+    const other = stripeEvent('customer.created', { id: 'cus_verify' });
+    const otherResult = await postStripe(other, stripeSignature(other));
+    check('an event that is not a payment outcome is acknowledged and ignored',
+      otherResult.status === 200 && typeof otherResult.body?.ignored === 'string', `got ${otherResult.status}`);
+  }
+
+  const buyer = sessions['thabo@gmail.com'].jar;
+  const ops = sessions['ops@afrideal.co.bw'].jar;
+  const finance = sessions['finance@afrideal.co.bw'].jar;
+  const placeCard = (extra = {}) =>
+    json(buyer, '/api/orders', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        lines: [{ product_id: 'p001', variant_id: 'p001v1', qty: 1 }],
+        payment_method: 'CARD',
+        delivery_address: 'Plot 5412, Extension 12',
+        delivery_city: 'Gaborone',
+        ...extra,
+      }),
+    });
+
+  const first = await placeCard();
+  if (first.body?.payment?.provider !== 'STRIPE') {
+    console.log(`  · The server takes cards on ${first.body?.payment?.provider ?? 'nothing'}; set CARD_PROVIDER=stripe with test keys for the session checks.`);
+  } else if (!STRIPE_WEBHOOK_SECRET || !STRIPE_SECRET_KEY.startsWith('sk_test_') && !STRIPE_SECRET_KEY.startsWith('rk_test_')) {
+    check('verify has the same Stripe test keys as the server', false, 'set STRIPE_SECRET_KEY and STRIPE_WEBHOOK_SECRET');
+  } else {
+    const order = first.body.order;
+    const payment = first.body.payment;
+    check('a card order opens a Stripe Checkout session', payment.reference?.startsWith('cs_test_'), payment.reference);
+    check('the buyer is sent to Stripe’s hosted page',
+      typeof payment.redirect_url === 'string' && payment.redirect_url.startsWith('https://checkout.stripe.com/'), payment.redirect_url);
+
+    const session = await stripeSession(payment.reference);
+    check('Stripe holds the order total in thebe', session?.amount_total === Math.round(order.total * 100),
+      `${session?.amount_total} vs ${order.total}`);
+    check('a Botswana buyer is charged in pula', session?.currency === 'bwp', `got ${session?.currency}`);
+    check('the session is linked to the order', session?.client_reference_id === order.id && session?.metadata?.order_id === order.id);
+    check('the session closes before the order window does',
+      session?.expires_at * 1000 < new Date(order.payment_expires_at).getTime(),
+      `${new Date(session?.expires_at * 1000).toISOString()} vs ${order.payment_expires_at}`);
+
+    const again = await json(buyer, `/api/orders/${order.id}/payments`, { method: 'POST' });
+    check('coming back hands the open session back rather than opening a second',
+      again.body?.reused === true && again.body?.payment?.reference === payment.reference,
+      `${again.status} ${again.body?.payment?.reference}`);
+
+    const confirmed = await payCallback(order.id, payment, { amount: order.total });
+    check('a signed checkout.session.completed confirms the order',
+      confirmed.status === 200 && confirmed.body?.order_status === 'PROCESSING', `${confirmed.status} ${JSON.stringify(confirmed.body)}`);
+    check('and the amount matched', confirmed.body?.amount_matches === true);
+
+    const replay = await payCallback(order.id, payment, { amount: order.total });
+    check('Stripe redelivering the event is a 200 replay', replay.status === 200 && replay.body?.replayed === true,
+      `${replay.status} ${JSON.stringify(replay.body)}`);
+    const detail = (await json(ops, `/api/orders/${order.id}`)).body;
+    check('one set of supplier legs after the replay',
+      (detail?.legs?.length ?? 0) > 0 && detail?.payables?.length === detail?.legs?.length,
+      `${detail?.legs?.length} legs, ${detail?.payables?.length} payables`);
+    check('the order carries the session as its payment reference', detail?.order?.payment_reference === payment.reference);
+
+    // A refund of a Stripe payment goes back through Stripe.
+    const refund = await json(finance, `/api/orders/${order.id}`, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ action: 'REFUND', reason: 'verify: refund through Stripe' }),
+    });
+    check('finance refunds a card payment through Stripe',
+      refund.status === 200 && refund.body?.status === 'REFUNDED' && refund.body?.refund_reference?.startsWith('re_'),
+      `${refund.status} ${refund.body?.refund_reference ?? JSON.stringify(refund.body)}`);
+
+    // AC-11: right number, wrong currency is still a mismatch.
+    const wrongCurrency = await placeCard();
+    const mismatch = await payCallback(wrongCurrency.body?.order?.id, wrongCurrency.body?.payment, {
+      amount: wrongCurrency.body?.order?.total,
+      currency: 'ZAR',
+    });
+    check('a payment in the wrong currency is applied but flagged',
+      mismatch.status === 200 && mismatch.body?.amount_matches === false, JSON.stringify(mismatch.body));
+
+    // An expired session fails its attempt; the order stays payable and a
+    // fresh session can be opened (AC-10).
+    const lapsed = await placeCard();
+    const lapsedRef = lapsed.body?.payment?.reference;
+    const expiredEvent = stripeEvent('checkout.session.expired', { id: lapsedRef, payment_status: 'unpaid', status: 'expired' });
+    const expired = await postStripe(expiredEvent, stripeSignature(expiredEvent));
+    check('an expired session fails its attempt', expired.status === 200 && expired.body?.status === 'FAILED',
+      `${expired.status} ${JSON.stringify(expired.body)}`);
+    const stillOpen = (await json(buyer, `/api/orders/${lapsed.body?.order?.id}`)).body?.order?.status;
+    check('and the order is still waiting for payment', stillOpen === 'AWAITING_PAYMENT', `got ${stillOpen}`);
+    const fresh = await json(buyer, `/api/orders/${lapsed.body?.order?.id}/payments`, { method: 'POST' });
+    check('a new Stripe session can be opened for it',
+      fresh.status === 201 && fresh.body?.payment?.reference?.startsWith('cs_test_') && fresh.body?.payment?.reference !== lapsedRef,
+      `${fresh.status} ${fresh.body?.payment?.reference}`);
+
+    // A person cancels: the session is closed at Stripe, and money that still
+    // arrives does not reopen the order.
+    const dropped = await placeCard();
+    await json(buyer, `/api/orders/${dropped.body?.order?.id}`, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ action: 'CANCEL' }),
+    });
+    const closedSession = await stripeSession(dropped.body?.payment?.reference);
+    check('cancelling an order expires its open Stripe session', closedSession?.status === 'expired', `got ${closedSession?.status}`);
+    const late = await payCallback(dropped.body?.order?.id, dropped.body?.payment, { amount: dropped.body?.order?.total });
+    check('a payment for an order a person cancelled is refused (200 to Stripe, flagged)', late.status === 409,
+      `${late.status} ${JSON.stringify(late.body)}`);
+
+    // Spec 0009, answer 1: a Lesotho buyer pays in rand.
+    const maseru = await placeCard({ delivery_address: 'Kingsway Road 12', delivery_city: 'Maseru', delivery_country: 'LS' });
+    const randSession = maseru.body?.payment?.reference ? await stripeSession(maseru.body.payment.reference) : null;
+    check('a Lesotho buyer is charged in rand on Stripe', randSession?.currency === 'zar',
+      `${maseru.status} ${randSession?.currency}`);
+    check('for the rand total', randSession?.amount_total === Math.round((maseru.body?.order?.total ?? 0) * 100),
+      `${randSession?.amount_total} vs ${maseru.body?.order?.total}`);
+  }
 }
 
 // ── Feature 10: a collection point is charged the fee checkout shows ─────────
@@ -981,7 +1190,7 @@ section('13. Tiered pricing — the ladder is real, not hard-coded');
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({
       lines: [{ product_id: 'p001', variant_id: 'p001v1', qty: 1 }],
-      payment_method: 'DPO_PAY',
+      payment_method: 'CARD',
       delivery_address: 'Plot 220, Block 6',
       delivery_city: 'Gaborone',
     }),
@@ -995,7 +1204,7 @@ section('13. Tiered pricing — the ladder is real, not hard-coded');
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({
       lines: [{ product_id: 'p001', variant_id: 'p001v1', qty: 5 }],
-      payment_method: 'DPO_PAY',
+      payment_method: 'CARD',
       delivery_address: 'Plot 220, Block 6',
       delivery_city: 'Gaborone',
     }),
@@ -1015,7 +1224,7 @@ section('13. Tiered pricing — the ladder is real, not hard-coded');
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         lines: [{ product_id: 'p001', variant_id: 'p001v1', qty }],
-        payment_method: 'DPO_PAY',
+        payment_method: 'CARD',
         delivery_address: 'Plot 220, Block 6',
         delivery_city: 'Gaborone',
       }),
@@ -1049,7 +1258,7 @@ section('13. Tiered pricing — the ladder is real, not hard-coded');
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({
       lines: [{ product_id: 'p001', variant_id: 'p001v1', qty: 20 }],
-      payment_method: 'DPO_PAY',
+      payment_method: 'CARD',
       delivery_address: 'Plot 5412, Extension 12',
       delivery_city: 'Gaborone',
     }),
@@ -1092,7 +1301,7 @@ section('13. Tiered pricing — the ladder is real, not hard-coded');
         { product_id: 'p018', variant_id: 'p018v1', qty: 3 },
         { product_id: 'p018', variant_id: 'p018v2', qty: 3 },
       ],
-      payment_method: 'DPO_PAY',
+      payment_method: 'CARD',
       delivery_address: 'Plot 5412, Extension 12',
       delivery_city: 'Gaborone',
     }),
@@ -1115,7 +1324,7 @@ section('13. Tiered pricing — the ladder is real, not hard-coded');
         { product_id: 'p018', variant_id: 'p018v1', qty: 3 },
         { product_id: 'p001', variant_id: 'p001v1', qty: 3 },
       ],
-      payment_method: 'DPO_PAY',
+      payment_method: 'CARD',
       delivery_address: 'Plot 5412, Extension 12',
       delivery_city: 'Gaborone',
     }),
@@ -1142,7 +1351,7 @@ section('13. Tiered pricing — the ladder is real, not hard-coded');
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({
       lines: [{ product_id: 'p001', variant_id: 'p001v1', qty: 1 }],
-      payment_method: 'DPO_PAY',
+      payment_method: 'CARD',
       delivery_address: 'Somewhere',
       delivery_city: 'Nowhere',
       delivery_country: 'XX',
@@ -1167,7 +1376,7 @@ section('13. Tiered pricing — the ladder is real, not hard-coded');
         delivery_country: 'LS',
       }),
     });
-  const inRand = await maseruOrder('DPO_PAY');
+  const inRand = await maseruOrder('CARD');
   check('a Lesotho order is charged in rand', inRand.body?.order?.currency === 'ZAR', `got ${inRand.status} ${inRand.body?.order?.currency}`);
   const eftInLesotho = await maseruOrder('EFT');
   check('a method Lesotho does not list (bank transfer) is refused', eftInLesotho.status === 422, `got ${eftInLesotho.status}`);
@@ -1190,7 +1399,7 @@ section('13. Tiered pricing — the ladder is real, not hard-coded');
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({
       lines: [{ product_id: 'p001', variant_id: 'p001v1', qty: 100 }],
-      payment_method: 'DPO_PAY',
+      payment_method: 'CARD',
       delivery_address: 'Plot 220, Block 6',
       delivery_city: 'Gaborone',
     }),

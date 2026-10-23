@@ -5,13 +5,15 @@ import type { Order, PaymentMethod } from '@/types';
 /**
  * How long an order stays payable, per spec 0003.
  *
- * Card and wallet sessions live in minutes, so 30 minutes outlives a hosted
- * gateway session rather than firing before it. A Botswana interbank transfer
- * clears in one to three working days, so 7 days covers a weekend plus a public
- * holiday. One window cannot serve both, which is why this is keyed by method.
+ * Card and wallet sessions live in minutes, and the order's window should
+ * outlive the gateway's session rather than fire before it. Stripe Checkout
+ * sessions last at least 30 minutes, so a card gets 35 (spec 0010) against a
+ * session created to expire at 31. A Botswana interbank transfer clears in one
+ * to three working days, so 7 days covers a weekend plus a public holiday. One
+ * window cannot serve both, which is why this is keyed by method.
  */
 const WINDOW_MINUTES: Record<PaymentMethod, number> = {
-  DPO_PAY: 30,
+  CARD: 35,
   PAYGATE: 30,
   ORANGE_MONEY: 30,
   EFT: 7 * 24 * 60,
