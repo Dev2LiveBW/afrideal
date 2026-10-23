@@ -21,10 +21,10 @@ test.describe('B. Buying and tracking (Close-out)', () => {
 
     await caption(page, 'B09 · 2. Select Pay by Card and place order');
     await page.getByRole('textbox', { name: 'Street address or plot number' }).fill('Plot 1234, Gaborone');
-    await page.getByRole('textbox', { name: 'City or town' }).fill('Gaborone');
-    
-    // Choose Card payment (this radio might not exist yet, so test.fail() is appropriate)
-    await page.getByRole('radio', { name: /DPO Pay/ }).check();
+    await page.getByRole('combobox', { name: 'City or town' }).fill('Gaborone');
+
+    // Botswana's card method (spec 0009); cards go through DPO Pay.
+    await page.getByRole('radio', { name: /Visa \/ Mastercard/ }).check({ force: true });
     
     // Place order should trigger the gateway redirect
     await clickAndSave(page.getByRole('button', { name: 'Place order' }));
@@ -95,6 +95,8 @@ test.describe('B. Buying and tracking (Customs & Duty)', () => {
     const orderSummary = page.getByRole('heading', { name: 'Order summary' }).locator('xpath=..');
     await expect(orderSummary).toContainText('Customs & Duty');
     await expect(orderSummary).toContainText('Cleared by your courier');
+    // The courier's own fee is shown but paid to the courier, outside the total.
+    await expect(orderSummary).toContainText(/not to AfriDeal, so it is\s+not in your total/);
   });
 });
 
@@ -107,7 +109,10 @@ test.describe('C. Request for quotation (Chosen quote to order)', () => {
     await ready(page);
     await caption(page, 'C04 · 1. Submit quotation request and receive supplier quote');
     const label = runLabel('C04 quotation');
+    // Each of these is a save: give it the 90 s clickAndSave gives a click.
+    const SAVE = 90_000;
     const createRes = await page.request.post('/api/rfqs', {
+      timeout: SAVE,
       data: {
         product_id: 'p001',
         requested_quantity: 150,
@@ -123,6 +128,7 @@ test.describe('C. Request for quotation (Chosen quote to order)', () => {
     await naledi.goto('/supplier/dashboard');
     await ready(naledi);
     const quoteRes = await naledi.request.patch(`/api/rfqs/${rfq.id}`, {
+      timeout: SAVE,
       data: {
         action: 'RESPOND',
         unit_price: 65,
@@ -136,6 +142,7 @@ test.describe('C. Request for quotation (Chosen quote to order)', () => {
 
     // 3. Buyer accepts the quote (or staff selects), converting it into an order
     const acceptRes = await page.request.patch(`/api/rfqs/${rfq.id}`, {
+      timeout: SAVE,
       data: { action: 'ACCEPT_QUOTE', customer_unit_price: 85, payment_method: 'DPO_PAY' },
     });
     expect(acceptRes.ok(), `accept quote failed: ${await acceptRes.text()}`).toBeTruthy();
@@ -155,7 +162,8 @@ test.describe('C. Request for quotation (Chosen quote to order)', () => {
     await page.goto(`/orders/${order.id}`);
     await expectHealthy(page);
     await expect(page.getByText('Waiting for your payment')).toBeVisible();
-    await expect(page.getByText('Shea Butter Deep Treatment 500ml')).toBeVisible();
+    // In main: the search box's placeholder ticker can show the same name.
+    await expect(page.locator('main').getByText('Shea Butter Deep Treatment 500ml')).toBeVisible();
 
     // 6. Pay via card gateway
     await page.getByRole('button', { name: 'Try paying again' }).click();
@@ -180,6 +188,9 @@ test.describe('F. Runner deliveries (Collection Point)', () => {
     // Three people and about ten saves, each 2 to 30 s from Botswana: the
     // default 3 minutes ran out during the locker drop-off (2026-10-13).
     test.setTimeout(10 * 60_000);
+    // Not Gaborone Central: B10 orders there and E02 may mark that order ready,
+    // and the runner's job cards carry no order reference to tell them apart.
+    const LOCKER = 'Francistown Main Mall Locker';
 
     // 1. Kefilwe places an order to a Collection Point
     await caption(page, 'F04 · 1. Kefilwe orders with Collection Point delivery');
@@ -189,7 +200,7 @@ test.describe('F. Runner deliveries (Collection Point)', () => {
     await ready(page);
 
     await page.getByRole('radio', { name: /Collection Point/ }).check();
-    await page.getByRole('combobox', { name: 'Select location' }).selectOption('Gaborone Central Locker');
+    await page.getByRole('combobox', { name: 'Select location' }).selectOption(LOCKER);
     await clickAndSave(page.getByRole('button', { name: 'Place order' }));
 
     // Mock payment gateway step
@@ -234,7 +245,7 @@ test.describe('F. Runner deliveries (Collection Point)', () => {
     for (let attempt = 0; attempt < 3 && !accepted; attempt++) {
       if (await alertModal.waitFor({ timeout: 5000 }).then(() => true, () => false)) {
         const text = await alertModal.innerText();
-        if (text.includes('Gaborone Central Locker')) {
+        if (text.includes(LOCKER)) {
           await clickAndSave(alertModal.getByRole('button', { name: 'Accept' }));
           accepted = true;
           break;
@@ -250,14 +261,14 @@ test.describe('F. Runner deliveries (Collection Point)', () => {
         await alertModal.getByRole('button', { name: 'Decline' }).click();
         await alertModal.waitFor({ state: 'detached', timeout: 3000 }).catch(() => {});
       }
-      const availableJob = runner.locator('.shadow-card').filter({ has: runner.getByText('Gaborone Central Locker') })
+      const availableJob = runner.locator('.shadow-card').filter({ has: runner.getByText(LOCKER) })
         .filter({ has: runner.getByRole('button', { name: 'Accept job' }) }).first();
       await clickAndSave(availableJob.getByRole('button', { name: 'Accept job' }));
     }
 
     // Active job progress: Mark picked up -> Start delivery
     const activeJob = runner.locator('.shadow-card').filter({ has: runner.getByText('Active job') })
-      .filter({ has: runner.getByText('Gaborone Central Locker') }).first();
+      .filter({ has: runner.getByText(LOCKER) }).first();
     await expect(activeJob).toBeVisible();
 
     const dismissAnyAlert = async () => {
@@ -358,8 +369,8 @@ test.describe('Z. The golden thread (Mobile Parity)', () => {
     expect(checkoutScrollWidth).toBeLessThanOrEqual(viewportWidth + 2);
 
     await page.getByRole('textbox', { name: 'Street address or plot number' }).fill('Plot 8841, Village');
-    await page.getByRole('textbox', { name: 'City or town' }).fill('Gaborone');
-    await page.getByRole('radio', { name: /DPO Pay/ }).check();
+    await page.getByRole('combobox', { name: 'City or town' }).fill('Gaborone');
+    await page.getByRole('radio', { name: /Visa \/ Mastercard/ }).check({ force: true });
 
     // Place order
     await clickAndSave(page.getByRole('button', { name: 'Place order' }).filter({ visible: true }));
