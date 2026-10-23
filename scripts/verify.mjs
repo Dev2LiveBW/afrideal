@@ -995,15 +995,21 @@ section('9f. Card payments through Stripe — signed webhook, one confirmation')
       `${detail?.legs?.length} legs, ${detail?.payables?.length} payables`);
     check('the order carries the session as its payment reference', detail?.order?.payment_reference === payment.reference);
 
-    // A refund of a Stripe payment goes back through Stripe.
+    // A refund of a Stripe payment goes back through Stripe first. This payment
+    // was confirmed by verify's own signed event, so Stripe holds no money for
+    // the session and refuses: the order must be left exactly as it was, not
+    // marked refunded with nothing returned. A real refund (re_…) is checked by
+    // hand on a 4242 payment (spec 0010, tests).
     const refund = await json(finance, `/api/orders/${order.id}`, {
       method: 'PATCH',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ action: 'REFUND', reason: 'verify: refund through Stripe' }),
     });
-    check('finance refunds a card payment through Stripe',
-      refund.status === 200 && refund.body?.status === 'REFUNDED' && refund.body?.refund_reference?.startsWith('re_'),
-      `${refund.status} ${refund.body?.refund_reference ?? JSON.stringify(refund.body)}`);
+    check('a refund Stripe cannot make is refused, not recorded',
+      refund.status === 409 && /Stripe could not refund/.test(refund.body?.error ?? ''),
+      `${refund.status} ${JSON.stringify(refund.body)}`);
+    const afterRefund = (await json(ops, `/api/orders/${order.id}`)).body?.order?.status;
+    check('and the order is still processing', afterRefund === 'PROCESSING', `got ${afterRefund}`);
 
     // AC-11: right number, wrong currency is still a mismatch.
     const wrongCurrency = await placeCard();

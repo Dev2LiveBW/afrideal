@@ -1,7 +1,7 @@
 # 0010. Card payments through Stripe, DPO later behind the same seam
 
 **Date**: 2026-10-23
-**Status**: Built on Stripe's test mode. Live mode is not enabled (see Open questions).
+**Status**: Built and paid end to end on Stripe's test mode (2026-10-23). Live mode is not enabled (see Open questions).
 
 ## Summary
 
@@ -175,13 +175,63 @@ soon" there rather than taking it through a stale name.
 - By hand: a 4242 4242 4242 4242 test card takes an order from
   `AWAITING_PAYMENT` to `PROCESSING` on a local server.
 
+## Verified (2026-10-23, the "Afrideal sandbox" account)
+
+- The product owner's sandbox is a **US** Stripe account (default currency
+  USD). It presents BWP and ZAR: sessions were created in both.
+- A 4242 test card paid order AFD-24855 (BWP 182.00) through the real
+  checkout and Stripe's hosted page; `stripe listen` forwarded
+  `checkout.session.completed`; the order went `AWAITING_PAYMENT` →
+  `PROCESSING` with one payment, one supplier order and one payable.
+- A session left unpaid expired at 31 minutes, and the real
+  `checkout.session.expired` event failed its attempt.
+- Finance `REFUND` on that order created Stripe refund `re_…` (succeeded,
+  BWP 182.00); a second refund was refused.
+- `npm run verify` with `CARD_PROVIDER=stripe`: section 9f runs against
+  real test-mode sessions (amount in thebe, rand for Lesotho, resume,
+  expiry, cancel, replay, wrong currency).
+
+## Review against Stripe's products (2026-10-23)
+
+The product owner asked for Payments, Connect and Tax. From Stripe's own
+documentation, read on 2026-10-23:
+
+**Payments: in place.** Hosted Checkout, signed webhook as the only source of
+truth, raw-body verification, idempotent confirmation, refunds through the
+API, no card data or buyer personal data on our side. Still to add before
+live: `charge.dispute.created` (a chargeback) flagged to finance the way
+refused payments are; the dashboard webhook endpoint pinned to the SDK's API
+version (`2026-09-30` for stripe-node 23); a statement descriptor.
+
+**Connect: not a fit for these countries today.** Self-serve cross-border
+payouts reach connected accounts only in the US, UK, EEA, Canada and
+Switzerland, so suppliers in Botswana, South Africa, Lesotho and Eswatini
+cannot be connected accounts paid by a US platform. Stripe's alternative,
+**Global Payouts** (US or UK sender), lists Botswana (BWP, wire) and South
+Africa (ZAR, wire) as recipient countries; Lesotho and Eswatini are not
+listed. AfriDeal is merchant of record with its own payables ledger
+(`lib/payables.ts`), which is the shape Global Payouts expects (payments and
+payouts decoupled), not Connect's. South Africa itself appears on Stripe's
+availability page only as "Extended network", through Paystack.
+
+**Tax: not recommended.** Stripe Tax does not support Botswana, Lesotho or
+Eswatini at all, and supports South Africa only as a customer location, not
+as a business location. Spec 0009, answer 3, has VAT and import duty paid by
+the buyer at the border through the courier, never in AfriDeal's price, so
+there is nothing for Stripe Tax to calculate at checkout. Whether AfriDeal as
+merchant of record must register for VAT in Botswana (BURS) is a question for
+the accountant, not Stripe.
+
 ## Open questions
 
 1. **Where the Stripe account lives.** Stripe does not open accounts for
-   businesses in Botswana, Lesotho or Eswatini. A live account would be held
-   by an entity in a Stripe country (South Africa is one), settling in that
-   country's currency, with pula charges converted. That is a company and tax
-   question for the product owner before live mode, not a code one.
+   businesses in Botswana, Lesotho or Eswatini, and South Africa is reached
+   through Paystack. The sandbox is a US account; a live US (or UK) entity
+   would settle in USD (or GBP), with pula and rand charges converted, and
+   could pay Botswana and South African suppliers through Global Payouts.
+   That is a company and tax question for the product owner before live
+   mode, not a code one. DPO, which is licensed in Botswana, stays the
+   alternative behind the same seam.
 2. **Live mode.** Turning it on needs: the account above, a live webhook
    endpoint on the deployed site, and a review of this path at GA rigor.
 3. **Refund currency in copy.** `lib/refunds.ts` writes "BWP" into refund
