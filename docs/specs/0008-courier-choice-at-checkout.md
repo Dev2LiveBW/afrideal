@@ -26,6 +26,12 @@ at-checkout path stays in the model for a courier that later wants it.
 VAT and import duty on cross-border lanes are the buyer's, paid at the
 border through the courier (spec 0009, answer 3).
 
+**Last mile (2026-10-23, relayed by the developer)**: in **Gaborone**, AfriDeal's
+own car collects parcels from Gorosa's depot and delivers the last mile. Outside
+Gaborone (Francistown and other towns) a last-mile courier is still to be found;
+until then those orders are arranged by hand. The last-mile fee itself is still
+open.
+
 ## Summary
 
 Product sales and delivery are kept apart. Product prices no longer carry

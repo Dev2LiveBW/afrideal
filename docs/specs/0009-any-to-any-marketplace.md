@@ -176,15 +176,25 @@ note: "VW Puller" read as BW pula, "runs" as rand, "Sotona" as Setswana).
    can be marked as willing to (`cross_border`, a follow-up to step 4).
 6. **Language.** **Setswana and Sesotho** both (scope feature 19).
 
+## Answers (2026-10-23)
+
+7. **Seller of record.** One entity: AfriDeal sells to buyers in every
+   country, with suppliers on the platform in any country; buyers choose
+   whichever supplier they like, in Botswana, Lesotho or South Africa.
+8. **Card gateway.** Build on **Stripe's sandbox** now to test end to end,
+   and add DPO behind the same adapter when that application comes through.
+9. **Data protection.** Derived per country in
+   [docs/research/data-protection-by-country.md](../research/data-protection-by-country.md)
+   (Botswana's Act 18 of 2024, POPIA, Lesotho's 2011 Act, Eswatini's 2022
+   Act): one privacy notice naming all four, a basis for hosting data in the
+   USA (provider agreements plus consent), registrations, a 72-hour breach
+   runbook, opt-in marketing. To be confirmed with a lawyer before launch.
+
 ## Open questions
 
-1. **Seller of record per country** (from answer 3): which AfriDeal entity
-   invoices a buyer in South Africa, Lesotho or Eswatini.
-2. **Stripe or DPO.** Which card gateway goes live first, and for which
-   countries Stripe can settle.
-3. **Data protection.** Botswana's Data Protection Act 2018 governs today;
-   Lesotho and South Africa (POPIA) have their own. Hosting and consent
-   wording may need to cover each.
+1. **Legal sign-off** on the data protection points in the research note.
+2. **Hosting abroad.** Botswana's 2024 Act restricts transfers; confirm the
+   provider agreements cover Neon, Clerk and Vercel in the USA.
 
 ## Out of scope
 
