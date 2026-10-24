@@ -82,7 +82,7 @@ const UpdateSchema = z.object({
   status: z.enum(['SOURCING', 'QUOTED', 'ORDERED', 'ACCEPTED', 'DECLINED', 'EXPIRED']).optional(),
   response_id: z.string().optional(),
   customer_unit_price: z.number().positive().optional(),
-  payment_method: z.enum(['DPO_PAY', 'ORANGE_MONEY', 'PAYGATE', 'EFT']).optional(),
+  payment_method: z.enum(['CARD', 'ORANGE_MONEY', 'PAYGATE', 'EFT']).optional(),
 });
 
 async function createOrderFromRfqQuote({

@@ -21,7 +21,7 @@
       {
         "name": "Visa / Mastercard",
         "blurb": "Pay by card through our secure gateway.",
-        "method": "DPO_PAY"
+        "method": "CARD"
       },
       {
         "name": "Bank transfer",
@@ -56,7 +56,7 @@
       {
         "name": "Visa / Mastercard",
         "blurb": "Pay by card through our secure gateway.",
-        "method": "DPO_PAY"
+        "method": "CARD"
       },
       {
         "name": "Instant EFT",
@@ -88,7 +88,7 @@
       {
         "name": "Visa / Mastercard",
         "blurb": "Pay by card through our secure gateway.",
-        "method": "DPO_PAY"
+        "method": "CARD"
       },
       {
         "name": "M-Pesa",
@@ -119,7 +119,7 @@
       {
         "name": "Visa / Mastercard",
         "blurb": "Pay by card through our secure gateway.",
-        "method": "DPO_PAY"
+        "method": "CARD"
       },
       {
         "name": "MTN MoMo",

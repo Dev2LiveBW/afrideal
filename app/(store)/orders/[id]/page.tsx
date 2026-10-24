@@ -17,6 +17,7 @@ import { findById } from '@/lib/db';
 import { countryNames as readCountryNames } from '@/lib/countries';
 import { DEFAULT_DELIVERY_COUNTRY, isCrossBorder } from '@/lib/lanes.mjs';
 
+import { ConfirmingPayment } from './ConfirmingPayment';
 import { OrderActions } from './OrderActions';
 import { RetryPaymentButton } from './RetryPaymentButton';
 
@@ -40,7 +41,7 @@ export default async function OrderTrackingPage({
   searchParams,
 }: {
   params: { id: string };
-  searchParams: { placed?: string };
+  searchParams: { placed?: string; paid?: string };
 }) {
   const session = await auth();
   if (!session?.user) redirect('/login');
@@ -85,6 +86,14 @@ export default async function OrderTrackingPage({
   const isBankTransfer = order.payment_method === 'EFT';
   const latestAttempt = payments[0] ?? null;
   const lastFailed = latestAttempt?.status === 'FAILED';
+  // Spec 0010: back from Stripe's page with the webhook still on its way. The
+  // `paid=card` flag only changes what is said while the attempt is open; a buyer
+  // typing it into the address bar gets a refreshing page, nothing more.
+  const confirmingCard =
+    awaitingPayment &&
+    searchParams.paid === 'card' &&
+    latestAttempt?.status === 'STARTED' &&
+    latestAttempt.provider === 'STRIPE';
   const bankDetails = awaitingPayment && isBankTransfer ? await bankTransferDetails() : null;
 
   /*
@@ -135,11 +144,14 @@ export default async function OrderTrackingPage({
         <div className="mb-7 flex items-start gap-3 rounded-md border border-gold/40 bg-gold-wash px-5 py-4">
           <Clock size={18} strokeWidth={1.5} className="mt-0.5 shrink-0 text-gold-ink" />
           <div>
-            <p className="text-[14px] font-semibold text-ink">Waiting for your payment</p>
+            <p className="text-[14px] font-semibold text-ink">
+              {confirmingCard ? 'Confirming your card payment' : 'Waiting for your payment'}
+            </p>
             <p className="mt-1 text-[13px] leading-5 text-ink/80">
               {order.reference} is held for you. We start sourcing it as soon as your payment
               is confirmed, and no supplier has been asked to prepare anything yet.
             </p>
+            {confirmingCard && <ConfirmingPayment />}
 
             {isBankTransfer && (
               <div className="mt-3 rounded border border-hairline-strong bg-surface px-3.5 py-3">

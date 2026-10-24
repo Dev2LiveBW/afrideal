@@ -237,11 +237,15 @@ export type OrderStatus =
   | 'REFUNDED';
 
 /**
+ * What the buyer chose, not who takes the money (spec 0010). `CARD` is paid
+ * through whichever provider `CARD_PROVIDER` selects: Stripe now, DPO Pay once
+ * approved, without checkout or stored orders changing.
+ *
  * `EFT` is a bank transfer the buyer makes and finance confirms by hand (spec
  * 0003). It is a real method a buyer picks, not an internal marker: it is what
- * lets AfriDeal trade before the card gateway is approved.
+ * lets AfriDeal trade before a card gateway is live.
  */
-export type PaymentMethod = 'DPO_PAY' | 'ORANGE_MONEY' | 'PAYGATE' | 'EFT';
+export type PaymentMethod = 'CARD' | 'ORANGE_MONEY' | 'PAYGATE' | 'EFT';
 
 /**
  * Why an order was cancelled. A late payment reopens an `EXPIRED` order but
@@ -350,10 +354,11 @@ export interface SupplierOrder {
 // ── Payments (spec 0003) ─────────────────────────────────────────────────────
 
 /**
- * Who took the money. `MOCK` stands in for a hosted card page while DPO Pay
- * approval is outstanding, and is refused outright in production.
+ * Who took the money. `STRIPE` takes cards on Stripe Checkout (spec 0010).
+ * `MOCK` stands in for a hosted page in development and tests, and is refused
+ * outright in production.
  */
-export type PaymentProvider = 'MOCK' | 'DPO_PAY' | 'ORANGE_MONEY' | 'PAYGATE' | 'EFT';
+export type PaymentProvider = 'MOCK' | 'STRIPE' | 'DPO_PAY' | 'ORANGE_MONEY' | 'PAYGATE' | 'EFT';
 
 export type PaymentStatus = 'STARTED' | 'CONFIRMED' | 'FAILED';
 
