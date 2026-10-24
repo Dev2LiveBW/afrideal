@@ -48,6 +48,8 @@ npm run e2e          # Playwright journeys on a throwaway Neon branch (docs/test
 npm run e2e:demo     # the same, slowed down with every screen recorded, for demo videos
 npm run e2e:report   # open the last run's report (videos and traces of failures)
 npm run e2e:videos   # turn the last demo run into demo-videos/*.mp4 (needs ffmpeg)
+npm run images       # stock photos for the seed: square 1600px crops of originals (needs PEXELS_API_KEY)
+npm run catalogue:audit  # launch readiness per product and category, from Sanity (--source json for the seed)
 ```
 
 `npm run e2e` branches `production` into `e2e-<timestamp>`, reloads it from
