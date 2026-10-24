@@ -18,7 +18,9 @@ test.describe('A. Browsing (no account)', () => {
     );
     expect(hrefs.length, 'the home page links to other pages').toBeGreaterThan(3);
     for (const href of hrefs) {
-      const response = await request.get(href, { maxRedirects: 0 });
+      // A page load, so the 90 s navigation budget, not the 20 s action one: a
+      // wig's page reads 80 to 160 price bands and can take 20 s under load.
+      const response = await request.get(href, { maxRedirects: 0, timeout: 90_000 });
       expect(response.status(), `${href} answers`).toBeLessThan(400);
     }
   });
@@ -41,7 +43,7 @@ test.describe('A. Browsing (no account)', () => {
     await expectHealthy(page);
     await expect(page.getByRole('heading', { name: 'Shea Butter Deep Treatment 500ml', level: 1 })).toBeVisible();
     await expect(page.getByText('Price per unit')).toBeVisible();
-    await expect(page.getByText(bwp(146)).first()).toBeVisible();
+    await expect(page.getByText(bwp(137)).first()).toBeVisible();
     const addToCart = page.getByRole('button', { name: 'Add to cart' });
     await expect(addToCart).toBeAttached();
     // On a phone the buy bar is pinned to the bottom of the screen
@@ -49,21 +51,23 @@ test.describe('A. Browsing (no account)', () => {
     if (test.info().project.name === 'phone') await expect(addToCart).toBeInViewport();
   });
 
-  test('A04 the unit price steps down at 5, 20 and 50 units @p1', async ({ page }) => {
+  test('A04 the unit price steps down at 5, 11 and 21 units @p1', async ({ page }) => {
     await page.goto('/products/p001');
     const quantity = page.getByRole('spinbutton', { name: 'Quantity' });
     const lineTotal = page.getByText('Line total', { exact: true }).locator('xpath=..');
 
-    // Retail 146, bulk 133 (5 to 19), wholesale 121 (20 to 49), wholesale+ 112 (50 to 99).
+    // Retail 137, less the multi-buy discount at 2 to 4 (2, 3, 5%, rounded up),
+    // bulk 122 (5 to 10), wholesale 114 (11 to 20), wholesale+ 108 (21 to 99).
     for (const [qty, unit] of [
-      [1, 146],
-      [4, 146],
-      [5, 133],
-      [19, 133],
-      [20, 121],
-      [49, 121],
-      [50, 112],
-      [99, 112],
+      [1, 137],
+      [2, 135],
+      [4, 131],
+      [5, 122],
+      [10, 122],
+      [11, 114],
+      [20, 114],
+      [21, 108],
+      [99, 108],
     ] as const) {
       await quantity.fill(String(qty));
       await expect(lineTotal, `${qty} units at ${unit}`).toContainText(bwp(qty * unit));

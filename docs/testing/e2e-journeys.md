@@ -43,7 +43,9 @@ The spec for each journey lives in `e2e/` (storefront, supplier, runner, console
 
 **Phone and desktop.** The storefront is built to match the Alibaba app on a phone, so storefront journeys run twice: at phone width (390 px) and at desktop width (1440 px). The team console runs at desktop width. The runner portal runs at phone width.
 
-**Payment is simulated today.** Checkout lets you pick DPO Pay, Orange Money or PayGate, but no money moves and no gateway page opens. The order is created straight away. Journeys say so where it matters. Real card payment is scope feature 4.
+**Payment is simulated today.** Checkout lists the delivery country's payment methods (spec 0009): for Botswana, "Visa / Mastercard" (the `CARD` method; Stripe test mode or the mock, by `CARD_PROVIDER`, spec 0010), "Bank transfer" and "Orange Money". Methods the platform cannot take yet show "Coming soon" and cannot be picked. The e2e run keeps cards on the mock gateway (`/mock-gateway`); no money moves. Journeys say so where it matters. Stripe test-mode cards are covered by `npm run verify` section 9f.
+
+**Where the buyer is.** Checkout starts with a Country field, then the street and town; the header's "Deliver to" is a country and a town. The demo buyers are in Botswana, so prices are in Pula (BWP); a buyer in South Africa, Lesotho or Eswatini sees rand.
 
 **Priority.** P1 must pass before any demo to the client. P2 should pass before a release. P3 is a nice to have.
 
@@ -69,7 +71,7 @@ The spec for each journey lives in `e2e/` (storefront, supplier, runner, console
 | B08 | An empty cart cannot be checked out | Customer | P3 | yes | no |
 | B09 | Checkout with real card payment (Gateway) | Customer | P1 | yes | yes |
 | B10 | Delivery to a Collection Point (Smart Locker) | Customer | P1 | yes | yes |
-| B11 | Customs and duty included in landed price | Customer | P1 | yes | yes |
+| B11 | Customs and duty on imported goods are cleared by the courier | Customer | P1 | yes | yes |
 | **C** | **Request for quotation (RFQ)** | | | | |
 | C01 | Buyer sends an RFQ | Customer | P1 | yes | yes |
 | C02 | Invited supplier sends a quote | Supplier | P1 | no screen yet | no |
@@ -156,7 +158,7 @@ That is 49 journeys. 46 have a screen to test (C02 to C04 do not yet, see Findin
 2. Read the photos, the price, the supplier name, and the tier table.
 
 **Expect:**
-- One landed price in Pula (BWP), the price the buyer actually pays to AfriDeal.
+- One price in Pula (BWP), the price the buyer actually pays to AfriDeal (BWP 137.00 for one `p001`).
 - The supplier's own cost is not shown anywhere on the page (see H08).
 - "Add to cart" is visible without scrolling on a phone.
 
@@ -165,12 +167,14 @@ That is 49 journeys. 46 have a screen to test (C02 to C04 do not yet, see Findin
 **Start:** signed out, product `p001` detail page.
 
 1. Set quantity to 1, note the unit price.
-2. Set it to 5, then 20, then 50.
-3. Set it to 100.
+2. Set it to 2, then 4.
+3. Set it to 5, then 11, then 21.
+4. Set it to 100.
 
-**Expect:**
-- 1 is the retail price. 5 is cheaper (bulk). 20 is cheaper again (wholesale). 50 is cheapest (wholesale plus).
-- 19 costs the same per unit as 5; 49 the same as 20 (the step happens exactly at 5, 20 and 50).
+**Expect** (p001 since 2026-10-21, no customs in the price; spec 0007):
+- 1 is the retail price, BWP 137.00. 2 to 4 take the multi-buy discount off it (2%, 3%, 5%, rounded up: 135, 133, 131).
+- 5 is cheaper (bulk, 122). 11 is cheaper again (wholesale, 114). 21 is cheapest (wholesale plus, 108).
+- 10 costs the same per unit as 5; 20 the same as 11; 99 the same as 21 (the steps happen exactly at 5, 11 and 21).
 - 100 does not let you add to cart; it offers a quotation instead.
 
 ### A05 Browse suppliers
@@ -206,13 +210,13 @@ That is 49 journeys. 46 have a screen to test (C02 to C04 do not yet, see Findin
 1. Open a product, set quantity 2, tap "Add to cart".
 2. Open the cart. Check the line and the total.
 3. Tap through to checkout.
-4. Enter a delivery address (for example "Plot 5412, Extension 12", "Gaborone").
-5. Choose a payment method: bank transfer (until a card gateway is live it is the only one offered; spec 0003).
+4. Leave Country on Botswana. Enter a delivery address (for example "Plot 5412, Extension 12", "Gaborone").
+5. Choose "Bank transfer" (Botswana's methods are listed; card is covered by B09; spec 0003, spec 0009).
 6. Place the order.
 
 **Expect:**
-- The cart total equals quantity times the unit price.
-- At checkout: total equals subtotal plus delivery fee.
+- The cart total equals quantity times the unit price (two tubs of `p001`: 2 × BWP 135.00 = 270.00, the multi-buy price).
+- At checkout: total equals subtotal plus delivery fee (270.00 + 45.00 = 315.00). The shea butter comes from South Africa, so a "Customs & Duty: Cleared by your courier" row shows, and the courier's fee is not in the total.
 - After placing: "Waiting for your payment", a reference like `AFD-24851`, and the bank transfer box asking Thabo to quote that reference. No supplier is asked to prepare anything until the money arrives.
 - The order appears at the top of `/orders`.
 - The cart is empty afterwards.
@@ -274,7 +278,7 @@ That is 49 journeys. 46 have a screen to test (C02 to C04 do not yet, see Findin
 **Start:** signed in as Thabo.
 
 1. Add a product to the cart and proceed to checkout.
-2. Select "DPO Pay" as the payment method.
+2. Select "Visa / Mastercard" as the payment method (on the mock gateway in the e2e run).
 3. Tap "Place order".
 4. The user is redirected via a full window navigation to the mock payment gateway page (`/mock-gateway`).
 5. Enter test card details and submit. The gateway signs a callback and POSTs it to the API.
@@ -299,17 +303,16 @@ That is 49 journeys. 46 have a screen to test (C02 to C04 do not yet, see Findin
 - The delivery fee is adjusted for a collection point.
 - The order confirms and displays the collection point address on the receipt.
 
-### B11 Customs and duty included in landed price
+### B11 Customs and duty on imported goods are cleared by the courier
 
-**Start:** signed out, product `p018` (an imported item; customs cleared by the courier) detail page.
+**Start:** signed in as Thabo (Botswana), product `p018` (an AfriDeal wig held in South Africa) detail page.
 
-1. View the price breakdown.
+1. View the price.
 2. Add to cart and proceed to checkout.
 
 **Expect:**
-- The detail page displays the final landed price (BWP).
-- At checkout, the subtotal breakdown explicitly lists "Customs & Duty" as a line item before the final total.
-- The buyer sees that AfriDeal is covering the border mechanics.
+- The detail page shows the price in Pula with no customs in it, and says "Customs cleared by courier" (since 2026-10-21 the price carries no 14% customs; spec 0008).
+- At checkout the order summary has a "Customs & Duty" row reading "Cleared by your courier", and the courier's own fee is shown as paid to the courier, outside the total.
 
 ---
 
@@ -449,9 +452,11 @@ A fresh job (accept from the alert or the list, "Mark picked up", "Start deliver
 
 ### F04 Runner delivers to a Collection Point
 
-**Start:** signed in as Kagiso, `/runner/jobs`. Job for Kefilwe's order (B10) is active.
+**Start:** Kefilwe orders one `p001` to the **Francistown Main Mall Locker** and pays by card; Naledi confirms, prepares and marks it ready, which opens Kagiso's job. Then signed in as Kagiso, `/runner/jobs`.
 
-1. Pick up the item from the supplier.
+The locker is Francistown, not Gaborone Central, on purpose: B10 orders to Gaborone Central, E02 can mark that order ready, and the runner screens do not show an order reference, so a Gaborone Central job could belong to either journey (run of 2026-10-23).
+
+1. Accept the job to the Francistown Main Mall Locker. Pick up the item from the supplier.
 2. Navigate to the Collection Point.
 3. Tap "Drop off at Collection Point" and enter the locker confirmation code (e.g. `LCK-7711`).
 4. Buyer (Kefilwe) opens the order receipt (`/orders/[id]`), views the locker PIN, and taps "Confirm collection".
@@ -591,7 +596,7 @@ Runs end to end since 2026-10-11 (`e2e/storefront/b-buy-closeout.spec.ts`).
 | 1 | Thabo | Browses categories at 390px, selects Shea Butter (p001) | Category browser, product detail fits viewport (`scrollWidth <= 390px + 2`) |
 | 2 | Thabo | Taps "Add to cart" on sticky mobile buy bar | Instant cart update, toast notification |
 | 3 | Thabo | Opens slide-up cart sheet, taps "Proceed to checkout" | Framer motion sheet at benchmark §4b timings, cart line items & totals |
-| 4 | Thabo | Fills delivery address, selects DPO Pay, taps sticky "Place order" bar | Single column checkout, zero horizontal overflow, redirect to gateway |
+| 4 | Thabo | Fills delivery address, selects Visa / Mastercard, taps sticky "Place order" bar | Single column checkout, zero horizontal overflow, redirect to gateway |
 | 5 | Thabo | Enters card details on gateway, submits payment | Signed webhook verification, redirect to order tracking |
 | 6 | Thabo | Views order tracking page | "Payment confirmed", Paid timeline milestone, 390px zero overflow |
 
@@ -605,7 +610,6 @@ These have no journeys until they are built; add them here when they land.
 
 - Live card payment gateway (production credentials); the mock gateway is covered by B09
 - Pausing checkout and payment reconciliation (13, 15); mark as paid is in Z01 step 2, refunds in G11
-- Customs and duty in the price (9): the order only shows a "Customs & duty included" label so far
 - Order emails and SMS (11, 12)
 - A chosen quote becoming an order (24, see C04)
 - Supplier and runner self sign up (27, 28); team user management (30)

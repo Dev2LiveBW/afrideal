@@ -1,4 +1,4 @@
-import { bwp, caption, card, clickAndSave, expect, runLabel, test } from '../support/fixtures';
+import { bwp, caption, card, clickAndSave, expect, ready, runLabel, test } from '../support/fixtures';
 
 /**
  * D01 to D05. Request a runner, from description to delivery
@@ -16,6 +16,8 @@ test('D01 to D05 a runner finds an item, the buyer approves the price, it arrive
   await test.step('D01 Thabo describes the item and sends it to the runners', async () => {
     await say('D01 Thabo describes the item and sends it to the runners');
     await buyer.goto('/request-a-runner');
+    // Typed before hydration, the first field is wiped and the form refuses to send.
+    await ready(buyer);
     await buyer.getByRole('textbox', { name: 'What are you looking for?' }).fill(item);
     await buyer.getByRole('spinbutton', { name: 'How many' }).fill('2');
     await buyer.getByRole('textbox', { name: 'Town or city' }).fill('Gaborone');

@@ -21,20 +21,20 @@ test.describe('B. Buying and tracking', () => {
   test.use(signedInAs('thabo'));
 
   test('B02 add to cart, check out, get an order reference @p1', async ({ page }) => {
-    // 1. Two of p001 at the retail price, BWP 146.00 each.
+    // 1. Two of p001 at the multi-buy price, BWP 135.00 each (137 less 2%, rounded up).
     await caption(page, 'B02 · 1. Add two tubs of shea butter to the cart');
     await addToCart(page, 'p001', 2);
 
-    // 2. The cart: 292.00 plus a flat 45.00 delivery.
+    // 2. The cart: 270.00 plus a flat 45.00 delivery.
     await page.goto('/cart');
-    await caption(page, 'B02 · 2. The cart: BWP 292.00 plus a flat BWP 45.00 delivery');
+    await caption(page, 'B02 · 2. The cart: BWP 270.00 plus a flat BWP 45.00 delivery');
     // The heading counts units, not lines.
     await expect(page.getByRole('heading', { name: /Your cart \(2\)/ })).toBeVisible();
     // A desktop shows an "Order summary" panel; a phone shows the line and a
     // Total bar. Both show the line total and the total with delivery.
     const cart = page.locator('main');
-    await expect(cart).toContainText(bwp(292));
-    await expect(cart).toContainText(bwp(337));
+    await expect(cart).toContainText(bwp(270));
+    await expect(cart).toContainText(bwp(315));
     if (test.info().project.name === 'desktop') {
       await expect(page.getByRole('heading', { name: 'Order summary' }).locator('xpath=..')).toContainText(bwp(45));
     }
@@ -45,13 +45,14 @@ test.describe('B. Buying and tracking', () => {
     await ready(page);
     await caption(page, 'B02 · 3. Delivery address and bank transfer, then Place order (no money moves yet)');
     await page.getByRole('textbox', { name: 'Street address or plot number' }).fill('Plot 5412, Extension 12');
-    await page.getByRole('textbox', { name: 'City or town' }).fill('Gaborone');
+    // A combobox: it suggests the delivery country's towns (spec 0009).
+    await page.getByRole('combobox', { name: 'City or town' }).fill('Gaborone');
     // B02 is the bank transfer journey (B09 covers a card through the mock
     // gateway). The e2e run turns the mock on, so card methods are offered too
     // and bank transfer is chosen explicitly (spec 0003).
     await page.getByRole('radio', { name: /Bank transfer/ }).check({ force: true });
     await expect(page.getByRole('radio', { name: /Bank transfer/ })).toBeChecked();
-    await expect(page.getByText('Total to pay').first().locator('xpath=following-sibling::*[1]')).toHaveText(bwp(337));
+    await expect(page.getByText('Total to pay').first().locator('xpath=following-sibling::*[1]')).toHaveText(bwp(315));
     await clickAndSave(page.getByRole('button', { name: 'Place order' }).filter({ visible: true }));
 
     // The order waits for the money: a reference to quote, and nothing sourced yet.
@@ -62,7 +63,7 @@ test.describe('B. Buying and tracking', () => {
     await expect(page.getByText('Paying by bank transfer')).toBeVisible();
     const reference = (await page.getByRole('heading', { level: 1, name: /^AFD-\d+$/ }).textContent())!.trim();
     await expect(page.locator('main strong', { hasText: reference }).first()).toBeVisible();
-    await expect(page.getByText('Total', { exact: true }).locator('xpath=following-sibling::*[1]')).toHaveText(bwp(337));
+    await expect(page.getByText('Total', { exact: true }).locator('xpath=following-sibling::*[1]')).toHaveText(bwp(315));
     await expect(page.getByText('Plot 5412, Extension 12')).toBeVisible();
 
     // The new order is at the top of the order list, and the cart is empty.

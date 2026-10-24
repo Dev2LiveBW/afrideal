@@ -240,9 +240,9 @@ export function ProductCard({
             ) : (
               <>
                 {supplierCount !== undefined && supplierCount > 0 && (
-                  <span className="inline-flex shrink-0 items-center gap-0.5 font-semibold text-forest">
-                    <ShieldCheck size={11} strokeWidth={2.25} />
-                    AfriDeal · {supplierCount} verified
+                  <span className="inline-flex min-w-0 items-center gap-0.5 font-semibold text-forest">
+                    <ShieldCheck size={11} strokeWidth={2.25} className="shrink-0" />
+                    <span className="truncate">AfriDeal · {supplierCount} verified</span>
                   </span>
                 )}
               </>
