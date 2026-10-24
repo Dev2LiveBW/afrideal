@@ -55,7 +55,7 @@ export default async function RfqDetailsPage({
         <p className="text-[13px] leading-5 text-body">
           The more you give us, the closer the first price. Nothing is bought until you approve it.
         </p>
-        <RunnerRequestForm defaultItem={item} defaultCity="Gaborone" />
+        <RunnerRequestForm defaultItem={item} />
       </div>
     </div>
   );

@@ -105,6 +105,11 @@ Cart and checkout is the weakest part at 39%; orders and account is at 53%.
 
 ## How to run it
 
+To show package 2 to the client, the presenter's script is
+[demo-walkthrough.md](demo-walkthrough.md): the buyer placing a bank transfer order,
+finance confirming it, the supplier legs appearing, and what to say when the card
+question comes up.
+
 Each package can go through the usual loop: `/architect` where a decision is owed, then `/develop`, `/check verify`,
 `/test`, `/check review`. Package 1 first, then 2, because the client's staging review needs an honest payment step.
 Packages 3 to 7 can go in any order after that. After each package, update the scores in

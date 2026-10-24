@@ -6,7 +6,7 @@ import { Heart, Plus, ShieldCheck, Star } from 'lucide-react';
 import toast from 'react-hot-toast';
 
 import { PriceTag } from '@/components/brand/MoneyText';
-import { pulaTag } from '@/lib/format';
+import { PriceText } from '@/components/brand/BuyerCurrency';
 import { Swatch, photoUrl } from '@/components/storefront/Swatch';
 import { useAfriDealStore } from '@/store/useAfriDealStore';
 import { cn } from '@/lib/utils';
@@ -72,7 +72,9 @@ export function ProductCard({
   const addToCart = useAfriDealStore((state) => state.addToCart);
   const [saved, setSaved] = useState(false);
 
-  const showingTier = tierPrice !== null && tierPrice !== undefined;
+  const isSupplierOwned = product.owner_type === 'SUPPLIER' || product.commercial_model === 'SUPPLIER_LED';
+  const supplierMoq = Math.max(1, product.moq ?? 1);
+  const showingTier = !isSupplierOwned && tierPrice !== null && tierPrice !== undefined;
 
   function toggleSave(event: React.MouseEvent) {
     event.preventDefault();
@@ -93,10 +95,13 @@ export function ProductCard({
      * On a tier-filtered grid the card is quoting a band price, so adding a
      * single unit would land the buyer in a cart showing the list price they
      * were not offered. Quick-add takes the quantity that actually earns the
-     * figure on the card. The quoted rung is excluded: there is no published
-     * that price at any quantity.
+     * figure on the card. For supplier products, quick-add uses the supplier's MOQ.
      */
-    const qty = showingTier && !tierByQuotation && tierMinQty ? Math.max(1, tierMinQty) : 1;
+    const qty = isSupplierOwned
+      ? supplierMoq
+      : showingTier && !tierByQuotation && tierMinQty
+        ? Math.max(1, tierMinQty)
+        : 1;
 
     addToCart({
       product_id: product.id,
@@ -106,16 +111,24 @@ export function ProductCard({
       emoji: product.emoji,
       unit_price: variant.price,
       qty,
-      supplier_id: primarySupplierId ?? '',
+      supplier_id: (isSupplierOwned && product.supplier_id) ? product.supplier_id : (primarySupplierId ?? ''),
       image_url: photoUrl(image),
     });
 
     toast.success(
       qty === 1
         ? `${product.name} added to cart`
-        : `${qty} × ${product.name} added - bulk price applied`,
+        : isSupplierOwned
+          ? `${qty} × ${product.name} added (supplier MOQ)`
+          : `${qty} × ${product.name} added - bulk price applied`,
     );
   }
+
+  const displayMinQty = isSupplierOwned
+    ? supplierMoq
+    : showingTier && tierMinQty
+      ? tierMinQty
+      : 1;
 
   return (
     <article className={cn('press-soft group relative', className)}>
@@ -138,12 +151,14 @@ export function ProductCard({
             <span className="absolute left-0.5 top-0.5 rounded bg-danger px-0.5 py-0 font-mono text-[0.34375rem] font-semibold text-white sm:left-2 sm:top-2 sm:px-1.5 sm:py-0.5 sm:text-[0.625rem]">
               −{product.promotion.discount_pct}%
             </span>
+          ) : isSupplierOwned ? (
+            <span className="absolute left-0.5 top-0.5 rounded bg-ocean/90 px-0.5 py-0 font-mono text-[0.3125rem] uppercase tracking-[0.06em] text-white backdrop-blur-sm sm:left-2 sm:top-2 sm:px-1.5 sm:py-0.5 sm:text-[0.5625rem] sm:tracking-[0.12em]">
+              Supplier
+            </span>
           ) : (
-            product.featured && (
-              <span className="absolute left-0.5 top-0.5 rounded bg-ink/70 px-0.5 py-0 font-mono text-[0.3125rem] uppercase tracking-[0.08em] text-white backdrop-blur-sm sm:left-2 sm:top-2 sm:px-1.5 sm:py-0.5 sm:text-[0.5625rem] sm:tracking-[0.14em]">
-                Featured
-              </span>
-            )
+            <span className="absolute left-0.5 top-0.5 rounded bg-forest/90 px-0.5 py-0 font-mono text-[0.3125rem] uppercase tracking-[0.06em] text-white backdrop-blur-sm sm:left-2 sm:top-2 sm:px-1.5 sm:py-0.5 sm:text-[0.5625rem] sm:tracking-[0.12em]">
+              AfriDeal
+            </span>
           )}
 
           <button
@@ -184,19 +199,19 @@ export function ProductCard({
             <PriceTag
               amount={showingTier ? tierPrice! : product.price}
               size="sm"
-              tone={tierByQuotation ? 'muted' : 'ink'}
+              tone={!isSupplierOwned && tierByQuotation ? 'muted' : 'ink'}
               className="text-[0.4375rem] sm:text-[0.875rem]"
             />
             {showingTier ? (
               tierPrice! < product.price && (
                 <span className="text-[0.34375rem] tabular-nums text-muted line-through sm:text-[0.6875rem]">
-                  {pulaTag(product.price)}
+                  <PriceText amount={product.price} />
                 </span>
               )
             ) : (
               product.compare_at_price && (
                 <span className="text-[0.34375rem] tabular-nums text-muted line-through sm:text-[0.6875rem]">
-                  {pulaTag(product.compare_at_price)}
+                  <PriceText amount={product.compare_at_price} />
                 </span>
               )
             )}
@@ -208,34 +223,35 @@ export function ProductCard({
           </p>
 
           {/*
-            The rung's minimum, or one - the retail rung has no floor. "On
-            quotation" replaces the figure on the custom rung, where there is
-            no published price to have a minimum for.
+            The rung's minimum, or the supplier's MOQ on supplier-owned products.
           */}
           <p className="mt-0.5 text-[0.34375rem] leading-tight text-body sm:text-[0.75rem]">
-            {tierByQuotation
+            {!isSupplierOwned && tierByQuotation
               ? 'On quotation'
-              : <>Min. order: <span className="font-mono tabular-nums text-ink">{showingTier && tierMinQty ? tierMinQty : 1}</span> {showingTier && tierMinQty && tierMinQty > 1 ? 'units' : 'unit'}</>}
+              : <>Min. order: <span className="font-mono tabular-nums text-ink">{displayMinQty}</span> {displayMinQty > 1 ? 'units' : 'unit'}</>}
           </p>
 
           <p className="mt-0.5 flex min-w-0 items-center gap-0.5 text-[0.3125rem] leading-tight text-muted sm:gap-1 sm:text-[0.6875rem]">
-            {supplierCount !== undefined && supplierCount > 0 && (
-              <span className="inline-flex shrink-0 items-center gap-0.5 font-semibold text-ocean">
-                <ShieldCheck size={11} strokeWidth={2.25} />
-                {supplierCount} verified
+            {isSupplierOwned && product.supplier_name ? (
+              <span className="inline-flex min-w-0 items-center gap-0.5 font-semibold text-ocean">
+                <ShieldCheck size={11} strokeWidth={2.25} className="shrink-0" />
+                <span className="truncate">{product.supplier_name}</span>
               </span>
+            ) : (
+              <>
+                {supplierCount !== undefined && supplierCount > 0 && (
+                  <span className="inline-flex min-w-0 items-center gap-0.5 font-semibold text-forest">
+                    <ShieldCheck size={11} strokeWidth={2.25} className="shrink-0" />
+                    <span className="truncate">AfriDeal · {supplierCount} verified</span>
+                  </span>
+                )}
+              </>
             )}
-            {supplierCount !== undefined && supplierCount > 0 && <span aria-hidden="true">·</span>}
-            <span className="inline-flex items-center gap-0.5">
+            <span aria-hidden="true">·</span>
+            <span className="inline-flex shrink-0 items-center gap-0.5">
               <Star size={10} strokeWidth={1.5} className="fill-gold text-gold" />
               <span className="font-mono tabular-nums">{product.rating.toFixed(1)}</span>
             </span>
-            {categoryName && (
-              <>
-                <span aria-hidden="true">·</span>
-                <span className="truncate">{categoryName}</span>
-              </>
-            )}
           </p>
         </div>
       </Link>

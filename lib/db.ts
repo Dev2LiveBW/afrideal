@@ -12,6 +12,8 @@ import type {
   AuditEntry,
   Brand,
   Category,
+  Country,
+  Courier,
   CustomerPrice,
   Dispute,
   SupplierPayable,
@@ -110,6 +112,11 @@ export interface Schema {
   // order; `settings` holds platform switches, starting with `checkout_paused`.
   payments: Payment;
   settings: Setting;
+
+  // The countries AfriDeal trades in (spec 0009): reference data, not code.
+  countries: Country;
+  // Listed courier and clearance partners and the routes they serve (spec 0008, 0009).
+  couriers: Courier;
 }
 
 export type Collection = keyof Schema;
@@ -159,8 +166,24 @@ export async function readAll<C extends Collection>(collection: C): Promise<Sche
 /** Overwrite a whole collection. Prefer `mutate()` unless you already hold the lock. */
 async function writeAll<C extends Collection>(collection: C, rows: Schema[C][]): Promise<void> {
   const tmp = `${fileFor(collection)}.tmp`;
+  const target = fileFor(collection);
   await fs.writeFile(tmp, `${JSON.stringify(rows, null, 2)}\n`, 'utf8');
-  await fs.rename(tmp, fileFor(collection));
+
+  // On Windows, concurrent file reads or background handles can briefly hold a lock,
+  // causing EPERM or EBUSY on rename. Retry with short exponential backoff.
+  for (let attempt = 0; attempt < 5; attempt++) {
+    try {
+      await fs.rename(tmp, target);
+      return;
+    } catch (err: unknown) {
+      const code = (err as { code?: string })?.code;
+      if ((code === 'EPERM' || code === 'EBUSY') && attempt < 4) {
+        await new Promise((resolve) => setTimeout(resolve, 25 * Math.pow(2, attempt) + Math.random() * 25));
+      } else {
+        throw err;
+      }
+    }
+  }
 }
 
 // One tail-promise per collection. Each mutation appends to its chain.
@@ -298,6 +321,8 @@ export async function remove<C extends Collection>(collection: C, id: string): P
   });
 }
 
+const inMemoryCounters = new Map<string, number>();
+
 /**
  * The next `count` ids for a collection, e.g. `nextIds('order-items', 'oi', 3)`
  * → `['oi024', 'oi025', 'oi026']`. Scans existing ids rather than counting
@@ -319,8 +344,15 @@ export async function nextIds<C extends Collection>(
     return Number.isFinite(n) && n > max ? n : max;
   }, 0);
 
-  const last =
-    DB_DRIVER === 'postgres' ? await reserveIds(`${collection}:${prefix}`, count, highest) : highest + count;
+  const key = `${collection}:${prefix}`;
+  let last: number;
+  if (DB_DRIVER === 'postgres') {
+    last = await reserveIds(key, count, highest);
+  } else {
+    const floor = Math.max(highest, inMemoryCounters.get(key) ?? 0);
+    last = floor + count;
+    inMemoryCounters.set(key, last);
+  }
   const first = last - count + 1;
   return Array.from({ length: count }, (_, i) => `${prefix}${String(first + i).padStart(width, '0')}`);
 }

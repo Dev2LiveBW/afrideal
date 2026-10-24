@@ -62,6 +62,7 @@ export function Swatch({
   label,
   priority = false,
   zoomOnHover = true,
+  fit = 'cover',
 }: {
   image?: ProductImage | { image_url: string };
   fallback: [string, string];
@@ -73,6 +74,8 @@ export function Swatch({
   priority?: boolean;
   /** Slow push-in when an ancestor marked `group` is hovered. */
   zoomOnHover?: boolean;
+  /** `contain` shows the whole photo, for tall shots in a wide frame. */
+  fit?: 'cover' | 'contain';
 }) {
   const url = image?.image_url;
 
@@ -97,7 +100,7 @@ export function Swatch({
           priority={priority}
           loading={priority ? undefined : 'lazy'}
           className={cn(
-            'object-cover',
+            fit === 'contain' ? 'object-contain' : 'object-cover',
             zoomOnHover &&
               'transition-transform duration-[900ms] ease-[cubic-bezier(0.16,1,0.3,1)] group-hover:scale-[1.06]',
           )}

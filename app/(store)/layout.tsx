@@ -3,6 +3,8 @@ import {
   StorefrontFooter,
   StorefrontNav,
 } from '@/components/layout/StorefrontNav';
+import { BuyerCurrencyProvider } from '@/components/brand/BuyerCurrency';
+import { activeCountries } from '@/lib/countries';
 import { readAll } from '@/lib/db';
 
 export default async function StoreLayout({ children }: { children: React.ReactNode }) {
@@ -11,7 +13,11 @@ export default async function StoreLayout({ children }: { children: React.ReactN
    * the category list is the one piece of real data the mobile menu needs.
    * Passing seven rows down beats making every storefront page fetch them.
    */
-  const [categories, products] = await Promise.all([readAll('categories'), readAll('products')]);
+  const [categories, products, countries] = await Promise.all([
+    readAll('categories'),
+    readAll('products'),
+    activeCountries(),
+  ]);
 
   /*
    * What the search field suggests while it is empty (benchmark §3a, the
@@ -24,9 +30,15 @@ export default async function StoreLayout({ children }: { children: React.ReactN
     .slice(0, 6)
     .map((product) => product.name);
 
+  // Spec 0009: what each country's buyers pay in, for the storefront's prices.
+  const buyerCurrencies = Object.fromEntries(
+    countries.map((country) => [country.code, country.buyer_currency]),
+  );
+
   return (
+    <BuyerCurrencyProvider buyerCurrencies={buyerCurrencies}>
     <div className="flex min-h-[100dvh] flex-col">
-      <StorefrontNav categories={categories} hotSearches={hotSearches} />
+      <StorefrontNav categories={categories} hotSearches={hotSearches} countries={countries} />
       {/*
         The nav is fixed and detached from the top, so pages that do not open
         with a full-bleed dark hero add their own top padding. The landing page
@@ -46,5 +58,6 @@ export default async function StoreLayout({ children }: { children: React.ReactN
       />
       <MobileTabBar />
     </div>
+    </BuyerCurrencyProvider>
   );
 }

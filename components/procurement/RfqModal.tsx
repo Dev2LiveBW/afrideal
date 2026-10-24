@@ -7,6 +7,7 @@ import { AlertCircle, CheckCircle2, FileText, X } from 'lucide-react';
 
 import { ActionButton } from '@/components/brand/ActionButton';
 import { cn } from '@/lib/utils';
+import { useAfriDealStore } from '@/store/useAfriDealStore';
 import type { CustomerType } from '@/types';
 
 /**
@@ -36,7 +37,9 @@ export function RfqModal({
 
   const [qty, setQty] = useState(initialQty);
   const [target, setTarget] = useState('');
-  const [location, setLocation] = useState('Gaborone');
+  // Starts from the shopper's "Deliver to" town (spec 0009); they can change it.
+  const deliverToCity = useAfriDealStore((state) => state.deliverTo.city);
+  const [location, setLocation] = useState('');
   const [notes, setNotes] = useState('');
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -46,10 +49,11 @@ export function RfqModal({
   useEffect(() => {
     if (isOpen) {
       setQty(initialQty);
+      setLocation((current) => current || deliverToCity);
       setError(null);
       setReference(null);
     }
-  }, [isOpen, initialQty]);
+  }, [isOpen, initialQty, deliverToCity]);
 
   useEffect(() => {
     if (!isOpen) return;
@@ -216,7 +220,7 @@ export function RfqModal({
                       id="rfq-location"
                       value={location}
                       onChange={(event) => setLocation(event.target.value)}
-                      placeholder="Gaborone"
+                      placeholder="Town or city"
                       className={inputClass}
                     />
                   </div>

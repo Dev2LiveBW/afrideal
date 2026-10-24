@@ -3,17 +3,21 @@ import { z } from 'zod';
 import { fail, guard, handled, ok } from '@/lib/api';
 import { insert, insertMany, nextId, nextIds, readAll } from '@/lib/db';
 import { EVENTS, audit, notify } from '@/lib/notifications';
-import { resolvePrice } from '@/lib/pricing-tiers';
+import { offerLandedCost, priceLine, sellerQuantities } from '@/lib/pricing-tiers';
 import { selectSupplier } from '@/lib/supplier-selection';
 import { availablePaymentMethods, startPayment } from '@/lib/payments/adapters';
 import { allAsDisplayed } from '@/lib/payments/status';
+import { findCollectionPoint } from '@/lib/collection-points';
+import { activeCountries } from '@/lib/countries';
+import { fromPula } from '@/lib/currency.mjs';
+import { DEFAULT_DELIVERY_COUNTRY } from '@/lib/lanes.mjs';
 import { checkoutIsPaused } from '@/lib/settings';
 import { paymentExpiresAt } from '@/lib/payments/policy';
 import type { Order, OrderItem, OrderTimelineEntry, Payment } from '@/types';
 
 export const dynamic = 'force-dynamic';
 
-const DELIVERY_FEE = 45;
+const DOORSTEP_DELIVERY_FEE = 45;
 
 const CheckoutSchema = z.object({
   lines: z
@@ -26,8 +30,12 @@ const CheckoutSchema = z.object({
     )
     .min(1, 'Your cart is empty.'),
   payment_method: z.enum(['DPO_PAY', 'ORANGE_MONEY', 'PAYGATE', 'EFT']),
+  delivery_method: z.enum(['DOORSTEP', 'COLLECTION_POINT']).optional().default('DOORSTEP'),
+  collection_point: z.string().nullish(),
   delivery_address: z.string().min(4, 'Enter a delivery address.'),
   delivery_city: z.string().min(2, 'Enter a city.'),
+  /** Spec 0009: where the order is going. Botswana until "Deliver to" sends one. */
+  delivery_country: z.string().trim().toUpperCase().length(2).optional(),
 });
 
 // ── GET /api/orders ──────────────────────────────────────────────────────────
@@ -84,12 +92,42 @@ export const POST = handled(async (request: Request) => {
     return fail(parsed.error.issues[0]?.message ?? 'Invalid checkout payload.', 422);
   }
 
-  const { lines, payment_method, delivery_address, delivery_city } = parsed.data;
+  const {
+    lines,
+    payment_method,
+    delivery_method,
+    collection_point,
+    delivery_address,
+    delivery_city,
+    delivery_country,
+  } = parsed.data;
 
   // Spec 0003, AC-8: checked before any pricing or supplier work, so a pause stops
   // an order at the door rather than part way through building one.
   if (await checkoutIsPaused()) {
     return fail('Checkout is temporarily unavailable. Please try again shortly.', 409);
+  }
+
+  // A collection point order must name a locker on the list; its fee is charged
+  // from that list, so an unknown name cannot pick its own price.
+  if (delivery_method === 'COLLECTION_POINT' && !findCollectionPoint(collection_point)) {
+    return fail('Choose one of the collection points listed at checkout.', 422);
+  }
+
+  // Spec 0009: the lane runs to the locker's country when one is chosen, else to
+  // the buyer's. Customs and courier clearance key off it, never off Botswana.
+  const locker = delivery_method === 'COLLECTION_POINT' ? findCollectionPoint(collection_point) : null;
+  const deliveryCountry = locker?.country ?? delivery_country ?? DEFAULT_DELIVERY_COUNTRY;
+  const country = (await activeCountries()).find((entry) => entry.code === deliveryCountry);
+  if (!country) {
+    return fail('We do not deliver to that country yet.', 422);
+  }
+  // Spec 0009, answers 1 and 2: the buyer pays in their country's currency,
+  // with one of the methods offered there.
+  const currency = country.buyer_currency;
+  const offered = country.payment_methods.map((entry) => entry.method).filter(Boolean);
+  if (!offered.includes(payment_method)) {
+    return fail(`That payment method is not offered in ${country.name} yet.`, 422);
   }
 
   // A method nothing can take money through would leave the order waiting for a
@@ -112,6 +150,7 @@ export const POST = handled(async (request: Request) => {
   // 1 + 2 - resolve and route every line.
   const itemIds = await nextIds('order-items', 'oi', lines.length);
   const items: OrderItem[] = [];
+  const tierQuantityOf = sellerQuantities(lines, products);
 
   for (const line of lines) {
     const product = products.find((candidate) => candidate.id === line.product_id);
@@ -120,34 +159,59 @@ export const POST = handled(async (request: Request) => {
     const variant = product.variants.find((candidate) => candidate.id === line.variant_id);
     if (!variant) return fail(`That option is no longer available for ${product.name}.`, 422);
 
-    const route = selectSupplier(
-      offers.filter((offer) => offer.product_id === product.id),
-      suppliers,
-      line.qty,
-    );
+    const minOrderQty = product.owner_type === 'SUPPLIER' ? Math.max(1, product.moq ?? 1) : 1;
+    if (line.qty < minOrderQty) {
+      return fail(
+        `${product.name} requires a minimum order of ${minOrderQty} units.`,
+        422,
+      );
+    }
+
+    const candidateOffers = offers.filter((offer) => offer.product_id === product.id);
+    const preferredOffers =
+      product.owner_type === 'SUPPLIER' && product.supplier_id
+        ? candidateOffers.filter((offer) => offer.supplier_id === product.supplier_id)
+        : candidateOffers;
+
+    const route =
+      selectSupplier(
+        preferredOffers.length > 0 ? preferredOffers : candidateOffers,
+        suppliers,
+        line.qty,
+      ) ?? selectSupplier(candidateOffers, suppliers, line.qty);
 
     if (!route) return fail(`No verified supplier can currently fulfil ${product.name}.`, 409);
 
     /**
-     * §14 - price the line from the buyer's own tier ladder, at the server, for
-     * the quantity actually ordered. The client sends no prices at all, so a
-     * tampered cart cannot set its own, and a buyer who qualifies for wholesale
-     * gets it whether or not the page they came from showed it.
+     * §14 - price the line from the buyer's own tier ladder, at the server.
+     * Supplier-owned products use the supplier's set price directly; AfriDeal
+     * products use the ladder, on the rung chosen by every unit in this order
+     * from the same seller and category (spec 0007, AC-5). `priceLine()` is the
+     * function the cart and checkout show, so the charge matches the summary.
      */
     const productBands = bands.filter((band) => band.product_id === product.id);
-    const tiered = resolvePrice(productBands, product, line.qty, actor.customerType);
+    const priced = priceLine(
+      productBands,
+      product,
+      variant.id,
+      line.qty,
+      actor.customerType,
+      tierQuantityOf(product.id),
+    );
 
-    if (tiered.requires_rfq) {
+    if (priced.resolved.requires_rfq) {
       return fail(
         `${product.name} at ${line.qty} units is priced by quotation. Submit a quotation request rather than ordering directly.`,
         409,
       );
     }
 
-    // Variants carry an uplift over the product base; apply it as a ratio so a
-    // case is correctly dearer than a single unit at every rung of the ladder.
-    const variantRatio = product.price === 0 ? 1 : variant.price / product.price;
-    const unitPrice = Math.ceil(tiered.unit_price * variantRatio);
+    // Spec 0007, AC-7: what this unit cost us, fixed now so a later rate or
+    // cost change never rewrites a placed order or its payable.
+    const landed = offerLandedCost(route.offer, product, variant.id, deliveryCountry);
+    const supplierCost =
+      route.offer.variant_costs?.find((entry) => entry.variant_id === variant.id)?.cost ??
+      route.offer.supplier_cost;
 
     items.push({
       id: itemIds[items.length],
@@ -158,10 +222,14 @@ export const POST = handled(async (request: Request) => {
       variant_label: variant.label,
       emoji: product.emoji,
       qty: line.qty,
-      unit_price: unitPrice,
-      line_total: unitPrice * line.qty,
+      // Priced in pula, charged in the buyer's currency (spec 0009).
+      unit_price: fromPula(priced.unit_price, currency),
+      line_total: fromPula(priced.line_total, currency),
       supplier_id: route.supplier.id,
-      supplier_cost: route.offer.supplier_cost,
+      supplier_cost: supplierCost,
+      supplier_cost_currency: route.offer.cost_currency ?? 'BWP',
+      fx_rate: supplierCost === 0 ? 1 : landed.cost / supplierCost,
+      customs_amount: landed.customs,
     });
   }
 
@@ -173,6 +241,13 @@ export const POST = handled(async (request: Request) => {
     { status: 'AWAITING_PAYMENT', label: 'Order placed, waiting for payment', at: now },
   ];
 
+  // The locker, its fee, address and town come from the one shared list, never
+  // from the request: checkout shows the same fee it reads from there.
+  const isCollectionPoint = delivery_method === 'COLLECTION_POINT';
+  const point = isCollectionPoint ? findCollectionPoint(collection_point) : null;
+  const delivery_fee = fromPula(point ? point.fee : DOORSTEP_DELIVERY_FEE, currency);
+  const resolvedAddress = point ? point.name : delivery_address;
+
   // 3 - the customer-facing order. The reference follows the id (the seed
   // numbers o001 as AFD-24810), so it is unique for the same reason the id is;
   // a row count would repeat under concurrent checkouts.
@@ -182,17 +257,21 @@ export const POST = handled(async (request: Request) => {
     customer_id: actor.id,
     customer_name: actor.name,
     status: 'AWAITING_PAYMENT',
+    currency,
     subtotal,
-    delivery_fee: DELIVERY_FEE,
-    total: subtotal + DELIVERY_FEE,
+    delivery_fee,
+    total: subtotal + delivery_fee,
     payment_method,
     // Null until a payment confirms. It used to be invented from the clock here,
     // which is what made every order look paid the moment it was placed.
     payment_reference: null,
     payment_expires_at: paymentExpiresAt(now, payment_method),
     cancel_reason: null,
-    delivery_address,
-    delivery_city,
+    delivery_address: resolvedAddress,
+    delivery_city: point ? point.city : delivery_city,
+    delivery_country: deliveryCountry,
+    delivery_method,
+    collection_point: point ? point.name : null,
     placed_at: now,
     updated_at: now,
     timeline,

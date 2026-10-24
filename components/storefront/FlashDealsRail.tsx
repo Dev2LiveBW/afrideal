@@ -6,7 +6,7 @@ import { Zap, Flame } from 'lucide-react';
 
 import { ActionButton } from '@/components/brand/ActionButton';
 import { PriceTag } from '@/components/brand/MoneyText';
-import { pulaTag } from '@/lib/format';
+import { PriceText } from '@/components/brand/BuyerCurrency';
 import { Swatch } from '@/components/storefront/Swatch';
 import { categoryPalette } from '@/lib/category-palette';
 import type { Product, ProductImage } from '@/types';
@@ -170,7 +170,7 @@ export function FlashDealsRail({
                     <PriceTag amount={product.price} size="sm" tone="ink" className="text-[0.75rem] sm:text-[0.875rem]" />
                     {product.compare_at_price && (
                       <span className="font-mono text-[0.625rem] sm:text-[0.75rem] tabular-nums text-muted line-through">
-                        {pulaTag(product.compare_at_price)}
+                        <PriceText amount={product.compare_at_price} />
                       </span>
                     )}
                   </div>

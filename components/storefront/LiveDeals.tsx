@@ -6,7 +6,7 @@ import toast from 'react-hot-toast';
 
 import { Floor } from '@/components/storefront/home/Floor';
 import { Swatch, photoUrl } from '@/components/storefront/Swatch';
-import { pulaTag } from '@/lib/format';
+import { PriceText } from '@/components/brand/BuyerCurrency';
 import { useAfriDealStore } from '@/store/useAfriDealStore';
 import type { Product, ProductImage } from '@/types';
 
@@ -123,10 +123,10 @@ export function LiveDeals({ rows, className }: { rows: LiveDealRow[]; className?
                 <div className="mt-0.5 px-0">
                   <div className="flex flex-wrap items-baseline gap-1">
                     <span className="font-mono text-[0.5rem] font-bold tabular-nums text-[#1E8449] sm:text-[0.875rem]">
-                      {pulaTag(to)}
+                      <PriceText amount={to} />
                     </span>
                     <span className="font-mono text-[0.375rem] font-normal tabular-nums text-muted line-through sm:text-[0.6875rem]">
-                      {pulaTag(from)}
+                      <PriceText amount={from} />
                     </span>
                   </div>
                   <div className="mt-0 line-clamp-1 text-[0.46875rem] font-medium text-[#222] transition-colors group-hover:text-[#E67E22] sm:text-[0.75rem]">

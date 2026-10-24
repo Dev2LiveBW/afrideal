@@ -2,56 +2,55 @@
  * The AfriDeal price ladder - one rule, applied to every product.
  *
  * AfriDeal buys from a verified supplier and resells to the customer. The
- * customer-facing price is therefore the supplier's cost plus a published
- * platform markup, and the markup is decided by how many units the customer
- * takes:
+ * customer-facing price is the landed cost (the supplier's cost, converted to
+ * pula) plus a published markup decided by how many units the customer takes
+ * (spec 0007, the product owner's developer table of 2026-10-20). Customs is
+ * not in it: since 2026-10-21 the courier clears the goods and charges for it
+ * in the delivery fee (spec 0008).
  *
- *   1 – 4 units      Retail        cost + 60%
- *   5 – 19 units     Bulk          cost + 46%
- *   20 – 49 units    Wholesale     cost + 32%
- *   50 – 99 units    Wholesale+    cost + 22%
+ *   1 – 4 units      Retail        landed + 50%, less 2 / 3 / 5% for 2 / 3 / 4 units
+ *   5 – 10 units     Bulk          landed + 33%
+ *   11 – 20 units    Wholesale     landed + 25%
+ *   21 – 99 units    Wholesale+    landed + 18%
  *   100 units +      Custom        by quotation
  *
- * Worked example, on a supplier cost of BWP 250.00:
+ * Worked example, an 8" wig at a supplier cost of R280 (rate 1:1 for now):
  *
- *   Retail       250 × 1.60 = BWP 400.00 per unit
- *   Bulk         250 × 1.46 = BWP 365.00 per unit   (BWP  35.00 per unit less)
- *   Wholesale    250 × 1.32 = BWP 330.00 per unit   (BWP  70.00 per unit less)
- *   Wholesale+   250 × 1.22 = BWP 305.00 per unit   (BWP  95.00 per unit less)
- *   100 +        quoted against the volume, the delivery point and the lead time
+ *   Landed       280 × 1.00 = BWP 280
+ *   Retail       280 × 1.50 = BWP 420 per unit
+ *   Bulk         280 × 1.33 = BWP 373 per unit (372.40, rounded up)
+ *   Wholesale    280 × 1.25 = BWP 350 per unit
+ *   Wholesale+   280 × 1.18 = BWP 331 per unit (330.40, rounded up)
  *
- * Four published rungs rather than two. Two rungs made the ladder an argument
- * about a single quantity break; a buyer taking twenty units and a buyer taking
- * ninety stood on the same price, so the catalogue had nothing to say to the
- * reseller it most wants. Four rungs give the same product a rate at every
- * quantity a Botswana buyer actually orders in, and the board that publishes
- * them is the baseline for every product in the catalogue - there is no product
- * priced on a different structure, and none where a rung is hidden until you
- * register.
+ * The arithmetic itself lives in `lib/pricing-formula.mjs`, shared with the
+ * seed, so the published bands and the charged price cannot disagree.
  *
  * Three decisions are deliberate and worth keeping.
  *
- * The markup applies to the supplier cost alone. Delivery is quoted separately
- * at checkout against the real address rather than smeared across every unit,
- * so a customer collecting from Gaborone is not paying for a Francistown run.
+ * Delivery is quoted separately at checkout against the real address rather
+ * than smeared across every unit, so a customer collecting from Gaborone is not
+ * paying for a Francistown run. Customs goes with delivery: the buyer's chosen
+ * courier clears the goods and prices the clearance into its own fee.
  *
  * The ladder does not vary by account type. Everyone - a first-time visitor, a
  * salon owner, a school procurement officer - is shown the same published
- * figures for the same quantity. A price the buyer has to apply for is not a
- * price advantage they can act on, and the whole argument of the catalogue is
- * that the buyer can see the comparison before committing.
+ * figures for the same quantity.
  *
- * The gaps narrow as the ladder descends: 14 points from retail to bulk, then
- * 14, then 10. The margin has to survive the bottom rung on the platform's
- * thinnest category, and a ladder that kept stepping by the full amount would
- * have priced the deepest rung under its floor rather than earning its way
- * there.
+ * Quantity is counted across one seller's units in one category (spec 0007,
+ * AC-5), so a salon taking three 8" and three 10" wigs stands on the bulk rung.
  */
 
 import type { PricingTier } from '@/types';
 
+import {
+  HAIR_LADDER_RUNGS,
+  LADDER_RUNGS,
+  QUOTATION_THRESHOLD as THRESHOLD,
+  unitPrice,
+} from './pricing-formula.mjs';
+
 /** Where the quantity ladder stops publishing and starts quoting. */
-export const QUOTATION_THRESHOLD = 100;
+export const QUOTATION_THRESHOLD: number = THRESHOLD;
 
 /** The tiers that carry a published figure, cheapest last. */
 export type PublishedTier = Extract<
@@ -61,36 +60,29 @@ export type PublishedTier = Extract<
 
 export interface LadderRung {
   tier: PublishedTier;
-  /** Fraction of supplier cost added on top, e.g. 0.6 for 60%. */
+  /** Fraction of the landed cost added on top, e.g. 0.5 for 50%. */
   markup: number;
   minimum_quantity: number;
   maximum_quantity: number;
+  /** Minimum share of the selling price kept after landed cost and card fee, in %. */
+  floor: number;
 }
 
 /**
- * The published rungs, cheapest last. Changing a markup here changes every
- * customer price on the next seed, and every figure the storefront quotes.
+ * The published rungs, cheapest last, from `lib/pricing-formula.mjs`. Changing
+ * a markup there changes every customer price on the next seed, and every
+ * figure the storefront quotes.
  */
-export const LADDER: LadderRung[] = [
-  { tier: 'RETAIL', markup: 0.6, minimum_quantity: 1, maximum_quantity: 4 },
-  { tier: 'BULK', markup: 0.46, minimum_quantity: 5, maximum_quantity: 19 },
-  { tier: 'WHOLESALE', markup: 0.32, minimum_quantity: 20, maximum_quantity: 49 },
-  {
-    tier: 'WHOLESALE_PLUS',
-    markup: 0.22,
-    minimum_quantity: 50,
-    maximum_quantity: QUOTATION_THRESHOLD - 1,
-  },
-];
+export const LADDER: LadderRung[] = LADDER_RUNGS.map((rung) => ({ ...rung }));
 
 /**
- * Selling price for one unit at a given rung.
+ * Selling price for one unit at a given rung, from a landed cost in thebe.
  *
  * Rounded up to the Pula. Rounding down would let a rounding error, applied
  * across a hundred-unit order, quietly eat the margin the rung was set to earn.
  */
-export function priceAtRung(supplierCost: number, rung: LadderRung): number {
-  return Math.ceil(supplierCost * (1 + rung.markup));
+export function priceAtRung(landedThebe: number, rung: LadderRung): number {
+  return unitPrice(landedThebe, rung.markup);
 }
 
 /** The rung a quantity falls on, or null once it passes into quotation territory. */
@@ -106,19 +98,31 @@ export function requiresQuotation(quantity: number): boolean {
   return quantity >= QUOTATION_THRESHOLD;
 }
 
-/** `1–4`, `5–19`, `100+` - the range as the buyer reads it. */
+/** `1–4`, `5–10`, `100+` - the range as the buyer reads it. */
 export function rungRange(rung: LadderRung): string {
   return `${rung.minimum_quantity}–${rung.maximum_quantity}`;
 }
 
-export const MARKUP_PCT: Record<PublishedTier, number> = Object.fromEntries(
-  LADDER.map((rung) => [rung.tier, rung.markup * 100]),
-) as Record<PublishedTier, number>;
+const markupPct = (ladder: LadderRung[]) =>
+  Object.fromEntries(
+    ladder.map((rung) => [rung.tier, Math.round(rung.markup * 1000) / 10]),
+  ) as Record<PublishedTier, number>;
+
+/** Markup on the landed cost, in whole percent: `{ RETAIL: 50, … }`. */
+export const MARKUP_PCT: Record<PublishedTier, number> = markupPct(LADDER);
+
+/**
+ * The hair category's own, leaner ladder (2026-10-21): same quantity breaks,
+ * markups of 25 / 12 / 10 / 8%. Prices themselves come from the stored bands;
+ * this is for copy that quotes the percentages.
+ */
+export const HAIR_LADDER: LadderRung[] = HAIR_LADDER_RUNGS.map((rung) => ({ ...rung }));
+export const HAIR_MARKUP_PCT: Record<PublishedTier, number> = markupPct(HAIR_LADDER);
 
 /**
  * What a buyer saves per unit by moving from the retail rung to another one, on
- * the same supplier cost. Expressed against the retail price, because that is
- * the figure they would otherwise have paid.
+ * the same landed cost. Expressed against the retail price, because that is the
+ * figure they would otherwise have paid.
  */
 export function savingPctAt(tier: PublishedTier): number {
   const retail = 1 + LADDER[0].markup;

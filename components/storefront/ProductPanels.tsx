@@ -2,6 +2,7 @@ import Link from 'next/link';
 import { BadgeCheck, ChevronRight, Store, Truck } from 'lucide-react';
 
 import { MoneyText } from '@/components/brand/MoneyText';
+import { DeliverToTown } from '@/components/storefront/DeliverToTown';
 import type { PublicOffer } from '@/lib/queries';
 
 /** Breadcrumb, delivery estimate and seller card for the product detail page. */
@@ -40,14 +41,15 @@ export function DeliveryEstimate({
   fee = 45,
 }: {
   offers: PublicOffer[];
-  city: string;
+  /** A fixed town; otherwise the shopper's "Deliver to" choice (spec 0009). */
+  city?: string;
   fee?: number;
 }) {
   const inStock = offers.filter((offer) => offer.in_stock);
 
   if (inStock.length === 0) {
     return (
-      <div className="mt-4 rounded-md border border-hairline bg-surface p-4">
+      <div className="rounded-md border border-hairline bg-surface p-4">
         <p className="text-[13px] text-body">
           No supplier is currently holding stock, so we cannot quote a delivery window. Request a
           quotation and we will source it.
@@ -62,12 +64,12 @@ export function DeliveryEstimate({
   const high = Math.max(low, slowest + 1);
 
   return (
-    <div className="mt-4 rounded-md border border-hairline bg-surface p-4">
+    <div className="rounded-md border border-hairline bg-surface p-4">
       <div className="flex items-center gap-2.5">
         <Truck size={16} strokeWidth={1.5} className="shrink-0 text-muted" />
         <div>
           <p className="text-[13px] font-medium text-ink">Delivery estimate</p>
-          <p className="text-[11.5px] text-muted">To {city}</p>
+          <p className="text-[11.5px] text-muted">To {city ?? <DeliverToTown />}</p>
         </div>
       </div>
 
@@ -103,7 +105,7 @@ export function SellerCard({ offer }: { offer: PublicOffer | undefined }) {
   if (!offer) return null;
 
   return (
-    <div className="mt-3 flex items-center gap-3 rounded-md border border-hairline bg-surface-raised p-4">
+    <div className="flex items-center gap-3 rounded-md border border-hairline bg-surface-raised p-4">
       <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-forest-wash font-mono text-[12px] font-semibold text-forest">
         {offer.supplier_initials}
       </span>
@@ -119,7 +121,7 @@ export function SellerCard({ offer }: { offer: PublicOffer | undefined }) {
       </div>
 
       <Link
-        href="/browse"
+        href={`/suppliers/${offer.supplier_id}`}
         className="inline-flex shrink-0 items-center gap-1.5 rounded-full border border-hairline-strong px-3 py-1.5 text-[12px] font-medium text-ink transition-colors hover:bg-ink/[0.04]"
       >
         <Store size={13} strokeWidth={1.5} />

@@ -68,6 +68,24 @@ Switch on the real thing: live gateway keys, live DNS, Company owned repo, host 
 **Done when:** the repo, Neon project and host belong to the Company; the runbook covers deploy, rollback, restore, stuck payment, manual settlement and pausing checkout; a real BWP 10 order and its refund appear in the gateway dashboard and the reconciliation page.
 - [ ] Design it (spec): `/architect production go live`
 
+## Close out
+
+### 32. Any-to-any marketplace: countries, lanes, deliver to · in-progress
+Buyers, suppliers, runners and couriers in any country; every order a lane from the goods' town to the buyer's. Countries become data, "imported" becomes "cross-border on this lane", the header's "Deliver to" carries a country, couriers list the routes they serve, runners serve towns in a country.
+**Done when:** a Lesotho buyer can order Botswana and South African goods and is offered the runners, couriers and collection points serving that lane; a Gaborone buyer ordering from Gaborone sees no customs row; no code or copy assumes a Botswana buyer.
+spec [0009](../specs/0009-any-to-any-marketplace.md)
+- [x] Design it (spec): `/architect any-to-any marketplace`
+- [ ] Build it: `/develop any-to-any marketplace`
+  - [x] Countries as data; `'BW' | 'ZA'` unions and enums gone; Lesotho in the seed
+  - [x] `laneFor()` replaces every "not Botswana" check; customs row per lane
+  - [x] "Deliver to" country and town in the header and checkout
+  - [x] Courier routes and runner service areas carry countries
+  - [x] Copy sweep
+- [ ] Verify it: `/check verify any-to-any marketplace`
+- [ ] Test it: `/test`
+- [ ] Review it: `/check review`
+- [ ] Document it: `/document`
+
 ## Deferred
 Out of scope for the current build pass, kept so the plan stays honest.
 - **Removing the JSON store adapter**: once staging has run on Postgres through launch

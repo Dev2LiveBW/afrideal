@@ -190,7 +190,8 @@ section('3. Pricing engine — margins are arithmetically correct');
 {
   const { jar } = sessions['admin@afrideal.co.bw'];
 
-  // Hair & Beauty is an 80% markup, BWP 15 logistics, 2.5% gateway.
+  // Hair's retail markup is 25% (its own ladder since 2026-10-21, spec 0007),
+  // no logistics, 2.5% gateway.
   const { body } = await json(jar, '/api/pricing', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
@@ -201,7 +202,7 @@ section('3. Pricing engine — margins are arithmetically correct');
   check('returns a result', r != null);
 
   if (r) {
-    check('markup is 60% of cost', r.markup === 60, `got ${r.markup}`);
+    check('markup is 25% of cost', r.markup === 25, `got ${r.markup}`);
     check(
       'no per-unit logistics is folded into the price',
       r.logistics_cost === 0,
@@ -209,17 +210,17 @@ section('3. Pricing engine — margins are arithmetically correct');
     );
     check(
       'gateway is 2.5% of the selling price',
-      r.gateway_cost === 4,
+      r.gateway_cost === 3.125,
       `got ${r.gateway_cost}`,
     );
     check(
-      'price = ceil(100 x 1.60) = 160',
-      r.recommended_price === 160,
+      'price = ceil(100 x 1.25) = 125',
+      r.recommended_price === 125,
       `got ${r.recommended_price}`,
     );
     check(
       'margin_pct is margin over selling price',
-      Math.abs(r.margin_pct - ((160 - 100 - 4) / 160) * 100) < 0.001,
+      Math.abs(r.margin_pct - ((125 - 100 - 3.125) / 125) * 100) < 0.001,
       `got ${r.margin_pct}`,
     );
   }
@@ -240,7 +241,10 @@ section('4. Catalogue — no product sells below cost');
   const products = (await json(jar, '/api/products')).body ?? [];
   const offers = (await json(jar, '/api/supplier-offers')).body ?? [];
 
-  check('17 products seeded', products.length === 17, `got ${products.length}`);
+  // 11 demo products outside hair, plus AfriDeal's seven wigs (spec 0007:
+  // Products 1 to 5, 8 and 9). Hair holds only AfriDeal's own range since
+  // 2026-10-21.
+  check('18 products seeded', products.length === 18, `got ${products.length}`);
 
   let violations = 0;
   for (const product of products) {
@@ -443,14 +447,16 @@ section('9. Checkout — the order split engine');
     const after = (await json(jar, '/api/orders')).body?.length ?? 0;
     check('order count increased by one', after === before + 1, `${before} → ${after}`);
 
-    // Prices must come from the catalogue, never from the client.
+    // Prices must come from the catalogue, never from the client. Two units
+    // earn the 2% retail multi-buy on the catalogue price (spec 0007, AC-4).
     const products = (await json(jar, '/api/products')).body ?? [];
     const p001 = products.find((p) => p.id === 'p001');
     const variant = p001?.variants?.find((v) => v.id === 'p001v1');
+    const twoUnitPrice = variant ? Math.ceil(Math.round(variant.price * 98) / 100) : undefined;
     check(
       'unit price was re-read server-side',
-      result.items[0].unit_price === variant?.price,
-      `${result.items[0].unit_price} vs catalogue ${variant?.price}`,
+      result.items[0].unit_price === twoUnitPrice,
+      `${result.items[0].unit_price} vs catalogue ${variant?.price} less 2% = ${twoUnitPrice}`,
     );
   }
 
@@ -633,10 +639,15 @@ section('9b. Payment expiry — a closed window reads as cancelled');
   // excluded CANCELLED but not AWAITING_PAYMENT.
   // Computed rather than hardcoded: earlier sections place orders of their own, so
   // any fixed number here would rot. The list already carries effective statuses.
-  const analytics = (await json(ops, '/api/analytics?days=3650')).body;
+  // `period=YTD` (365 days) so every seeded order is inside the window. This used
+  // to pass `days=3650`, which the route ignores: it fell back to the 30-day MTD
+  // window, and the check started failing on 2026-10-12, the day the oldest
+  // seeded order (o001, placed 2026-09-11) aged out of it.
+  const analytics = (await json(ops, '/api/analytics?period=YTD')).body;
   const everyOrder = Array.isArray(list) ? list : [];
   const expectedBillable = everyOrder.filter(
-    (o) => o.status !== 'CANCELLED' && o.status !== 'AWAITING_PAYMENT',
+    // Refunded orders stopped counting as revenue with feature 14 (isBillable).
+    (o) => o.status !== 'CANCELLED' && o.status !== 'AWAITING_PAYMENT' && o.status !== 'REFUNDED',
   ).length;
   const unpaidOrDead = everyOrder.length - expectedBillable;
 
@@ -833,6 +844,38 @@ section('9d. Refused payments — a cancelled order is not reopened, a paid one 
     `${paidEntries.length} PAID entries`);
 }
 
+// ── Feature 10: a collection point is charged the fee checkout shows ─────────
+section('9e. Collection points — the fee charged is the fee shown');
+{
+  const buyer = sessions['thabo@gmail.com'].jar;
+
+  const placeAt = (collection_point) =>
+    json(buyer, '/api/orders', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        lines: [{ product_id: 'p001', variant_id: 'p001v1', qty: 1 }],
+        payment_method: 'EFT',
+        delivery_method: 'COLLECTION_POINT',
+        collection_point,
+        delivery_address: collection_point ?? 'none',
+        delivery_city: 'Gaborone',
+      }),
+    });
+
+  // Checkout lists Francistown at BWP 30; the server used to charge 25 for every
+  // locker. Both now read lib/collection-points.ts.
+  const francistown = await placeAt('Francistown Main Mall Locker');
+  check('a Francistown locker order is placed', francistown.status === 201, `got ${francistown.status}`);
+  check('and charged the BWP 30 that checkout shows', francistown.body?.order?.delivery_fee === 30,
+    `charged ${francistown.body?.order?.delivery_fee}`);
+  check('and its town comes from the locker, not the request', francistown.body?.order?.delivery_city === 'Francistown',
+    `got ${francistown.body?.order?.delivery_city}`);
+
+  const unknown = await placeAt('A locker nobody listed');
+  check('an unlisted locker is refused, so it cannot set its own fee', unknown.status === 422, `got ${unknown.status}`);
+}
+
 // ── 10. Runner availability toggle ───────────────────────────────────────────
 
 section('10. Runner availability');
@@ -946,7 +989,7 @@ section('13. Tiered pricing — the ladder is real, not hard-coded');
   const unit1 = order1.body?.items?.[0]?.unit_price;
   check('qty 1 is charged the retail band', unit1 === p001?.price, `${unit1} vs ${p001?.price}`);
 
-  // Bulk rung, 5–19.
+  // Bulk rung, 5–10.
   const order5 = await json(business, '/api/orders', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
@@ -962,8 +1005,8 @@ section('13. Tiered pricing — the ladder is real, not hard-coded');
   check('bulk line total uses the bulk unit price', order5.body?.items?.[0]?.line_total === unit5 * 5);
 
   /*
-   * Four published rungs (scripts/seed.mjs, lib/pricing-model.ts): retail 1–4,
-   * bulk 5–19, wholesale 20–49, wholesale+ 50–99. Each break drops the unit
+   * Four published rungs (lib/pricing-formula.mjs, spec 0007): retail 1–4,
+   * bulk 5–10, wholesale 11–20, wholesale+ 21–99. Each break drops the unit
    * price; a quantity inside a rung is priced identically to its neighbours.
    */
   const unitAt = async (qty) => {
@@ -979,14 +1022,22 @@ section('13. Tiered pricing — the ladder is real, not hard-coded');
     });
     return order.body?.items?.[0]?.unit_price;
   };
-  const unit19 = await unitAt(19);
+  const unit10 = await unitAt(10);
+  const unit11 = await unitAt(11);
   const unit20 = await unitAt(20);
-  const unit49 = await unitAt(49);
+  const unit21 = await unitAt(21);
   const unit50 = await unitAt(50);
-  check('qty 19 stays on the bulk rung', unit19 === unit5, `${unit19} vs ${unit5}`);
-  check('qty 20 drops to the wholesale rung', unit20 < unit5, `${unit20} vs ${unit5}`);
-  check('qty 49 stays on the wholesale rung', unit49 === unit20, `${unit49} vs ${unit20}`);
-  check('qty 50 drops to the wholesale+ rung', unit50 < unit20, `${unit50} vs ${unit20}`);
+  check('qty 10 stays on the bulk rung', unit10 === unit5, `${unit10} vs ${unit5}`);
+  check('qty 11 drops to the wholesale rung', unit11 < unit5, `${unit11} vs ${unit5}`);
+  check('qty 20 stays on the wholesale rung', unit20 === unit11, `${unit20} vs ${unit11}`);
+  check('qty 21 drops to the wholesale+ rung', unit21 < unit11, `${unit21} vs ${unit11}`);
+  check('qty 50 stays on the wholesale+ rung', unit50 === unit21, `${unit50} vs ${unit21}`);
+
+  // Retail multi-buy (spec 0007, AC-4): 2% off each for 2 units, 5% for 4.
+  const unit2 = await unitAt(2);
+  const unit4 = await unitAt(4);
+  check('qty 2 takes 2% off retail', unit2 === Math.ceil(Math.round(unit1 * 98) / 100), `${unit2} vs ${unit1}`);
+  check('qty 4 takes 5% off retail', unit4 === Math.ceil(Math.round(unit1 * 95) / 100), `${unit4} vs ${unit1}`);
 
   /*
    * The published ladder is not gated by account type. A retail shopper taking
@@ -1011,20 +1062,127 @@ section('13. Tiered pricing — the ladder is real, not hard-coded');
   );
 
   /*
-   * And the markups themselves are the published ones: 60% over cost at retail
-   * quantities, then 46%, 32% and 22% down the ladder. Checked as ratios
+   * And the markups themselves are the published ones: 50% over landed cost at
+   * retail quantities, then 33%, 25% and 18% down the ladder. Checked as ratios
    * against the rung the API actually charged rather than against the seed, so
    * a drift between the pricing model and the data shows up here.
    */
   const rung = (label, unit, markup) =>
     check(
-      `the ${label} rung is cost + ${markup}%`,
-      Math.abs(unit / unit1 - (1 + markup / 100) / 1.6) < 0.02,
+      `the ${label} rung is landed cost + ${markup}%`,
+      Math.abs(unit / unit1 - (1 + markup / 100) / 1.5) < 0.02,
       `${unit} / ${unit1} = ${(unit / unit1).toFixed(4)}`,
     );
-  rung('bulk', unit5, 46);
-  rung('wholesale', unit20, 32);
-  rung('wholesale+', unit50, 22);
+  rung('bulk', unit5, 33);
+  rung('wholesale', unit11, 25);
+  rung('wholesale+', unit21, 18);
+
+  /*
+   * Spec 0007: AfriDeal's wigs are sold by length, priced from the product
+   * owner's rand costs (no customs since 2026-10-21; the courier clears it), on
+   * the hair ladder (25 / 12 / 10 / 8%), and counted across lengths. Three 8" and
+   * three 10" are six units, so both lines stand on the bulk rung:
+   * 280 × 1.12 = 313.60 and 450 × 1.12 = 504, published rounded up.
+   */
+  const wigs = await json(retail, '/api/orders', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      lines: [
+        { product_id: 'p018', variant_id: 'p018v1', qty: 3 },
+        { product_id: 'p018', variant_id: 'p018v2', qty: 3 },
+      ],
+      payment_method: 'DPO_PAY',
+      delivery_address: 'Plot 5412, Extension 12',
+      delivery_city: 'Gaborone',
+    }),
+  });
+  const [wig8, wig10] = wigs.body?.items ?? [];
+  check('mixed wig lengths count together: 8" at the bulk price', wig8?.unit_price === 314, `got ${wig8?.unit_price}`);
+  check('mixed wig lengths count together: 10" at the bulk price', wig10?.unit_price === 504, `got ${wig10?.unit_price}`);
+  check(
+    'the order fixes the rand cost and the customs it was priced on (none)',
+    wig8?.supplier_cost === 280 && wig8?.supplier_cost_currency === 'ZAR' && wig8?.customs_amount === 0,
+    JSON.stringify({ cost: wig8?.supplier_cost, currency: wig8?.supplier_cost_currency, customs: wig8?.customs_amount }),
+  );
+
+  // A product from another category does not count towards the wigs' rung.
+  const mixed = await json(retail, '/api/orders', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      lines: [
+        { product_id: 'p018', variant_id: 'p018v1', qty: 3 },
+        { product_id: 'p001', variant_id: 'p001v1', qty: 3 },
+      ],
+      payment_method: 'DPO_PAY',
+      delivery_address: 'Plot 5412, Extension 12',
+      delivery_city: 'Gaborone',
+    }),
+  });
+  // Three 8" wigs alone: hair retail 350 less the 3% multi-buy, 339.50 rounded up.
+  check(
+    'a beauty product does not count towards the hair rung',
+    mixed.body?.items?.[0]?.unit_price === 340,
+    `got ${mixed.body?.items?.[0]?.unit_price}`,
+  );
+
+  /*
+   * Spec 0009: the market is any-to-any. An order records the country it is
+   * going to (Botswana until "Deliver to" sends one), and a country AfriDeal
+   * does not trade in is refused rather than priced on a guess.
+   */
+  check(
+    'an order records its delivery country',
+    wigs.body?.order?.delivery_country === 'BW',
+    `got ${wigs.body?.order?.delivery_country}`,
+  );
+  const nowhere = await json(retail, '/api/orders', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      lines: [{ product_id: 'p001', variant_id: 'p001v1', qty: 1 }],
+      payment_method: 'DPO_PAY',
+      delivery_address: 'Somewhere',
+      delivery_city: 'Nowhere',
+      delivery_country: 'XX',
+    }),
+  });
+  check('an order to a country AfriDeal does not trade in is refused', nowhere.status === 422, `got ${nowhere.status}`);
+
+  /*
+   * Spec 0009, answers 1 and 2: a Botswana buyer pays in pula, a Lesotho buyer
+   * in rand; each country takes only the methods it lists.
+   */
+  check('a Botswana order is charged in pula', wigs.body?.order?.currency === 'BWP', `got ${wigs.body?.order?.currency}`);
+  const maseruOrder = (payment_method) =>
+    json(retail, '/api/orders', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        lines: [{ product_id: 'p001', variant_id: 'p001v1', qty: 1 }],
+        payment_method,
+        delivery_address: 'Kingsway Road 12',
+        delivery_city: 'Maseru',
+        delivery_country: 'LS',
+      }),
+    });
+  const inRand = await maseruOrder('DPO_PAY');
+  check('a Lesotho order is charged in rand', inRand.body?.order?.currency === 'ZAR', `got ${inRand.status} ${inRand.body?.order?.currency}`);
+  const eftInLesotho = await maseruOrder('EFT');
+  check('a method Lesotho does not list (bank transfer) is refused', eftInLesotho.status === 422, `got ${eftInLesotho.status}`);
+
+  const admin = sessions['admin@afrideal.co.bw'].jar;
+  const onboard = (country) =>
+    json(admin, '/api/suppliers', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ name: `Verify supplier ${country}`, country, city: 'Maseru', supplier_type: 'WHOLESALER' }),
+    });
+  const lesotho = await onboard('LS');
+  check('a supplier can be onboarded in Lesotho', lesotho.status === 200 || lesotho.status === 201, `got ${lesotho.status}`);
+  const unknown = await onboard('XX');
+  check('a supplier in an unknown country is refused', unknown.status === 422, `got ${unknown.status}`);
 
   // Past the top band the answer is a quotation, not a guessed price.
   const order100 = await json(business, '/api/orders', {
@@ -1137,6 +1295,19 @@ section('15. RFQ — quotation requests');
         body: JSON.stringify({ action: 'SELECT_RESPONSE', response_id: target.id }),
       });
       check('staff can select a winning quote', selected.status === 200, `got ${selected.status}`);
+      check('a chosen quote creates an order', Boolean(selected.body?.order?.id), `got ${selected.body?.order?.id}`);
+      check('the order starts as AWAITING_PAYMENT', selected.body?.order?.status === 'AWAITING_PAYMENT');
+      check('the order is linked to the rfq customer', selected.body?.order?.customer_id === created.body?.rfq?.customer_id);
+
+      const rfqAfter = (await json(business, `/api/rfqs/${rfqId}`)).body;
+      check('rfq is marked ORDERED', rfqAfter?.rfq?.status === 'ORDERED', `got ${rfqAfter?.rfq?.status}`);
+      check('rfq references the created order', rfqAfter?.rfq?.order_id === selected.body?.order?.id);
+
+      const buyerOrders = (await json(business, '/api/orders')).body;
+      check(
+        'the quotation order appears in buyer orders list',
+        Array.isArray(buyerOrders) && buyerOrders.some((o) => o.id === selected.body?.order?.id),
+      );
     }
 
     const runner = sessions['runner@afrideal.co.bw'].jar;

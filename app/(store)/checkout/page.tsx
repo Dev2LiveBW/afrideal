@@ -5,6 +5,7 @@ import { LogIn } from 'lucide-react';
 import { ActionButton } from '@/components/brand/ActionButton';
 import { EmptyState } from '@/components/brand/Panel';
 import { auth } from '@/lib/auth';
+import { activeCountries } from '@/lib/countries';
 import { readAll } from '@/lib/db';
 import { availablePaymentMethods } from '@/lib/payments/adapters';
 
@@ -41,10 +42,15 @@ export default async function CheckoutPage() {
    * the ladder is resolved here rather than trusting the price frozen onto each
    * cart line when it was added.
    */
-  const [bands, products] = await Promise.all([readAll('customer-prices'), readAll('products')]);
+  const [bands, products, countries, couriers] = await Promise.all([
+    readAll('customer-prices'),
+    readAll('products'),
+    activeCountries(),
+    readAll('couriers'),
+  ]);
 
   return (
-    <div className="mx-auto max-w-market px-6 pb-24 pt-28">
+    <div className="mx-auto max-w-market px-4 pb-36 pt-20 sm:px-6 sm:pb-24 sm:pt-28">
       <CheckoutClient
         customerName={session.user.name ?? 'Customer'}
         customerEmail={session.user.email ?? ''}
@@ -52,6 +58,8 @@ export default async function CheckoutPage() {
         products={products}
         customerType={session.user.customer_type ?? 'RETAIL'}
         methods={availablePaymentMethods()}
+        countries={countries}
+        couriers={couriers.filter((courier) => courier.active)}
       />
     </div>
   );

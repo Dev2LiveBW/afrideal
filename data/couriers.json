@@ -1,0 +1,63 @@
+[
+  {
+    "id": "cr001",
+    "name": "Gorosa Express Logistics",
+    "role": "CROSS_BORDER_CLEARANCE",
+    "sort_order": 1,
+    "active": true,
+    "trips_per_week": 2,
+    "insured": true,
+    "phone": "+27 73 932 7292",
+    "depot": {
+      "country": "ZA",
+      "city": "Johannesburg",
+      "address": "2A Kikuyu Road, Sunninghill Self-Storage, Sunninghill"
+    },
+    "consignee_format": "{first} {last} Gorosa",
+    "payment_options": [
+      "ON_ARRIVAL"
+    ],
+    "routes": [
+      {
+        "from": {
+          "country": "ZA"
+        },
+        "to": {
+          "country": "BW",
+          "city": "Gaborone"
+        },
+        "fee": {
+          "threshold": 2000,
+          "flat": 250,
+          "pct": 0.16,
+          "launch_flat": 200,
+          "launch_until": null
+        },
+        "payable": {
+          "flat": 130,
+          "pct": null
+        }
+      },
+      {
+        "from": {
+          "country": "ZA"
+        },
+        "to": {
+          "country": "BW",
+          "city": "Francistown"
+        },
+        "fee": {
+          "threshold": 2000,
+          "flat": 300,
+          "pct": 0.21,
+          "launch_flat": null,
+          "launch_until": null
+        },
+        "payable": {
+          "flat": null,
+          "pct": null
+        }
+      }
+    ]
+  }
+]

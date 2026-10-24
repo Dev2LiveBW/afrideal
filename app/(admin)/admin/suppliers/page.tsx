@@ -1,15 +1,22 @@
 import { PageHeader } from '@/components/brand/Panel';
 import { ConsoleTopbar } from '@/components/layout/ConsoleTopbar';
 import { auth } from '@/lib/auth';
+import { activeCountries } from '@/lib/countries';
 import { readAll } from '@/lib/db';
 import { getNotifications } from '@/lib/queries';
 
+import { OnboardSupplierButton } from './OnboardSupplierButton';
 import { SuppliersTable } from './SuppliersTable';
 
 export const dynamic = 'force-dynamic';
 
 export default async function AdminSuppliersPage() {
-  const [session, suppliers] = await Promise.all([auth(), readAll('suppliers')]);
+  const [session, suppliers, categories, countries] = await Promise.all([
+    auth(),
+    readAll('suppliers'),
+    readAll('categories'),
+    activeCountries(),
+  ]);
   const notifications = session?.user ? await getNotifications(session.user.id) : [];
   const canDecide = session?.user ? ['SUPER_ADMIN', 'OPERATIONS_ADMIN'].includes(session.user.role) : false;
 
@@ -32,7 +39,8 @@ export default async function AdminSuppliersPage() {
         <PageHeader
           eyebrow="Commerce"
           title="Suppliers"
-          description={`${suppliers.length} suppliers registered across Botswana and South Africa.`}
+          description={`${suppliers.length} suppliers registered across ${new Set(suppliers.map((supplier) => supplier.country)).size} countries.`}
+          action={canDecide ? <OnboardSupplierButton categories={categories} countries={countries} /> : undefined}
         />
 
         <SuppliersTable suppliers={sorted} canDecide={canDecide} />

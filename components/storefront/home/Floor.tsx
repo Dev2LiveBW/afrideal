@@ -15,9 +15,11 @@ import { cn } from '@/lib/utils';
  * 250px tall on the benchmark; ours are the same to within the line-height of
  * our faces.
  *
- * The rail scrolls on every width. On a wide screen the cards simply stop
- * before the edge, which is what the benchmark does too - it has no desktop
- * layout for the floors, and neither does this.
+ * The rail scrolls whenever its cards do not fit. When they do fit, as on a
+ * wide screen with a short floor, the cards grow (up to 220px) to fill the row
+ * instead of stopping short of the right edge; product owner, 2026-10-21. Gaps
+ * stay at 4px: wider gaps would leave small cards floating, and the density is
+ * the point of the benchmark.
  */
 
 export function Floor({
@@ -88,7 +90,8 @@ export function Rail({ children, className }: { children: React.ReactNode; class
 }
 
 /**
- * One card on a rail: a 136px square photograph at 4px radius under the
+ * One card on a rail: a square photograph, 136px wide (growing to at most 220px
+ * when the row has room, see Floor), at 4px radius under the
  * benchmark's 4% film, an optional pill centred on the photograph's foot, and
  * two lines under it - a 13px bold primary line and an 11px grey secondary.
  * The whole card is one link; anything interactive on top of the photograph
@@ -115,7 +118,7 @@ export function RailCard({
   className?: string;
 }) {
   return (
-    <li className={cn('w-[136px] shrink-0', className)}>
+    <li className={cn('min-w-[136px] max-w-[220px] shrink-0 grow basis-[136px]', className)}>
       <Link href={href} className="press-soft block outline-none">
         <div className="film relative aspect-square w-full overflow-hidden rounded-[4px] bg-[#f4f4f4]">
           {image}

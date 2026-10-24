@@ -14,6 +14,8 @@ import { readAll } from '@/lib/db';
 import { PAYMENT_LABELS, dateTime, shortDate } from '@/lib/format';
 import { getOrderDetail } from '@/lib/queries';
 import { findById } from '@/lib/db';
+import { countryNames as readCountryNames } from '@/lib/countries';
+import { DEFAULT_DELIVERY_COUNTRY, isCrossBorder } from '@/lib/lanes.mjs';
 
 import { OrderActions } from './OrderActions';
 import { RetryPaymentButton } from './RetryPaymentButton';
@@ -51,12 +53,13 @@ export default async function OrderTrackingPage({
   const isStaff = ['SUPER_ADMIN', 'OPERATIONS_ADMIN', 'FINANCE_ADMIN'].includes(session.user.role);
   if (order.customer_id !== session.user.id && !isStaff) notFound();
 
-  const [shipments, runners, allOrders, images, products] = await Promise.all([
+  const [shipments, runners, allOrders, images, products, countryNames] = await Promise.all([
     readAll('shipments'),
     readAll('runners'),
     readAll('orders'),
     readAll('product-images'),
     readAll('products'),
+    readCountryNames(),
   ]);
 
   // The runner card appears only once someone is actually carrying the order.
@@ -84,14 +87,45 @@ export default async function OrderTrackingPage({
   const lastFailed = latestAttempt?.status === 'FAILED';
   const bankDetails = awaitingPayment && isBankTransfer ? await bankTransferDetails() : null;
 
-  const canConfirm = order.status === 'IN_TRANSIT' || order.status === 'DELIVERED';
+  /*
+   * Which buyer-protection note the order earns.
+   *
+   * It cannot be read off the payables alone. Spec 0003 means a new order has
+   * no payable at all until payment is confirmed, so an empty set used to fall
+   * through to 'Refunded' and tell a buyer who had just placed an order that
+   * their money had been sent back. A real refund states itself above, with its
+   * amount and gateway reference (order.status === 'REFUNDED'), so this box
+   * never needs to claim one.
+   */
+  const protection: 'UNDER_REVIEW' | 'COMPLETE' | 'AWAITING_PAYMENT' | 'ACTIVE' =
+    underReview.length > 0
+      ? 'UNDER_REVIEW'
+      : outstanding.length > 0
+        ? 'ACTIVE'
+        : settled.length > 0
+          ? 'COMPLETE'
+          : awaitingPayment
+            ? 'AWAITING_PAYMENT'
+            : 'ACTIVE';
+
+  const canConfirm =
+    order.status === 'IN_TRANSIT' ||
+    order.status === 'READY_FOR_COLLECTION' ||
+    order.status === 'DELIVERED';
   const canDispute = outstanding.length > 0 && order.status !== 'CANCELLED';
+  const isCollectionPoint = order.delivery_method === 'COLLECTION_POINT';
+
+  const lockerPinEntry = [...order.timeline]
+    .reverse()
+    .find((t) => t.note?.includes('Locker PIN') || (t.status === 'READY_FOR_COLLECTION' && t.note));
+  const lockerPinMatch = lockerPinEntry?.note?.match(/Locker PIN:\s*([A-Za-z0-9-]+)/i);
+  const lockerPin = lockerPinMatch ? lockerPinMatch[1] : (lockerPinEntry?.note ?? null);
 
   const expected = new Date(order.placed_at);
   expected.setDate(expected.getDate() + 3);
 
   return (
-    <div className="mx-auto max-w-market px-6 pb-24 pt-28">
+    <div className="mx-auto max-w-market px-4 pb-24 pt-20 sm:px-6 sm:pt-28">
       {/*
         Spec 0003: this used to say "Your payment has been processed" the instant an
         order was placed, which was never true and is now plainly false. What the
@@ -167,6 +201,44 @@ export default async function OrderTrackingPage({
             </div>
           </div>
         )
+      )}
+
+      {order.status === 'READY_FOR_COLLECTION' && (
+        <div className="mb-7 flex items-start gap-3 rounded-md border border-forest/30 bg-forest-wash px-5 py-4">
+          <Lock size={18} strokeWidth={1.5} className="mt-0.5 shrink-0 text-forest" />
+          <div>
+            <p className="text-[14px] font-semibold text-forest-ink">Ready for collection</p>
+            <p className="mt-1 text-[13px] leading-5 text-forest-ink/85">
+              Your package is waiting at <strong>{order.collection_point || order.delivery_address}</strong>.
+            </p>
+            {lockerPin && (
+              <div className="mt-3 inline-flex items-center gap-2 rounded border border-forest/20 bg-surface px-3 py-1.5 text-ink">
+                <span className="text-[12px] font-medium text-muted">Locker PIN:</span>
+                <span className="font-mono text-[14px] font-bold tracking-wider text-forest-ink">{lockerPin}</span>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
+
+      {order.status === 'REFUNDED' && (
+        <div className="mb-7 flex items-start gap-3 rounded-md border border-slateish-ink/20 bg-slateish-wash px-5 py-4">
+          <RotateCcw size={18} strokeWidth={1.5} className="mt-0.5 shrink-0 text-slateish-ink" />
+          <div>
+            <p className="text-[14px] font-semibold text-ink">Order refunded</p>
+            <p className="mt-1 text-[13px] leading-5 text-ink/85">
+              A refund of <strong>BWP {(order.refund_amount ?? order.total).toFixed(2)}</strong> has been processed to your original payment method.
+              {order.refund_reference && (
+                <> (Gateway reference: <span className="font-mono font-medium">{order.refund_reference}</span>)</>
+              )}
+            </p>
+            {order.refund_reason && (
+              <p className="mt-1 text-[12.5px] text-muted">
+                Reason: {order.refund_reason}
+              </p>
+            )}
+          </div>
+        </div>
       )}
 
       <div className="flex flex-col gap-10 lg:flex-row lg:gap-12">
@@ -253,11 +325,11 @@ export default async function OrderTrackingPage({
                       </Link>
                       <p className="mt-0.5 text-[12.5px] text-body">
                         {item.variant_label} · {item.qty} ×{' '}
-                        <MoneyText amount={item.unit_price} size="xs" tone="muted" bare />
+                        <MoneyText currency={order.currency ?? 'BWP'} amount={item.unit_price} size="xs" tone="muted" bare />
                       </p>
                     </div>
 
-                    <MoneyText amount={item.line_total} size="sm" />
+                    <MoneyText currency={order.currency ?? 'BWP'} amount={item.line_total} size="sm" />
                   </li>
                 );
               })}
@@ -266,12 +338,21 @@ export default async function OrderTrackingPage({
 
           <div className="mt-6 grid gap-6 lg:grid-cols-[minmax(0,1fr)_minmax(0,320px)]">
             <section className="rounded-md border border-hairline bg-surface-raised p-5">
-              <h2 className="text-[15px] font-semibold text-ink">Delivery</h2>
+              <h2 className="text-[15px] font-semibold text-ink">
+                {order.delivery_method === 'COLLECTION_POINT' ? 'Collection Point' : 'Delivery'}
+              </h2>
               <div className="mt-4 flex items-start gap-3">
                 <MapPin size={16} strokeWidth={1.5} className="mt-0.5 shrink-0 text-muted" />
                 <div>
-                  <p className="text-[14px] text-ink">{order.delivery_address}</p>
-                  <p className="text-[13px] text-body">{order.delivery_city}, Botswana</p>
+                  <p className="text-[14px] font-medium text-ink">{order.delivery_address}</p>
+                  <p className="text-[13px] text-body">
+                    {order.delivery_city}, {countryNames[order.delivery_country ?? DEFAULT_DELIVERY_COUNTRY] ?? order.delivery_country}
+                  </p>
+                  {order.delivery_method === 'COLLECTION_POINT' && (
+                    <p className="mt-2 text-[12px] text-muted">
+                      Your order will be held in a secure locker. You will receive your locker PIN once runner drop-off is complete.
+                    </p>
+                  )}
                 </div>
               </div>
             </section>
@@ -285,19 +366,35 @@ export default async function OrderTrackingPage({
                     <div className="flex items-center justify-between">
                       <dt className="text-body">Subtotal</dt>
                       <dd>
-                        <MoneyText amount={order.subtotal} size="sm" />
+                        <MoneyText currency={order.currency ?? 'BWP'} amount={order.subtotal} size="sm" />
                       </dd>
                     </div>
                     <div className="flex items-center justify-between">
                       <dt className="text-body">Delivery</dt>
                       <dd>
-                        <MoneyText amount={order.delivery_fee} size="sm" />
+                        <MoneyText currency={order.currency ?? 'BWP'} amount={order.delivery_fee} size="sm" />
                       </dd>
                     </div>
+                    {items.some((item) => {
+                      const p = products.find((prod) => prod.id === item.product_id);
+                      // Spec 0009: the lane this order actually took.
+                      return p ? isCrossBorder(p.country_of_origin, order.delivery_country) : false;
+                    }) && (
+                      <div className="flex items-center justify-between">
+                        <dt className="flex items-center gap-1.5 text-body">
+                          <span>Customs & Duty</span>
+                        </dt>
+                        <dd className="text-right">
+                          <span className="text-[12.5px] font-medium text-forest">
+                            Cleared by your courier
+                          </span>
+                        </dd>
+                      </div>
+                    )}
                     <div className="flex items-baseline justify-between border-t border-hairline pt-3">
                       <dt className="font-medium text-ink">Total</dt>
                       <dd>
-                        <MoneyText amount={order.total} size="lg" tone="ink" />
+                        <MoneyText currency={order.currency ?? 'BWP'} amount={order.total} size="lg" tone="ink" />
                       </dd>
                     </div>
                     <div className="flex items-center justify-between pt-1">
@@ -319,11 +416,11 @@ export default async function OrderTrackingPage({
               */}
               <div
                 className={`rounded-md border px-5 py-4 ${
-                  underReview.length > 0
+                  protection === 'UNDER_REVIEW'
                     ? 'border-danger/25 bg-danger-wash'
-                    : outstanding.length > 0
-                      ? 'border-gold/25 bg-gold-50/70'
-                      : 'border-forest/25 bg-forest-wash'
+                    : protection === 'COMPLETE'
+                      ? 'border-forest/25 bg-forest-wash'
+                      : 'border-gold/25 bg-gold-50/70'
                 }`}
               >
                 <div className="flex items-start gap-3">
@@ -331,15 +428,15 @@ export default async function OrderTrackingPage({
                     size={16}
                     strokeWidth={1.5}
                     className={`mt-0.5 shrink-0 ${
-                      underReview.length > 0
+                      protection === 'UNDER_REVIEW'
                         ? 'text-danger-ink'
-                        : outstanding.length > 0
-                          ? 'text-gold-700'
-                          : 'text-forest'
+                        : protection === 'COMPLETE'
+                          ? 'text-forest'
+                          : 'text-gold-700'
                     }`}
                   />
                   <div className="min-w-0">
-                    {underReview.length > 0 ? (
+                    {protection === 'UNDER_REVIEW' ? (
                       <>
                         <p className="text-[13px] font-semibold text-danger-ink">Claim under review</p>
                         <p className="mt-1 text-[12.5px] leading-5 text-danger-ink/85">
@@ -348,7 +445,7 @@ export default async function OrderTrackingPage({
                           an explanation.
                         </p>
                       </>
-                    ) : outstanding.length > 0 ? (
+                    ) : protection === 'ACTIVE' ? (
                       <>
                         <p className="text-[13px] font-semibold text-gold-700">
                           Covered by AfriDeal buyer protection
@@ -359,7 +456,7 @@ export default async function OrderTrackingPage({
                           it or refund you.
                         </p>
                       </>
-                    ) : settled.length > 0 ? (
+                    ) : protection === 'COMPLETE' ? (
                       <>
                         <p className="text-[13px] font-semibold text-forest-ink">Order complete</p>
                         <p className="mt-1 text-[12.5px] leading-5 text-forest-ink/85">
@@ -369,9 +466,13 @@ export default async function OrderTrackingPage({
                       </>
                     ) : (
                       <>
-                        <p className="text-[13px] font-semibold text-forest-ink">Refunded</p>
-                        <p className="mt-1 text-[12.5px] leading-5 text-forest-ink/85">
-                          This order was cancelled and the money went back to you.
+                        <p className="text-[13px] font-semibold text-gold-700">
+                          Covered once your payment clears
+                        </p>
+                        <p className="mt-1 text-[12.5px] leading-5 text-gold-700/85">
+                          Nothing has been charged for this order yet. Once your payment is
+                          confirmed the order is ours to put right: if it arrives late, short or
+                          not as described, tell us and we will replace it or refund you.
                         </p>
                       </>
                     )}
@@ -385,6 +486,7 @@ export default async function OrderTrackingPage({
                 orderAmount={orderValue}
                 canConfirm={canConfirm && outstanding.length > 0}
                 canDispute={canDispute}
+                isCollectionPoint={isCollectionPoint}
               />
             </div>
           </div>
@@ -421,7 +523,7 @@ export default async function OrderTrackingPage({
                       {entry.reference}
                     </p>
                     <p className="mt-1">
-                      <MoneyText amount={entry.total} size="sm" tone="ink" />
+                      <MoneyText currency={order.currency ?? 'BWP'} amount={entry.total} size="sm" tone="ink" />
                     </p>
 
                     <div className="mt-3.5">

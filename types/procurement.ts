@@ -87,6 +87,8 @@ export interface ProductImage {
   variant_id: string | null;
   image_url: string;
   image_type: 'PRIMARY' | 'GALLERY' | 'SPEC' | 'PACKAGING';
+  /** What the photo shows ("Side view"). Without it the gallery names the slot by its role. */
+  caption?: string;
   sort_order: number;
   source: 'AFRIDEAL' | 'SUPPLIER' | 'BRAND';
   permission_status: 'CLEARED' | 'PENDING' | 'RESTRICTED';
@@ -120,7 +122,7 @@ export interface CustomerPrice {
 }
 
 /** §21 - a buyer asking for a price on a quantity nobody has listed. */
-export type RfqStatus = 'SUBMITTED' | 'SOURCING' | 'QUOTED' | 'ACCEPTED' | 'DECLINED' | 'EXPIRED';
+export type RfqStatus = 'SUBMITTED' | 'SOURCING' | 'QUOTED' | 'ORDERED' | 'ACCEPTED' | 'DECLINED' | 'EXPIRED';
 
 export interface Rfq {
   id: string;
@@ -137,6 +139,8 @@ export interface Rfq {
   required_delivery_date: string | null;
   notes: string;
   status: RfqStatus;
+  order_id?: string | null;
+  quoted_unit_price?: number | null;
   created_at: string;
   updated_at: string;
 }
@@ -192,9 +196,11 @@ export interface TieredPriceResult {
 export interface MarginBreakdown {
   supplier_cost: number;
   selling_price: number;
+  /** The 14% customs paid at the border on imported goods; 0 for local ones. */
+  customs_cost: number;
   logistics_cost: number;
   gateway_cost: number;
-  /** selling_price − supplier_cost − logistics − gateway */
+  /** selling_price − supplier_cost − customs − logistics − gateway */
   gross_margin: number;
   /** gross_margin ÷ selling_price */
   gross_margin_pct: number;

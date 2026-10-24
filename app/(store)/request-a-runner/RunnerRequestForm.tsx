@@ -172,7 +172,7 @@ export function RunnerRequestForm({
           label="Town or city"
           error={errors.delivery_city?.message}
           {...register('delivery_city')}
-          placeholder="Gaborone"
+          placeholder="Town or city"
         />
         <Field
           id="needed_by"

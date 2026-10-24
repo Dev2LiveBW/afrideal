@@ -90,7 +90,6 @@ const PROVIDER = PEXELS ? 'pexels' : 'unsplash';
  */
 const PRODUCT_QUERIES = {
   p001: ['shea butter jar cosmetic', 'body butter cream jar', 'cosmetic jar cream'],
-  p002: ['braids', 'african hair', 'hairdresser braiding'],
   p003: ['argan oil serum bottle', 'hair oil serum dropper', 'cosmetic oil bottle'],
   p004: ['solar power bank charger', 'portable power bank', 'solar charger device'],
   // Avoid the default earbud result: it is unmistakably a competitor's branded
@@ -104,16 +103,10 @@ const PRODUCT_QUERIES = {
   p010: ['stack of paper', 'printer paper', 'office paper ream'],
   p011: ['boiler suit', 'coverall clothing', 'overalls workwear garment'],
   p012: ['african school children uniform', 'school uniform folded clothing', 'kids uniform clothes'],
-  // The hair category is the shop window, and the first run got it wrong in
-  // exactly the way this file already warns about: unanchored queries returned
-  // a platinum wig on an East Asian model and a beach portrait with no product
-  // in it. Both queries are now anchored to the hair itself and to the market
-  // the catalogue actually sells into.
-  p013: ['black hair extensions bundle', 'wavy hair extensions', 'hair weave bundle'],
-  p014: ['black woman long hair studio portrait', 'african woman long hairstyle', 'black woman hair salon'],
-  p015: ['african woman straight long hair', 'black woman sleek straight hair', 'black woman long dark hair'],
-  p016: ['african woman box braids', 'braided hairstyle african woman', 'braids hairstyle black woman'],
-  p017: ['african woman short bob hair', 'black woman bob haircut', 'african woman short hairstyle'],
+  // No hair queries: since 2026-10-21 the hair category holds only AfriDeal's
+  // own wigs (p018 onwards), photographed by the product owner. Their files
+  // are placed in public/products by hand; a product with no queries here is
+  // skipped, so stock never replaces them.
 };
 
 const CATEGORY_QUERIES = {
@@ -209,7 +202,7 @@ async function firstHit(queries) {
 // ─── Run ─────────────────────────────────────────────────────────────────────
 
 /*
- * `--only p014,p016` re-fetches a subset. Taking a list rather than a single id
+ * `--only p004,p006` re-fetches a subset. Taking a list rather than a single id
  * matters more than it looks: a partial run used to overwrite CREDITS.json with
  * just the products it touched, silently dropping the provenance of every file
  * it left alone. So the ids are a set, and the credits below are merged.
@@ -335,4 +328,4 @@ console.log(`${fetched} image(s) downloaded, ${skipped} query group(s) with no r
 console.log(`\nProvenance written to public/products/CREDITS.json`);
 console.log(`\nNow LOOK at them before trusting the run:`);
 console.log(`  a wrong-but-plausible photo is the failure mode here, not a crash.`);
-console.log(`  re-fetch specific products with:  npm run images -- --only p014,p016`);
+console.log(`  re-fetch specific products with:  npm run images -- --only p004,p006`);

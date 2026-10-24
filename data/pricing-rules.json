@@ -4,7 +4,7 @@
     "category_id": "c1",
     "category_name": "Hair, Weaves & Extensions",
     "markup_type": "PERCENTAGE",
-    "markup_value": 60,
+    "markup_value": 25,
     "logistics_cost": 0,
     "gateway_rate": 0.025,
     "active": true
@@ -14,7 +14,7 @@
     "category_id": "c7",
     "category_name": "Beauty & Personal Care",
     "markup_type": "PERCENTAGE",
-    "markup_value": 60,
+    "markup_value": 50,
     "logistics_cost": 0,
     "gateway_rate": 0.025,
     "active": true
@@ -24,7 +24,7 @@
     "category_id": "c2",
     "category_name": "Electronics",
     "markup_type": "PERCENTAGE",
-    "markup_value": 60,
+    "markup_value": 50,
     "logistics_cost": 0,
     "gateway_rate": 0.025,
     "active": true
@@ -34,7 +34,7 @@
     "category_id": "c6",
     "category_name": "Clothing & Uniforms",
     "markup_type": "PERCENTAGE",
-    "markup_value": 60,
+    "markup_value": 50,
     "logistics_cost": 0,
     "gateway_rate": 0.025,
     "active": true
@@ -44,7 +44,7 @@
     "category_id": "c4",
     "category_name": "Food & Agriculture",
     "markup_type": "PERCENTAGE",
-    "markup_value": 60,
+    "markup_value": 50,
     "logistics_cost": 0,
     "gateway_rate": 0.025,
     "active": true
@@ -54,7 +54,7 @@
     "category_id": "c3",
     "category_name": "Building Materials",
     "markup_type": "PERCENTAGE",
-    "markup_value": 60,
+    "markup_value": 50,
     "logistics_cost": 0,
     "gateway_rate": 0.025,
     "active": true
@@ -64,7 +64,7 @@
     "category_id": "c5",
     "category_name": "Office Supplies",
     "markup_type": "PERCENTAGE",
-    "markup_value": 60,
+    "markup_value": 50,
     "logistics_cost": 0,
     "gateway_rate": 0.025,
     "active": true

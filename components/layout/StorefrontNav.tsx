@@ -23,8 +23,8 @@ import {
 import { AfriDealLogo } from '@/components/brand/AfriDealLogo';
 import { markTabNavigation } from '@/components/motion/PageTransition';
 import { CategoryIcon } from '@/components/storefront/CategoryIcon';
-import { DELIVERY_CITIES, cartCount, useAfriDealStore } from '@/store/useAfriDealStore';
-import type { Category } from '@/types';
+import { DEFAULT_DELIVER_TO, cartCount, useAfriDealStore } from '@/store/useAfriDealStore';
+import type { Category, Country } from '@/types';
 import {
   DIRECTORY_IN_NAV,
   DIRECTORY_LABEL,
@@ -35,12 +35,12 @@ import { cn } from '@/lib/utils';
 /**
  * Where to deliver.
  *
- * Was a label with a chevron that did nothing. The chevron promised a control,
- * so this is the control: ten cities, persisted, and read only after hydration
+ * A country and a town (spec 0009: the market is any-to-any), grouped by
+ * country from the `countries` data, persisted, and read only after hydration
  * because a persisted value differs from what the server rendered and React
- * would otherwise flag the mismatch on first paint.
+ * would otherwise flag the mismatch on first paint. Checkout starts from it.
  */
-function DeliverToPicker() {
+function DeliverToPicker({ countries }: { countries: Country[] }) {
   const deliverTo = useAfriDealStore((state) => state.deliverTo);
   const setDeliverTo = useAfriDealStore((state) => state.setDeliverTo);
 
@@ -66,7 +66,9 @@ function DeliverToPicker() {
     };
   }, [open]);
 
-  const city = mounted ? deliverTo : 'Gaborone';
+  const chosen = mounted ? deliverTo : DEFAULT_DELIVER_TO;
+  const countryName =
+    countries.find((country) => country.code === chosen.country)?.name ?? chosen.country;
 
   return (
     <div ref={boxRef} className="relative">
@@ -81,7 +83,10 @@ function DeliverToPicker() {
         {/* "Deliver to:" and the country are dropped below `sm`; the pin says it. */}
         <span className="truncate">
           <span className="hidden sm:inline">Deliver to: </span>
-          <span className="font-semibold text-gray-900">{city}<span className="hidden sm:inline">, Botswana</span></span>
+          <span className="font-semibold text-gray-900">
+            {chosen.city}
+            <span className="hidden sm:inline">, {countryName}</span>
+          </span>
         </span>
         <ChevronDown
           size={13}
@@ -99,29 +104,38 @@ function DeliverToPicker() {
             transition={{ duration: 0.18, ease: [0.16, 1, 0.3, 1] }}
             className="absolute left-0 top-[calc(100%+6px)] z-50 max-h-64 w-56 overflow-y-auto rounded-xl border border-gray-200 bg-white py-1 shadow-lg"
           >
-            {DELIVERY_CITIES.map((option) => (
-              <li key={option}>
-                <button
-                  type="button"
-                  role="option"
-                  aria-selected={option === city}
-                  onClick={() => {
-                    setDeliverTo(option);
-                    setOpen(false);
-                  }}
-                  className={cn(
-                    'flex w-full items-center gap-2 px-3.5 py-2.5 text-left text-[13px] transition-colors hover:bg-gray-50',
-                    option === city ? 'font-semibold text-gray-900' : 'text-gray-600',
-                  )}
-                >
-                  <MapPin
-                    size={13}
-                    className={option === city ? 'text-[#E67E22]' : 'text-gray-300'}
-                  />
-                  {option}
-                </button>
-              </li>
-            ))}
+            {countries.flatMap((country) => [
+              <li
+                key={`${country.code}-heading`}
+                role="presentation"
+                className="sticky top-0 bg-white px-3.5 pb-1 pt-2.5 text-[10.5px] font-semibold uppercase tracking-wider text-gray-400"
+              >
+                {country.name}
+              </li>,
+              ...country.towns.map((town) => {
+                const selected = country.code === chosen.country && town === chosen.city;
+                return (
+                  <li key={`${country.code}-${town}`}>
+                    <button
+                      type="button"
+                      role="option"
+                      aria-selected={selected}
+                      onClick={() => {
+                        setDeliverTo({ country: country.code, city: town });
+                        setOpen(false);
+                      }}
+                      className={cn(
+                        'flex w-full items-center gap-2 px-3.5 py-2.5 text-left text-[13px] transition-colors hover:bg-gray-50',
+                        selected ? 'font-semibold text-gray-900' : 'text-gray-600',
+                      )}
+                    >
+                      <MapPin size={13} className={selected ? 'text-[#E67E22]' : 'text-gray-300'} />
+                      {town}
+                    </button>
+                  </li>
+                );
+              }),
+            ])}
           </motion.ul>
         )}
       </AnimatePresence>
@@ -214,8 +228,11 @@ function SearchField({ terms }: { terms: string[] }) {
 export function StorefrontNav({
   categories = [],
   hotSearches = [],
+  countries = [],
 }: {
   categories?: Category[];
+  /** Active countries and their towns, for "Deliver to" (spec 0009). */
+  countries?: Country[];
   /** What the search field suggests while it is empty. */
   hotSearches?: string[];
 }) {
@@ -332,7 +349,7 @@ export function StorefrontNav({
           */}
           <div className="mx-auto flex max-w-[1400px] items-center justify-between gap-3 px-3 py-1.5 sm:px-4">
             <div className="min-w-0 flex-1 truncate">
-              <DeliverToPicker />
+              <DeliverToPicker countries={countries} />
             </div>
             <div className="flex shrink-0 items-center gap-2.5 sm:gap-4">
               {/*
@@ -529,7 +546,7 @@ export function StorefrontFooter() {
           <div>
             <AfriDealLogo variant="dark" size="md" withTagline />
             <p className="mt-4 max-w-[280px] text-[13.5px] leading-6 text-white/65">
-              A procurement marketplace for Botswana and South Africa. Verified suppliers, published pricing, and runner-assisted sourcing.
+              A procurement marketplace for southern Africa: order from suppliers in any country we trade in, delivered to yours. Verified suppliers, published pricing, and runner-assisted sourcing.
             </p>
           </div>
 

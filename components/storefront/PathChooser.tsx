@@ -149,13 +149,15 @@ function DoorCard({ door, compact }: { door: Door; compact: boolean }) {
 
         <h3
           className={cn(
-            'font-display font-bold leading-none text-ink',
+            'font-display font-bold text-ink',
             compact ? 'text-[0.75rem] sm:text-[1.125rem]' : 'text-[0.8125rem] sm:text-[1.375rem]',
+            /* Last: twMerge's font-size group removes an EARLIER leading-*. */
+            'leading-none',
           )}
         >
           {door.title}
         </h3>
-        <p className={cn('font-bold text-ink leading-tight', compact ? 'mt-1 text-[0.53125rem] sm:text-[0.8125rem]' : 'mt-1 text-[0.59375rem] sm:text-[0.875rem]')}>
+        <p className={cn('font-bold text-ink', compact ? 'mt-1 text-[0.53125rem] sm:text-[0.8125rem]' : 'mt-1 text-[0.59375rem] sm:text-[0.875rem]', 'leading-tight')}>
           {door.band}
         </p>
         <p
@@ -169,10 +171,18 @@ function DoorCard({ door, compact }: { door: Door; compact: boolean }) {
 
         {/* In the rail card the list stops short of the render's column. */}
         <ul className={cn(compact ? 'mt-1.5 space-y-0.5 sm:mt-3 sm:space-y-1.5' : 'mt-2 space-y-1 sm:mt-4 sm:space-y-2')}>
-          {door.points.slice(0, 2).map((point) => (
+          {door.points.map((point, index) => (
             <li
               key={point}
-              className={cn('flex items-center gap-1 text-ink leading-tight', compact ? 'text-[0.46875rem] sm:text-[0.71875rem]' : 'text-[0.53125rem] sm:text-[0.8125rem]')}
+              className={cn(
+                'flex items-center gap-1 text-ink',
+                compact ? 'text-[0.46875rem] sm:text-[0.71875rem]' : 'text-[0.53125rem] sm:text-[0.8125rem]',
+                'leading-tight',
+                /* Every door has three. The third is the one a 97px rail card
+                   cannot hold, so it folds below sm rather than being cut for
+                   every viewport. Last, so twMerge keeps it over the base flex. */
+                index === 2 && 'hidden sm:flex',
+              )}
             >
               <CheckCircle2
                 size={10}

@@ -43,7 +43,9 @@ The spec for each journey lives in `e2e/` (storefront, supplier, runner, console
 
 **Phone and desktop.** The storefront is built to match the Alibaba app on a phone, so storefront journeys run twice: at phone width (390 px) and at desktop width (1440 px). The team console runs at desktop width. The runner portal runs at phone width.
 
-**Payment is simulated today.** Checkout lets you pick DPO Pay, Orange Money or PayGate, but no money moves and no gateway page opens. The order is created straight away. Journeys say so where it matters. Real card payment is scope feature 4.
+**Payment is simulated today.** Checkout lists the delivery country's payment methods (spec 0009): for Botswana, "Visa / Mastercard" (card, through DPO Pay), "Bank transfer" and "Orange Money". Methods the platform cannot take yet show "Coming soon" and cannot be picked. The e2e run turns on a mock card gateway (`/mock-gateway`); no money moves. Journeys say so where it matters. Real card payment is scope feature 4.
+
+**Where the buyer is.** Checkout starts with a Country field, then the street and town; the header's "Deliver to" is a country and a town. The demo buyers are in Botswana, so prices are in Pula (BWP); a buyer in South Africa, Lesotho or Eswatini sees rand.
 
 **Priority.** P1 must pass before any demo to the client. P2 should pass before a release. P3 is a nice to have.
 
@@ -67,11 +69,14 @@ The spec for each journey lives in `e2e/` (storefront, supplier, runner, console
 | B06 | Open a dispute on an order | Customer | P2 | yes | yes |
 | B07 | A very large quantity is sent to a quotation instead | Customer | P2 | yes | no |
 | B08 | An empty cart cannot be checked out | Customer | P3 | yes | no |
+| B09 | Checkout with real card payment (Gateway) | Customer | P1 | yes | yes |
+| B10 | Delivery to a Collection Point (Smart Locker) | Customer | P1 | yes | yes |
+| B11 | Customs and duty on imported goods are cleared by the courier | Customer | P1 | yes | yes |
 | **C** | **Request for quotation (RFQ)** | | | | |
 | C01 | Buyer sends an RFQ | Customer | P1 | yes | yes |
 | C02 | Invited supplier sends a quote | Supplier | P1 | no screen yet | no |
 | C03 | Team picks the winning quote | Operations | P1 | no screen yet | no |
-| C04 | Buyer approves the chosen quote | Customer | P2 | no screen yet | no |
+| C04 | Chosen quote becomes an order and is paid by card | Customer | P1 | yes | yes |
 | **D** | **Request a runner (personal sourcing)** | | | | |
 | D01 | Buyer describes an item and requests a runner | Customer | P1 | yes | yes |
 | D02 | Runner takes the request and goes looking | Runner | P1 | yes | yes |
@@ -87,6 +92,7 @@ The spec for each journey lives in `e2e/` (storefront, supplier, runner, console
 | F01 | Go online and offline | Runner | P1 | yes | yes |
 | F02 | Accept a job, pick up, deliver | Runner | P1 | yes | yes |
 | F03 | Read earnings | Runner | P3 | yes | no |
+| F04 | Runner delivers to a Collection Point and buyer confirms collection | Runner, Customer | P1 | yes | yes |
 | **G** | **Team console** | | | | |
 | G01 | Dashboard and orders list | Operations | P1 | yes | yes |
 | G02 | Open an order and add a note | Operations | P2 | yes | yes |
@@ -152,7 +158,7 @@ That is 49 journeys. 46 have a screen to test (C02 to C04 do not yet, see Findin
 2. Read the photos, the price, the supplier name, and the tier table.
 
 **Expect:**
-- One landed price in Pula (BWP), the price the buyer actually pays to AfriDeal.
+- One price in Pula (BWP), the price the buyer actually pays to AfriDeal (BWP 137.00 for one `p001`).
 - The supplier's own cost is not shown anywhere on the page (see H08).
 - "Add to cart" is visible without scrolling on a phone.
 
@@ -161,12 +167,14 @@ That is 49 journeys. 46 have a screen to test (C02 to C04 do not yet, see Findin
 **Start:** signed out, product `p001` detail page.
 
 1. Set quantity to 1, note the unit price.
-2. Set it to 5, then 20, then 50.
-3. Set it to 100.
+2. Set it to 2, then 4.
+3. Set it to 5, then 11, then 21.
+4. Set it to 100.
 
-**Expect:**
-- 1 is the retail price. 5 is cheaper (bulk). 20 is cheaper again (wholesale). 50 is cheapest (wholesale plus).
-- 19 costs the same per unit as 5; 49 the same as 20 (the step happens exactly at 5, 20 and 50).
+**Expect** (p001 since 2026-10-21, no customs in the price; spec 0007):
+- 1 is the retail price, BWP 137.00. 2 to 4 take the multi-buy discount off it (2%, 3%, 5%, rounded up: 135, 133, 131).
+- 5 is cheaper (bulk, 122). 11 is cheaper again (wholesale, 114). 21 is cheapest (wholesale plus, 108).
+- 10 costs the same per unit as 5; 20 the same as 11; 99 the same as 21 (the steps happen exactly at 5, 11 and 21).
 - 100 does not let you add to cart; it offers a quotation instead.
 
 ### A05 Browse suppliers
@@ -202,13 +210,13 @@ That is 49 journeys. 46 have a screen to test (C02 to C04 do not yet, see Findin
 1. Open a product, set quantity 2, tap "Add to cart".
 2. Open the cart. Check the line and the total.
 3. Tap through to checkout.
-4. Enter a delivery address (for example "Plot 5412, Extension 12", "Gaborone").
-5. Choose a payment method: bank transfer (until a card gateway is live it is the only one offered; spec 0003).
+4. Leave Country on Botswana. Enter a delivery address (for example "Plot 5412, Extension 12", "Gaborone").
+5. Choose "Bank transfer" (Botswana's methods are listed; card is covered by B09; spec 0003, spec 0009).
 6. Place the order.
 
 **Expect:**
-- The cart total equals quantity times the unit price.
-- At checkout: total equals subtotal plus delivery fee.
+- The cart total equals quantity times the unit price (two tubs of `p001`: 2 × BWP 135.00 = 270.00, the multi-buy price).
+- At checkout: total equals subtotal plus delivery fee (270.00 + 45.00 = 315.00). The shea butter comes from South Africa, so a "Customs & Duty: Cleared by your courier" row shows, and the courier's fee is not in the total.
 - After placing: "Waiting for your payment", a reference like `AFD-24851`, and the bank transfer box asking Thabo to quote that reference. No supplier is asked to prepare anything until the money arrives.
 - The order appears at the top of `/orders`.
 - The cart is empty afterwards.
@@ -265,6 +273,47 @@ That is 49 journeys. 46 have a screen to test (C02 to C04 do not yet, see Findin
 
 **Expect:** a "There is nothing to check out" message and a way back to shopping. No order is created.
 
+### B09 Checkout with real card payment (Gateway)
+
+**Start:** signed in as Thabo.
+
+1. Add a product to the cart and proceed to checkout.
+2. Select "Visa / Mastercard" as the payment method (cards go through DPO Pay).
+3. Tap "Place order".
+4. The user is redirected via a full window navigation to the mock payment gateway page (`/mock-gateway`).
+5. Enter test card details and submit. The gateway signs a callback and POSTs it to the API.
+6. The gateway redirects back to AfriDeal.
+
+**Expect:**
+- The order is created successfully.
+- The order status is `Processing` and the timeline shows `Paid` immediately.
+- The payment reference is securely generated.
+- No actual card details are saved to our database.
+
+### B10 Delivery to a Collection Point
+
+**Start:** signed in as Kefilwe.
+
+1. Add a product to the cart and proceed to checkout.
+2. Under Delivery, select "Collection Point" instead of Home Delivery.
+3. Choose the "Gaborone Central Locker" from the list.
+4. Place the order.
+
+**Expect:**
+- The delivery fee is adjusted for a collection point.
+- The order confirms and displays the collection point address on the receipt.
+
+### B11 Customs and duty on imported goods are cleared by the courier
+
+**Start:** signed in as Thabo (Botswana), product `p018` (an AfriDeal wig held in South Africa) detail page.
+
+1. View the price.
+2. Add to cart and proceed to checkout.
+
+**Expect:**
+- The detail page shows the price in Pula with no customs in it, and says "Customs cleared by courier" (since 2026-10-21 the price carries no 14% customs; spec 0008).
+- At checkout the order summary has a "Customs & Duty" row reading "Cleared by your courier", and the courier's own fee is shown as paid to the courier, outside the total.
+
 ---
 
 ## C. Request for quotation (RFQ)
@@ -280,15 +329,28 @@ That is 49 journeys. 46 have a screen to test (C02 to C04 do not yet, see Findin
 
 Note: the `/rfq` page's "Write request details" leads to the runner request form (D01), not to this dialog. Worth deciding whether that is what the page should do.
 
-### C02 to C04 Supplier quotes, team picks, buyer approves: no screen yet
+### C02 to C03 Supplier quotes, team picks: no dedicated screens yet
 
-Checked 2026-10-05. The API does all three (`npm run verify` section 15 proves it), but no screen does:
+Checked 2026-10-05. The API does both (`npm run verify` section 15 proves it):
 
 - **C02.** The supplier "Quote inbox" (`/supplier/quotes`) lists orders awaiting confirmation plus sample "Direct enquiry" rows. Sending a quote on a sample row only shows "Quote captured for this preview. Full RFQ persistence lands in Phase 2." The RFQs buyers send in C01 do not appear there.
 - **C03.** The team console has no RFQ screen (`/admin/sourcing` is the runner request overview).
-- **C04.** The buyer has no screen listing their RFQs or the quote chosen for them.
 
-When these screens land, write their journeys here, then the specs.
+### C04 Chosen quote becomes an order and is paid by card
+
+**Start:** signed in as Kefilwe.
+
+1. Submit a quotation request for an unlisted bulk quantity (e.g. 150 units of `p001`).
+2. An invited supplier (Naledi) responds with a competitive unit quote via API.
+3. Buyer accepts the quote (or staff selects), converting the quotation into an order in `AWAITING_PAYMENT` state with standard `AFD-xxxxx` reference. The RFQ status updates to `ORDERED`.
+4. Buyer opens `/orders` and clicks through to the quotation order receipt (`/orders/[id]`), seeing "Waiting for your payment".
+5. Buyer clicks "Try paying again", completes card payment via `/mock-gateway`.
+6. Returning to the receipt confirms the payment.
+
+**Expect:**
+- The order status advances to `Processing`.
+- The receipt displays "Payment confirmed" with the timeline showing Placed and Paid.
+- Covered in `e2e/storefront/b-buy-closeout.spec.ts` with demo video `demo-videos/C04-phone.mp4` and `demo-videos/C04-desktop.mp4`.
 
 ---
 
@@ -388,6 +450,22 @@ A fresh job (accept from the alert or the list, "Mark picked up", "Start deliver
 
 **Start:** signed in as Kagiso, `/runner/earnings`. **Expect:** the job from F02 appears with its fee.
 
+### F04 Runner delivers to a Collection Point
+
+**Start:** Kefilwe orders one `p001` to the **Francistown Main Mall Locker** and pays by card; Naledi confirms, prepares and marks it ready, which opens Kagiso's job. Then signed in as Kagiso, `/runner/jobs`.
+
+The locker is Francistown, not Gaborone Central, on purpose: B10 orders to Gaborone Central, E02 can mark that order ready, and the runner screens do not show an order reference, so a Gaborone Central job could belong to either journey (run of 2026-10-23).
+
+1. Accept the job to the Francistown Main Mall Locker. Pick up the item from the supplier.
+2. Navigate to the Collection Point.
+3. Tap "Drop off at Collection Point" and enter the locker confirmation code (e.g. `LCK-7711`).
+4. Buyer (Kefilwe) opens the order receipt (`/orders/[id]`), views the locker PIN, and taps "Confirm collection".
+
+**Expect:**
+- The runner job is marked complete.
+- Kefilwe's order moves to `Ready for Collection` with the locker PIN displayed.
+- Buyer confirming collection transitions order to `Delivered` and releases supplier payables for settlement.
+
 ---
 
 ## G. Team console
@@ -455,6 +533,18 @@ A fresh job (accept from the alert or the list, "Mark picked up", "Start deliver
 
 **Start:** Keabetswe, `/admin/runners`. **Expect:** Kagiso is listed with online status matching F01.
 
+### G11 Process a refund
+
+**Start:** signed in as Finance Admin, `/admin/payables`. An order was recently resolved in favor of the customer via a dispute.
+
+1. Locate the disputed order.
+2. Tap "Initiate Refund".
+3. Enter the refund amount (full) and confirm.
+
+**Expect:**
+- The refund is logged.
+- The order timeline updates to `Refunded`.
+
 ---
 
 ## H. Who can see what
@@ -495,13 +585,31 @@ Runs end to end since 2026-10-06 (Findings, 1). Kagiso's job pays BWP 45.00, the
 
 ---
 
+### Z02 The mobile golden thread (Mobile Parity)
+
+One mobile order, start to finish at 390px against the Alibaba benchmark.
+
+Runs end to end since 2026-10-11 (`e2e/storefront/b-buy-closeout.spec.ts`).
+
+| Step | Who | Does | System shows |
+|---|---|---|---|
+| 1 | Thabo | Browses categories at 390px, selects Shea Butter (p001) | Category browser, product detail fits viewport (`scrollWidth <= 390px + 2`) |
+| 2 | Thabo | Taps "Add to cart" on sticky mobile buy bar | Instant cart update, toast notification |
+| 3 | Thabo | Opens slide-up cart sheet, taps "Proceed to checkout" | Framer motion sheet at benchmark §4b timings, cart line items & totals |
+| 4 | Thabo | Fills delivery address, selects Visa / Mastercard, taps sticky "Place order" bar | Single column checkout, zero horizontal overflow, redirect to gateway |
+| 5 | Thabo | Enters card details on gateway, submits payment | Signed webhook verification, redirect to order tracking |
+| 6 | Thabo | Views order tracking page | "Payment confirmed", Paid timeline milestone, 390px zero overflow |
+
+Videos: `demo-videos/Z02-phone.mp4`, `demo-videos/Z02-desktop.mp4`.
+
+---
+
 ## Not covered yet (waiting on planned features)
 
 These have no journeys until they are built; add them here when they land.
 
-- Real card payment and failed payments (scope 3 and 4)
-- Pausing checkout, refunds, reconciliation (14, 15); mark as paid is in Z01 step 2
-- Customs and duty in the price; collection point delivery (9, 10)
+- Live card payment gateway (production credentials); the mock gateway is covered by B09
+- Pausing checkout and payment reconciliation (13, 15); mark as paid is in Z01 step 2, refunds in G11
 - Order emails and SMS (11, 12)
 - A chosen quote becoming an order (24, see C04)
 - Supplier and runner self sign up (27, 28); team user management (30)
@@ -512,7 +620,7 @@ These have no journeys until they are built; add them here when they land.
 What the first runs turned up. Bugs are kept as tests marked `test.fail()` (see "Running the suite").
 
 1. **Fixed 2026-10-06: a new order never reached a runner.** Marking an order "Ready for collection" only sent a notification; nothing created a shipment, so no runner job appeared and every runner job came from the seed. Now `lib/shipments.ts` opens the job when a supplier marks their part ready (`openJobForLeg`), and marks the part collected and the order in transit when the runner picks it up (`markCollected`). The payout is the order's delivery fee split across its pickups (product owner's decision); distance is not measured yet and the runner screens hide it. Test: Z01, end to end.
-2. **Fixed 2026-10-06: garbled text.** The order list and the runner request list printed "Â·" where a middle dot belongs (the dots were stored double-encoded in `app/(store)/orders/page.tsx`, `app/(store)/requests/page.tsx` and the legacy v4 footer). Guards: K01 and K02 in `e2e/access/known-issues.spec.ts`.
+2. **Fixed 2026-10-06: garbled text.** The order list and the runner request list printed "Â·" where a middle dot belongs (the dots were stored double-encoded in `app/(store)/orders/page.tsx`, `app/(store)/requests/page.tsx` and the legacy v4 footer). On 2026-10-11 the phone order cards were made denser (at most 120px at 390px wide). Guards: K01 (characters and row height) and K02 in `e2e/access/known-issues.spec.ts`.
 3. **The RFQ chain has no screens** past the buyer's request (C02 to C04 above).
 4. **Fixed 2026-10-06: when Clerk could not be reached, the page crashed.** `auth()` now builds the session from the signed session token's `metadata` claim and the profile already linked to the Clerk account, with no call to Clerk's API; `currentUser()` (now with three retries) is only needed on a first sign-in or a token without the claim. It was: every signed-in page called Clerk's API (`currentUser()` in `lib/auth.ts`). From this machine that call fails now and then ("fetch failed"). `lib/auth.ts` retries twice, but in one 25 minute run it still failed 5 times, and each time the buyer saw the full "We could not finish loading this" screen (for example `/requests`, digest 2291417529). A gentler fallback (a longer backoff, or rendering the page signed out with a "reconnecting" notice) would hide most of these. The suite's one retry absorbs them and reports the test as flaky.
 5. **Fixed 2026-10-06: on a phone, the pinned buy bar was not pinned.** The transition now keeps `will-change` only while it slides, and never wraps a server render (which counted every request as a navigation). It was: the phone page transition (`components/motion/PageTransition.tsx`) left `will-change: transform` on the page wrapper. That makes every `position: fixed` element inside a page pin to the wrapper instead of the screen, so "Add to cart" sits about 3,600 px down the product page instead of at the bottom of the screen, and the cart's Total and Checkout bar floats in the middle of the screen over the cart line. Anything else fixed inside a storefront page (dialogs, bars) is exposed to the same thing. Test: A03 on phone.

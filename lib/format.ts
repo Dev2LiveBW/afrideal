@@ -13,6 +13,9 @@ const pula = new Intl.NumberFormat('en-BW', {
 
 /** `BWP 12,450.00` */
 export function bwp(amount: number): string {
+  if (amount < 0) {
+    return `-BWP ${pula.format(Math.abs(amount))}`;
+  }
   return `BWP ${pula.format(amount)}`;
 }
 

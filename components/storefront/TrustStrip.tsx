@@ -35,7 +35,7 @@ const CLAIMS = [
   {
     icon: Truck,
     title: 'Delivery you can follow',
-    body: 'Pickup and drop-off are tracked against the order, across Botswana and South Africa.',
+    body: 'Pickup and drop-off are tracked against the order, wherever the goods and the buyer are.',
     legal: false,
   },
   {

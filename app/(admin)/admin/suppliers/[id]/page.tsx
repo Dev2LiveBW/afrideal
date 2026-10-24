@@ -7,6 +7,7 @@ import { PageHeader, Panel, PanelBody } from '@/components/brand/Panel';
 import { StatusBadge } from '@/components/brand/StatusBadge';
 import { ConsoleTopbar } from '@/components/layout/ConsoleTopbar';
 import { auth } from '@/lib/auth';
+import { countryNames } from '@/lib/countries';
 import { readAll } from '@/lib/db';
 import { shortDate } from '@/lib/format';
 import { getNotifications, getSupplierWorkspace } from '@/lib/queries';
@@ -16,10 +17,11 @@ import { SupplierDetailTabs } from './SupplierDetailTabs';
 export const dynamic = 'force-dynamic';
 
 export default async function AdminSupplierDetailPage({ params }: { params: { id: string } }) {
-  const [session, workspace, allSuppliers] = await Promise.all([
+  const [session, workspace, allSuppliers, names] = await Promise.all([
     auth(),
     getSupplierWorkspace(params.id),
     readAll('suppliers'),
+    countryNames(),
   ]);
 
   if (!workspace.supplier) notFound();
@@ -73,7 +75,7 @@ export default async function AdminSupplierDetailPage({ params }: { params: { id
 
       <div className="mx-auto max-w-console space-y-5 px-6 py-6">
         <PageHeader
-          eyebrow={`${supplier.country === 'BW' ? 'Botswana' : 'South Africa'} · ${supplier.city}`}
+          eyebrow={`${names[supplier.country] ?? supplier.country} · ${supplier.city}`}
           title={supplier.name}
           description={supplier.legal_name}
           action={<StatusBadge status={supplier.status} />}
@@ -99,11 +101,15 @@ export default async function AdminSupplierDetailPage({ params }: { params: { id
                 <dl className="space-y-2.5 border-t border-hairline pt-4 text-[12.5px]">
                   <div className="flex items-center gap-2 text-body">
                     <Mail size={13} strokeWidth={1.5} className="shrink-0 text-muted" />
-                    <span className="truncate">{supplier.contact_email}</span>
+                    <span className={supplier.contact_email ? 'truncate' : 'truncate text-muted'}>
+                      {supplier.contact_email || 'Email not yet provided'}
+                    </span>
                   </div>
                   <div className="flex items-center gap-2 text-body">
                     <Phone size={13} strokeWidth={1.5} className="shrink-0 text-muted" />
-                    {supplier.contact_phone}
+                    <span className={supplier.contact_phone ? '' : 'text-muted'}>
+                      {supplier.contact_phone || 'Phone not yet provided'}
+                    </span>
                   </div>
                   <div className="flex items-center gap-2 text-body">
                     <MapPin size={13} strokeWidth={1.5} className="shrink-0 text-muted" />
@@ -111,7 +117,9 @@ export default async function AdminSupplierDetailPage({ params }: { params: { id
                   </div>
                   <div className="flex items-center gap-2 text-body">
                     <Building2 size={13} strokeWidth={1.5} className="shrink-0 text-muted" />
-                    <span className="truncate">Reg. {supplier.registration_no}</span>
+                    <span className={supplier.registration_no ? 'truncate' : 'truncate text-muted'}>
+                      {supplier.registration_no ? `Reg. ${supplier.registration_no}` : 'Registration no. pending'}
+                    </span>
                   </div>
                 </dl>
 

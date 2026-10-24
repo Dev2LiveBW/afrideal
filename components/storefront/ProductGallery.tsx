@@ -13,6 +13,10 @@ const ROLE_LABELS: Record<string, string> = {
   PACKAGING: 'Packaging',
 };
 
+/** The photo's own caption ("Side view") when it has one, else its role. */
+const captionFor = (image: ProductImage): string | undefined =>
+  image.caption ?? ROLE_LABELS[image.image_type];
+
 export function ProductGallery({
   product,
   images,
@@ -33,7 +37,7 @@ export function ProductGallery({
             <button
               key={image.id}
               onClick={() => setActiveId(image.id)}
-              aria-label={`View ${ROLE_LABELS[image.image_type] ?? 'image'}`}
+              aria-label={`View ${captionFor(image) ?? 'image'}`}
               aria-pressed={image.id === active?.id}
               className={cn(
                 'overflow-hidden rounded transition-all duration-250 ease-[cubic-bezier(0.16,1,0.3,1)]',
@@ -63,6 +67,10 @@ export function ProductGallery({
           className="aspect-[4/3] rounded-lg"
           glyphClassName="text-[110px] bottom-6 right-8"
           label={product.name}
+          // The whole photo, not a 4:3 slice: wig shots are tall, and cover
+          // would cut the head or the length off.
+          fit="contain"
+          zoomOnHover={false}
         />
 
         {/*
@@ -73,7 +81,7 @@ export function ProductGallery({
         */}
         {active && (
           <p className="mt-2 text-center font-mono text-[10px] uppercase tracking-[0.16em] text-muted">
-            {ROLE_LABELS[active.image_type] ?? 'View'}
+            {captionFor(active) ?? 'View'}
             {!isPhoto(active.image_url) && ' · placeholder'}
           </p>
         )}

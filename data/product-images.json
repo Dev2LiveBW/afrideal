@@ -8,7 +8,7 @@
     "sort_order": 0,
     "source": "AFRIDEAL",
     "permission_status": "CLEARED",
-    "created_at": "2026-06-10T08:00:00.000Z"
+    "created_at": "2026-06-24T08:00:00.000Z"
   },
   {
     "id": "img002",
@@ -19,7 +19,7 @@
     "sort_order": 1,
     "source": "AFRIDEAL",
     "permission_status": "CLEARED",
-    "created_at": "2026-06-10T08:00:00.000Z"
+    "created_at": "2026-06-24T08:00:00.000Z"
   },
   {
     "id": "img003",
@@ -30,7 +30,7 @@
     "sort_order": 2,
     "source": "AFRIDEAL",
     "permission_status": "CLEARED",
-    "created_at": "2026-06-10T08:00:00.000Z"
+    "created_at": "2026-06-24T08:00:00.000Z"
   },
   {
     "id": "img004",
@@ -41,54 +41,10 @@
     "sort_order": 3,
     "source": "AFRIDEAL",
     "permission_status": "CLEARED",
-    "created_at": "2026-06-10T08:00:00.000Z"
+    "created_at": "2026-06-24T08:00:00.000Z"
   },
   {
     "id": "img005",
-    "product_id": "p002",
-    "variant_id": null,
-    "image_url": "/products/p002-0.jpg",
-    "image_type": "PRIMARY",
-    "sort_order": 0,
-    "source": "AFRIDEAL",
-    "permission_status": "CLEARED",
-    "created_at": "2026-06-16T08:18:00.000Z"
-  },
-  {
-    "id": "img006",
-    "product_id": "p002",
-    "variant_id": null,
-    "image_url": "/products/p002-1.jpg",
-    "image_type": "GALLERY",
-    "sort_order": 1,
-    "source": "AFRIDEAL",
-    "permission_status": "CLEARED",
-    "created_at": "2026-06-16T08:18:00.000Z"
-  },
-  {
-    "id": "img007",
-    "product_id": "p002",
-    "variant_id": null,
-    "image_url": "/products/p002-2.jpg",
-    "image_type": "SPEC",
-    "sort_order": 2,
-    "source": "AFRIDEAL",
-    "permission_status": "CLEARED",
-    "created_at": "2026-06-16T08:18:00.000Z"
-  },
-  {
-    "id": "img008",
-    "product_id": "p002",
-    "variant_id": null,
-    "image_url": "/products/p002-3.jpg",
-    "image_type": "PACKAGING",
-    "sort_order": 3,
-    "source": "AFRIDEAL",
-    "permission_status": "CLEARED",
-    "created_at": "2026-06-16T08:18:00.000Z"
-  },
-  {
-    "id": "img009",
     "product_id": "p003",
     "variant_id": null,
     "image_url": "/products/p003-0.jpg",
@@ -96,10 +52,10 @@
     "sort_order": 0,
     "source": "AFRIDEAL",
     "permission_status": "CLEARED",
-    "created_at": "2026-06-22T08:36:00.000Z"
+    "created_at": "2026-06-30T08:18:00.000Z"
   },
   {
-    "id": "img010",
+    "id": "img006",
     "product_id": "p003",
     "variant_id": null,
     "image_url": "/products/p003-1.jpg",
@@ -107,10 +63,10 @@
     "sort_order": 1,
     "source": "AFRIDEAL",
     "permission_status": "CLEARED",
-    "created_at": "2026-06-22T08:36:00.000Z"
+    "created_at": "2026-06-30T08:18:00.000Z"
   },
   {
-    "id": "img011",
+    "id": "img007",
     "product_id": "p003",
     "variant_id": null,
     "image_url": "/products/p003-2.jpg",
@@ -118,10 +74,10 @@
     "sort_order": 2,
     "source": "AFRIDEAL",
     "permission_status": "CLEARED",
-    "created_at": "2026-06-22T08:36:00.000Z"
+    "created_at": "2026-06-30T08:18:00.000Z"
   },
   {
-    "id": "img012",
+    "id": "img008",
     "product_id": "p003",
     "variant_id": null,
     "image_url": "/products/p003-3.jpg",
@@ -129,10 +85,10 @@
     "sort_order": 3,
     "source": "AFRIDEAL",
     "permission_status": "CLEARED",
-    "created_at": "2026-06-22T08:36:00.000Z"
+    "created_at": "2026-06-30T08:18:00.000Z"
   },
   {
-    "id": "img013",
+    "id": "img009",
     "product_id": "p004",
     "variant_id": null,
     "image_url": "/products/p004-0.jpg",
@@ -140,10 +96,10 @@
     "sort_order": 0,
     "source": "AFRIDEAL",
     "permission_status": "CLEARED",
-    "created_at": "2026-06-28T08:54:00.000Z"
+    "created_at": "2026-07-06T08:36:00.000Z"
   },
   {
-    "id": "img014",
+    "id": "img010",
     "product_id": "p004",
     "variant_id": null,
     "image_url": "/products/p004-1.jpg",
@@ -151,10 +107,10 @@
     "sort_order": 1,
     "source": "AFRIDEAL",
     "permission_status": "CLEARED",
-    "created_at": "2026-06-28T08:54:00.000Z"
+    "created_at": "2026-07-06T08:36:00.000Z"
   },
   {
-    "id": "img015",
+    "id": "img011",
     "product_id": "p004",
     "variant_id": null,
     "image_url": "/products/p004-2.jpg",
@@ -162,10 +118,10 @@
     "sort_order": 2,
     "source": "AFRIDEAL",
     "permission_status": "CLEARED",
-    "created_at": "2026-06-28T08:54:00.000Z"
+    "created_at": "2026-07-06T08:36:00.000Z"
   },
   {
-    "id": "img016",
+    "id": "img012",
     "product_id": "p004",
     "variant_id": null,
     "image_url": "/products/p004-3.jpg",
@@ -173,10 +129,10 @@
     "sort_order": 3,
     "source": "AFRIDEAL",
     "permission_status": "CLEARED",
-    "created_at": "2026-06-28T08:54:00.000Z"
+    "created_at": "2026-07-06T08:36:00.000Z"
   },
   {
-    "id": "img017",
+    "id": "img013",
     "product_id": "p005",
     "variant_id": null,
     "image_url": "/products/p005-0.jpg",
@@ -184,10 +140,10 @@
     "sort_order": 0,
     "source": "AFRIDEAL",
     "permission_status": "CLEARED",
-    "created_at": "2026-07-04T08:12:00.000Z"
+    "created_at": "2026-07-12T08:54:00.000Z"
   },
   {
-    "id": "img018",
+    "id": "img014",
     "product_id": "p005",
     "variant_id": null,
     "image_url": "/products/p005-1.jpg",
@@ -195,10 +151,10 @@
     "sort_order": 1,
     "source": "AFRIDEAL",
     "permission_status": "CLEARED",
-    "created_at": "2026-07-04T08:12:00.000Z"
+    "created_at": "2026-07-12T08:54:00.000Z"
   },
   {
-    "id": "img019",
+    "id": "img015",
     "product_id": "p005",
     "variant_id": null,
     "image_url": "/products/p005-2.jpg",
@@ -206,10 +162,10 @@
     "sort_order": 2,
     "source": "AFRIDEAL",
     "permission_status": "CLEARED",
-    "created_at": "2026-07-04T08:12:00.000Z"
+    "created_at": "2026-07-12T08:54:00.000Z"
   },
   {
-    "id": "img020",
+    "id": "img016",
     "product_id": "p005",
     "variant_id": null,
     "image_url": "/products/p005-3.jpg",
@@ -217,10 +173,10 @@
     "sort_order": 3,
     "source": "AFRIDEAL",
     "permission_status": "CLEARED",
-    "created_at": "2026-07-04T08:12:00.000Z"
+    "created_at": "2026-07-12T08:54:00.000Z"
   },
   {
-    "id": "img021",
+    "id": "img017",
     "product_id": "p006",
     "variant_id": null,
     "image_url": "/products/p006-0.jpg",
@@ -228,10 +184,10 @@
     "sort_order": 0,
     "source": "AFRIDEAL",
     "permission_status": "CLEARED",
-    "created_at": "2026-07-10T08:30:00.000Z"
+    "created_at": "2026-07-18T08:12:00.000Z"
   },
   {
-    "id": "img022",
+    "id": "img018",
     "product_id": "p006",
     "variant_id": null,
     "image_url": "/products/p006-1.jpg",
@@ -239,10 +195,10 @@
     "sort_order": 1,
     "source": "AFRIDEAL",
     "permission_status": "CLEARED",
-    "created_at": "2026-07-10T08:30:00.000Z"
+    "created_at": "2026-07-18T08:12:00.000Z"
   },
   {
-    "id": "img023",
+    "id": "img019",
     "product_id": "p006",
     "variant_id": null,
     "image_url": "/products/p006-2.jpg",
@@ -250,10 +206,10 @@
     "sort_order": 2,
     "source": "AFRIDEAL",
     "permission_status": "CLEARED",
-    "created_at": "2026-07-10T08:30:00.000Z"
+    "created_at": "2026-07-18T08:12:00.000Z"
   },
   {
-    "id": "img024",
+    "id": "img020",
     "product_id": "p006",
     "variant_id": null,
     "image_url": "/products/p006-3.jpg",
@@ -261,10 +217,10 @@
     "sort_order": 3,
     "source": "AFRIDEAL",
     "permission_status": "CLEARED",
-    "created_at": "2026-07-10T08:30:00.000Z"
+    "created_at": "2026-07-18T08:12:00.000Z"
   },
   {
-    "id": "img025",
+    "id": "img021",
     "product_id": "p007",
     "variant_id": null,
     "image_url": "/products/p007-0.jpg",
@@ -272,10 +228,10 @@
     "sort_order": 0,
     "source": "AFRIDEAL",
     "permission_status": "CLEARED",
-    "created_at": "2026-07-16T08:48:00.000Z"
+    "created_at": "2026-07-24T08:30:00.000Z"
   },
   {
-    "id": "img026",
+    "id": "img022",
     "product_id": "p007",
     "variant_id": null,
     "image_url": "/products/p007-1.jpg",
@@ -283,10 +239,10 @@
     "sort_order": 1,
     "source": "AFRIDEAL",
     "permission_status": "CLEARED",
-    "created_at": "2026-07-16T08:48:00.000Z"
+    "created_at": "2026-07-24T08:30:00.000Z"
   },
   {
-    "id": "img027",
+    "id": "img023",
     "product_id": "p007",
     "variant_id": null,
     "image_url": "/products/p007-2.jpg",
@@ -294,10 +250,10 @@
     "sort_order": 2,
     "source": "AFRIDEAL",
     "permission_status": "CLEARED",
-    "created_at": "2026-07-16T08:48:00.000Z"
+    "created_at": "2026-07-24T08:30:00.000Z"
   },
   {
-    "id": "img028",
+    "id": "img024",
     "product_id": "p007",
     "variant_id": null,
     "image_url": "/products/p007-3.jpg",
@@ -305,10 +261,10 @@
     "sort_order": 3,
     "source": "AFRIDEAL",
     "permission_status": "CLEARED",
-    "created_at": "2026-07-16T08:48:00.000Z"
+    "created_at": "2026-07-24T08:30:00.000Z"
   },
   {
-    "id": "img029",
+    "id": "img025",
     "product_id": "p008",
     "variant_id": null,
     "image_url": "/products/p008-0.jpg",
@@ -316,10 +272,10 @@
     "sort_order": 0,
     "source": "AFRIDEAL",
     "permission_status": "CLEARED",
-    "created_at": "2026-07-22T08:06:00.000Z"
+    "created_at": "2026-07-30T08:48:00.000Z"
   },
   {
-    "id": "img030",
+    "id": "img026",
     "product_id": "p008",
     "variant_id": null,
     "image_url": "/products/p008-1.jpg",
@@ -327,10 +283,10 @@
     "sort_order": 1,
     "source": "AFRIDEAL",
     "permission_status": "CLEARED",
-    "created_at": "2026-07-22T08:06:00.000Z"
+    "created_at": "2026-07-30T08:48:00.000Z"
   },
   {
-    "id": "img031",
+    "id": "img027",
     "product_id": "p008",
     "variant_id": null,
     "image_url": "/products/p008-2.jpg",
@@ -338,10 +294,10 @@
     "sort_order": 2,
     "source": "AFRIDEAL",
     "permission_status": "CLEARED",
-    "created_at": "2026-07-22T08:06:00.000Z"
+    "created_at": "2026-07-30T08:48:00.000Z"
   },
   {
-    "id": "img032",
+    "id": "img028",
     "product_id": "p008",
     "variant_id": null,
     "image_url": "/products/p008-3.jpg",
@@ -349,10 +305,10 @@
     "sort_order": 3,
     "source": "AFRIDEAL",
     "permission_status": "CLEARED",
-    "created_at": "2026-07-22T08:06:00.000Z"
+    "created_at": "2026-07-30T08:48:00.000Z"
   },
   {
-    "id": "img033",
+    "id": "img029",
     "product_id": "p009",
     "variant_id": null,
     "image_url": "/products/p009-0.jpg",
@@ -360,10 +316,10 @@
     "sort_order": 0,
     "source": "AFRIDEAL",
     "permission_status": "CLEARED",
-    "created_at": "2026-07-28T08:24:00.000Z"
+    "created_at": "2026-08-05T08:06:00.000Z"
   },
   {
-    "id": "img034",
+    "id": "img030",
     "product_id": "p009",
     "variant_id": null,
     "image_url": "/products/p009-1.jpg",
@@ -371,10 +327,10 @@
     "sort_order": 1,
     "source": "AFRIDEAL",
     "permission_status": "CLEARED",
-    "created_at": "2026-07-28T08:24:00.000Z"
+    "created_at": "2026-08-05T08:06:00.000Z"
   },
   {
-    "id": "img035",
+    "id": "img031",
     "product_id": "p009",
     "variant_id": null,
     "image_url": "/products/p009-2.jpg",
@@ -382,10 +338,10 @@
     "sort_order": 2,
     "source": "AFRIDEAL",
     "permission_status": "CLEARED",
-    "created_at": "2026-07-28T08:24:00.000Z"
+    "created_at": "2026-08-05T08:06:00.000Z"
   },
   {
-    "id": "img036",
+    "id": "img032",
     "product_id": "p009",
     "variant_id": null,
     "image_url": "/products/p009-3.jpg",
@@ -393,10 +349,10 @@
     "sort_order": 3,
     "source": "AFRIDEAL",
     "permission_status": "CLEARED",
-    "created_at": "2026-07-28T08:24:00.000Z"
+    "created_at": "2026-08-05T08:06:00.000Z"
   },
   {
-    "id": "img037",
+    "id": "img033",
     "product_id": "p010",
     "variant_id": null,
     "image_url": "/products/p010-0.jpg",
@@ -404,10 +360,10 @@
     "sort_order": 0,
     "source": "AFRIDEAL",
     "permission_status": "CLEARED",
-    "created_at": "2026-08-03T08:42:00.000Z"
+    "created_at": "2026-08-11T08:24:00.000Z"
   },
   {
-    "id": "img038",
+    "id": "img034",
     "product_id": "p010",
     "variant_id": null,
     "image_url": "/products/p010-1.jpg",
@@ -415,10 +371,10 @@
     "sort_order": 1,
     "source": "AFRIDEAL",
     "permission_status": "CLEARED",
-    "created_at": "2026-08-03T08:42:00.000Z"
+    "created_at": "2026-08-11T08:24:00.000Z"
   },
   {
-    "id": "img039",
+    "id": "img035",
     "product_id": "p010",
     "variant_id": null,
     "image_url": "/products/p010-2.jpg",
@@ -426,10 +382,10 @@
     "sort_order": 2,
     "source": "AFRIDEAL",
     "permission_status": "CLEARED",
-    "created_at": "2026-08-03T08:42:00.000Z"
+    "created_at": "2026-08-11T08:24:00.000Z"
   },
   {
-    "id": "img040",
+    "id": "img036",
     "product_id": "p010",
     "variant_id": null,
     "image_url": "/products/p010-3.jpg",
@@ -437,10 +393,10 @@
     "sort_order": 3,
     "source": "AFRIDEAL",
     "permission_status": "CLEARED",
-    "created_at": "2026-08-03T08:42:00.000Z"
+    "created_at": "2026-08-11T08:24:00.000Z"
   },
   {
-    "id": "img041",
+    "id": "img037",
     "product_id": "p011",
     "variant_id": null,
     "image_url": "/products/p011-0.jpg",
@@ -448,10 +404,10 @@
     "sort_order": 0,
     "source": "AFRIDEAL",
     "permission_status": "CLEARED",
-    "created_at": "2026-08-09T08:00:00.000Z"
+    "created_at": "2026-08-17T08:42:00.000Z"
   },
   {
-    "id": "img042",
+    "id": "img038",
     "product_id": "p011",
     "variant_id": null,
     "image_url": "/products/p011-1.jpg",
@@ -459,10 +415,10 @@
     "sort_order": 1,
     "source": "AFRIDEAL",
     "permission_status": "CLEARED",
-    "created_at": "2026-08-09T08:00:00.000Z"
+    "created_at": "2026-08-17T08:42:00.000Z"
   },
   {
-    "id": "img043",
+    "id": "img039",
     "product_id": "p011",
     "variant_id": null,
     "image_url": "/products/p011-2.jpg",
@@ -470,10 +426,10 @@
     "sort_order": 2,
     "source": "AFRIDEAL",
     "permission_status": "CLEARED",
-    "created_at": "2026-08-09T08:00:00.000Z"
+    "created_at": "2026-08-17T08:42:00.000Z"
   },
   {
-    "id": "img044",
+    "id": "img040",
     "product_id": "p011",
     "variant_id": null,
     "image_url": "/products/p011-3.jpg",
@@ -481,10 +437,10 @@
     "sort_order": 3,
     "source": "AFRIDEAL",
     "permission_status": "CLEARED",
-    "created_at": "2026-08-09T08:00:00.000Z"
+    "created_at": "2026-08-17T08:42:00.000Z"
   },
   {
-    "id": "img045",
+    "id": "img041",
     "product_id": "p012",
     "variant_id": null,
     "image_url": "/products/p012-0.jpg",
@@ -492,10 +448,10 @@
     "sort_order": 0,
     "source": "AFRIDEAL",
     "permission_status": "CLEARED",
-    "created_at": "2026-08-15T08:18:00.000Z"
+    "created_at": "2026-08-23T08:00:00.000Z"
   },
   {
-    "id": "img046",
+    "id": "img042",
     "product_id": "p012",
     "variant_id": null,
     "image_url": "/products/p012-1.jpg",
@@ -503,10 +459,10 @@
     "sort_order": 1,
     "source": "AFRIDEAL",
     "permission_status": "CLEARED",
-    "created_at": "2026-08-15T08:18:00.000Z"
+    "created_at": "2026-08-23T08:00:00.000Z"
   },
   {
-    "id": "img047",
+    "id": "img043",
     "product_id": "p012",
     "variant_id": null,
     "image_url": "/products/p012-2.jpg",
@@ -514,10 +470,10 @@
     "sort_order": 2,
     "source": "AFRIDEAL",
     "permission_status": "CLEARED",
-    "created_at": "2026-08-15T08:18:00.000Z"
+    "created_at": "2026-08-23T08:00:00.000Z"
   },
   {
-    "id": "img048",
+    "id": "img044",
     "product_id": "p012",
     "variant_id": null,
     "image_url": "/products/p012-3.jpg",
@@ -525,226 +481,318 @@
     "sort_order": 3,
     "source": "AFRIDEAL",
     "permission_status": "CLEARED",
-    "created_at": "2026-08-15T08:18:00.000Z"
+    "created_at": "2026-08-23T08:00:00.000Z"
+  },
+  {
+    "id": "img045",
+    "product_id": "p018",
+    "variant_id": null,
+    "image_url": "/products/p018-0.jpg",
+    "image_type": "PRIMARY",
+    "caption": "Styled",
+    "sort_order": 0,
+    "source": "AFRIDEAL",
+    "permission_status": "CLEARED",
+    "created_at": "2026-08-29T08:18:00.000Z"
+  },
+  {
+    "id": "img046",
+    "product_id": "p018",
+    "variant_id": null,
+    "image_url": "/products/p018-1.jpg",
+    "image_type": "GALLERY",
+    "caption": "Front view",
+    "sort_order": 1,
+    "source": "AFRIDEAL",
+    "permission_status": "CLEARED",
+    "created_at": "2026-08-29T08:18:00.000Z"
+  },
+  {
+    "id": "img047",
+    "product_id": "p018",
+    "variant_id": null,
+    "image_url": "/products/p018-2.jpg",
+    "image_type": "SPEC",
+    "caption": "Side view",
+    "sort_order": 2,
+    "source": "AFRIDEAL",
+    "permission_status": "CLEARED",
+    "created_at": "2026-08-29T08:18:00.000Z"
+  },
+  {
+    "id": "img048",
+    "product_id": "p018",
+    "variant_id": null,
+    "image_url": "/products/p018-3.jpg",
+    "image_type": "PACKAGING",
+    "caption": "Top view",
+    "sort_order": 3,
+    "source": "AFRIDEAL",
+    "permission_status": "CLEARED",
+    "created_at": "2026-08-29T08:18:00.000Z"
   },
   {
     "id": "img049",
-    "product_id": "p013",
+    "product_id": "p019",
     "variant_id": null,
-    "image_url": "/products/p013-0.jpg",
+    "image_url": "/products/p019-0.jpg",
     "image_type": "PRIMARY",
+    "caption": "Styled",
     "sort_order": 0,
     "source": "AFRIDEAL",
     "permission_status": "CLEARED",
-    "created_at": "2026-08-21T08:36:00.000Z"
+    "created_at": "2026-09-04T08:36:00.000Z"
   },
   {
     "id": "img050",
-    "product_id": "p013",
+    "product_id": "p019",
     "variant_id": null,
-    "image_url": "/products/p013-1.jpg",
+    "image_url": "/products/p019-1.jpg",
     "image_type": "GALLERY",
+    "caption": "Side view",
     "sort_order": 1,
     "source": "AFRIDEAL",
     "permission_status": "CLEARED",
-    "created_at": "2026-08-21T08:36:00.000Z"
+    "created_at": "2026-09-04T08:36:00.000Z"
   },
   {
     "id": "img051",
-    "product_id": "p013",
+    "product_id": "p020",
     "variant_id": null,
-    "image_url": "/products/p013-2.jpg",
-    "image_type": "SPEC",
-    "sort_order": 2,
+    "image_url": "/products/p020-0.jpg",
+    "image_type": "PRIMARY",
+    "caption": "Styled",
+    "sort_order": 0,
     "source": "AFRIDEAL",
     "permission_status": "CLEARED",
-    "created_at": "2026-08-21T08:36:00.000Z"
+    "created_at": "2026-09-10T08:54:00.000Z"
   },
   {
     "id": "img052",
-    "product_id": "p013",
+    "product_id": "p020",
     "variant_id": null,
-    "image_url": "/products/p013-3.jpg",
-    "image_type": "PACKAGING",
-    "sort_order": 3,
+    "image_url": "/products/p020-1.jpg",
+    "image_type": "GALLERY",
+    "caption": "Front view",
+    "sort_order": 1,
     "source": "AFRIDEAL",
     "permission_status": "CLEARED",
-    "created_at": "2026-08-21T08:36:00.000Z"
+    "created_at": "2026-09-10T08:54:00.000Z"
   },
   {
     "id": "img053",
-    "product_id": "p014",
+    "product_id": "p020",
     "variant_id": null,
-    "image_url": "/products/p014-0.jpg",
-    "image_type": "PRIMARY",
-    "sort_order": 0,
+    "image_url": "/products/p020-2.jpg",
+    "image_type": "SPEC",
+    "caption": "Side view",
+    "sort_order": 2,
     "source": "AFRIDEAL",
     "permission_status": "CLEARED",
-    "created_at": "2026-08-27T08:54:00.000Z"
+    "created_at": "2026-09-10T08:54:00.000Z"
   },
   {
     "id": "img054",
-    "product_id": "p014",
+    "product_id": "p020",
     "variant_id": null,
-    "image_url": "/products/p014-1.jpg",
-    "image_type": "GALLERY",
-    "sort_order": 1,
+    "image_url": "/products/p020-3.jpg",
+    "image_type": "PACKAGING",
+    "caption": "Back view",
+    "sort_order": 3,
     "source": "AFRIDEAL",
     "permission_status": "CLEARED",
-    "created_at": "2026-08-27T08:54:00.000Z"
+    "created_at": "2026-09-10T08:54:00.000Z"
   },
   {
     "id": "img055",
-    "product_id": "p014",
+    "product_id": "p021",
     "variant_id": null,
-    "image_url": "/products/p014-2.jpg",
-    "image_type": "SPEC",
-    "sort_order": 2,
+    "image_url": "/products/p021-0.jpg",
+    "image_type": "PRIMARY",
+    "caption": "Styled",
+    "sort_order": 0,
     "source": "AFRIDEAL",
     "permission_status": "CLEARED",
-    "created_at": "2026-08-27T08:54:00.000Z"
+    "created_at": "2026-09-16T08:12:00.000Z"
   },
   {
     "id": "img056",
-    "product_id": "p014",
+    "product_id": "p021",
     "variant_id": null,
-    "image_url": "/products/p014-3.jpg",
-    "image_type": "PACKAGING",
-    "sort_order": 3,
+    "image_url": "/products/p021-1.jpg",
+    "image_type": "GALLERY",
+    "caption": "Front view",
+    "sort_order": 1,
     "source": "AFRIDEAL",
     "permission_status": "CLEARED",
-    "created_at": "2026-08-27T08:54:00.000Z"
+    "created_at": "2026-09-16T08:12:00.000Z"
   },
   {
     "id": "img057",
-    "product_id": "p015",
+    "product_id": "p021",
     "variant_id": null,
-    "image_url": "/products/p015-0.jpg",
-    "image_type": "PRIMARY",
-    "sort_order": 0,
+    "image_url": "/products/p021-2.jpg",
+    "image_type": "SPEC",
+    "caption": "Side view",
+    "sort_order": 2,
     "source": "AFRIDEAL",
     "permission_status": "CLEARED",
-    "created_at": "2026-09-02T08:12:00.000Z"
+    "created_at": "2026-09-16T08:12:00.000Z"
   },
   {
     "id": "img058",
-    "product_id": "p015",
+    "product_id": "p021",
     "variant_id": null,
-    "image_url": "/products/p015-1.jpg",
-    "image_type": "GALLERY",
-    "sort_order": 1,
+    "image_url": "/products/p021-3.jpg",
+    "image_type": "PACKAGING",
+    "caption": "Back view",
+    "sort_order": 3,
     "source": "AFRIDEAL",
     "permission_status": "CLEARED",
-    "created_at": "2026-09-02T08:12:00.000Z"
+    "created_at": "2026-09-16T08:12:00.000Z"
   },
   {
     "id": "img059",
-    "product_id": "p015",
+    "product_id": "p022",
     "variant_id": null,
-    "image_url": "/products/p015-2.jpg",
-    "image_type": "SPEC",
-    "sort_order": 2,
+    "image_url": "/products/p022-0.jpg",
+    "image_type": "PRIMARY",
+    "caption": "Styled",
+    "sort_order": 0,
     "source": "AFRIDEAL",
     "permission_status": "CLEARED",
-    "created_at": "2026-09-02T08:12:00.000Z"
+    "created_at": "2026-09-22T08:30:00.000Z"
   },
   {
     "id": "img060",
-    "product_id": "p015",
+    "product_id": "p022",
     "variant_id": null,
-    "image_url": "/products/p015-3.jpg",
-    "image_type": "PACKAGING",
-    "sort_order": 3,
+    "image_url": "/products/p022-1.jpg",
+    "image_type": "GALLERY",
+    "caption": "Front view",
+    "sort_order": 1,
     "source": "AFRIDEAL",
     "permission_status": "CLEARED",
-    "created_at": "2026-09-02T08:12:00.000Z"
+    "created_at": "2026-09-22T08:30:00.000Z"
   },
   {
     "id": "img061",
-    "product_id": "p016",
+    "product_id": "p022",
     "variant_id": null,
-    "image_url": "/products/p016-0.jpg",
-    "image_type": "PRIMARY",
-    "sort_order": 0,
+    "image_url": "/products/p022-2.jpg",
+    "image_type": "SPEC",
+    "caption": "Side view",
+    "sort_order": 2,
     "source": "AFRIDEAL",
     "permission_status": "CLEARED",
-    "created_at": "2026-09-08T08:30:00.000Z"
+    "created_at": "2026-09-22T08:30:00.000Z"
   },
   {
     "id": "img062",
-    "product_id": "p016",
+    "product_id": "p022",
     "variant_id": null,
-    "image_url": "/products/p016-1.jpg",
-    "image_type": "GALLERY",
-    "sort_order": 1,
+    "image_url": "/products/p022-3.jpg",
+    "image_type": "PACKAGING",
+    "caption": "Back view",
+    "sort_order": 3,
     "source": "AFRIDEAL",
     "permission_status": "CLEARED",
-    "created_at": "2026-09-08T08:30:00.000Z"
+    "created_at": "2026-09-22T08:30:00.000Z"
   },
   {
     "id": "img063",
-    "product_id": "p016",
+    "product_id": "p023",
     "variant_id": null,
-    "image_url": "/products/p016-2.jpg",
-    "image_type": "SPEC",
-    "sort_order": 2,
-    "source": "AFRIDEAL",
-    "permission_status": "CLEARED",
-    "created_at": "2026-09-08T08:30:00.000Z"
-  },
-  {
-    "id": "img064",
-    "product_id": "p016",
-    "variant_id": null,
-    "image_url": "/products/p016-3.jpg",
-    "image_type": "PACKAGING",
-    "sort_order": 3,
-    "source": "AFRIDEAL",
-    "permission_status": "CLEARED",
-    "created_at": "2026-09-08T08:30:00.000Z"
-  },
-  {
-    "id": "img065",
-    "product_id": "p017",
-    "variant_id": null,
-    "image_url": "/products/p017-0.jpg",
+    "image_url": "/products/p023-0.jpg",
     "image_type": "PRIMARY",
+    "caption": "Styled",
     "sort_order": 0,
     "source": "AFRIDEAL",
     "permission_status": "CLEARED",
-    "created_at": "2026-09-14T08:48:00.000Z"
+    "created_at": "2026-09-28T08:48:00.000Z"
   },
   {
-    "id": "img066",
-    "product_id": "p017",
+    "id": "img064",
+    "product_id": "p023",
     "variant_id": null,
-    "image_url": "/products/p017-1.jpg",
+    "image_url": "/products/p023-1.jpg",
     "image_type": "GALLERY",
+    "caption": "Front view",
     "sort_order": 1,
     "source": "AFRIDEAL",
     "permission_status": "CLEARED",
-    "created_at": "2026-09-14T08:48:00.000Z"
+    "created_at": "2026-09-28T08:48:00.000Z"
   },
   {
-    "id": "img067",
-    "product_id": "p017",
+    "id": "img065",
+    "product_id": "p023",
     "variant_id": null,
-    "image_url": "/products/p017-2.jpg",
+    "image_url": "/products/p023-2.jpg",
     "image_type": "SPEC",
+    "caption": "Side view",
     "sort_order": 2,
     "source": "AFRIDEAL",
     "permission_status": "CLEARED",
-    "created_at": "2026-09-14T08:48:00.000Z"
+    "created_at": "2026-09-28T08:48:00.000Z"
   },
   {
-    "id": "img068",
-    "product_id": "p017",
+    "id": "img066",
+    "product_id": "p023",
     "variant_id": null,
-    "image_url": "/products/p017-3.jpg",
+    "image_url": "/products/p023-3.jpg",
     "image_type": "PACKAGING",
+    "caption": "Back view",
     "sort_order": 3,
     "source": "AFRIDEAL",
     "permission_status": "CLEARED",
-    "created_at": "2026-09-14T08:48:00.000Z"
+    "created_at": "2026-09-28T08:48:00.000Z"
+  },
+  {
+    "id": "img067",
+    "product_id": "p024",
+    "variant_id": null,
+    "image_url": "/products/p024-0.jpg",
+    "image_type": "PRIMARY",
+    "caption": "Styled",
+    "sort_order": 0,
+    "source": "AFRIDEAL",
+    "permission_status": "CLEARED",
+    "created_at": "2026-10-04T08:06:00.000Z"
+  },
+  {
+    "id": "img068",
+    "product_id": "p024",
+    "variant_id": null,
+    "image_url": "/products/p024-1.jpg",
+    "image_type": "GALLERY",
+    "caption": "Front view",
+    "sort_order": 1,
+    "source": "AFRIDEAL",
+    "permission_status": "CLEARED",
+    "created_at": "2026-10-04T08:06:00.000Z"
+  },
+  {
+    "id": "img069",
+    "product_id": "p024",
+    "variant_id": null,
+    "image_url": "/products/p024-2.jpg",
+    "image_type": "SPEC",
+    "caption": "Side view",
+    "sort_order": 2,
+    "source": "AFRIDEAL",
+    "permission_status": "CLEARED",
+    "created_at": "2026-10-04T08:06:00.000Z"
+  },
+  {
+    "id": "img070",
+    "product_id": "p024",
+    "variant_id": null,
+    "image_url": "/products/p024-3.jpg",
+    "image_type": "PACKAGING",
+    "caption": "Back view",
+    "sort_order": 3,
+    "source": "AFRIDEAL",
+    "permission_status": "CLEARED",
+    "created_at": "2026-10-04T08:06:00.000Z"
   }
 ]

@@ -3,7 +3,17 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 
-import type { CartLine } from '@/types';
+import { DEFAULT_DELIVERY_COUNTRY } from '@/lib/lanes.mjs';
+import type { CartLine, CountryCode } from '@/types';
+
+/** Where the shopper wants things delivered: a country and a town (spec 0009). */
+export interface DeliverTo {
+  country: CountryCode;
+  city: string;
+}
+
+/** Until a shopper chooses. The market is any-to-any; this is only a starting point. */
+export const DEFAULT_DELIVER_TO: DeliverTo = { country: DEFAULT_DELIVERY_COUNTRY, city: 'Gaborone' };
 
 interface AfriDealState {
   // ── Cart ──────────────────────────────────────────────────────────────
@@ -22,10 +32,11 @@ interface AfriDealState {
    * Where the shopper wants things delivered.
    *
    * Safe to persist, unlike anything commercial: it changes which suppliers
-   * read as local and what the header says, never what a buyer is charged.
+   * read as local, what the header says and which lane checkout starts on,
+   * never what a buyer is charged (the server prices every order itself).
    */
-  deliverTo: string;
-  setDeliverTo: (city: string) => void;
+  deliverTo: DeliverTo;
+  setDeliverTo: (deliverTo: DeliverTo) => void;
   toggleSidebar: () => void;
 }
 
@@ -46,9 +57,9 @@ export const useAfriDealStore = create<AfriDealState>()(
     (set) => ({
       cart: [],
       cartPulse: 0,
-      deliverTo: 'Gaborone',
+      deliverTo: DEFAULT_DELIVER_TO,
 
-      setDeliverTo: (city) => set({ deliverTo: city }),
+      setDeliverTo: (deliverTo) => set({ deliverTo }),
 
       addToCart: (line) =>
         set((state) => {
@@ -89,6 +100,18 @@ export const useAfriDealStore = create<AfriDealState>()(
     }),
     {
       name: 'afrideal-store',
+      /*
+       * Version 1 (2026-10-22, spec 0009): `deliverTo` became a country and a
+       * town. Every town saved before then was a Botswana one.
+       */
+      version: 1,
+      migrate: (persisted, version) => {
+        const state = (persisted ?? {}) as Record<string, unknown>;
+        if (version < 1 && typeof state.deliverTo === 'string') {
+          state.deliverTo = { country: DEFAULT_DELIVERY_COUNTRY, city: state.deliverTo };
+        }
+        return state as unknown as AfriDealState;
+      },
       partialize: (state) => ({
         cart: state.cart,
         sidebarCollapsed: state.sidebarCollapsed,
@@ -97,20 +120,6 @@ export const useAfriDealStore = create<AfriDealState>()(
     },
   ),
 );
-
-/** Cities AfriDeal delivers into today, in order of volume. */
-export const DELIVERY_CITIES = [
-  'Gaborone',
-  'Francistown',
-  'Molepolole',
-  'Maun',
-  'Serowe',
-  'Selebi-Phikwe',
-  'Kanye',
-  'Lobatse',
-  'Palapye',
-  'Mahalapye',
-];
 
 export const cartCount = (cart: CartLine[]) => cart.reduce((sum, line) => sum + line.qty, 0);
 export const cartSubtotal = (cart: CartLine[]) =>

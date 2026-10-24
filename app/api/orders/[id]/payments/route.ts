@@ -68,6 +68,10 @@ export const POST = handled(async (_request: Request, { params }: { params: { id
   const open = mine.find((row) => row.status === 'STARTED');
   if (open) {
     const existing = await startPayment(order);
+    if (existing.providerReference && existing.providerReference !== open.provider_reference) {
+      await update('payments', open.id, { provider_reference: existing.providerReference });
+      open.provider_reference = existing.providerReference;
+    }
     return ok({
       payment: {
         id: open.id,

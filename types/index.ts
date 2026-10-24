@@ -89,6 +89,15 @@ export interface Product {
   brand_id?: string | null;
   product_type?: string;
   country_of_origin?: string;
+  /** Whether this is an in-house AfriDeal product or a supplier's own product. */
+  owner_type?: 'AFRIDEAL' | 'SUPPLIER';
+  /** Set when owner_type === 'SUPPLIER': the supplier who owns and prices this product. */
+  supplier_id?: string | null;
+  supplier_name?: string | null;
+  /** Minimum order quantity set by the supplier (defaults to 1 for AfriDeal products). */
+  moq?: number;
+  /** AFRIDEAL_MANAGED uses the 4-tier ladder; SUPPLIER_LED uses supplier-set price & MOQ. */
+  commercial_model?: CommercialModel;
   /** Set only while a PROMOTIONAL band is live. The strikethrough figure. */
   compare_at_price?: number;
   promotion?: {
@@ -97,6 +106,52 @@ export interface Product {
     stock_allocated: number;
     stock_sold: number;
   };
+}
+
+/**
+ * An ISO 3166-1 alpha-2 country code (`BW`, `ZA`, `LS`). Countries are data
+ * (the `countries` collection), so any active one is valid: the market is
+ * any-to-any (spec 0009), never a fixed list in code.
+ */
+export type CountryCode = string;
+
+/** An ISO 4217 currency code (`BWP`, `ZAR`, `LSL`). */
+export type CurrencyCode = string;
+
+/** A payment method as a country's buyers see it at checkout. */
+export interface CountryPaymentMethod {
+  name: string;
+  blurb: string;
+  /** The platform method behind it, once one exists; missing means "coming soon". */
+  method?: PaymentMethod;
+}
+
+/** One country AfriDeal trades in: buyers, suppliers, runners or couriers there. */
+export interface Country {
+  /** The country code, e.g. `LS`. */
+  id: CountryCode;
+  code: CountryCode;
+  name: string;
+  /** The country's own currency. */
+  currency: CurrencyCode;
+  /**
+   * What its buyers pay in (spec 0009, answer 1): pula in Botswana, rand in
+   * South Africa, Lesotho and Eswatini.
+   */
+  buyer_currency: CurrencyCode;
+  /**
+   * The payment methods this country's buyers are offered, in order. One with
+   * a `method` the platform can take money through right now is selectable;
+   * the rest show as "coming soon" (spec 0009, answer 2).
+   */
+  payment_methods: CountryPaymentMethod[];
+  /**
+   * The towns "Deliver to" offers, busiest first. A buyer can still type any
+   * other town at checkout; this is the shortlist, not a limit.
+   */
+  towns: string[];
+  active: boolean;
+  sort_order: number;
 }
 
 export type SupplierStatus = 'VERIFIED' | 'PENDING' | 'SUSPENDED' | 'REJECTED';
@@ -114,7 +169,7 @@ export interface Supplier {
   name: string;
   legal_name: string;
   initials: string;
-  country: 'BW' | 'ZA';
+  country: CountryCode;
   city: string;
   status: SupplierStatus;
   contact_email: string;
@@ -143,8 +198,15 @@ export interface SupplierOffer {
   id: string;
   product_id: string;
   supplier_id: string;
-  /** What the supplier charges AfriDeal, in Pula. */
+  /**
+   * What the supplier charges AfriDeal per unit, in `cost_currency`. For an
+   * offer with `variant_costs`, the cost of the cheapest option.
+   */
   supplier_cost: number;
+  /** The supplier's own currency. Missing means Pula (spec 0007, AC-1). */
+  cost_currency?: CurrencyCode;
+  /** One cost per option where they differ, e.g. a wig sold by length. */
+  variant_costs?: { variant_id: string; cost: number }[];
   stock: number;
   fulfilment_days: number;
   moq: number;
@@ -168,9 +230,11 @@ export type OrderStatus =
   | 'PENDING'
   | 'PROCESSING'
   | 'IN_TRANSIT'
+  | 'READY_FOR_COLLECTION'
   | 'DELIVERED'
   | 'DISPUTED'
-  | 'CANCELLED';
+  | 'CANCELLED'
+  | 'REFUNDED';
 
 /**
  * `EFT` is a bank transfer the buyer makes and finance confirms by hand (spec
@@ -199,6 +263,12 @@ export interface Order {
   customer_id: string;
   customer_name: string;
   status: OrderStatus;
+  /**
+   * What the buyer is charged in (spec 0009): pula or rand. Every amount on
+   * the order and its items is in it. Missing on orders before 2026-10-22,
+   * which were all pula.
+   */
+  currency?: CurrencyCode;
   subtotal: number;
   delivery_fee: number;
   total: number;
@@ -215,10 +285,21 @@ export interface Order {
   cancel_reason: CancelReason | null;
   delivery_address: string;
   delivery_city: string;
+  /**
+   * Where the order is going (spec 0009). Missing on orders placed before
+   * 2026-10-22, which all went to Botswana.
+   */
+  delivery_country?: CountryCode;
+  delivery_method?: 'DOORSTEP' | 'COLLECTION_POINT';
+  collection_point?: string | null;
   placed_at: string;
   updated_at: string;
   timeline: OrderTimelineEntry[];
   internal_notes: string;
+  refund_amount?: number;
+  refund_reference?: string | null;
+  refund_reason?: string | null;
+  refunded_at?: string | null;
 }
 
 export interface OrderItem {
@@ -233,7 +314,13 @@ export interface OrderItem {
   unit_price: number;
   line_total: number;
   supplier_id: string;
+  /** Per unit, in the supplier's own currency (`supplier_cost_currency`). */
   supplier_cost: number;
+  /** Spec 0007, AC-7: the costs this line was priced on, fixed at order time. */
+  supplier_cost_currency?: CurrencyCode;
+  fx_rate?: number;
+  /** Customs per unit, in Pula. */
+  customs_amount?: number;
 }
 
 export type SupplierOrderStatus =
@@ -341,6 +428,8 @@ export interface SupplierPayable {
   /** Agreed supplier payment terms, in days from delivery confirmation. */
   terms_days: number;
   history: PayableTransition[];
+  credit_note_for_payable_id?: string | null;
+  reason?: string;
 }
 
 export type DisputeStatus =
@@ -374,7 +463,15 @@ export interface Runner {
   phone: string;
   vehicle: string;
   plate: string;
+  /** Home town. */
   city: string;
+  /** The country the runner works in (spec 0009). Runners are onboarded anywhere. */
+  country: CountryCode;
+  /**
+   * The towns the runner takes jobs in, in `country`. A job alerts the runners
+   * who serve its pickup town; spec 0005 adds the 30-minute widening.
+   */
+  towns: string[];
   online: boolean;
   rating: number;
   deliveries_completed: number;
@@ -398,12 +495,60 @@ export interface Shipment {
   status: ShipmentStatus;
   pickup_name: string;
   pickup_address: string;
+  /** Spec 0009: where the job starts and ends, so it reaches runners there. */
+  pickup_country?: CountryCode;
+  pickup_town?: string;
   dropoff_name: string;
   dropoff_address: string;
+  dropoff_country?: CountryCode;
+  dropoff_town?: string;
   distance_km: number;
   payout: number;
   created_at: string;
   delivered_at: string | null;
+}
+
+/** How a buyer pays a courier's fee (spec 0008, AC-9). */
+export type CourierPaymentOption = 'AT_CHECKOUT' | 'ON_ARRIVAL';
+
+/**
+ * One route a courier serves (spec 0008 as generalised by spec 0009): from a
+ * country (and, if it only collects there, a town) to a destination town, with
+ * its own fee rule. All amounts are pula.
+ */
+export interface CourierRoute {
+  from: { country: CountryCode; city?: string };
+  to: { country: CountryCode; city: string };
+  fee: {
+    /** Goods subtotal at or below which the flat fee applies. */
+    threshold: number;
+    flat: number;
+    /** Share of the goods subtotal charged above the threshold, e.g. 0.16. */
+    pct: number;
+    /** A launch price in place of `flat` while it lasts (2026-10-21: P200). */
+    launch_flat?: number | null;
+    /** When the launch price ends; null means until someone changes it. */
+    launch_until?: string | null;
+  };
+  /** What AfriDeal owes the courier on this route, where known (spec 0008, Q8). */
+  payable?: { flat?: number | null; pct?: number | null };
+}
+
+/** A listed courier and clearance partner (spec 0008). */
+export interface Courier {
+  id: string;
+  name: string;
+  role: 'CROSS_BORDER_CLEARANCE' | 'DOMESTIC';
+  sort_order: number;
+  active: boolean;
+  trips_per_week: number | null;
+  insured: boolean;
+  phone: string;
+  depot: { country: CountryCode; city: string; address: string };
+  /** How the supplier labels the parcel, e.g. "{first} {last} Gorosa". */
+  consignee_format: string | null;
+  payment_options: CourierPaymentOption[];
+  routes: CourierRoute[];
 }
 
 export interface Settlement {

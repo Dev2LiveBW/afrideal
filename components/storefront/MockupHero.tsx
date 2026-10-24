@@ -8,9 +8,11 @@ import { cn } from '@/lib/utils';
  * (2026-09-11). On the home page it stands where the benchmark's banner
  * would, as the first floor after the tools.
  *
- * Both cards always sit side by side (grid-cols-2 at every width) with the
- * photograph and button visible at every breakpoint — no separate mobile/desktop
- * image slots. The photo height scales: h-20 → sm:h-32 → lg:h-44.
+ * Both cards always sit side by side (grid-cols-2 at every width). Below
+ * `lg` each card ends in a photo band (h-20 → sm:h-32) above its button.
+ * From `lg` the photographs go back to their original size: full-bleed on
+ * the marketplace card, masked into its black, and the runner standing in
+ * the bottom-right corner, with each button pinned to the card's foot.
  *
  * `badges` - the six-tile strip under the cards. Off on the home page,
  * where the benchmark's tool floor (`ToolFloor`) now does the same job one
@@ -51,25 +53,40 @@ export function MockupHero({ badges = true }: { badges?: boolean }) {
               </ul>
             </div>
 
-            {/* Photo + button — visible at every width */}
-            <div className="relative mt-auto flex flex-col items-center w-full z-10">
-              <div className="relative h-20 sm:h-32 lg:h-44 w-full shrink-0">
+            {/* Below `lg`: photo band + button */}
+            <div className="relative mt-auto flex flex-col items-center w-full z-10 lg:hidden">
+              <div className="relative h-20 sm:h-32 w-full shrink-0">
                 <Image
                   src="/images/hero/mockup.jpg"
                   alt="Marketplace products"
                   fill
-                  sizes="(max-width: 640px) 45vw, (max-width: 1024px) 45vw, 640px"
+                  sizes="(max-width: 640px) 45vw, 240px"
                   className="object-contain object-bottom"
                 />
               </div>
               <Link
                 href="/browse"
-                className="mt-1.5 flex h-7 sm:h-10 lg:h-14 w-full items-center justify-center gap-1 whitespace-nowrap rounded-full bg-gold px-2 text-[0.5625rem] font-bold text-black transition-colors hover:bg-gold-light sm:gap-2 sm:px-4 sm:text-[0.8125rem] lg:text-[1rem]"
+                className="mt-1.5 flex h-7 sm:h-10 w-full items-center justify-center gap-1 whitespace-nowrap rounded-full bg-gold px-2 text-[0.5625rem] font-bold text-black transition-colors hover:bg-gold-light sm:gap-2 sm:px-4 sm:text-[0.8125rem]"
               >
                 Browse products
                 <ArrowRight className="h-3 w-3 shrink-0 sm:h-4 sm:w-4" />
               </Link>
             </div>
+            {/* From `lg`: the full-bleed photograph, masked into the card's black so the copy keeps its contrast */}
+            <div
+              className="pointer-events-none absolute bottom-0 right-0 top-0 z-0 hidden w-[95%] lg:block"
+              style={{ maskImage: 'linear-gradient(to right, transparent 0%, black 45%)', WebkitMaskImage: 'linear-gradient(to right, transparent 0%, black 45%)' }}
+            >
+              <Image src="/images/hero/mockup.jpg" alt="" fill sizes="640px" className="object-cover object-right" />
+            </div>
+            <div className="pointer-events-none absolute inset-y-0 right-0 z-0 hidden w-full bg-gradient-to-r from-[#0e0701] via-[#0e0701]/40 to-transparent lg:block" />
+            <Link
+              href="/browse"
+              className="relative z-10 mt-auto hidden h-14 items-center justify-center gap-2 self-start whitespace-nowrap rounded-full bg-gold px-8 text-[1rem] font-bold text-black transition-colors hover:bg-gold-light lg:inline-flex"
+            >
+              Browse products
+              <ArrowRight className="h-[18px] w-[18px] shrink-0" />
+            </Link>
           </div>
 
           {/* Right Card: Runner Service */}
@@ -98,25 +115,36 @@ export function MockupHero({ badges = true }: { badges?: boolean }) {
               </ul>
             </div>
 
-            {/* Photo + button — visible at every width */}
-            <div className="relative mt-auto flex flex-col items-center w-full z-10">
-              <div className="relative h-20 sm:h-32 lg:h-44 w-full shrink-0">
+            {/* Below `lg`: photo band + button */}
+            <div className="relative mt-auto flex flex-col items-center w-full z-10 lg:hidden">
+              <div className="relative h-20 sm:h-32 w-full shrink-0">
                 <Image
                   src="/images/hero/runner.jpg"
                   alt="Verified runner"
                   fill
-                  sizes="(max-width: 640px) 40vw, (max-width: 1024px) 45vw, 560px"
+                  sizes="(max-width: 640px) 40vw, 220px"
                   className="object-contain object-bottom"
                 />
               </div>
               <Link
                 href="/request-a-runner"
-                className="mt-1.5 flex h-7 sm:h-10 lg:h-14 w-full items-center justify-center gap-1 whitespace-nowrap rounded-full bg-[#E67E22] px-2 text-[0.5625rem] font-bold text-white transition-colors hover:bg-[#D35400] sm:gap-2 sm:px-4 sm:text-[0.8125rem] lg:text-[1rem]"
+                className="mt-1.5 flex h-7 sm:h-10 w-full items-center justify-center gap-1 whitespace-nowrap rounded-full bg-[#E67E22] px-2 text-[0.5625rem] font-bold text-white transition-colors hover:bg-[#D35400] sm:gap-2 sm:px-4 sm:text-[0.8125rem]"
               >
                 Request a runner
                 <ArrowRight className="h-3 w-3 shrink-0 sm:h-4 sm:w-4" />
               </Link>
             </div>
+            {/* From `lg`: the runner in the bottom-right corner, the button at the card's foot */}
+            <div className="pointer-events-none absolute -right-12 bottom-0 z-0 hidden h-[95%] w-[80%] lg:block">
+              <Image src="/images/hero/runner.jpg" alt="" fill sizes="560px" className="object-contain object-right-bottom" />
+            </div>
+            <Link
+              href="/request-a-runner"
+              className="relative z-10 mt-auto hidden h-14 w-[80%] items-center justify-center gap-2 whitespace-nowrap rounded-xl bg-[#E67E22] px-8 text-[1rem] font-bold text-white transition-colors hover:bg-[#D35400] lg:flex"
+            >
+              Request a runner
+              <ArrowRight className="h-[18px] w-[18px] shrink-0" />
+            </Link>
           </div>
 
         </div>

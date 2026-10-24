@@ -16,6 +16,16 @@ import fs from 'node:fs/promises';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
+import {
+  GATEWAY_RATE,
+  QUOTATION_THRESHOLD,
+  ladderFor,
+  landedCost,
+  marginPct,
+  unitPrice,
+} from '../lib/pricing-formula.mjs';
+import { DEFAULT_DELIVERY_COUNTRY, isCrossBorder } from '../lib/lanes.mjs';
+
 const ROOT_DIR = path.join(path.dirname(fileURLToPath(import.meta.url)), '..');
 const DATA_DIR = path.join(ROOT_DIR, 'data');
 const PHOTO_DIR = path.join(ROOT_DIR, 'public', 'products');
@@ -50,27 +60,29 @@ const pick = (arr) => arr[Math.floor(rand() * arr.length)];
 
 /**
  * AfriDeal buys from the supplier and resells to the customer, so the customer
- * price is the supplier's cost plus a published markup, decided by quantity:
+ * price is the landed cost (supplier cost, converted; no customs since
+ * 2026-10-21, the courier clears it) plus a published markup, decided by
+ * quantity (spec 0007):
  *
- *   1 – 4 units      Retail       cost + 60%
- *   5 – 19 units     Bulk         cost + 46%
- *   20 – 49 units    Wholesale    cost + 32%
- *   50 – 99 units    Wholesale+   cost + 22%
+ *   1 – 4 units      Retail       landed + 50%, less 2 / 3 / 5% for 2 / 3 / 4
+ *   5 – 10 units     Bulk         landed + 33%
+ *   11 – 20 units    Wholesale    landed + 25%
+ *   21 – 99 units    Wholesale+   landed + 18%
  *   100 units +      Custom       by quotation
  *
- * Kept in step with lib/pricing-model.ts, which is what the running app reads.
+ * The rungs and the arithmetic come from lib/pricing-formula.mjs, the module the
+ * running app reads too, so the bands written here are the prices it charges.
  * Delivery is quoted separately at checkout rather than smeared across units.
  */
-const RETAIL_MARKUP_PCT = 60;
-const BULK_MARKUP_PCT = 46;
-const WHOLESALE_MARKUP_PCT = 32;
-const WHOLESALE_PLUS_MARKUP_PCT = 22;
-const QUOTATION_THRESHOLD = 100;
+/** A rung's markup in percent, on the ladder of the category it prices. */
+const pct = (rung) => Math.round(rung.markup * 1000) / 10;
+/** The retail markup a category opens at: 50% by default, 25% for hair. */
+const retailMarkupPct = (categoryId) => pct(ladderFor(categoryId)[0]);
 
 // ─── Categories ──────────────────────────────────────────────────────────────
 
 const categories = [
-  { id: 'c1', name: 'Hair, Weaves & Extensions', slug: 'hair-weaves-extensions', emoji: '💇🏾‍♀️', sort_order: 1, blurb: 'Bundles, frontals, closures, wigs and braiding hair. The category the platform sells most of.' },
+  { id: 'c1', name: 'Hair, Weaves & Extensions', slug: 'hair-weaves-extensions', emoji: '💇🏾‍♀️', sort_order: 1, blurb: 'AfriDeal lace wigs, from short bobs to 32 inch, sold by length.' },
   { id: 'c7', name: 'Beauty & Personal Care', slug: 'beauty-personal-care', emoji: '💄', sort_order: 2, blurb: 'Treatments, serums and salon consumables from verified regional distributors.' },
   { id: 'c2', name: 'Electronics', slug: 'electronics', emoji: '🔌', sort_order: 3, blurb: 'Consumer and off-grid electronics, landed and warranty-backed.' },
   { id: 'c6', name: 'Clothing & Uniforms', slug: 'clothing-uniforms', emoji: '👕', sort_order: 4, blurb: 'Workwear, school uniforms and retail apparel at trade quantities.' },
@@ -88,7 +100,7 @@ const pricingRules = categories.map((category, i) => ({
   markup_type: 'PERCENTAGE',
   // The platform retail markup. One figure across the catalogue, so a buyer
   // comparing two categories is comparing supplier costs, not our arithmetic.
-  markup_value: RETAIL_MARKUP_PCT,
+  markup_value: retailMarkupPct(category.id),
   // Zero, deliberately. Delivery is quoted at checkout against the real
   // address, so folding a per-unit contribution in here would charge for it
   // twice and would punish the cheapest lines hardest.
@@ -99,10 +111,28 @@ const pricingRules = categories.map((category, i) => ({
 
 const ruleFor = (categoryId) => pricingRules.find((r) => r.category_id === categoryId);
 
-function calculatePrice(supplierCost, rule) {
-  const markup =
-    rule.markup_type === 'PERCENTAGE' ? supplierCost * (rule.markup_value / 100) : rule.markup_value;
-  return Math.ceil(supplierCost + markup);
+/**
+ * Where a category's goods come from. Building materials and food are sourced
+ * in Botswana; everything else crosses the border from South Africa, where the
+ * courier clears it (CUSTOMS_RATE is 0, so origin no longer moves the price).
+ */
+const originFor = (categoryId) => (categoryId === 'c3' || categoryId === 'c4' ? 'BW' : 'ZA');
+
+/** Landed cost in thebe: the supplier's price, converted, plus customs if imported. */
+/*
+ * Published bands are for the default delivery country until "Deliver to"
+ * carries one (spec 0009), so "imported" is the lane from the goods' country to
+ * that default, never a test against Botswana.
+ */
+const landedFor = (cost, currency, categoryId) =>
+  landedCost({ cost, currency, imported: isCrossBorder(originFor(categoryId), DEFAULT_DELIVERY_COUNTRY) })
+    .landed_thebe;
+
+/** The retail price on a landed cost, under a category's pricing rule. */
+function calculatePrice(landedThebe, rule) {
+  return rule.markup_type === 'PERCENTAGE'
+    ? unitPrice(landedThebe, rule.markup_value / 100)
+    : Math.ceil(landedThebe / 100 + rule.markup_value);
 }
 
 // ─── Suppliers ───────────────────────────────────────────────────────────────
@@ -113,6 +143,48 @@ const docTemplate = (status, uploadedDaysAgo) => [
   { id: 'd3', label: 'Proof of Bank Account', status, uploaded_at: uploadedDaysAgo == null ? null : daysAgo(uploadedDaysAgo) },
   { id: 'd4', label: 'Directors ID Documents', status, uploaded_at: uploadedDaysAgo == null ? null : daysAgo(uploadedDaysAgo) },
 ];
+
+// ─── Countries ───────────────────────────────────────────────────────────────
+
+/**
+ * The countries AfriDeal trades in (spec 0009). Buyers, suppliers, runners and
+ * couriers can be in any of them, and adding one is a row here (or in the
+ * admin, later), never a code change. Lesotho is in from the start so the
+ * any-to-any paths are exercised by verify and e2e, not just Botswana's.
+ */
+/*
+ * Spec 0009, answer 2: each country lists its own payment methods. One with a
+ * `method` is taken once that method is live on the platform (a card through
+ * Stripe or DPO at launch); one without is shown as "coming soon".
+ */
+const CARD = { name: 'Visa / Mastercard', blurb: 'Pay by card through our secure gateway.', method: 'DPO_PAY' };
+const PAYMENT_METHODS = {
+  BW: [
+    CARD,
+    { name: 'Bank transfer', blurb: 'Pay from your bank; we start sourcing once it reaches us, usually 1 to 3 working days.', method: 'EFT' },
+    { name: 'Orange Money', blurb: 'Mobile money from a Botswana number.', method: 'ORANGE_MONEY' },
+  ],
+  ZA: [CARD, { name: 'Instant EFT', blurb: 'Pay straight from a South African bank account.' }, { name: 'SnapScan', blurb: 'Scan and pay from the SnapScan app.' }],
+  LS: [CARD, { name: 'M-Pesa', blurb: 'Mobile money from a Vodacom Lesotho number.' }, { name: 'EcoCash', blurb: 'Mobile money from an Econet number.' }],
+  SZ: [CARD, { name: 'MTN MoMo', blurb: 'Mobile money from an MTN Eswatini number.' }],
+};
+
+const countries = [
+  [
+    'BW', 'Botswana', 'BWP',
+    ['Gaborone', 'Francistown', 'Molepolole', 'Maun', 'Serowe', 'Selebi-Phikwe', 'Kanye', 'Lobatse', 'Palapye', 'Mahalapye'],
+  ],
+  ['ZA', 'South Africa', 'ZAR', ['Johannesburg', 'Pretoria', 'Cape Town', 'Durban', 'Polokwane', 'Mahikeng', 'Bloemfontein']],
+  ['LS', 'Lesotho', 'LSL', ['Maseru', 'Teyateyaneng', 'Maputsoe', 'Mafeteng', 'Hlotse', "Mohale's Hoek"]],
+  // A launch country since 2026-10-22 (spec 0009, answer 4).
+  ['SZ', 'Eswatini', 'SZL', ['Mbabane', 'Manzini', 'Matsapha', 'Nhlangano', 'Siteki']],
+].map(([code, name, currency, towns], i) => ({
+  id: code, code, name, currency, towns,
+  // Spec 0009, answer 1: pula in Botswana, rand everywhere else we trade.
+  buyer_currency: code === 'BW' ? 'BWP' : 'ZAR',
+  payment_methods: PAYMENT_METHODS[code],
+  active: true, sort_order: i + 1,
+}));
 
 const suppliers = [
   {
@@ -199,6 +271,32 @@ const suppliers = [
     total_gmv: 88_400, products_count: 2, orders_count: 41,
     verification_docs: docTemplate('APPROVED', 515), categories: ['c6'],
   },
+  {
+    /*
+     * AfriDeal's own sourcing for its hair range: AfriDeal buys the wigs in
+     * South Africa and is the merchant of record. Stands in for the supplier the
+     * product owner has not yet named (spec 0007, open question 5); no ratings
+     * or volumes are claimed for it.
+     */
+    id: 's009', name: 'AfriDeal Hair Sourcing', legal_name: 'AfriDeal (supplier to be confirmed)', initials: 'AH',
+    country: 'ZA', city: 'South Africa', status: 'VERIFIED',
+    contact_email: 'hair@afrideal.co.bw', contact_phone: '',
+    registration_no: '', joined_at: daysAgo(1),
+    rating: 0, fulfilment_rate: 0, reliability_score: 60, avg_fulfilment_days: 5,
+    total_gmv: 0, products_count: 5, orders_count: 0,
+    verification_docs: docTemplate('APPROVED', 1), categories: ['c1'],
+  },
+  {
+    // The first supplier outside Botswana and South Africa (spec 0009): a
+    // Maseru workwear maker, quoting in maloti.
+    id: 's010', name: 'Maluti Workwear', legal_name: 'Maluti Workwear (Pty) Ltd', initials: 'MW',
+    country: 'LS', city: 'Maseru', status: 'VERIFIED',
+    contact_email: 'orders@malutiworkwear.co.ls', contact_phone: '+266 2231 4470',
+    registration_no: 'LS-2018/04417', joined_at: daysAgo(60),
+    rating: 4.3, fulfilment_rate: 90, reliability_score: 80, avg_fulfilment_days: 5,
+    total_gmv: 0, products_count: 1, orders_count: 0,
+    verification_docs: docTemplate('APPROVED', 58), categories: ['c6'],
+  },
 ];
 
 // ─── Products and supplier offers ────────────────────────────────────────────
@@ -220,17 +318,6 @@ const productSpecs = [
     variants: [['Single tub', 'SHB-500-1', 0], ['Case of 6', 'SHB-500-6', 5.4], ['Case of 12', 'SHB-500-12', 10.2]],
     offers: [['s001', 82, 340, 2, 6], ['s002', 76, 180, 4, 12], ['s005', 91, 0, 6, 6]],
     rating: 4.8, review_count: 214, featured: true,
-  },
-  {
-    id: 'p002', name: 'Premium Braiding Hair Bundle', category_id: 'c1', emoji: '💇🏾‍♀️',
-    swatch: ['#2a2a2a', '#111111'],
-    short_description: 'Heat-resistant kanekalon, 26 inch, salon-grade tension.',
-    description:
-      'The braiding bundle most requested by salons on the platform. Kanekalon fibre rated to 180°C, pre-stretched, with a consistent tension that holds a knotless braid without slipping. Ships in sealed retail packs of five.',
-    specs: [['Length', '26 inch'], ['Fibre', 'Kanekalon'], ['Heat rating', '180°C'], ['Pack', '5 bundles']],
-    variants: [['Natural Black 1B', 'BRD-26-1B', 0], ['Dark Brown 2', 'BRD-26-2', 0], ['Burgundy 99J', 'BRD-26-99J', 4.5], ['Honey Blonde 27', 'BRD-26-27', 6.0]],
-    offers: [['s001', 58, 620, 1, 5], ['s002', 54, 410, 3, 10]],
-    rating: 4.6, review_count: 388, featured: true,
   },
   {
     id: 'p003', name: 'Argan Repair Serum 100ml', category_id: 'c7', emoji: '💧',
@@ -342,63 +429,134 @@ const productSpecs = [
     offers: [['s002', 142, 380, 3, 10], ['s005', 154, 90, 6, 20]],
     rating: 4.4, review_count: 218, featured: true,
   },
+];
 
+/**
+ * AfriDeal's own wigs (spec 0007), from the product owner's WhatsApp messages of
+ * 2026-10-19/20, sold under the AfriDeal brand. Each length has its own supplier
+ * price in rand, so each length is a variant with its own cost and its own
+ * ladder rather than an uplift over a base price.
+ *
+ * Names follow her AfriDeal product boards (the second photo of each product,
+ * in public/products as <id>-1.jpg; the model shot is <id>-0.jpg). Still to
+ * confirm with her, so kept honest here: no hair grade, density or cap claims
+ * in the specs beyond what the boards print; the supplier is unnamed, so the
+ * offers sit with AfriDeal's own sourcing record (s009); stock and lead time
+ * are placeholders; no ratings or reviews exist yet. Product 1's lengths come
+ * from her price list CSV, sent with its photo.
+ */
+const HAIR_SOURCING = { supplier_id: 's009', stock: 50, fulfilment_days: 5, moq: 1 };
+
+const afridealWigSpecs = [
   {
-    id: 'p013', name: 'Brazilian Body Wave Bundle — 20 inch', category_id: 'c1', emoji: '💇🏾‍♀️',
-    swatch: ['#3a2418', '#111111'],
-    short_description: '100% unprocessed human hair, double machine weft, 100g.',
+    id: 'p018', name: 'Sleek Straight Lace Bob Wig', emoji: '💇🏾‍♀️', swatch: ['#1c1714', '#0a0a0a'],
+    short_description: 'A sleek, straight bob on a lace front. 8 to 16 inch.',
     description:
-      'The bundle salons in Gaborone reorder most often. Unprocessed human hair on a double machine weft that holds through repeated installs, with a loose body wave that keeps its pattern after washing. Sold at 100g a bundle; a full head is normally three bundles, and most salons buy them three at a time.',
-    specs: [['Length', '20 inch'], ['Weight', '100g per bundle'], ['Texture', 'Body wave'], ['Weft', 'Double machine'], ['Grade', 'Unprocessed human hair']],
-    variants: [['Natural Black 1B', 'BBW-20-1B', 0], ['Off Black 2', 'BBW-20-2', 0], ['Ombre 1B/27', 'BBW-20-OMB', 9.0]],
-    offers: [['s001', 520, 180, 2, 3], ['s002', 545, 240, 4, 3]],
-    rating: 4.8, review_count: 412, featured: true,
+      'A sleek, straight bob on a lace front, cut to sit at the jaw with a natural parting. Sold by length from 8 to 16 inches. Mix lengths and styles from the AfriDeal hair range and they count together towards the multi-buy and bulk prices.',
+    style: 'Straight bob', front: 'Lace front',
+    // Her board shows the crown from above in place of a back view.
+    views: ['Front view', 'Side view', 'Top view'],
+    lengths: [['8 inch', 280], ['10 inch', 450], ['12 inch', 630], ['14 inch', 830], ['16 inch', 1060]],
   },
   {
-    id: 'p014', name: 'HD Lace Frontal 13×4 — 18 inch', category_id: 'c1', emoji: '✨',
-    swatch: ['#2a1c14', '#0d0d0d'],
-    short_description: 'Swiss HD lace, pre-plucked hairline, bleached knots.',
+    id: 'p019', name: 'Straight Bob Wig with Fringe', emoji: '👩🏾', swatch: ['#211812', '#0d0b0a'],
+    short_description: 'A straight bob with a full fringe. 8 to 12 inch.',
     description:
-      'A 13×4 frontal in Swiss HD lace that melts against a range of complexions rather than only the lightest. Pre-plucked hairline with bleached knots, so the install does not start with an hour of preparation. This is the line that decides whether a salon can charge for a frontal install at all, which is why it is stocked deeper than its volume alone would justify.',
-    specs: [['Size', '13×4'], ['Length', '18 inch'], ['Lace', 'Swiss HD'], ['Density', '150%'], ['Knots', 'Bleached, pre-plucked']],
-    variants: [['Natural Black 1B', 'HDF-134-18-1B', 0], ['Straight', 'HDF-134-18-ST', 0], ['Body Wave', 'HDF-134-18-BW', 6.0]],
-    offers: [['s002', 680, 95, 3, 1], ['s001', 715, 60, 2, 1]],
-    rating: 4.7, review_count: 236, featured: true,
+      'A straight bob with a full fringe, finished at the jaw. Sold by length from 8 to 12 inches. Mix lengths and styles from the AfriDeal hair range and they count together towards the multi-buy and bulk prices.',
+    style: 'Straight bob, fringe', front: null,
+    // Her board for this one is a single side-on photograph.
+    views: ['Side view'],
+    lengths: [['8 inch', 200], ['10 inch', 250], ['12 inch', 300]],
   },
   {
-    id: 'p015', name: 'Bone Straight Weave Bundle — 24 inch', category_id: 'c1', emoji: '💫',
-    swatch: ['#1f1a17', '#0a0a0a'],
-    short_description: 'Silk-press straight, no chemical processing, 100g.',
+    id: 'p020', name: 'Long Straight Lace Wig', emoji: '✨', swatch: ['#18120f', '#060606'],
+    short_description: 'Long, sleek and straight on a lace front. 20 to 32 inch.',
     description:
-      'Straight from the weft without a chemical relaxer, so it takes heat without the frizz that gives a processed bundle away by the second wash. Twenty-four inches is the length most requested for a sew-in in the region. Sold per bundle at 100g.',
-    specs: [['Length', '24 inch'], ['Weight', '100g per bundle'], ['Texture', 'Bone straight'], ['Weft', 'Double machine'], ['Heat rating', '200°C']],
-    variants: [['Natural Black 1B', 'BST-24-1B', 0], ['Dark Brown 2', 'BST-24-2', 0], ['Honey Blonde 27', 'BST-24-27', 11.0]],
-    offers: [['s001', 465, 210, 2, 3], ['s002', 488, 150, 4, 3]],
-    rating: 4.6, review_count: 318, featured: true,
+      'Long, sleek and straight on a lace front, with a middle parting. Sold by length from 20 to 32 inches. Mix lengths and styles from the AfriDeal hair range and they count together towards the multi-buy and bulk prices.',
+    style: 'Long straight', front: 'Lace front',
+    lengths: [['20 inch', 1000], ['22 inch', 1100], ['24 inch', 1300], ['26 inch', 1450], ['28 inch', 1750], ['30 inch', 1850], ['32 inch', 2100]],
   },
   {
-    id: 'p016', name: 'Passion Twist Crochet Hair — 18 inch', category_id: 'c1', emoji: '🌀',
-    swatch: ['#4a3123', '#1a1a1a'],
-    short_description: 'Pre-twisted synthetic, 8 packs to a full head.',
+    // Product 4. Her board: "13*4 Waterwave hair 200% density".
+    id: 'p021', name: 'Water Wave Lace Wig', emoji: '👩🏾‍🦱', swatch: ['#231a14', '#0b0908'],
+    short_description: 'Full, defined water-wave curls on a lace front. 20 to 32 inch.',
     description:
-      'Pre-twisted crochet hair that turns a six-hour protective style into a two-hour one, which is the whole reason a salon stocks it. Water-wave synthetic fibre, springy rather than limp, and it holds the twist without unravelling at the ends. Eight packs does a full head on most heads.',
-    specs: [['Length', '18 inch'], ['Fibre', 'Low-temperature synthetic'], ['Strands', '18 per pack'], ['Full head', '≈8 packs'], ['Style', 'Pre-twisted']],
-    variants: [['Natural Black 1B', 'PTC-18-1B', 0], ['Dark Brown 4', 'PTC-18-4', 0], ['Burgundy 99J', 'PTC-18-99J', 5.0], ['Honey Blonde 27', 'PTC-18-27', 5.0]],
-    offers: [['s001', 92, 860, 1, 8], ['s002', 88, 620, 3, 8]],
-    rating: 4.5, review_count: 527, featured: true,
+      'Full, defined water-wave curls with plenty of volume, on a lace front. Sold by length from 20 to 32 inches. Mix lengths and styles from the AfriDeal hair range and they count together towards the multi-buy and bulk prices.',
+    style: 'Water wave', front: 'Lace front',
+    lengths: [['20 inch', 950], ['22 inch', 1050], ['24 inch', 1180], ['26 inch', 1400], ['28 inch', 1600], ['30 inch', 1800], ['32 inch', 2000]],
   },
   {
-    id: 'p017', name: 'Glueless Bob Wig — 12 inch', category_id: 'c1', emoji: '👩🏾‍🦱',
-    swatch: ['#241a13', '#111111'],
-    short_description: 'Adjustable band, no glue, wear-and-go in under a minute.',
+    // Product 5. Her board: "13*4 Pixie Curl 200% density".
+    id: 'p022', name: 'Pixie Curl Lace Wig', emoji: '🌀', swatch: ['#2a1f17', '#0e0b09'],
+    short_description: 'Natural, voluminous pixie curls on a lace front. 20 to 24 inch.',
     description:
-      'A glueless unit on an adjustable elastic band with pre-installed combs, so it goes on without adhesive and comes off at the end of the day. The bob length has moved from a seasonal line to a standing one over the last two years, and it sells to customers who have never bought a wig before as much as to regulars.',
-    specs: [['Length', '12 inch'], ['Cap', 'Glueless, adjustable band'], ['Density', '180%'], ['Lace', '4×4 closure'], ['Fitting', 'Pre-installed combs']],
-    variants: [['Natural Black 1B', 'GBW-12-1B', 0], ['Dark Brown 2', 'GBW-12-2', 0], ['Auburn 30', 'GBW-12-30', 8.0]],
-    offers: [['s002', 742, 74, 3, 1], ['s001', 780, 45, 2, 1]],
-    rating: 4.6, review_count: 189, featured: true,
+      'Natural, voluminous pixie curls on a lace front. Sold by length from 20 to 24 inches. Mix lengths and styles from the AfriDeal hair range and they count together towards the multi-buy and bulk prices.',
+    style: 'Pixie curl', front: 'Lace front',
+    lengths: [['20 inch', 950], ['22 inch', 1050], ['24 inch', 1180]],
+  },
+  {
+    // Product 8, sent 2026-10-20 23:55. There is no Product 6 in the chat.
+    id: 'p023', name: 'Kinky Straight Lace Wig', emoji: '🖤', swatch: ['#1a1410', '#070605'],
+    short_description: 'Long, full kinky-straight hair on a lace front. 20 to 32 inch.',
+    description:
+      'Long, full hair with a natural kinky-straight texture, on a lace front with a middle parting. Sold by length from 20 to 32 inches. Mix lengths and styles from the AfriDeal hair range and they count together towards the multi-buy and bulk prices.',
+    style: 'Kinky straight', front: 'Lace front',
+    lengths: [['20 inch', 1050], ['22 inch', 1150], ['24 inch', 1250], ['26 inch', 1450], ['28 inch', 1600], ['30 inch', 1850], ['32 inch', 2000]],
+  },
+  {
+    // Product 9, sent 2026-10-21 12:55. Her board: "13*4 Jerry Curl 200%".
+    id: 'p024', name: 'Jerry Curl Lace Wig', emoji: '➰', swatch: ['#241a15', '#0a0807'],
+    short_description: 'Long, tight jerry curls on a lace front. 20 to 32 inch.',
+    description:
+      'Long, tight jerry curls with full volume from root to tip, on a lace front. Sold by length from 20 to 32 inches. Mix lengths and styles from the AfriDeal hair range and they count together towards the multi-buy and bulk prices.',
+    style: 'Jerry curl', front: 'Lace front',
+    lengths: [['20 inch', 950], ['22 inch', 1050], ['24 inch', 1180], ['26 inch', 1400], ['28 inch', 1600], ['30 inch', 1800], ['32 inch', 2000]],
   },
 ];
+
+/*
+ * What each wig photo shows. Slot 0 is her styled shot; slots 1 to 3 are the
+ * views cut out of her product board (never the whole board, which carries
+ * her marketing copy). The crops are made by hand and dropped into
+ * public/products; the seed only names them.
+ */
+const WIG_PHOTO_CAPTIONS = new Map(
+  afridealWigSpecs.map((wig) => [wig.id, ['Styled', ...(wig.views ?? ['Front view', 'Side view', 'Back view'])]]),
+);
+
+for (const wig of afridealWigSpecs) {
+  const code = wig.id.toUpperCase();
+  productSpecs.push({
+    id: wig.id,
+    name: wig.name,
+    category_id: 'c1',
+    emoji: wig.emoji,
+    swatch: wig.swatch,
+    short_description: wig.short_description,
+    description: wig.description,
+    specs: [
+      ['Lengths', `${wig.lengths[0][0]} to ${wig.lengths[wig.lengths.length - 1][0]}`],
+      ['Style', wig.style],
+      ...(wig.front ? [['Front', wig.front]] : []),
+      ['Sold by', 'Length, one wig per unit'],
+      ['Brand', 'AfriDeal'],
+    ],
+    variants: wig.lengths.map(([label]) => [label, `${code}-${label.replace(/\D/g, '')}`, 0]),
+    cost_currency: 'ZAR',
+    variant_costs: wig.lengths.map(([, cost]) => cost),
+    offers: [[
+      HAIR_SOURCING.supplier_id,
+      Math.min(...wig.lengths.map(([, cost]) => cost)),
+      HAIR_SOURCING.stock,
+      HAIR_SOURCING.fulfilment_days,
+      HAIR_SOURCING.moq,
+    ]],
+    rating: 0, review_count: 0, featured: true,
+  });
+}
+
+/** Products whose only supplier is AfriDeal's own sourcing, by design. */
+const SINGLE_SOURCE = new Set(afridealWigSpecs.map((wig) => wig.id));
 
 const products = [];
 const supplierOffers = [];
@@ -406,8 +564,21 @@ let offerSeq = 1;
 
 for (const spec of productSpecs) {
   const rule = ruleFor(spec.category_id);
+  const currency = spec.cost_currency ?? 'BWP';
   const highestCost = Math.max(...spec.offers.map(([, cost]) => cost));
-  const basePrice = calculatePrice(highestCost, rule);
+  const variantIds = spec.variants.map((_, i) => `${spec.id}v${i + 1}`);
+
+  /*
+   * A product sold by length prices every variant from its own landed cost.
+   * Everything else prices the base from the dearest supplier we might route to
+   * and lifts each variant by its uplift.
+   */
+  const variantPrices = spec.variant_costs
+    ? spec.variant_costs.map((cost) => calculatePrice(landedFor(cost, currency, spec.category_id), rule))
+    : null;
+  const basePrice = variantPrices
+    ? Math.min(...variantPrices)
+    : calculatePrice(landedFor(highestCost, currency, spec.category_id), rule);
 
   products.push({
     id: spec.id,
@@ -420,17 +591,18 @@ for (const spec of productSpecs) {
     description: spec.description,
     specs: spec.specs.map(([label, value]) => ({ label, value })),
     variants: spec.variants.map(([label, sku, uplift], i) => ({
-      id: `${spec.id}v${i + 1}`,
+      id: variantIds[i],
       label,
       sku,
-      price: Math.ceil(basePrice * (1 + uplift / 100)),
+      price: variantPrices ? variantPrices[i] : Math.ceil(basePrice * (1 + uplift / 100)),
     })),
     price: basePrice,
     status: 'ACTIVE',
     rating: spec.rating,
     review_count: spec.review_count,
     featured: spec.featured,
-    created_at: daysAgo(120 - productSpecs.indexOf(spec) * 6),
+    // Never in the future: a band is only live from its product's created_at.
+    created_at: daysAgo(Math.max(1, 120 - productSpecs.indexOf(spec) * 6)),
   });
 
   for (const [supplier_id, supplier_cost, stock, fulfilment_days, moq] of spec.offers) {
@@ -439,6 +611,15 @@ for (const spec of productSpecs) {
       product_id: spec.id,
       supplier_id,
       supplier_cost,
+      ...(spec.cost_currency ? { cost_currency: spec.cost_currency } : {}),
+      ...(spec.variant_costs
+        ? {
+            variant_costs: spec.variant_costs.map((cost, i) => ({
+              variant_id: variantIds[i],
+              cost,
+            })),
+          }
+        : {}),
       stock,
       fulfilment_days,
       moq,
@@ -447,6 +628,24 @@ for (const spec of productSpecs) {
     });
   }
 }
+
+/*
+ * Maluti Workwear's offer on the work overall, in maloti (spec 0009). Below the
+ * dearest existing offer, so the published price (set from the worst routable
+ * cost) does not move; its date is fixed so the seeded random stream does not.
+ */
+supplierOffers.push({
+  id: `so${String(offerSeq++).padStart(3, '0')}`,
+  product_id: 'p011',
+  supplier_id: 's010',
+  supplier_cost: 180,
+  cost_currency: 'LSL',
+  stock: 160,
+  fulfilment_days: 5,
+  moq: 10,
+  last_updated: daysAgo(3),
+  active: true,
+});
 
 // ─── Supplier selection (mirrors lib/supplier-selection.ts) ──────────────────
 
@@ -498,21 +697,68 @@ const users = [
 
 // ─── Runners ─────────────────────────────────────────────────────────────────
 
+/*
+ * Runners work where they are (spec 0009): each has a country and the towns
+ * they take jobs in. A job alerts the online runners serving its pickup town.
+ */
 const runners = [
   {
     id: 'r001', user_id: 'u005', name: 'Kagiso Sithole', initials: 'KS', phone: '+267 72 118 449',
     vehicle: 'Toyota Hilux single cab', plate: 'B 481 AQR', city: 'Gaborone',
+    country: 'BW', towns: ['Gaborone', 'Mogoditshane', 'Tlokweng'],
     online: true, rating: 4.9, deliveries_completed: 312, earnings_mtd: 4_180, earnings_total: 61_420,
   },
   {
     id: 'r002', user_id: null, name: 'Onalenna Phiri', initials: 'OP', phone: '+267 71 903 226',
     vehicle: 'Nissan NP200', plate: 'B 772 BKM', city: 'Gaborone',
+    country: 'BW', towns: ['Gaborone', 'Lobatse', 'Kanye'],
     online: false, rating: 4.7, deliveries_completed: 198, earnings_mtd: 2_640, earnings_total: 38_900,
   },
   {
     id: 'r003', user_id: null, name: 'Lesedi Kgosi', initials: 'LK', phone: '+267 74 552 018',
     vehicle: 'Motorcycle — Honda CG125', plate: 'B 219 CDN', city: 'Francistown',
+    country: 'BW', towns: ['Francistown'],
     online: true, rating: 4.6, deliveries_completed: 141, earnings_mtd: 1_980, earnings_total: 22_150,
+  },
+  {
+    // The first runner outside Botswana (spec 0009).
+    id: 'r004', user_id: null, name: 'Palesa Mokoena', initials: 'PM', phone: '+266 5884 2210',
+    vehicle: 'Toyota Quantum', plate: 'A 4471', city: 'Maseru',
+    country: 'LS', towns: ['Maseru', 'Teyateyaneng', 'Maputsoe'],
+    online: false, rating: 4.8, deliveries_completed: 37, earnings_mtd: 620, earnings_total: 5_410,
+  },
+];
+
+/*
+ * Listed courier and clearance partners (spec 0008, generalised by spec 0009):
+ * each lists the routes it serves with a fee rule per route. Gorosa's two
+ * routes are from the product owner's messages of 2026-10-20/21: cut-off P2,000,
+ * Gaborone P250 or 16%, Francistown P300 or 21%, P200 for launch to Gaborone
+ * (she gave no end date), P130 of the Gaborone fee owed to Gorosa. Kedi's is
+ * the second courier she named; it joins once she sends its routes and fees.
+ */
+const couriers = [
+  {
+    id: 'cr001', name: 'Gorosa Express Logistics', role: 'CROSS_BORDER_CLEARANCE', sort_order: 1, active: true,
+    trips_per_week: 2, insured: true, phone: '+27 73 932 7292',
+    depot: { country: 'ZA', city: 'Johannesburg', address: '2A Kikuyu Road, Sunninghill Self-Storage, Sunninghill' },
+    consignee_format: '{first} {last} Gorosa',
+    // Paid to Gorosa directly, never through AfriDeal (spec 0008, answer of 2026-10-22).
+    payment_options: ['ON_ARRIVAL'],
+    routes: [
+      {
+        from: { country: 'ZA' },
+        to: { country: 'BW', city: 'Gaborone' },
+        fee: { threshold: 2000, flat: 250, pct: 0.16, launch_flat: 200, launch_until: null },
+        payable: { flat: 130, pct: null },
+      },
+      {
+        from: { country: 'ZA' },
+        to: { country: 'BW', city: 'Francistown' },
+        fee: { threshold: 2000, flat: 300, pct: 0.21, launch_flat: null, launch_until: null },
+        payable: { flat: null, pct: null },
+      },
+    ],
   },
 ];
 
@@ -646,10 +892,10 @@ const orderSpecs = [
   ['DELIVERED', 'u007', 24, 'ORANGE_MONEY', 'Gaborone', 'Plot 220, Block 6, Broadhurst', [['p006', 2, 1]]],
   ['DELIVERED', 'u006', 19, 'PAYGATE', 'Gaborone', 'Plot 5412, Extension 12', [['p004', 0, 1], ['p005', 0, 1]]],
   ['DELIVERED', 'u007', 15, 'DPO_PAY', 'Francistown', 'Plot 1180, Tati Siding', [['p008', 1, 4], ['p010', 0, 2]]],
-  ['IN_TRANSIT', 'u006', 6, 'ORANGE_MONEY', 'Gaborone', 'Plot 5412, Extension 12', [['p002', 0, 5]]],
+  ['IN_TRANSIT', 'u006', 6, 'ORANGE_MONEY', 'Gaborone', 'Plot 5412, Extension 12', [['p001', 0, 5]]],
   ['IN_TRANSIT', 'u007', 5, 'DPO_PAY', 'Gaborone', 'Plot 220, Block 6, Broadhurst', [['p007', 0, 8], ['p006', 0, 12]]],
   ['IN_TRANSIT', 'u006', 4, 'PAYGATE', 'Lobatse', 'Plot 88, Peleng Ward', [['p012', 1, 3], ['p011', 0, 2]]],
-  ['PROCESSING', 'u007', 3, 'DPO_PAY', 'Gaborone', 'Plot 220, Block 6, Broadhurst', [['p001', 2, 1], ['p002', 3, 2], ['p003', 1, 1]]],
+  ['PROCESSING', 'u007', 3, 'DPO_PAY', 'Gaborone', 'Plot 220, Block 6, Broadhurst', [['p001', 2, 1], ['p003', 1, 1]]],
   ['PROCESSING', 'u006', 2, 'ORANGE_MONEY', 'Gaborone', 'Plot 5412, Extension 12', [['p009', 0, 2]]],
   ['PROCESSING', 'u007', 2, 'PAYGATE', 'Maun', 'Plot 3301, Boseja Ward', [['p008', 0, 6]]],
   ['AWAITING_PAYMENT', 'u006', 1, 'DPO_PAY', 'Gaborone', 'Plot 5412, Extension 12', [['p005', 1, 1]]],
@@ -858,8 +1104,12 @@ orderSpecs.forEach((spec, index) => {
         status: delivered ? 'DELIVERED' : 'IN_TRANSIT',
         pickup_name: supplier.name,
         pickup_address: `${supplier.city} depot`,
+        pickup_country: supplier.country,
+        pickup_town: supplier.city,
         dropoff_name: customer.name,
         dropoff_address: `${address}, ${city}`,
+        dropoff_country: DEFAULT_DELIVERY_COUNTRY,
+        dropoff_town: city,
         distance_km: Math.round((4 + rand() * 26) * 10) / 10,
         payout: Math.round(35 + rand() * 55),
         created_at: placedAt,
@@ -1023,12 +1273,14 @@ const supplierUsers = users
 // ─── §8/§26 brands ───────────────────────────────────────────────────────────
 
 const BRAND_BY_PRODUCT = {
-  p001: 'b001', p002: 'b001', p003: 'b001',
+  p001: 'b001', p003: 'b001',
   p004: 'b002', p005: 'b002',
   p006: 'b003', p007: 'b003',
   p008: 'b004', p009: 'b004',
   p010: 'b005',
   p011: 'b006', p012: 'b006',
+  // The product owner's own hair range, sold as AfriDeal (2026-10-20).
+  ...Object.fromEntries(afridealWigSpecs.map((wig) => [wig.id, 'b007'])),
 };
 
 const brands = [
@@ -1038,12 +1290,38 @@ const brands = [
   ['b004', 'Tsholofelo Agri'],
   ['b005', 'Setlhoa Office'],
   ['b006', 'Bokamoso Apparel'],
+  ['b007', 'AfriDeal'],
 ].map(([id, name]) => ({ id, name, slug: name.toLowerCase().replace(/\s+/g, '-') }));
+
+const SUPPLIER_OWNED_PRODUCTS = {
+  p003: { supplier_id: 's002', moq: 6 },
+  p005: { supplier_id: 's003', moq: 2 },
+  p007: { supplier_id: 's004', moq: 10 },
+  p009: { supplier_id: 's005', moq: 5 },
+  p010: { supplier_id: 's005', moq: 5 },
+  p011: { supplier_id: 's002', moq: 10 },
+};
 
 for (const product of products) {
   product.brand_id = BRAND_BY_PRODUCT[product.id] ?? null;
   product.product_type = 'PHYSICAL';
-  product.country_of_origin = product.category_id === 'c3' || product.category_id === 'c4' ? 'BW' : 'ZA';
+  product.country_of_origin = originFor(product.category_id);
+
+  const supplierSpec = SUPPLIER_OWNED_PRODUCTS[product.id];
+  if (supplierSpec) {
+    const ownerSupplier = supplierById.get(supplierSpec.supplier_id);
+    product.owner_type = 'SUPPLIER';
+    product.supplier_id = supplierSpec.supplier_id;
+    product.supplier_name = ownerSupplier?.name ?? null;
+    product.moq = supplierSpec.moq;
+    product.commercial_model = 'SUPPLIER_LED';
+  } else {
+    product.owner_type = 'AFRIDEAL';
+    product.supplier_id = null;
+    product.supplier_name = null;
+    product.moq = 1;
+    product.commercial_model = 'AFRIDEAL_MANAGED';
+  }
 }
 
 // ─── §10 product images ──────────────────────────────────────────────────────
@@ -1092,13 +1370,24 @@ const photosOnDisk = await (async () => {
   }
 })();
 
-const productImages = products.flatMap((product, i) =>
-  IMAGE_ROLES.map(([role, angle], j) => {
+/*
+ * A product with any photograph on disk shows only its photographs: the
+ * product owner's wigs come with two (the model and a front / side / back
+ * board), and padding them with gradients would put fake views beside real
+ * ones. A product with none keeps the four gradient slots.
+ */
+let imageSeq = 0;
+const productImages = products.flatMap((product) => {
+  const photoSlots = IMAGE_ROLES.filter((_, j) => photosOnDisk.has(`${product.id}-${j}.jpg`));
+  const slots = photoSlots.length > 0 ? photoSlots : IMAGE_ROLES;
+
+  return slots.map(([role, angle]) => {
+    const j = IMAGE_ROLES.findIndex(([r]) => r === role);
     const filename = `${product.id}-${j}.jpg`;
     const hasPhoto = photosOnDisk.has(filename);
 
     return {
-      id: `img${String(i * IMAGE_ROLES.length + j + 1).padStart(3, '0')}`,
+      id: `img${String(++imageSeq).padStart(3, '0')}`,
       product_id: product.id,
       variant_id: null,
       // A real photograph if `npm run images` has fetched one for this slot,
@@ -1109,6 +1398,9 @@ const productImages = products.flatMap((product, i) =>
         ? `/products/${filename}`
         : `swatch:${shiftHex(product.swatch[0], j * 0.14)},${shiftHex(product.swatch[1], j * 0.1)},${angle}`,
       image_type: role,
+      ...(hasPhoto && WIG_PHOTO_CAPTIONS.get(product.id)?.[j]
+        ? { caption: WIG_PHOTO_CAPTIONS.get(product.id)[j] }
+        : {}),
       sort_order: j,
       // Stays AFRIDEAL either way: `source` is the party that supplied the
       // asset, and the platform did. Per-file provenance for the fetched
@@ -1117,8 +1409,8 @@ const productImages = products.flatMap((product, i) =>
       permission_status: 'CLEARED',
       created_at: product.created_at,
     };
-  }),
-);
+  });
+});
 
 
 // ─── §14–§20 pricing ladder ──────────────────────────────────────────────────
@@ -1151,37 +1443,26 @@ const PRICED_CUSTOMER_TYPES = ['GUEST', 'RETAIL', 'BUSINESS', 'RESELLER', 'INSTI
  * to its floor, so each rung is given the floor its own arithmetic can actually
  * clear against the worst routable supplier cost.
  */
-const TIER_PLAN = PRICED_CUSTOMER_TYPES.flatMap((customer_type) => [
-  { customer_type, tier: 'RETAIL', min: 1, max: 4, markup: RETAIL_MARKUP_PCT, floor: 20 },
-  { customer_type, tier: 'BULK', min: 5, max: 19, markup: BULK_MARKUP_PCT, floor: 15 },
-  {
-    customer_type,
-    tier: 'WHOLESALE',
-    min: 20,
-    max: 49,
-    markup: WHOLESALE_MARKUP_PCT,
-    floor: 12,
-  },
-  {
-    customer_type,
-    tier: 'WHOLESALE_PLUS',
-    min: 50,
-    max: QUOTATION_THRESHOLD - 1,
-    markup: WHOLESALE_PLUS_MARKUP_PCT,
-    floor: 8,
-  },
-]);
+const tierPlanFor = (categoryId) =>
+  PRICED_CUSTOMER_TYPES.flatMap((customer_type) =>
+    ladderFor(categoryId).map((rung) => ({
+      customer_type,
+      tier: rung.tier,
+      min: rung.minimum_quantity,
+      max: rung.maximum_quantity,
+      markup: pct(rung),
+      floor: rung.floor,
+    })),
+  );
 
 /**
  * Margin floors.
  *
- * With delivery billed separately and one markup across the catalogue, the
- * realised margin no longer depends on how cheap the product is: a 60% markup
- * clears about 35% of the selling price at any cost, 46% clears about 29%, 32%
- * clears about 22% and 22% clears about 15%. Each sits clear of its own floor,
- * so no category needs an exception any more —
- * the Electronics carve-out this table used to hold existed only because a flat
- * BWP 15 logistics contribution ate an inexpensive line alive.
+ * With delivery billed separately and the markup applied to the landed cost,
+ * the realised margin does not depend on how cheap the product is: after the
+ * card fee, +50% keeps about 31% of the selling price (27% with the 4-unit
+ * multi-buy), +33% about 22%, +25% about 17.5% and +18% about 13%. Each sits
+ * clear of its own floor, so no category needs an exception.
  */
 const FLOOR_OVERRIDES = {};
 
@@ -1193,7 +1474,7 @@ for (const category of categories) {
   const base = ruleFor(category.id);
   const overrides = FLOOR_OVERRIDES[category.id];
 
-  for (const plan of TIER_PLAN) {
+  for (const plan of tierPlanFor(category.id)) {
     const key = `${category.id}|${plan.customer_type}|${plan.tier}`;
     if (seenRule.has(key)) continue;
     seenRule.add(key);
@@ -1226,7 +1507,7 @@ for (const category of categories) {
  */
 for (const category of categories) {
   const base = ruleFor(category.id);
-  const retailFloor = FLOOR_OVERRIDES[category.id]?.RETAIL ?? 20;
+  const retailFloor = FLOOR_OVERRIDES[category.id]?.RETAIL ?? ladderFor(category.id)[0].floor;
 
   for (const customerType of PRICED_CUSTOMER_TYPES) {
     marginRules.push({
@@ -1236,7 +1517,7 @@ for (const category of categories) {
       customer_type: customerType,
       pricing_tier: 'PROMOTIONAL',
       margin_type: 'PERCENTAGE_MARKUP',
-      margin_value: Math.round(RETAIL_MARKUP_PCT * 0.8 * 10) / 10,
+      margin_value: Math.round(retailMarkupPct(category.id) * 0.8 * 10) / 10,
       fixed_component: 0,
       logistics_cost: base.logistics_cost,
       gateway_rate: base.gateway_rate,
@@ -1247,36 +1528,61 @@ for (const category of categories) {
   }
 }
 
+/**
+ * The landed cost, in thebe, of the dearest offer this product (or one of its
+ * lengths) might be routed to, so the published figure holds whichever supplier
+ * ends up filling the order.
+ */
+function worstLanded(product, variantId = null) {
+  return Math.max(
+    ...supplierOffers
+      .filter((offer) => offer.product_id === product.id)
+      .map((offer) => {
+        const perVariant = variantId
+          ? offer.variant_costs?.find((entry) => entry.variant_id === variantId)?.cost
+          : undefined;
+        return landedFor(perVariant ?? offer.supplier_cost, offer.cost_currency ?? 'BWP', product.category_id);
+      }),
+  );
+}
+
 // §14 — the customer-facing bands themselves.
 const customerPrices = [];
 
-for (const product of products) {
-  const costs = supplierOffers
-    .filter((offer) => offer.product_id === product.id)
-    .map((offer) => offer.supplier_cost);
-  // Priced off the most expensive supplier we might actually route to, so the
-  // published figure holds whichever of them ends up filling the order.
-  const worstCost = Math.max(...costs);
-
-  for (const plan of TIER_PLAN) {
-    const unitPrice = Math.ceil(worstCost * (1 + plan.markup / 100));
-
+function pushLadder(product, variantId, landedThebe) {
+  for (const plan of tierPlanFor(product.category_id)) {
     customerPrices.push({
       id: `cp${String(customerPrices.length + 1).padStart(4, '0')}`,
       product_id: product.id,
-      variant_id: null,
+      variant_id: variantId,
       supplier_offer_id: null,
       customer_type: plan.customer_type,
       pricing_tier: plan.tier,
       minimum_quantity: plan.min,
       maximum_quantity: plan.max,
-      unit_price: unitPrice,
+      unit_price: unitPrice(landedThebe, plan.markup / 100),
       currency: 'BWP',
       pricing_method: 'PERCENTAGE_MARKUP',
       effective_from: product.created_at,
       effective_to: null,
       status: 'ACTIVE',
     });
+  }
+}
+
+for (const product of products) {
+  // The product-level ladder. For a product sold by length its offer cost is
+  // the cheapest length, so this is the "from" ladder.
+  pushLadder(product, null, worstLanded(product));
+
+  // A ladder per length where the lengths cost different amounts (spec 0007).
+  const sold = supplierOffers.some(
+    (offer) => offer.product_id === product.id && offer.variant_costs?.length,
+  );
+  if (sold) {
+    for (const variant of product.variants) {
+      pushLadder(product, variant.id, worstLanded(product, variant.id));
+    }
   }
 }
 
@@ -1294,10 +1600,9 @@ for (const product of products) {
  * one. Moving every rung by the same percentage keeps the shape, keeps the
  * descent strictly monotonic, and keeps the argument.
  */
+// None on the hair range: it is the product owner's own stock, priced by her
+// ladder, and she has not asked for a deal on it.
 const PROMOTIONS = [
-  ['p016', 15, 3],
-  ['p002', 16, 3],
-  ['p013', 12, 5],
   ['p008', 14, 2],
   ['p012', 18, 6],
 ];
@@ -1306,14 +1611,14 @@ const PROMOTIONS = [
  * Promotional margin floor.
  *
  * A promotion is applied as one percentage across the whole ladder, so the
- * rung with the least room decides how deep it may go — and that is now
- * Wholesale+ at 22% over cost, not retail at 60%. The floor is therefore set to
- * the deepest rung's own floor rather than to half the retail one: anything
- * looser would publish a discounted wholesale band underneath the margin the
- * standing band was held to, which is a loss dressed as a promotion.
+ * rung with the least room decides how deep it may go — and that is
+ * Wholesale+ at 18% over landed cost, not retail at 50%. The floor is therefore
+ * set to the deepest rung's own floor rather than to half the retail one:
+ * anything looser would publish a discounted wholesale band underneath the
+ * margin the standing band was held to, which is a loss dressed as a promotion.
  *
  * The practical effect is that headline discounts are single-digit. That is the
- * honest consequence of publishing a 22% rung at all, and it is better than a
+ * honest consequence of publishing an 18% rung at all, and it is better than a
  * 15% banner the bottom of the ladder cannot pay for.
  */
 const PROMO_FLOOR_PCT = 8;
@@ -1323,9 +1628,8 @@ for (let [productId, discountPct, endsInDays] of PROMOTIONS) {
   if (!product) continue;
 
   const base = ruleFor(product.category_id);
-  const worstCost = Math.max(
-    ...supplierOffers.filter((o) => o.product_id === productId).map((o) => o.supplier_cost),
-  );
+  // Landed, in Pula: the floor has to cover customs too, whenever there is any.
+  const worstCost = worstLanded(product) / 100;
 
   const bands = customerPrices.filter(
     (band) => band.product_id === productId && band.status === 'ACTIVE',
@@ -1396,7 +1700,7 @@ for (let [productId, discountPct, endsInDays] of PROMOTIONS) {
 const RFQ_SPECS = [
   ['u007', 'BUSINESS', 'p012', 240, 300, 'Gaborone', 'QUOTED', 6, 'School intake order for a private group of three campuses. Delivery must land before the January term.'],
   ['u007', 'BUSINESS', 'p006', 800, null, 'Francistown', 'SOURCING', 3, 'Slab pour scheduled. Needs to be palletised and delivered to site, not to a depot.'],
-  ['u006', 'RETAIL', 'p002', 150, 60, 'Gaborone', 'SUBMITTED', 1, 'Opening a salon. Want a standing monthly order if the first one goes well.'],
+  ['u006', 'RETAIL', 'p001', 150, 80, 'Gaborone', 'SUBMITTED', 1, 'Opening a salon. Want a standing monthly order if the first one goes well.'],
 ];
 
 const rfqs = [];
@@ -1500,6 +1804,8 @@ const settings = [
 const files = {
   users,
   categories,
+  countries,
+  couriers,
   products,
   suppliers,
   'supplier-offers': supplierOffers,
@@ -1538,10 +1844,10 @@ const problems = [];
 
 for (const product of products) {
   const costs = supplierOffers.filter((o) => o.product_id === product.id).map((o) => o.supplier_cost);
-  const worst = Math.max(...costs);
-  if (product.price <= worst) problems.push(`${product.id} price ${product.price} is not above its highest supplier cost ${worst}`);
+  const worst = worstLanded(product) / 100;
+  if (product.price <= worst) problems.push(`${product.id} price ${product.price} is not above its landed cost ${worst}`);
   if (product.variants.length < 2) problems.push(`${product.id} has fewer than 2 variants`);
-  if (costs.length < 2) problems.push(`${product.id} has fewer than 2 supplier offers`);
+  if (costs.length < 2 && !SINGLE_SOURCE.has(product.id)) problems.push(`${product.id} has fewer than 2 supplier offers`);
 }
 
 for (const order of orders) {
@@ -1581,8 +1887,8 @@ for (const [status, count] of Object.entries(expected)) {
 const verified = suppliers.filter((s) => s.status === 'VERIFIED').length;
 const pending = suppliers.filter((s) => s.status === 'PENDING').length;
 const suspended = suppliers.filter((s) => s.status === 'SUSPENDED').length;
-if (verified !== 5 || pending !== 2 || suspended !== 1) {
-  problems.push(`supplier mix is ${verified}/${pending}/${suspended}, expected 5 verified / 2 pending / 1 suspended`);
+if (verified !== 6 || pending !== 2 || suspended !== 1) {
+  problems.push(`supplier mix is ${verified}/${pending}/${suspended}, expected 6 verified / 2 pending / 1 suspended`);
 }
 
 // ─── Procurement integrity (§14–§20) ────────────────────────────────────────
@@ -1604,6 +1910,7 @@ for (const product of products) {
   // While a promotion runs, the entry rung is PROMOTIONAL rather than RETAIL.
   const retailEntry = bands.find(
     (band) =>
+      band.variant_id === null &&
       band.customer_type === 'RETAIL' &&
       band.minimum_quantity === 1 &&
       (band.pricing_tier === 'RETAIL' || band.pricing_tier === 'PROMOTIONAL'),
@@ -1616,26 +1923,40 @@ for (const product of products) {
     );
   }
 
-  // Within one customer type, price per unit must fall as quantity rises.
-  for (const type of ['RETAIL', 'BUSINESS', 'RESELLER', 'INSTITUTIONAL']) {
-    const ladder = bands
-      .filter((band) => band.customer_type === type)
-      .sort((a, b) => a.minimum_quantity - b.minimum_quantity);
+  // A length with its own ladder must open at the price its option advertises.
+  for (const variant of product.variants) {
+    const entry = bands.find(
+      (band) =>
+        band.variant_id === variant.id &&
+        band.customer_type === 'RETAIL' &&
+        band.minimum_quantity === 1,
+    );
+    if (entry && entry.unit_price !== variant.price) {
+      problems.push(`${variant.id} retail band ${entry.unit_price} does not match option price ${variant.price}`);
+    }
+  }
 
-    for (let i = 1; i < ladder.length; i += 1) {
-      if (ladder[i].unit_price > ladder[i - 1].unit_price) {
-        problems.push(
-          `${product.id} ${type} ladder rises at ${ladder[i].minimum_quantity}+ (${ladder[i - 1].unit_price} → ${ladder[i].unit_price})`,
-        );
+  // Within one customer type and one ladder, price per unit must fall as
+  // quantity rises.
+  const ladderKeys = [...new Set(bands.map((band) => band.variant_id))];
+  for (const type of ['RETAIL', 'BUSINESS', 'RESELLER', 'INSTITUTIONAL']) {
+    for (const variantId of ladderKeys) {
+      const ladder = bands
+        .filter((band) => band.customer_type === type && band.variant_id === variantId)
+        .sort((a, b) => a.minimum_quantity - b.minimum_quantity);
+
+      for (let i = 1; i < ladder.length; i += 1) {
+        if (ladder[i].unit_price > ladder[i - 1].unit_price) {
+          problems.push(
+            `${product.id}${variantId ? `/${variantId}` : ''} ${type} ladder rises at ${ladder[i].minimum_quantity}+ (${ladder[i - 1].unit_price} → ${ladder[i].unit_price})`,
+          );
+        }
       }
     }
   }
 
-  // §19 — no band may sit under its tier floor against the worst routable cost.
-  const primaryCost = Math.min(
-    ...supplierOffers.filter((o) => o.product_id === product.id).map((o) => o.supplier_cost),
-  );
-
+  // §19 — no band may sit under its tier floor against the worst routable
+  // landed cost, the card fee charged on the selling price.
   for (const band of bands) {
     const rule = marginRules.find(
       (r) =>
@@ -1645,13 +1966,12 @@ for (const product of products) {
     );
     if (!rule) continue;
 
-    const gateway = primaryCost * rule.gateway_rate;
-    const grossMargin = band.unit_price - primaryCost - rule.logistics_cost - gateway;
-    const marginPct = (grossMargin / band.unit_price) * 100;
+    const landed = worstLanded(product, band.variant_id) + rule.logistics_cost * 100;
+    const kept = marginPct(band.unit_price, landed, rule.gateway_rate ?? GATEWAY_RATE);
 
-    if (marginPct < rule.minimum_margin_pct) {
+    if (kept < rule.minimum_margin_pct) {
       problems.push(
-        `${product.id} ${band.customer_type}/${band.pricing_tier} band at ${band.minimum_quantity}+ yields ${marginPct.toFixed(1)}% margin, below its ${rule.minimum_margin_pct}% floor`,
+        `${product.id} ${band.customer_type}/${band.pricing_tier} band at ${band.minimum_quantity}+ yields ${kept.toFixed(1)}% margin, below its ${rule.minimum_margin_pct}% floor`,
       );
     }
   }
@@ -1681,9 +2001,15 @@ console.log('\n✓ integrity checks complete');
 
 // When the app reads from Postgres, the regenerated files are only half the
 // reset - push them there too so `npm run seed` still means "clean slate".
+//
+// `SEED_FILES_ONLY=1` stops at the files. `.env.local` points DB_DRIVER at the
+// shared production branch, so regenerating data/ to inspect it must not also
+// reload the live database.
 const { default: nextEnv } = await import('@next/env');
 nextEnv.loadEnvConfig(ROOT_DIR);
-if (process.env.DB_DRIVER === 'postgres') {
+if (process.env.SEED_FILES_ONLY === '1') {
+  console.log('• SEED_FILES_ONLY=1: data/ regenerated, Postgres left untouched');
+} else if (process.env.DB_DRIVER === 'postgres') {
   const { loadAll } = await import('./db-load.mjs');
   const loaded = await loadAll();
   console.log(`✓ ${loaded.length} collections loaded into Postgres`);

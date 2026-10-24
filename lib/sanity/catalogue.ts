@@ -109,6 +109,11 @@ interface SanityProduct {
   createdAt: string | null;
   productType: string | null;
   countryOfOrigin: string | null;
+  ownerType: Product['owner_type'] | null;
+  supplier: string | null;
+  supplierName: string | null;
+  moq: number | null;
+  commercialModel: Product['commercial_model'] | null;
   images: SanityImage[] | null;
 }
 
@@ -160,6 +165,7 @@ const PRODUCT_PROJECTION = `{
   variants[]{_key, label, sku, price},
   price, compareAtPrice, status, rating, reviewCount, featured, createdAt,
   productType, countryOfOrigin,
+  ownerType, "supplier": supplier._ref, "supplierName": coalesce(supplierName, supplier->name), moq, commercialModel,
   images[]{_key, imageType, alt, "url": asset->url}
 }`;
 
@@ -210,6 +216,7 @@ function toBrand(row: SanityBrand): Brand {
 
 function toProduct(row: SanityProduct): Product {
   const swatch = row.swatch ?? [];
+  const ownerType = row.ownerType ?? (row.supplier ? 'SUPPLIER' : 'AFRIDEAL');
   return {
     id: appId(row._id),
     name: row.name,
@@ -235,6 +242,12 @@ function toProduct(row: SanityProduct): Product {
     brand_id: row.brand ? appId(row.brand) : null,
     product_type: row.productType ?? 'PHYSICAL',
     country_of_origin: row.countryOfOrigin ?? undefined,
+    owner_type: ownerType,
+    supplier_id: row.supplier ? appId(row.supplier) : null,
+    supplier_name: row.supplierName ?? null,
+    moq: row.moq ?? 1,
+    commercial_model:
+      row.commercialModel ?? (ownerType === 'SUPPLIER' ? 'SUPPLIER_LED' : 'AFRIDEAL_MANAGED'),
     ...(row.compareAtPrice ? { compare_at_price: row.compareAtPrice } : {}),
   };
 }
@@ -267,6 +280,8 @@ function initialsFrom(name: string): string {
 }
 
 function toSupplier(row: SanitySupplier): Supplier {
+  const status = row.status ?? 'PENDING';
+  const isVerifiedWithoutScore = status === 'VERIFIED' && !row.reliabilityScore;
   return {
     id: appId(row._id),
     name: row.name,
@@ -274,15 +289,15 @@ function toSupplier(row: SanitySupplier): Supplier {
     initials: row.initials ?? initialsFrom(row.name),
     country: (row.country ?? 'BW') as Supplier['country'],
     city: row.city ?? '',
-    status: row.status ?? 'PENDING',
+    status,
     contact_email: row.contactEmail ?? '',
     contact_phone: row.contactPhone ?? '',
     registration_no: row.registrationNo ?? '',
     joined_at: row.joinedAt ?? row._createdAt,
-    rating: row.rating ?? 0,
-    fulfilment_rate: row.fulfilmentRate ?? 0,
-    reliability_score: row.reliabilityScore ?? 0,
-    avg_fulfilment_days: row.avgFulfilmentDays ?? 0,
+    rating: row.rating ?? (isVerifiedWithoutScore ? 4 : 0),
+    fulfilment_rate: row.fulfilmentRate ?? (isVerifiedWithoutScore ? 85 : 0),
+    reliability_score: row.reliabilityScore ?? (isVerifiedWithoutScore ? 70 : 0),
+    avg_fulfilment_days: row.avgFulfilmentDays ?? (isVerifiedWithoutScore ? 3 : 0),
     total_gmv: row.totalGmv ?? 0,
     products_count: row.productsCount ?? 0,
     orders_count: row.ordersCount ?? 0,
@@ -290,7 +305,7 @@ function toSupplier(row: SanitySupplier): Supplier {
       id: doc._key,
       label: doc.label,
       status: doc.status,
-      uploaded_at: doc.uploadedAt ?? row._createdAt,
+      uploaded_at: doc.uploadedAt ?? null,
     })),
     categories: (row.categories ?? []).map(appId),
     supplier_type: row.supplierType ?? undefined,
