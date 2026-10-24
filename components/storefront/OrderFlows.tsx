@@ -40,7 +40,7 @@ const ORDER_STEPS = [
     state: 'PAID',
     icon: CreditCard,
     title: 'You pay AfriDeal',
-    body: 'Through a licensed provider — DPO Pay, Orange Money or PayGate. Not the supplier, and never into a private account.',
+    body: 'Through a licensed provider — a card processor for Visa and Mastercard, or your own bank. Not the supplier, and never into a private account.',
   },
   {
     state: 'PROCESSING',

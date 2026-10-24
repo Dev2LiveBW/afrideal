@@ -248,6 +248,46 @@ export async function flagRefusedPayment(args: {
   }
 }
 
+/**
+ * A buyer's bank opened a chargeback on a card payment (spec 0010). Stripe has
+ * already taken the amount back from our balance and gives finance a deadline to
+ * answer with evidence, so this is recorded and sent to finance at once. Nothing
+ * about the order changes here: whether goods go back, and whether the supplier's
+ * payable is held, are a person's decisions.
+ */
+export async function flagChargeback(args: {
+  order: Pick<Order, 'id' | 'reference'> | null;
+  provider: PaymentProvider;
+  providerReference: string;
+  disputeId: string;
+  amount: number;
+  currency: string;
+  reason: string;
+  respondBy: string | null;
+}): Promise<void> {
+  const subject = args.order ? args.order.reference : `payment ${args.providerReference}`;
+  const deadline = args.respondBy ? ` Respond with evidence by ${args.respondBy}.` : '';
+  const detail = `Chargeback ${args.disputeId} on ${subject}: ${args.currency} ${args.amount.toFixed(2)}, reason "${args.reason}". ${args.provider} has taken the amount back.${deadline}`;
+
+  console.error(`[payments] chargeback: ${detail}`);
+
+  await audit({
+    actorId: CALLBACK_ACTOR.id,
+    actorName: CALLBACK_ACTOR.name,
+    action: EVENTS.PAYMENT_CHARGEBACK,
+    entity: 'order',
+    entityId: args.order?.id ?? args.providerReference,
+    detail,
+  });
+
+  const finance = (await readAll('users')).filter((user) =>
+    ['FINANCE_ADMIN', 'SUPER_ADMIN'].includes(user.role),
+  );
+  for (const member of finance) {
+    await notify({ userId: member.id, title: 'Card chargeback opened', body: detail, kind: 'PAYMENT' });
+  }
+}
+
 export type FailOutcome =
   | { ok: true; payment: Payment }
   | { ok: false; reason: 'NOT_FOUND' | 'ALREADY_CONFIRMED' };

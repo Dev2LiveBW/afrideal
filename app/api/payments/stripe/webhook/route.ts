@@ -1,7 +1,12 @@
 import { fail, handled, ok } from '@/lib/api';
-import { readAll } from '@/lib/db';
-import { CALLBACK_ACTOR, confirmPayment, failPayment } from '@/lib/payments/confirm';
-import { STRIPE_SIGNATURE_HEADER, interpretStripeEvent, verifyStripeEvent } from '@/lib/payments/stripe';
+import { findById, readAll } from '@/lib/db';
+import { CALLBACK_ACTOR, confirmPayment, failPayment, flagChargeback } from '@/lib/payments/confirm';
+import {
+  STRIPE_SIGNATURE_HEADER,
+  interpretStripeEvent,
+  sessionForPaymentIntent,
+  verifyStripeEvent,
+} from '@/lib/payments/stripe';
 
 /**
  * Where Stripe tells us what happened to a Checkout session (spec 0010).
@@ -36,6 +41,28 @@ export const POST = handled(async (request: Request) => {
 
   const outcome = interpretStripeEvent(check.event);
   if (outcome.kind === 'IGNORED') return ok({ received: true, ignored: outcome.why });
+
+  // A chargeback names the payment intent, so find the session behind it first.
+  // Nothing about the order changes: finance decides, against Stripe's deadline.
+  if (outcome.kind === 'DISPUTED') {
+    const session = await sessionForPaymentIntent(outcome.paymentIntent);
+    const paid = session
+      ? (await readAll('payments')).find((row) => row.provider === 'STRIPE' && row.provider_reference === session)
+      : undefined;
+    if (!session || !paid) return ok({ received: true, ignored: 'no payment here matches that dispute' });
+
+    await flagChargeback({
+      order: await findById('orders', paid.order_id),
+      provider: 'STRIPE',
+      providerReference: session,
+      disputeId: outcome.disputeId,
+      amount: outcome.amount,
+      currency: outcome.currency,
+      reason: outcome.reason,
+      respondBy: outcome.respondBy,
+    });
+    return ok({ received: true, status: 'DISPUTED', order_id: paid.order_id });
+  }
 
   // The session id is the attempt's reference. One Stripe sandbox can feed
   // several environments (local, e2e, a preview) and every endpoint receives

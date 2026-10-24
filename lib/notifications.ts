@@ -68,6 +68,8 @@ export const EVENTS = {
   PAYMENT_FAILED: 'PAYMENT_FAILED',
   /** Money that arrived but could not be applied. Needs a human: refund or decide. */
   PAYMENT_REFUSED: 'PAYMENT_REFUSED',
+  /** A card payment the buyer's bank is clawing back (spec 0010). Needs finance before Stripe's deadline. */
+  PAYMENT_CHARGEBACK: 'PAYMENT_CHARGEBACK',
   SETTINGS_CHANGED: 'SETTINGS_CHANGED',
   SUPPLIER_ORDER_CREATED: 'SUPPLIER_ORDER_CREATED',
   PAYABLE_RAISED: 'PAYABLE_RAISED',

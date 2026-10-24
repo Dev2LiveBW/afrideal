@@ -11,6 +11,7 @@ import {
   fromMinorUnits,
   interpretStripeEvent,
   refundCheckoutPayment,
+  sessionForPaymentIntent,
   stripeConfigured,
   stripeGateway,
   stripeKeyState,
@@ -57,6 +58,7 @@ function fakeGateway(session: Partial<Stripe.Checkout.Session> = {}) {
           calls.expire.push(id);
           return {};
         },
+        list: async (params) => ({ data: params.payment_intent === 'pi_test_known' ? [{ id: 'cs_test_123' }] : [] }),
       },
     },
     refunds: {
@@ -347,5 +349,46 @@ describe('interpretStripeEvent', () => {
 
   it('ignores events that are not a payment outcome', () => {
     expect(interpretStripeEvent(asEvent(sessionEvent('customer.created'))).kind).toBe('IGNORED');
+  });
+});
+
+describe('chargebacks (charge.dispute.created)', () => {
+  const dispute = (over: Partial<Stripe.Dispute> = {}) =>
+    ({
+      type: 'charge.dispute.created',
+      data: {
+        object: {
+          id: 'dp_test_1',
+          object: 'dispute',
+          amount: 32950,
+          currency: 'bwp',
+          reason: 'fraudulent',
+          payment_intent: 'pi_test_known',
+          evidence_details: { due_by: 1793000000 },
+          ...over,
+        },
+      },
+    }) as unknown as Stripe.Event;
+
+  it('reads the disputed amount, reason and evidence deadline', () => {
+    expect(interpretStripeEvent(dispute())).toEqual({
+      kind: 'DISPUTED',
+      disputeId: 'dp_test_1',
+      paymentIntent: 'pi_test_known',
+      amount: 329.5,
+      currency: 'BWP',
+      reason: 'fraudulent',
+      respondBy: new Date(1793000000 * 1000).toISOString(),
+    });
+  });
+
+  it('ignores a dispute it cannot tie to a payment', () => {
+    expect(interpretStripeEvent(dispute({ payment_intent: null })).kind).toBe('IGNORED');
+  });
+
+  it('finds the Checkout session behind a payment intent, and nothing for a stranger', async () => {
+    const { gateway } = fakeGateway();
+    expect(await sessionForPaymentIntent('pi_test_known', gateway)).toBe('cs_test_123');
+    expect(await sessionForPaymentIntent('pi_test_elsewhere', gateway)).toBeNull();
   });
 });

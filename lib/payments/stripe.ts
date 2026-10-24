@@ -27,6 +27,7 @@ export interface StripeGateway {
         id: string,
       ): Promise<Pick<Stripe.Checkout.Session, 'id' | 'url' | 'status' | 'payment_intent'>>;
       expire(id: string): Promise<unknown>;
+      list(params: Stripe.Checkout.SessionListParams): Promise<{ data: Pick<Stripe.Checkout.Session, 'id'>[] }>;
     };
   };
   refunds: {
@@ -292,10 +293,48 @@ export function verifyStripeEvent(
 export type StripeOutcome =
   | { kind: 'CONFIRMED'; reference: string; amount: number; currency: string }
   | { kind: 'FAILED'; reference: string; reason: string }
+  /**
+   * A chargeback. It names the payment intent, not the session, so the route
+   * looks the session up (sessionForPaymentIntent) before it can find the order.
+   */
+  | {
+      kind: 'DISPUTED';
+      disputeId: string;
+      paymentIntent: string;
+      amount: number;
+      currency: string;
+      reason: string;
+      respondBy: string | null;
+    }
   | { kind: 'IGNORED'; why: string };
+
+/** The Checkout session that created a payment intent, or null if none here did. */
+export async function sessionForPaymentIntent(
+  paymentIntent: string,
+  gateway: StripeGateway = stripeGateway(),
+): Promise<string | null> {
+  const found = await gateway.checkout.sessions.list({ payment_intent: paymentIntent, limit: 1 });
+  return found.data[0]?.id ?? null;
+}
 
 /** What a verified event means for a payment attempt (the table in spec 0010). */
 export function interpretStripeEvent(event: Pick<Stripe.Event, 'type' | 'data'>): StripeOutcome {
+  if (event.type === 'charge.dispute.created') {
+    const dispute = event.data.object as Stripe.Dispute;
+    const intent = typeof dispute.payment_intent === 'string' ? dispute.payment_intent : dispute.payment_intent?.id;
+    if (!intent) return { kind: 'IGNORED', why: 'dispute with no payment intent' };
+    const due = dispute.evidence_details?.due_by;
+    return {
+      kind: 'DISPUTED',
+      disputeId: dispute.id,
+      paymentIntent: intent,
+      amount: fromMinorUnits(dispute.amount ?? 0),
+      currency: (dispute.currency ?? '').toUpperCase(),
+      reason: dispute.reason ?? 'unspecified',
+      respondBy: due ? new Date(due * 1000).toISOString() : null,
+    };
+  }
+
   const session = event.data.object as Stripe.Checkout.Session;
 
   switch (event.type) {

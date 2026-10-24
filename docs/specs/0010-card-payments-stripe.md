@@ -95,7 +95,13 @@ a captured request cannot be replayed later. The generic
 | `checkout.session.completed`, not yet paid | ignored; the async event follows |
 | `checkout.session.async_payment_failed` | `failPayment()` |
 | `checkout.session.expired` | `failPayment()` ("checkout session expired") |
+| `charge.dispute.created` | `flagChargeback()`: audit `PAYMENT_CHARGEBACK` and notify finance with the amount, reason and evidence deadline. The order is left alone; a person decides. The session is found from the payment intent |
 | anything else | ignored |
+
+A buyer returning to `/orders/<id>?paid=card` before the webhook lands sees
+"Confirming your card payment", and the page refreshes itself for about a
+minute (`ConfirmingPayment.tsx`). The flag only changes wording while a Stripe
+attempt is open; it never marks anything paid.
 
 Status codes differ from spec 0003's callback table on purpose. Stripe retries
 **every** non-2xx for up to three days and disables endpoints that keep
@@ -198,10 +204,12 @@ documentation, read on 2026-10-23:
 
 **Payments: in place.** Hosted Checkout, signed webhook as the only source of
 truth, raw-body verification, idempotent confirmation, refunds through the
-API, no card data or buyer personal data on our side. Still to add before
-live: `charge.dispute.created` (a chargeback) flagged to finance the way
-refused payments are; the dashboard webhook endpoint pinned to the SDK's API
-version (`2026-09-30` for stripe-node 23); a statement descriptor.
+API, no card data or buyer personal data on our side. Chargebacks
+(`charge.dispute.created`) reach finance; checked with Stripe's dispute test
+card 4000 0000 0000 0259 on AFD-24825 (2026-10-24). Still to set before
+live: the dashboard webhook endpoint pinned to the SDK's API version
+(`2026-09-30` for stripe-node 23) and subscribed to the five events above;
+a statement descriptor.
 
 **Connect: not a fit for these countries today.** Self-serve cross-border
 payouts reach connected accounts only in the US, UK, EEA, Canada and

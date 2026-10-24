@@ -937,6 +937,19 @@ section('9f. Card payments through Stripe — signed webhook, one confirmation')
     const otherResult = await postStripe(other, stripeSignature(other));
     check('an event that is not a payment outcome is acknowledged and ignored',
       otherResult.status === 200 && typeof otherResult.body?.ignored === 'string', `got ${otherResult.status}`);
+
+    // A chargeback is looked up through Stripe, so this needs the test key too.
+    if (STRIPE_SECRET_KEY.startsWith('sk_test_') || STRIPE_SECRET_KEY.startsWith('rk_test_')) {
+      const chargeback = JSON.stringify({
+        id: 'evt_verify_dispute',
+        object: 'event',
+        type: 'charge.dispute.created',
+        data: { object: { id: 'dp_verify', object: 'dispute', amount: 100, currency: 'bwp', reason: 'fraudulent', payment_intent: 'pi_verify_not_ours' } },
+      });
+      const disputed = await postStripe(chargeback, stripeSignature(chargeback));
+      check('a chargeback on a payment this environment never took is acknowledged and ignored',
+        disputed.status === 200 && typeof disputed.body?.ignored === 'string', `${disputed.status} ${JSON.stringify(disputed.body)}`);
+    }
   }
 
   const buyer = sessions['thabo@gmail.com'].jar;
