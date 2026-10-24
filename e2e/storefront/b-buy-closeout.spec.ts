@@ -23,7 +23,7 @@ test.describe('B. Buying and tracking (Close-out)', () => {
     await page.getByRole('textbox', { name: 'Street address or plot number' }).fill('Plot 1234, Gaborone');
     await page.getByRole('combobox', { name: 'City or town' }).fill('Gaborone');
 
-    // Botswana's card method (spec 0009); cards go through DPO Pay.
+    // Botswana's card method (spec 0009); the e2e run keeps cards on the mock gateway (spec 0010).
     await page.getByRole('radio', { name: /Visa \/ Mastercard/ }).check({ force: true });
     
     // Place order should trigger the gateway redirect
