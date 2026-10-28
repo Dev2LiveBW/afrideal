@@ -4,7 +4,7 @@ import { notFound } from 'next/navigation';
 import { ShieldCheck } from 'lucide-react';
 
 import { ActionButton } from '@/components/brand/ActionButton';
-import { readAll } from '@/lib/db';
+import { findById, readAll } from '@/lib/db';
 import { mockGatewayAvailable } from '@/lib/payments/adapters';
 
 import { submitMockCard } from './actions';
@@ -36,7 +36,10 @@ export default async function MockGatewayPage({
     notFound();
   }
 
-  const amount = `BWP ${attempt.amount.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+  // The order's own currency (spec 0009): a Maseru buyer pays rand, not pula.
+  const order = await findById('orders', attempt.order_id);
+  const currency = order?.currency ?? 'BWP';
+  const amount = `${currency} ${attempt.amount.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
 
   return (
     <main className="mx-auto max-w-md px-6 pb-24 pt-20">
