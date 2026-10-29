@@ -202,6 +202,24 @@ from the Sanity people directory - never by hand in the Clerk dashboard.
   gate one hop later. Do not add `auth.protect()` to `/api` routes - they
   answer JSON 401/403 through `guard()`.
 
+## Who takes the money
+
+Spec 0003 owns the payment states (`confirmPayment()` is the only way an
+order becomes paid); spec 0010 owns cards. The card is one method, `CARD`;
+who takes it is `CARD_PROVIDER` (`stripe`, `mock`, later `dpo`), so checkout
+never names a gateway.
+
+- Stripe runs in **test mode only**: `STRIPE_SECRET_KEY` must be `sk_test_`
+  or `rk_test_` (a live key is refused) and `STRIPE_WEBHOOK_SECRET` must be
+  set, or the card is not offered. Payment is confirmed only by the signed
+  webhook `POST /api/payments/stripe/webhook`, never by the return URL.
+- Locally the webhook needs `stripe listen --forward-to
+  localhost:<port>/api/payments/stripe/webhook` (`npx @stripe/cli` works);
+  it prints the `whsec_` to put in `.env.local`.
+- `CARD_PROVIDER=stripe` with `PAYMENTS_PROVIDER=mock` runs cards on Stripe
+  and wallets on the mock; `npm run verify` then pays every card order
+  through signed Stripe events (section 9f).
+
 ## Verifying UI
 
 - The dev server is `npm run dev` (`.claude/launch.json` → `afrideal`).

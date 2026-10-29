@@ -23,7 +23,7 @@ test.describe('B. Buying and tracking (Close-out)', () => {
     await page.getByRole('textbox', { name: 'Street address or plot number' }).fill('Plot 1234, Gaborone');
     await page.getByRole('combobox', { name: 'City or town' }).fill('Gaborone');
 
-    // Botswana's card method (spec 0009); cards go through DPO Pay.
+    // Botswana's card method (spec 0009); the e2e run keeps cards on the mock gateway (spec 0010).
     await page.getByRole('radio', { name: /Visa \/ Mastercard/ }).check({ force: true });
     
     // Place order should trigger the gateway redirect
@@ -143,7 +143,7 @@ test.describe('C. Request for quotation (Chosen quote to order)', () => {
     // 3. Buyer accepts the quote (or staff selects), converting it into an order
     const acceptRes = await page.request.patch(`/api/rfqs/${rfq.id}`, {
       timeout: SAVE,
-      data: { action: 'ACCEPT_QUOTE', customer_unit_price: 85, payment_method: 'DPO_PAY' },
+      data: { action: 'ACCEPT_QUOTE', customer_unit_price: 85, payment_method: 'CARD' },
     });
     expect(acceptRes.ok(), `accept quote failed: ${await acceptRes.text()}`).toBeTruthy();
     const { order, rfq: updatedRfq } = await acceptRes.json();

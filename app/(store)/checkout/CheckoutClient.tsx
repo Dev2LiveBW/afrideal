@@ -33,7 +33,7 @@ const CheckoutSchema = z
     collection_point: z.string().optional(),
     delivery_address: z.string().optional(),
     delivery_city: z.string().optional(),
-    payment_method: z.enum(['DPO_PAY', 'ORANGE_MONEY', 'PAYGATE', 'EFT']),
+    payment_method: z.enum(['CARD', 'ORANGE_MONEY', 'PAYGATE', 'EFT']),
   })
   .superRefine((data, ctx) => {
     if (data.delivery_method === 'DOORSTEP') {
@@ -58,7 +58,7 @@ type CheckoutValues = z.infer<typeof CheckoutSchema>;
 
 /** A short label for a method's tile. */
 const MONOGRAM: Partial<Record<PaymentMethod, string>> = {
-  DPO_PAY: 'CARD',
+  CARD: 'CARD',
   PAYGATE: 'CARD',
   ORANGE_MONEY: 'OM',
   EFT: 'EFT',

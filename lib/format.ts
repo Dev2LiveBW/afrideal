@@ -132,6 +132,7 @@ export function humanise(token: string): string {
 }
 
 export const PAYMENT_LABELS: Record<string, string> = {
+  CARD: 'Card',
   DPO_PAY: 'DPO Pay',
   ORANGE_MONEY: 'Orange Money',
   PAYGATE: 'PayGate',
