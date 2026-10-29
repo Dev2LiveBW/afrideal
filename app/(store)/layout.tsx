@@ -3,9 +3,12 @@ import {
   StorefrontFooter,
   StorefrontNav,
 } from '@/components/layout/StorefrontNav';
+import { cookies } from 'next/headers';
+
 import { BuyerCurrencyProvider } from '@/components/brand/BuyerCurrency';
 import { activeCountries } from '@/lib/countries';
 import { readAll } from '@/lib/db';
+import { DELIVER_TO_COOKIE, decodeDeliverTo } from '@/lib/deliver-to';
 
 export default async function StoreLayout({ children }: { children: React.ReactNode }) {
   /*
@@ -35,8 +38,11 @@ export default async function StoreLayout({ children }: { children: React.ReactN
     countries.map((country) => [country.code, country.buyer_currency]),
   );
 
+  // The shopper's "Deliver to", so the first paint is already in their town and currency.
+  const initialDeliverTo = decodeDeliverTo(cookies().get(DELIVER_TO_COOKIE)?.value, countries);
+
   return (
-    <BuyerCurrencyProvider buyerCurrencies={buyerCurrencies}>
+    <BuyerCurrencyProvider buyerCurrencies={buyerCurrencies} initialDeliverTo={initialDeliverTo}>
     <div className="flex min-h-[100dvh] flex-col">
       <StorefrontNav categories={categories} hotSearches={hotSearches} countries={countries} />
       {/*

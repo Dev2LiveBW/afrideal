@@ -39,7 +39,8 @@ export async function submitMockCard(formData: FormData): Promise<void> {
       reference,
       status: outcome,
       amount: attempt.amount,
-      currency: 'BWP',
+      // What the order is charged in (spec 0009), as a real gateway reports it.
+      currency: order.currency ?? 'BWP',
       occurred_at: new Date().toISOString(),
       ...(outcome === 'FAILED' ? { reason: 'Card declined (mock gateway)' } : {}),
     });

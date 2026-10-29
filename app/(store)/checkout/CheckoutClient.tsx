@@ -106,6 +106,9 @@ export function CheckoutClient({
 
   const [mounted, setMounted] = useState(false);
   const [apiError, setApiError] = useState<string | null>(null);
+  // Set once the order is placed: the cart empties before the next page
+  // arrives, and this keeps "nothing to check out" from flashing meanwhile.
+  const [leaving, setLeaving] = useState<'payment' | 'order' | null>(null);
 
   useEffect(() => setMounted(true), []);
 
@@ -279,6 +282,7 @@ export function CheckoutClient({
       return;
     }
 
+    setLeaving(body.payment?.redirect_url ? 'payment' : 'order');
     clearCart();
     // A hosted card page lives on the gateway's own domain, so this is a full
     // navigation, not a client-side route change.
@@ -295,6 +299,17 @@ export function CheckoutClient({
         <div className="skeleton h-96 rounded-md" />
         <div className="skeleton h-80 rounded-xl" />
       </div>
+    );
+  }
+
+  if (leaving) {
+    return (
+      <EmptyState
+        icon={<ShieldCheck size={22} strokeWidth={1.5} />}
+        title="Order placed"
+        description={leaving === 'payment' ? 'Taking you to the card page…' : 'Opening your order…'}
+        className="rounded-md border border-hairline bg-surface-raised"
+      />
     );
   }
 

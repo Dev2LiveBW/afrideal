@@ -72,6 +72,8 @@ The spec for each journey lives in `e2e/` (storefront, supplier, runner, console
 | B09 | Checkout with real card payment (Gateway) | Customer | P1 | yes | yes |
 | B10 | Delivery to a Collection Point (Smart Locker) | Customer | P1 | yes | yes |
 | B11 | Customs and duty on imported goods are cleared by the courier | Customer | P1 | yes | yes |
+| B12 | A buyer in Lesotho pays in rand, with Lesotho's payment methods | Customer | P1 | yes | yes |
+| B13 | Local goods to a local buyer carry no customs and no courier | Customer | P1 | yes | yes |
 | **C** | **Request for quotation (RFQ)** | | | | |
 | C01 | Buyer sends an RFQ | Customer | P1 | yes | yes |
 | C02 | Invited supplier sends a quote | Supplier | P1 | no screen yet | no |
@@ -116,7 +118,7 @@ The spec for each journey lives in `e2e/` (storefront, supplier, runner, console
 | **Z** | **The golden thread** | | | | |
 | Z01 | One order, from cart to supplier paid, across five people | All | P1 | yes | yes |
 
-That is 49 journeys. 46 have a screen to test (C02 to C04 do not yet, see Findings) and 30 get a demo video (Z01 is the long one, the rest run 1 to 3 minutes).
+That is 51 journeys. 48 have a screen to test (C02 to C04 do not yet, see Findings) and 32 get a demo video (Z01 is the long one, the rest run 1 to 3 minutes).
 
 ---
 
@@ -313,6 +315,30 @@ That is 49 journeys. 46 have a screen to test (C02 to C04 do not yet, see Findin
 **Expect:**
 - The detail page shows the price in Pula with no customs in it, and says "Customs cleared by courier" (since 2026-10-21 the price carries no 14% customs; spec 0008).
 - At checkout the order summary has a "Customs & Duty" row reading "Cleared by your courier", and the courier's own fee is shown as paid to the courier, outside the total.
+
+### B12 A buyer in Lesotho pays in rand, with Lesotho's payment methods
+
+**Start:** signed in as Kefilwe, home page. Spec 0009: any buyer, any country.
+
+1. Open "Deliver to" in the header and choose Maseru (under Lesotho).
+2. Add one tub of shea butter (`p001`, held in South Africa) to the cart and open the cart.
+3. Check out: fill in a street address in Maseru and pay by card.
+4. Pay on the card page and return to the order.
+
+**Expect:**
+- The header reads Maseru, and the cart is in rand: ZAR 137.00 for the tub, ZAR 182.00 with delivery (rand at 1:1 to the pula for now).
+- Checkout opens with Lesotho as the Country. Card is live; M-Pesa and EcoCash are listed as "Coming soon" and cannot be chosen.
+- The goods cross a border (South Africa to Lesotho), so the summary shows "Customs & Duty" cleared by the courier, and a Courier row "Arranged after you order", since no listed courier serves that lane yet.
+- The card page asks for ZAR 182.00, and the order is paid with its total reading ZAR 182.00.
+
+### B13 Local goods to a local buyer carry no customs and no courier
+
+**Start:** signed in as Thabo, delivering to Gaborone (the default).
+
+1. Open `p006` (Portland cement, held in Botswana) and add one bag to the cart.
+2. Go to checkout.
+
+**Expect:** the product page does not say "Customs cleared by courier", and the order summary has no "Customs & Duty" row and no Courier row: a Gaborone buyer buying from Botswana crosses no border (spec 0009, AC-3).
 
 ---
 
