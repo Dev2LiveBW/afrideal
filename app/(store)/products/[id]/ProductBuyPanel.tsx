@@ -1,11 +1,12 @@
 'use client';
 
 import Link from 'next/link';
-import { useEffect, useState, type ReactNode } from 'react';
+import { useState, type ReactNode } from 'react';
 import { FileText, Minus, PackageX, Plus, ShoppingBag } from 'lucide-react';
 import toast from 'react-hot-toast';
 
 import { ActionButton } from '@/components/brand/ActionButton';
+import { useDeliverTo } from '@/components/brand/BuyerCurrency';
 import { MoneyText } from '@/components/brand/MoneyText';
 import { VariantSelector } from '@/components/products/VariantSelector';
 import { RfqModal } from '@/components/procurement/RfqModal';
@@ -16,7 +17,7 @@ import { useAfriDealStore } from '@/store/useAfriDealStore';
 import { PriceLadder } from '@/components/storefront/PriceLadder';
 import { photoUrl } from '@/components/storefront/Swatch';
 import { CartSheet } from '@/components/storefront/CartSheet';
-import { DEFAULT_DELIVERY_COUNTRY, isCrossBorder } from '@/lib/lanes.mjs';
+import { isCrossBorder } from '@/lib/lanes.mjs';
 import type { TierDoor } from '@/lib/tier-doors';
 import type { CustomerPrice, CustomerType, Product, ProductImage } from '@/types';
 
@@ -47,11 +48,8 @@ export function ProductBuyPanel({
   aside: ReactNode;
 }) {
   const addToCart = useAfriDealStore((state) => state.addToCart);
-  const deliverTo = useAfriDealStore((state) => state.deliverTo);
-  // The persisted "Deliver to" is read only after hydration, as in the header.
-  const [mounted, setMounted] = useState(false);
-  useEffect(() => setMounted(true), []);
-  const deliveryCountry = mounted ? deliverTo.country : DEFAULT_DELIVERY_COUNTRY;
+  // "Deliver to" as the server's first paint and the persisted store agree on it.
+  const deliveryCountry = useDeliverTo().country;
 
   const isSupplierOwned =
     product.owner_type === 'SUPPLIER' || product.commercial_model === 'SUPPLIER_LED';

@@ -23,7 +23,8 @@ import {
 import { AfriDealLogo } from '@/components/brand/AfriDealLogo';
 import { markTabNavigation } from '@/components/motion/PageTransition';
 import { CategoryIcon } from '@/components/storefront/CategoryIcon';
-import { DEFAULT_DELIVER_TO, cartCount, useAfriDealStore } from '@/store/useAfriDealStore';
+import { useDeliverTo } from '@/components/brand/BuyerCurrency';
+import { cartCount, useAfriDealStore } from '@/store/useAfriDealStore';
 import type { Category, Country } from '@/types';
 import {
   DIRECTORY_IN_NAV,
@@ -36,19 +37,16 @@ import { cn } from '@/lib/utils';
  * Where to deliver.
  *
  * A country and a town (spec 0009: the market is any-to-any), grouped by
- * country from the `countries` data, persisted, and read only after hydration
- * because a persisted value differs from what the server rendered and React
- * would otherwise flag the mismatch on first paint. Checkout starts from it.
+ * country from the `countries` data, persisted, and mirrored into a cookie so
+ * the server's first paint already names the shopper's town (`useDeliverTo`).
+ * Checkout starts from it.
  */
 function DeliverToPicker({ countries }: { countries: Country[] }) {
-  const deliverTo = useAfriDealStore((state) => state.deliverTo);
+  const chosen = useDeliverTo();
   const setDeliverTo = useAfriDealStore((state) => state.setDeliverTo);
 
   const [open, setOpen] = useState(false);
-  const [mounted, setMounted] = useState(false);
   const boxRef = useRef<HTMLDivElement>(null);
-
-  useEffect(() => setMounted(true), []);
 
   useEffect(() => {
     if (!open) return;
@@ -66,7 +64,6 @@ function DeliverToPicker({ countries }: { countries: Country[] }) {
     };
   }, [open]);
 
-  const chosen = mounted ? deliverTo : DEFAULT_DELIVER_TO;
   const countryName =
     countries.find((country) => country.code === chosen.country)?.name ?? chosen.country;
 
@@ -238,7 +235,7 @@ export function StorefrontNav({
 }) {
   const pathname = usePathname();
   const router = useRouter();
-  const { data: session } = useSession();
+  const { data: session, status } = useSession();
   const signOut = useSignOut();
   const cart = useAfriDealStore((state) => state.cart);
   const pulse = useAfriDealStore((state) => state.cartPulse);
@@ -305,7 +302,11 @@ export function StorefrontNav({
               </AnimatePresence>
             </Link>
 
-            {session?.user ? (
+            {status === 'loading' ? (
+              // Until Clerk knows, neither "Sign in" nor the avatar: a signed-in
+              // shopper should not be told to sign in for the first second.
+              <div aria-hidden="true" className="hidden h-9 w-[150px] md:block" />
+            ) : session?.user ? (
               <div className="hidden items-center gap-2 md:flex">
                 <Link href="/orders" className="flex items-center gap-2 rounded-full bg-gray-100 py-1.5 pl-1.5 pr-3.5 hover:bg-gray-200 transition-colors">
                   <span className="flex h-7 w-7 items-center justify-center rounded-full bg-[#27AE60] font-mono text-[10.5px] font-semibold text-white">

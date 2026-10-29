@@ -3,17 +3,17 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 
+import { DEFAULT_DELIVER_TO, DELIVER_TO_COOKIE, encodeDeliverTo, type DeliverTo } from '@/lib/deliver-to';
 import { DEFAULT_DELIVERY_COUNTRY } from '@/lib/lanes.mjs';
-import type { CartLine, CountryCode } from '@/types';
+import type { CartLine } from '@/types';
 
-/** Where the shopper wants things delivered: a country and a town (spec 0009). */
-export interface DeliverTo {
-  country: CountryCode;
-  city: string;
+export { DEFAULT_DELIVER_TO, type DeliverTo };
+
+/** Mirror "Deliver to" into a cookie so the server's first paint uses it too. */
+function rememberDeliverTo(deliverTo: DeliverTo) {
+  if (typeof document === 'undefined') return;
+  document.cookie = `${DELIVER_TO_COOKIE}=${encodeDeliverTo(deliverTo)}; path=/; max-age=31536000; samesite=lax`;
 }
-
-/** Until a shopper chooses. The market is any-to-any; this is only a starting point. */
-export const DEFAULT_DELIVER_TO: DeliverTo = { country: DEFAULT_DELIVERY_COUNTRY, city: 'Gaborone' };
 
 interface AfriDealState {
   // ── Cart ──────────────────────────────────────────────────────────────
@@ -59,7 +59,10 @@ export const useAfriDealStore = create<AfriDealState>()(
       cartPulse: 0,
       deliverTo: DEFAULT_DELIVER_TO,
 
-      setDeliverTo: (deliverTo) => set({ deliverTo }),
+      setDeliverTo: (deliverTo) => {
+        rememberDeliverTo(deliverTo);
+        set({ deliverTo });
+      },
 
       addToCart: (line) =>
         set((state) => {
@@ -111,6 +114,10 @@ export const useAfriDealStore = create<AfriDealState>()(
           state.deliverTo = { country: DEFAULT_DELIVERY_COUNTRY, city: state.deliverTo };
         }
         return state as unknown as AfriDealState;
+      },
+      // A choice saved before the cookie existed reaches the server from the next page on.
+      onRehydrateStorage: () => (state) => {
+        if (state) rememberDeliverTo(state.deliverTo);
       },
       partialize: (state) => ({
         cart: state.cart,
