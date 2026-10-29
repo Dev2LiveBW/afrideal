@@ -24,7 +24,7 @@ function order(over: Partial<Order> = {}): Order {
     subtotal: 284,
     delivery_fee: 45,
     total: 329,
-    payment_method: 'DPO_PAY',
+    payment_method: 'CARD',
     payment_reference: null,
     payment_expires_at: '2026-10-06T11:00:00.000Z',
     cancel_reason: null,

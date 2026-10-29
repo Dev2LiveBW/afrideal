@@ -4,7 +4,7 @@ import { fail, guard, handled, ok } from '@/lib/api';
 import { findById, insert, mutate, nextId, readAll, update } from '@/lib/db';
 import { applyTransition } from '@/lib/payables';
 import { EVENTS, audit, notify } from '@/lib/notifications';
-import { providerFor } from '@/lib/payments/adapters';
+import { closeOpenAttempts, providerFor } from '@/lib/payments/adapters';
 import { confirmPayment } from '@/lib/payments/confirm';
 import { executeRefund } from '@/lib/refunds';
 import { getOrderDetail } from '@/lib/queries';
@@ -207,6 +207,11 @@ export const PATCH = handled(async (request: Request, { params }: { params: { id
       // Spec 0003: an unpaid order is AWAITING_PAYMENT, not PENDING. Without the
       // first a buyer could no longer cancel their own unpaid order at all.
       if (!updated) return fail('Only an unpaid order can be cancelled here.', 409);
+
+      // Spec 0010: a hosted card page still open for this order could take money
+      // for an order a person just cancelled. Close it now; confirmPayment()
+      // refusing and flagging anything that slips through is the backstop.
+      await closeOpenAttempts((await readAll('payments')).filter((row) => row.order_id === params.id));
 
       for (const leg of legs) {
         if (leg.status !== 'PENDING') continue;

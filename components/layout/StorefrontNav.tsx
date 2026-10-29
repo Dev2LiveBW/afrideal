@@ -570,10 +570,10 @@ export function StorefrontFooter() {
         <div className="mt-12 border-t border-white/10 pt-6">
           <p className="text-[12px] leading-5 text-white/60">AfriDeal is not a payment provider. Customer payments are processed by licensed payment partners.</p>
           <div className="mt-5 flex flex-wrap items-center justify-between gap-4">
-            <p className="text-[12.5px] text-white/60">\u00a9 {new Date().getFullYear()} AfriDeal. Gaborone, Botswana.</p>
+            <p className="text-[12.5px] text-white/60">© {new Date().getFullYear()} AfriDeal. Gaborone, Botswana.</p>
             <p className="flex items-center gap-2 font-mono text-[10.5px] uppercase tracking-[0.16em] text-white/55">
               <Package size={13} strokeWidth={1.5} />
-              DPO Pay \u00b7 Orange Money \u00b7 PayGate
+              Visa · Mastercard · Bank transfer
             </p>
           </div>
         </div>

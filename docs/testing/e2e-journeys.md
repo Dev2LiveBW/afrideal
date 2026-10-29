@@ -43,7 +43,7 @@ The spec for each journey lives in `e2e/` (storefront, supplier, runner, console
 
 **Phone and desktop.** The storefront is built to match the Alibaba app on a phone, so storefront journeys run twice: at phone width (390 px) and at desktop width (1440 px). The team console runs at desktop width. The runner portal runs at phone width.
 
-**Payment is simulated today.** Checkout lists the delivery country's payment methods (spec 0009): for Botswana, "Visa / Mastercard" (card, through DPO Pay), "Bank transfer" and "Orange Money". Methods the platform cannot take yet show "Coming soon" and cannot be picked. The e2e run turns on a mock card gateway (`/mock-gateway`); no money moves. Journeys say so where it matters. Real card payment is scope feature 4.
+**Payment is simulated today.** Checkout lists the delivery country's payment methods (spec 0009): for Botswana, "Visa / Mastercard" (the `CARD` method; Stripe test mode or the mock, by `CARD_PROVIDER`, spec 0010), "Bank transfer" and "Orange Money". Methods the platform cannot take yet show "Coming soon" and cannot be picked. The e2e run keeps cards on the mock gateway (`/mock-gateway`); no money moves. Journeys say so where it matters. Stripe test-mode cards are covered by `npm run verify` section 9f.
 
 **Where the buyer is.** Checkout starts with a Country field, then the street and town; the header's "Deliver to" is a country and a town. The demo buyers are in Botswana, so prices are in Pula (BWP); a buyer in South Africa, Lesotho or Eswatini sees rand.
 
@@ -280,7 +280,7 @@ That is 51 journeys. 48 have a screen to test (C02 to C04 do not yet, see Findin
 **Start:** signed in as Thabo.
 
 1. Add a product to the cart and proceed to checkout.
-2. Select "Visa / Mastercard" as the payment method (cards go through DPO Pay).
+2. Select "Visa / Mastercard" as the payment method (on the mock gateway in the e2e run).
 3. Tap "Place order".
 4. The user is redirected via a full window navigation to the mock payment gateway page (`/mock-gateway`).
 5. Enter test card details and submit. The gateway signs a callback and POSTs it to the API.

@@ -2,6 +2,7 @@ import 'server-only';
 
 import { findById, insert, nextId, readAll, update } from '@/lib/db';
 import { applyTransition } from '@/lib/payables';
+import { refundCheckoutPayment } from '@/lib/payments/stripe';
 import { EVENTS, audit, notify } from '@/lib/notifications';
 import type { Order, SupplierPayable } from '@/types';
 
@@ -51,11 +52,39 @@ export async function executeRefund(input: ExecuteRefundInput): Promise<RefundRe
 
   const now = new Date().toISOString();
   const refundAmount = input.amount != null && input.amount > 0 ? input.amount : order.total;
-  const gatewayRef =
-    input.gatewayReference && input.gatewayReference.trim().length > 0
-      ? input.gatewayReference.trim()
-      : `REF-${Math.floor(100000 + Math.random() * 900000)}`;
   const refundReason = input.reason?.trim() || 'Dispute resolved in customer favour';
+
+  // Spec 0010: a card paid through Stripe is refunded through Stripe, before any
+  // record here changes, so the buyer is never told "refund processed" while
+  // their money is still with us. If Stripe refuses, nothing below runs.
+  const paidBy = (await readAll('payments')).find(
+    (row) => row.order_id === order.id && row.status === 'CONFIRMED',
+  );
+  let stripeRefundId: string | null = null;
+  if (paidBy?.provider === 'STRIPE' && paidBy.provider_reference) {
+    if (refundAmount > order.total) {
+      return { ok: false, reason: 'A refund cannot be more than the order total.' };
+    }
+    try {
+      ({ refundId: stripeRefundId } = await refundCheckoutPayment({
+        reference: paidBy.provider_reference,
+        amount: refundAmount,
+        currency: order.currency ?? 'BWP',
+        // One refund per order, however often finance presses the button.
+        idempotencyKey: `afrideal-refund-${order.id}`,
+        reason: refundReason,
+      }));
+    } catch (error) {
+      const message = error instanceof Error ? error.message : 'Stripe refused the refund.';
+      return { ok: false, reason: `Stripe could not refund this payment: ${message}` };
+    }
+  }
+
+  const gatewayRef =
+    stripeRefundId ??
+    (input.gatewayReference && input.gatewayReference.trim().length > 0
+      ? input.gatewayReference.trim()
+      : `REF-${Math.floor(100000 + Math.random() * 900000)}`);
 
   // 1. Supplier payables adjustment
   const allPayables = await readAll('supplier-payables');
