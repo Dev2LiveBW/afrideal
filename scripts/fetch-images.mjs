@@ -12,6 +12,17 @@
  * to point at them. Anything that fails keeps its gradient swatch, so a partial
  * run degrades rather than breaking the storefront.
  *
+ * Product and category photos are square crops of the photographer's original,
+ * SQUARE_SIDE pixels a side (or the original's short side, if smaller), because
+ * the storefront shows them square and Alibaba's product pages do too. A
+ * candidate whose original is under MIN_SIDE on its short side is skipped, and
+ * every download is measured before it is written: a file that comes back the
+ * wrong shape or too small is refused rather than saved. The hero stays
+ * landscape. `npm run catalogue:audit` checks the same bar.
+ *
+ * These are still stock photos of something like the product: fine for a demo,
+ * not for launch, where a photo must show the item actually sold.
+ *
  * Both licences permit commercial use without attribution. Provenance is still
  * recorded per file in public/products/CREDITS.json, because a client demo
  * should be able to answer "where did this picture come from".
@@ -24,6 +35,8 @@
 import fs from 'node:fs/promises';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
+
+import { imageSize } from './image-size.mjs';
 
 const ROOT = path.join(path.dirname(fileURLToPath(import.meta.url)), '..');
 const DATA = path.join(ROOT, 'data');
@@ -66,6 +79,13 @@ or
 }
 
 const PROVIDER = PEXELS ? 'pexels' : 'unsplash';
+
+/** Side of a square product photo, in pixels. */
+const SQUARE_SIDE = 1600;
+/** The smallest short side worth downloading; the audit's bar too. */
+const MIN_SIDE = 1200;
+/** Width of the landscape hero. */
+const HERO_WIDTH = 1920;
 
 // ─── Search queries ──────────────────────────────────────────────────────────
 
@@ -142,14 +162,27 @@ const HERO_QUERIES = {
 
 // ─── Providers ───────────────────────────────────────────────────────────────
 
-async function searchPexels(query, perPage = 4) {
-  const url = `https://api.pexels.com/v1/search?query=${encodeURIComponent(query)}&per_page=${perPage}&orientation=landscape`;
+/*
+ * `shape` is 'square' for products and categories, 'landscape' for the hero.
+ * Both providers serve the photographer's original through an image CDN that
+ * crops and resizes on request, so the square is cut from the full-resolution
+ * file rather than from the 940px preview the first runs downloaded. More
+ * candidates are asked for than needed because the small ones are dropped.
+ */
+const sideFor = (photo) => Math.min(SQUARE_SIDE, photo.width, photo.height);
+
+async function searchPexels(query, shape, perPage = 8) {
+  const orientation = shape === 'square' ? 'square' : 'landscape';
+  const url = `https://api.pexels.com/v1/search?query=${encodeURIComponent(query)}&per_page=${perPage}&orientation=${orientation}`;
   const response = await fetch(url, { headers: { Authorization: PEXELS } });
   if (!response.ok) throw new Error(`Pexels ${response.status}: ${await response.text()}`);
 
   const body = await response.json();
   return (body.photos ?? []).map((photo) => ({
-    url: photo.src.large ?? photo.src.medium,
+    url:
+      shape === 'square'
+        ? `${photo.src.original}?auto=compress&cs=tinysrgb&fit=crop&w=${sideFor(photo)}&h=${sideFor(photo)}`
+        : `${photo.src.original}?auto=compress&cs=tinysrgb&w=${HERO_WIDTH}`,
     credit: `${photo.photographer} (Pexels)`,
     source: photo.url,
     width: photo.width,
@@ -157,14 +190,18 @@ async function searchPexels(query, perPage = 4) {
   }));
 }
 
-async function searchUnsplash(query, perPage = 4) {
-  const url = `https://api.unsplash.com/search/photos?query=${encodeURIComponent(query)}&per_page=${perPage}&orientation=landscape`;
+async function searchUnsplash(query, shape, perPage = 8) {
+  const orientation = shape === 'square' ? 'squarish' : 'landscape';
+  const url = `https://api.unsplash.com/search/photos?query=${encodeURIComponent(query)}&per_page=${perPage}&orientation=${orientation}`;
   const response = await fetch(url, { headers: { Authorization: `Client-ID ${UNSPLASH}` } });
   if (!response.ok) throw new Error(`Unsplash ${response.status}: ${await response.text()}`);
 
   const body = await response.json();
   return (body.results ?? []).map((photo) => ({
-    url: `${photo.urls.raw}&w=1200&q=80&fm=jpg&fit=crop`,
+    url:
+      shape === 'square'
+        ? `${photo.urls.raw}&w=${sideFor(photo)}&h=${sideFor(photo)}&fit=crop&crop=entropy&q=85&fm=jpg`
+        : `${photo.urls.raw}&w=${HERO_WIDTH}&q=85&fm=jpg`,
     credit: `${photo.user.name} (Unsplash)`,
     source: photo.links.html,
     width: photo.width,
@@ -174,7 +211,8 @@ async function searchUnsplash(query, perPage = 4) {
 
 const search = PROVIDER === 'pexels' ? searchPexels : searchUnsplash;
 
-async function download(url, destination) {
+/** Measured before writing, so a wrong file never replaces a good one. */
+async function download(url, destination, shape) {
   const response = await fetch(url);
   if (!response.ok) throw new Error(`download ${response.status}`);
 
@@ -182,15 +220,26 @@ async function download(url, destination) {
   // A "photo" under about 8KB is a placeholder or an error page, not an image.
   if (buffer.length < 8_000) throw new Error(`suspiciously small (${buffer.length}b)`);
 
+  const size = imageSize(buffer);
+  if (!size) throw new Error('not a JPEG, PNG or WebP');
+  if (shape === 'square') {
+    if (size.width !== size.height) throw new Error(`came back ${size.width}x${size.height}, not square`);
+    if (size.width < MIN_SIDE) throw new Error(`came back ${size.width}px, under ${MIN_SIDE}px`);
+  }
+
   await fs.writeFile(destination, buffer);
-  return buffer.length;
+  return { bytes: buffer.length, ...size };
 }
 
-/** Try each query in turn; return the candidates from the first that answers. */
-async function firstHit(queries) {
+/** Big enough to cut a MIN_SIDE square from or, for the hero, that wide. */
+const usable = (shape) => (photo) =>
+  shape === 'square' ? Math.min(photo.width, photo.height) >= MIN_SIDE : photo.width >= HERO_WIDTH;
+
+/** Try each query in turn; return the usable candidates from the first that has any. */
+async function firstHit(queries, shape) {
   for (const query of queries) {
     try {
-      const results = await search(query);
+      const results = (await search(query, shape)).filter(usable(shape));
       if (results.length > 0) return { query, results };
     } catch (error) {
       console.log(`      ! "${query}" — ${error.message.slice(0, 80)}`);
@@ -232,6 +281,23 @@ const credits = await (async () => {
 
 const creditFor = (file) => credits.findIndex((entry) => entry.file === file);
 
+/**
+ * What is kept per file: who took it, where from, the original's size and the
+ * size actually saved. Only the original's size used to be kept, which read as
+ * 6000x4000 for files that were 940px wide.
+ */
+function creditEntry(scope, candidate, saved) {
+  return {
+    ...scope,
+    credit: candidate.credit,
+    source: candidate.source,
+    original_width: candidate.width,
+    original_height: candidate.height,
+    width: saved.width,
+    height: saved.height,
+  };
+}
+
 function recordCredit(entry) {
   const at = creditFor(entry.file);
   if (at === -1) credits.push(entry);
@@ -243,7 +309,8 @@ let skipped = 0;
 
 console.log(`Provider: ${PROVIDER}\n`);
 
-// Products get up to three distinct views for the detail-page thumbnail rail.
+// Each product fills its image rows (four in the seed) with distinct views for
+// the detail-page thumbnail rail.
 for (const product of products) {
   if (only && !only.has(product.id)) continue;
 
@@ -252,9 +319,9 @@ for (const product of products) {
 
   console.log(`${product.id}  ${product.name}`);
 
-  const hit = await firstHit(queries);
+  const hit = await firstHit(queries, 'square');
   if (!hit) {
-    console.log('      ✗ no results — keeping gradient\n');
+    console.log('      ✗ no usable results — keeping the current photos\n');
     skipped += 1;
     continue;
   }
@@ -270,11 +337,11 @@ for (const product of products) {
     const filename = `${product.id}-${i}.jpg`;
 
     try {
-      const bytes = await download(candidate.url, path.join(OUT, filename));
+      const saved = await download(candidate.url, path.join(OUT, filename), 'square');
       rows[i].image_url = `/products/${filename}`;
-      recordCredit({ file: filename, product_id: product.id, ...candidate, url: undefined });
+      recordCredit(creditEntry({ file: filename, product_id: product.id }, candidate, saved));
       fetched += 1;
-      console.log(`      ✓ ${filename}  ${Math.round(bytes / 1024)}kb  — ${candidate.credit}`);
+      console.log(`      ✓ ${filename}  ${saved.width}x${saved.height}  ${Math.round(saved.bytes / 1024)}kb  — ${candidate.credit}`);
     } catch (error) {
       console.log(`      ✗ ${filename} — ${error.message}`);
     }
@@ -290,9 +357,10 @@ for (const product of products) {
 for (const [key, queries] of Object.entries({ ...CATEGORY_QUERIES, ...HERO_QUERIES })) {
   if (only && !only.has(key)) continue;
   {
-    const hit = await firstHit(queries);
+    const shape = key === 'hero' ? 'landscape' : 'square';
+    const hit = await firstHit(queries, shape);
     if (!hit) {
-      console.log(`${key}   ✗ no results`);
+      console.log(`${key}   ✗ no usable results`);
       skipped += 1;
       continue;
     }
@@ -301,10 +369,10 @@ for (const [key, queries] of Object.entries({ ...CATEGORY_QUERIES, ...HERO_QUERI
     const filename = `${key}.jpg`;
 
     try {
-      const bytes = await download(candidate.url, path.join(OUT, filename));
-      recordCredit({ file: filename, scope: key, ...candidate, url: undefined });
+      const saved = await download(candidate.url, path.join(OUT, filename), shape);
+      recordCredit(creditEntry({ file: filename, scope: key }, candidate, saved));
       fetched += 1;
-      console.log(`${key}   ✓ ${filename}  ${Math.round(bytes / 1024)}kb  — ${candidate.credit}  ("${hit.query}")`);
+      console.log(`${key}   ✓ ${filename}  ${saved.width}x${saved.height}  ${Math.round(saved.bytes / 1024)}kb  — ${candidate.credit}  ("${hit.query}")`);
     } catch (error) {
       console.log(`${key}   ✗ ${error.message}`);
     }
@@ -326,6 +394,7 @@ await fs.writeFile(
 console.log(`\n${'═'.repeat(52)}`);
 console.log(`${fetched} image(s) downloaded, ${skipped} query group(s) with no result`);
 console.log(`\nProvenance written to public/products/CREDITS.json`);
+console.log(`\nMeasure them:  npm run catalogue:audit -- --source json`);
 console.log(`\nNow LOOK at them before trusting the run:`);
 console.log(`  a wrong-but-plausible photo is the failure mode here, not a crash.`);
 console.log(`  re-fetch specific products with:  npm run images -- --only p004,p006`);
