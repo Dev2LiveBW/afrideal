@@ -8,6 +8,7 @@ import { auth } from '@/lib/auth';
 import { activeCountries } from '@/lib/countries';
 import { readAll } from '@/lib/db';
 import { availablePaymentMethods } from '@/lib/payments/adapters';
+import { goodsCountries } from '@/lib/supplier-selection';
 
 import { CheckoutClient } from './CheckoutClient';
 
@@ -42,11 +43,13 @@ export default async function CheckoutPage() {
    * the ladder is resolved here rather than trusting the price frozen onto each
    * cart line when it was added.
    */
-  const [bands, products, countries, couriers] = await Promise.all([
+  const [bands, products, countries, couriers, offers, suppliers] = await Promise.all([
     readAll('customer-prices'),
     readAll('products'),
     activeCountries(),
     readAll('couriers'),
+    readAll('supplier-offers'),
+    readAll('suppliers'),
   ]);
 
   return (
@@ -56,6 +59,7 @@ export default async function CheckoutPage() {
         customerEmail={session.user.email ?? ''}
         bands={bands}
         products={products}
+        goodsCountries={goodsCountries(products, offers, suppliers)}
         customerType={session.user.customer_type ?? 'RETAIL'}
         methods={availablePaymentMethods()}
         countries={countries}

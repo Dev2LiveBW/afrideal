@@ -4,13 +4,13 @@ import { fail, guard, handled, ok } from '@/lib/api';
 import { insert, insertMany, nextId, nextIds, readAll } from '@/lib/db';
 import { EVENTS, audit, notify } from '@/lib/notifications';
 import { offerLandedCost, priceLine, sellerQuantities } from '@/lib/pricing-tiers';
-import { selectSupplier } from '@/lib/supplier-selection';
+import { routeLine } from '@/lib/supplier-selection';
 import { availablePaymentMethods, startPayment } from '@/lib/payments/adapters';
 import { allAsDisplayed } from '@/lib/payments/status';
 import { findCollectionPoint } from '@/lib/collection-points';
 import { activeCountries } from '@/lib/countries';
 import { fromPula } from '@/lib/currency.mjs';
-import { DEFAULT_DELIVERY_COUNTRY } from '@/lib/lanes.mjs';
+import { DEFAULT_DELIVERY_COUNTRY, isCrossBorder } from '@/lib/lanes.mjs';
 import { checkoutIsPaused } from '@/lib/settings';
 import { paymentExpiresAt } from '@/lib/payments/policy';
 import type { Order, OrderItem, OrderTimelineEntry, Payment } from '@/types';
@@ -167,18 +167,7 @@ export const POST = handled(async (request: Request) => {
       );
     }
 
-    const candidateOffers = offers.filter((offer) => offer.product_id === product.id);
-    const preferredOffers =
-      product.owner_type === 'SUPPLIER' && product.supplier_id
-        ? candidateOffers.filter((offer) => offer.supplier_id === product.supplier_id)
-        : candidateOffers;
-
-    const route =
-      selectSupplier(
-        preferredOffers.length > 0 ? preferredOffers : candidateOffers,
-        suppliers,
-        line.qty,
-      ) ?? selectSupplier(candidateOffers, suppliers, line.qty);
+    const route = routeLine(product, offers, suppliers, line.qty);
 
     if (!route) return fail(`No verified supplier can currently fulfil ${product.name}.`, 409);
 
@@ -208,7 +197,12 @@ export const POST = handled(async (request: Request) => {
 
     // Spec 0007, AC-7: what this unit cost us, fixed now so a later rate or
     // cost change never rewrites a placed order or its payable.
-    const landed = offerLandedCost(route.offer, product, variant.id, deliveryCountry);
+    // Spec 0009, AC-3: customs when the routed supplier's goods cross a border.
+    const landed = offerLandedCost(
+      route.offer,
+      variant.id,
+      isCrossBorder(route.supplier.country, deliveryCountry),
+    );
     const supplierCost =
       route.offer.variant_costs?.find((entry) => entry.variant_id === variant.id)?.cost ??
       route.offer.supplier_cost;

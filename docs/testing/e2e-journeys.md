@@ -85,6 +85,7 @@ The spec for each journey lives in `e2e/` (storefront, supplier, runner, console
 | D03 | Runner sends back a price | Runner | P1 | yes | yes |
 | D04 | Buyer approves the price | Customer | P1 | yes | yes |
 | D05 | Runner delivers, buyer confirms | Runner, Customer | P1 | yes | yes |
+| D06 | A request in Maseru reaches Maseru's runners, not Gaborone's | Customer, Runner | P1 | yes | no |
 | **E** | **Supplier portal** | | | | |
 | E01 | Supplier dashboard shows their own numbers | Supplier | P1 | yes | yes |
 | E02 | Confirm, prepare, and mark an order ready for collection | Supplier | P1 | yes | yes |
@@ -321,15 +322,17 @@ That is 51 journeys. 48 have a screen to test (C02 to C04 do not yet, see Findin
 **Start:** signed in as Kefilwe, home page. Spec 0009: any buyer, any country.
 
 1. Open "Deliver to" in the header and choose Maseru (under Lesotho).
-2. Add one tub of shea butter (`p001`, held in South Africa) to the cart and open the cart.
+2. Open shea butter (`p001`: made in South Africa, held by Naledi Beauty in Gaborone). Add one tub to the cart and open the cart.
 3. Check out: fill in a street address in Maseru and pay by card.
 4. Pay on the card page and return to the order.
 
 **Expect:**
-- The header reads Maseru, and the cart is in rand: ZAR 137.00 for the tub, ZAR 182.00 with delivery (rand at 1:1 to the pula for now).
+- The header reads Maseru. The product page gives delivery as "a flat R45", and the cart is in rand: ZAR 137.00 for the tub, ZAR 182.00 with delivery (rand at 1:1 to the pula for now; spec 0009, AC-7).
 - Checkout opens with Lesotho as the Country. Card is live; M-Pesa and EcoCash are listed as "Coming soon" and cannot be chosen.
-- The goods cross a border (South Africa to Lesotho), so the summary shows "Customs & Duty" cleared by the courier, and a Courier row "Arranged after you order", since no listed courier serves that lane yet.
+- The goods cross a border (Botswana to Lesotho), so the summary shows "Customs & Duty" cleared by the courier, and a Courier row "Arranged after you order", since no listed courier serves that lane yet.
+- Delivery offers a Lesotho collection point, "Pickup from smart locker (from R35)" (spec 0009, AC-5).
 - The card page asks for ZAR 182.00, and the order is paid with its total reading ZAR 182.00.
+- After purchase the order's Delivery panel shows who serves the lane: "1 runner serves this town" with a "Request a runner" link, "No courier lists this route yet", and the Maseru Pioneer Mall Locker under "Collection points in Lesotho" (spec 0009, AC-5).
 
 ### B13 Local goods to a local buyer carry no customs and no courier
 
@@ -338,7 +341,11 @@ That is 51 journeys. 48 have a screen to test (C02 to C04 do not yet, see Findin
 1. Open `p006` (Portland cement, held in Botswana) and add one bag to the cart.
 2. Go to checkout.
 
-**Expect:** the product page does not say "Customs cleared by courier", and the order summary has no "Customs & Duty" row and no Courier row: a Gaborone buyer buying from Botswana crosses no border (spec 0009, AC-3).
+3. Open `p001` (shea butter, made in South Africa but held by Naledi Beauty in Gaborone).
+
+**Expect:**
+- The cement's product page does not say "Customs cleared by courier", and the order summary has no "Customs & Duty" row and no Courier row: a Gaborone buyer buying from Botswana crosses no border (spec 0009, AC-3).
+- Shea butter's page does not say "Customs cleared by courier" either: where goods are held decides the lane, not where they were made. Its delivery reads "a flat P45" (AC-7).
 
 ---
 
@@ -421,6 +428,15 @@ Run D01 to D05 in order; each picks up the request the last one left.
 2. As Thabo, confirm "Confirm this arrived?".
 
 **Expect:** status ends at Confirmed; it cannot be reopened afterwards.
+
+### D06 A request in Maseru reaches Maseru's runners, not Gaborone's
+
+**Start:** signed in as Kefilwe, delivering to Maseru (Lesotho). Spec 0009, AC-6. Stands on its own; it does not follow D05.
+
+1. On `/request-a-runner`, describe an item. The town is filled in as Maseru. Send.
+2. As Kagiso (who serves Gaborone), open the open pool on `/runner/sourcing`.
+
+**Expect:** Kefilwe's request shows on `/requests` as waiting for a runner, and it is not in Kagiso's open pool: a request goes only to runners who serve its town.
 
 ---
 

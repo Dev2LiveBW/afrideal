@@ -10,7 +10,7 @@ import { ProductTabs } from '@/components/storefront/ProductTabs';
 import { auth } from '@/lib/auth';
 import { readAll } from '@/lib/db';
 import { getCatalogue, getProductDetail, toPublicOffers } from '@/lib/queries';
-import { rankOffers } from '@/lib/supplier-selection';
+import { goodsCountryOf, rankOffers } from '@/lib/supplier-selection';
 import { tierDoors } from '@/lib/tier-doors';
 
 import { ProductBuyPanel } from './ProductBuyPanel';
@@ -110,6 +110,7 @@ export default async function ProductPage({ params }: { params: { id: string } }
           customerType={customerType}
           inStock={inStock}
           primarySupplierId={primaryOffer?.supplier_id ?? selection.primary?.supplier.id ?? ''}
+          goodsCountry={goodsCountryOf(product, offers, suppliers)}
           primaryImage={images.find((image) => image.sort_order === 0)}
           doors={productDoors}
           intro={

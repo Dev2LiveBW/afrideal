@@ -1,4 +1,6 @@
 import type {
+  CountryCode,
+  Product,
   ScoreBreakdown,
   ScoredOffer,
   SelectionResult,
@@ -142,4 +144,53 @@ export function selectSupplier(
 ): ScoredOffer | null {
   const { all } = rankOffers(offers, suppliers);
   return all.find((entry) => entry.offer.stock >= qty) ?? all[0] ?? null;
+}
+
+/**
+ * The supplier an order line for `product` goes to. A supplier's own product
+ * goes to that supplier while it has an offer; anything else, or one whose
+ * supplier cannot take it, goes to whoever `selectSupplier` picks.
+ */
+export function routeLine(
+  product: Product,
+  offers: SupplierOffer[],
+  suppliers: Supplier[],
+  qty = 1,
+): ScoredOffer | null {
+  const candidateOffers = offers.filter((offer) => offer.product_id === product.id);
+  const preferredOffers =
+    product.owner_type === 'SUPPLIER' && product.supplier_id
+      ? candidateOffers.filter((offer) => offer.supplier_id === product.supplier_id)
+      : candidateOffers;
+
+  return (
+    selectSupplier(preferredOffers.length > 0 ? preferredOffers : candidateOffers, suppliers, qty) ??
+    selectSupplier(candidateOffers, suppliers, qty)
+  );
+}
+
+/**
+ * Where a product's goods are held (spec 0009, AC-3): the country of the
+ * supplier an order for it routes to, not where it was made. Shea butter made
+ * in South Africa and held in Gaborone is a domestic lane for a Gaborone buyer.
+ * Null when nobody can supply it, which `laneFor` reads as domestic.
+ */
+export function goodsCountryOf(
+  product: Product,
+  offers: SupplierOffer[],
+  suppliers: Supplier[],
+  qty = 1,
+): CountryCode | null {
+  return routeLine(product, offers, suppliers, qty)?.supplier.country ?? null;
+}
+
+/** `goodsCountryOf` for every product, keyed by id, for the client components. */
+export function goodsCountries(
+  products: Product[],
+  offers: SupplierOffer[],
+  suppliers: Supplier[],
+): Record<string, CountryCode | null> {
+  return Object.fromEntries(
+    products.map((product) => [product.id, goodsCountryOf(product, offers, suppliers)]),
+  );
 }

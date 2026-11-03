@@ -81,8 +81,8 @@ spec [0009](../specs/0009-any-to-any-marketplace.md)
   - [x] "Deliver to" country and town in the header and checkout
   - [x] Courier routes and runner service areas carry countries
   - [x] Copy sweep
-- [ ] Verify it: `/check verify any-to-any marketplace`
-- [ ] Test it: `/test`
+- [x] Verify it: `/check verify any-to-any marketplace`
+- [x] Test it: `/test`
 - [ ] Review it: `/check review`
 - [ ] Document it: `/document`
 

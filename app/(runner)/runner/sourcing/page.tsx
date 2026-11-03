@@ -3,6 +3,8 @@ import { ShieldAlert } from 'lucide-react';
 import { EmptyState, PageHeader } from '@/components/brand/Panel';
 import { auth } from '@/lib/auth';
 import { readAll } from '@/lib/db';
+import { DEFAULT_DELIVERY_COUNTRY } from '@/lib/lanes.mjs';
+import { servesPlace } from '@/lib/runner-match';
 
 import { SourcingClient } from './SourcingClient';
 
@@ -22,10 +24,17 @@ export default async function RunnerSourcingPage() {
     );
   }
 
-  const requests = await readAll('runner-requests');
+  const [requests, runners] = await Promise.all([readAll('runner-requests'), readAll('runners')]);
+  const runner = runners.find((entry) => entry.id === runnerId);
 
+  // Spec 0009, AC-6: the pool holds only requests in a town this runner serves.
   const pool = requests
-    .filter((request) => request.status === 'REQUESTED')
+    .filter(
+      (request) =>
+        request.status === 'REQUESTED' &&
+        !!runner &&
+        servesPlace(runner, request.delivery_country ?? DEFAULT_DELIVERY_COUNTRY, request.delivery_city),
+    )
     .sort((a, b) => a.created_at.localeCompare(b.created_at));
 
   const mine = requests

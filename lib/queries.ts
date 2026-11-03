@@ -2,6 +2,7 @@ import 'server-only';
 
 import { readAll } from '@/lib/db';
 import { asDisplayed } from '@/lib/payments/status';
+import { runnersForJob } from '@/lib/runner-match';
 import { rankOffers } from '@/lib/supplier-selection';
 import type {
   SupplierPayable,
@@ -244,8 +245,18 @@ export async function getRunnerWorkspace(runnerId: string) {
       .filter((s) => s.runner_id === runnerId && s.status !== 'DELIVERED' && s.status !== 'FAILED')
       .map(decorate),
     completed: shipments.filter((s) => s.runner_id === runnerId && s.status === 'DELIVERED').map(decorate),
+    // Spec 0009, AC-6: a job is offered to the runners it alerts, those serving
+    // its pickup town, or every online runner while none there is online. This
+    // runner counts as online here, so going offline hides nothing they could
+    // take once back.
     available: shipments
       .filter((s) => s.runner_id === null || s.status === 'UNASSIGNED')
+      .filter((s) =>
+        runnersForJob(
+          runners.map((candidate) => (candidate.id === runnerId ? { ...candidate, online: true } : candidate)),
+          { country: s.pickup_country, town: s.pickup_town },
+        ).some((candidate) => candidate.id === runnerId),
+      )
       .map(decorate),
   };
 }

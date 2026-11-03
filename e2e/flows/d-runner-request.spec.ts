@@ -73,3 +73,38 @@ test('D01 to D05 a runner finds an item, the buyer approves the price, it arrive
     await expect(done.getByRole('button')).toHaveCount(0);
   });
 });
+
+test('D06 a request in Maseru reaches Maseru runners, not Gaborone ones @p1', async ({ as }) => {
+  const item = runLabel('Basotho blanket, Seanamarena');
+  const buyer = await as('kefilwe');
+  const runner = await as('kagiso', 'phone');
+  const say = (text: string) => Promise.all([caption(buyer, text), caption(runner, text)]);
+
+  await test.step('D06 Kefilwe, delivering to Maseru, asks for a runner', async () => {
+    await say('D06 Kefilwe, delivering to Maseru, asks for a runner');
+    await buyer.goto('/');
+    await ready(buyer);
+    const deliverTo = buyer.locator('button[aria-haspopup="listbox"]').first();
+    await deliverTo.click();
+    await buyer.getByRole('option', { name: 'Maseru' }).click();
+    await expect(deliverTo).toContainText('Maseru');
+
+    await buyer.goto('/request-a-runner');
+    await ready(buyer);
+    // The town comes from "Deliver to", and so does the country it is sent with.
+    await expect(buyer.getByRole('textbox', { name: 'Town or city' })).toHaveValue('Maseru');
+    await buyer.getByRole('textbox', { name: 'What are you looking for?' }).fill(item);
+    await buyer.getByRole('textbox', { name: 'Delivery address' }).fill('Kingsway, Maseru 100');
+    await clickAndSave(buyer.getByRole('button', { name: 'Send to our runners' }));
+    await buyer.waitForURL('**/requests');
+    await expect(card(buyer, item, 'li')).toContainText('Waiting for a runner');
+  });
+
+  await test.step('D06 Kagiso serves Gaborone, so it is not in his pool', async () => {
+    await say('D06 Kagiso serves Gaborone, so it is not in his pool');
+    await runner.goto('/runner/sourcing');
+    await ready(runner);
+    await runner.getByRole('button', { name: /^Open pool/ }).click();
+    await expect(runner.getByRole('heading', { name: item })).toHaveCount(0);
+  });
+});

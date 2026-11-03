@@ -7,6 +7,7 @@ import type {
   MarginType,
   PricingTier,
   Product,
+  Supplier,
   SupplierOffer,
   TieredPriceResult,
 } from '@/types';
@@ -101,14 +102,14 @@ export function marginBreakdown(
  * What one unit of an offer costs AfriDeal in Pula once it is landed: the
  * supplier's price in their own currency (one per length where the offer has
  * them), converted, plus customs when the goods cross a border on their way to
- * the buyer (spec 0009: goods' country ≠ delivery country, not "≠ Botswana").
+ * the buyer (spec 0009, AC-3: the offering supplier's country ≠ the delivery
+ * country; where the product was made does not decide it).
  */
 export function offerLandedCost(
   offer: SupplierOffer,
-  product: Product,
-  variantId: string | null = null,
-  /** Where the order is going; the default until "Deliver to" carries a country. */
-  deliveryCountry: string = DEFAULT_DELIVERY_COUNTRY,
+  variantId: string | null,
+  /** Whether this supplier's goods cross a border to reach the buyer: `isCrossBorder(supplier.country, deliveryCountry)`. */
+  crossBorder: boolean,
 ): { cost: number; customs: number; landed: number } {
   const perVariant = variantId
     ? offer.variant_costs?.find((entry) => entry.variant_id === variantId)?.cost
@@ -116,7 +117,7 @@ export function offerLandedCost(
   const { cost_thebe, customs_thebe, landed_thebe } = landedCost({
     cost: perVariant ?? offer.supplier_cost,
     currency: offer.cost_currency ?? 'BWP',
-    imported: isCrossBorder(product.country_of_origin, deliveryCountry),
+    imported: crossBorder,
   });
   return { cost: cost_thebe / 100, customs: customs_thebe / 100, landed: landed_thebe / 100 };
 }
@@ -405,8 +406,10 @@ export function findMarginAlerts(
   offers: SupplierOffer[],
   products: Product[],
   rules: MarginRule[],
+  suppliers: Supplier[],
   now: Date = new Date(),
 ): MarginAlert[] {
+  const supplierCountry = new Map(suppliers.map((supplier) => [supplier.id, supplier.country]));
   const alerts: MarginAlert[] = [];
 
   for (const band of bands) {
@@ -425,12 +428,19 @@ export function findMarginAlerts(
     if (!rule) continue;
 
     // Worst case is the most expensive supplier we might actually route to,
-    // landed: in Pula, for this band's length, with customs if imported.
+    // landed: in Pula, for this band's length, with customs when that
+    // supplier's goods cross a border to a buyer on the pula ladder's lane.
     const productOffers = offers.filter((offer) => offer.product_id === product.id && offer.active);
     if (productOffers.length === 0) continue;
 
     const worst = productOffers
-      .map((offer) => offerLandedCost(offer, product, band.variant_id))
+      .map((offer) =>
+        offerLandedCost(
+          offer,
+          band.variant_id,
+          isCrossBorder(supplierCountry.get(offer.supplier_id), DEFAULT_DELIVERY_COUNTRY),
+        ),
+      )
       .reduce((a, b) => (b.landed > a.landed ? b : a));
     const worstCost = worst.cost;
     const breakdown = marginBreakdown(
