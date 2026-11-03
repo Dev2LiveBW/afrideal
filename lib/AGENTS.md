@@ -24,6 +24,8 @@ The lib directory holds core domain logic, data store routing, authentication he
 * Route handlers call `guard()` from `lib/api.ts` to enforce authentication and role limits.
 * Prices publish across four quantity tiers (Retail, Bulk, Wholesale, Wholesale Plus). Orders of 100 units or more require quotation.
 * Supplier payables follow strict lifecycle states (PENDING, ON_HOLD, SETTLED, CANCELLED). Only PENDING and ON_HOLD may change.
+* An order and its items are in the buyer's currency (`order.currency`). Anything that books money (payables, margin, GMV) converts back to pula with `toPula(amount, order.buyer_fx_rate)` from `lib/currency.mjs`, and supplier costs with the line's `fx_rate`. Never sum order amounts across orders unconverted.
+* Delivery jobs and sourcing requests reach runners by one rule, `runnersForJob` / `offeredTo` in `lib/runner-match.ts`: the online runners serving the town, or every online runner while none of them is online.
 
 ## Gotchas
 

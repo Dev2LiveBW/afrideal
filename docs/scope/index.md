@@ -63,7 +63,7 @@ _These are recommendations to keep your build orderly, not requirements. Skip an
 | 29 | Team console gaps | delivery | Close out | planned |
 | 30 | Team user management | delivery | Close out | in-progress |
 | 31 | What a supplier sees on an order | delivery | Close out | planned |
-| 32 | Any-to-any marketplace: countries, lanes, deliver to | platform | Close out | in-progress |
+| 32 | Any-to-any marketplace: countries, lanes, deliver to | platform | Close out | done |
 
 Deferred features are listed at the end of each epic file.
 

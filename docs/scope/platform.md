@@ -70,12 +70,12 @@ Switch on the real thing: live gateway keys, live DNS, Company owned repo, host 
 
 ## Close out
 
-### 32. Any-to-any marketplace: countries, lanes, deliver to · in-progress
+### 32. Any-to-any marketplace: countries, lanes, deliver to · done
 Buyers, suppliers, runners and couriers in any country; every order a lane from the goods' town to the buyer's. Countries become data, "imported" becomes "cross-border on this lane", the header's "Deliver to" carries a country, couriers list the routes they serve, runners serve towns in a country.
 **Done when:** a Lesotho buyer can order Botswana and South African goods and is offered the runners, couriers and collection points serving that lane; a Gaborone buyer ordering from Gaborone sees no customs row; no code or copy assumes a Botswana buyer.
 spec [0009](../specs/0009-any-to-any-marketplace.md)
 - [x] Design it (spec): `/architect any-to-any marketplace`
-- [ ] Build it: `/develop any-to-any marketplace`
+- [x] Build it: `/develop any-to-any marketplace`
   - [x] Countries as data; `'BW' | 'ZA'` unions and enums gone; Lesotho in the seed
   - [x] `laneFor()` replaces every "not Botswana" check; customs row per lane
   - [x] "Deliver to" country and town in the header and checkout
@@ -84,7 +84,7 @@ spec [0009](../specs/0009-any-to-any-marketplace.md)
 - [x] Verify it: `/check verify any-to-any marketplace`
 - [x] Test it: `/test`
 - [x] Review it: `/check review`
-- [ ] Document it: `/document`
+- [x] Document it: `/document`
 
 ## Deferred
 Out of scope for the current build pass, kept so the plan stays honest.

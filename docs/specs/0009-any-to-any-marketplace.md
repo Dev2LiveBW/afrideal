@@ -1,7 +1,7 @@
 # 0009. Any-to-any marketplace: buyers, suppliers, runners and couriers anywhere
 
 **Date**: 2026-10-22
-**Status**: Building. The principle is decided (product owner, 2026-10-22).
+**Status**: Accepted (built, verified, tested and reviewed 2026-11-03). The principle is decided (product owner, 2026-10-22).
 Build steps 1 and 2 are done (2026-10-22): the `countries` collection
 (Botswana, South Africa, Lesotho; migration `0003`), country and currency as
 codes from data with every `'BW' | 'ZA'` union and enum gone, a Lesotho
