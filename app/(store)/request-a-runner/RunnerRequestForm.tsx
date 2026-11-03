@@ -9,6 +9,7 @@ import { AlertCircle } from 'lucide-react';
 import toast from 'react-hot-toast';
 
 import { ActionButton } from '@/components/brand/ActionButton';
+import { useDeliverTo } from '@/components/brand/BuyerCurrency';
 import { SOURCING_FEE_RATE } from '@/lib/runner-requests';
 import { cn } from '@/lib/utils';
 
@@ -42,6 +43,8 @@ export function RunnerRequestForm({
 }) {
   const router = useRouter();
   const [serverError, setServerError] = useState<string | null>(null);
+  // Spec 0009: the request goes to runners in the "Deliver to" country and town.
+  const deliverTo = useDeliverTo();
 
   const {
     register,
@@ -50,7 +53,7 @@ export function RunnerRequestForm({
     formState: { errors, isSubmitting },
   } = useForm<Values>({
     resolver: zodResolver(Schema),
-    defaultValues: { quantity: 1, delivery_city: defaultCity ?? '', item: defaultItem ?? '' },
+    defaultValues: { quantity: 1, delivery_city: defaultCity ?? deliverTo.city, item: defaultItem ?? '' },
   });
 
   const quantity = watch('quantity');
@@ -74,6 +77,7 @@ export function RunnerRequestForm({
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         ...values,
+        delivery_country: deliverTo.country,
         budget_per_unit: values.budget_per_unit === '' ? null : values.budget_per_unit,
         needed_by: values.needed_by || null,
       }),

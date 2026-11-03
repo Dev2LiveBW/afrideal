@@ -273,6 +273,12 @@ export interface Order {
    * which were all pula.
    */
   currency?: CurrencyCode;
+  /**
+   * Pula per unit of `currency` when the order was priced, so the ledgers
+   * (payables, margin, GMV) book it in pula at the rate the buyer was charged
+   * at. Missing means 1: every earlier order was charged at 1:1.
+   */
+  buyer_fx_rate?: number;
   subtotal: number;
   delivery_fee: number;
   total: number;

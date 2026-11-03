@@ -1,7 +1,7 @@
 # 0003. Order payment states
 
 **Date**: 2026-10-05
-**Status**: In Progress
+**Status**: Accepted
 
 ## Summary
 

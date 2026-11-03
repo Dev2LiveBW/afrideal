@@ -32,10 +32,10 @@ spec [0003](../specs/0003-order-payment-states.md) · code in `lib/payments/`
   - [x] Expiry everywhere: `effectiveOrderStatus()` across the read surfaces, including the analytics revenue filters (AC-5)
   - [x] Finance and switches: mark as paid on the payables queue, plus pause checkout (AC-6, AC-8, AC-11)
   - [x] Honest checkout and full coverage: the waiting state, EFT instructions, and `payAs()` in verify (AC-1, AC-10, AC-12)
-- [ ] Verify it: `/check verify order payment states`
-- [ ] Test it: `/test order payment states`
+- [x] Verify it: `/check verify order payment states`
+- [x] Test it: `/test order payment states`
 - [x] Review it (fresh model): `/check review order payment states`
-- [ ] Document it: `/document order payment states`
+- [x] Document it: `/document order payment states`
 
 ## Slice 1: Pay for one order by card, end to end
 

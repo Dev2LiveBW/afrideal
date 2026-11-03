@@ -9,7 +9,7 @@ import { AlertCircle, ShieldCheck, ShoppingBag } from 'lucide-react';
 import { z } from 'zod';
 
 import { ActionButton } from '@/components/brand/ActionButton';
-import { PriceText } from '@/components/brand/BuyerCurrency';
+import { ChargeCurrency, PriceText } from '@/components/brand/BuyerCurrency';
 import { MoneyText } from '@/components/brand/MoneyText';
 import { EmptyState, Enclosure } from '@/components/brand/Panel';
 import { CartLineThumb } from '@/components/storefront/CartLineThumb';
@@ -19,10 +19,17 @@ import { courierFee, couriersForLane } from '@/lib/couriers.mjs';
 import { isCrossBorder } from '@/lib/lanes.mjs';
 import { priceLine, sellerQuantities } from '@/lib/pricing-tiers';
 import { cn } from '@/lib/utils';
-import type { Country, Courier, CustomerPrice, CustomerType, PaymentMethod, Product } from '@/types';
+import type {
+  Country,
+  CountryCode,
+  Courier,
+  CustomerPrice,
+  CustomerType,
+  PaymentMethod,
+  Product,
+} from '@/types';
 
 const DOORSTEP_DELIVERY_FEE = 45;
-const COLLECTION_POINT_DELIVERY_FEE = 25;
 
 
 const CheckoutSchema = z
@@ -77,6 +84,7 @@ export function CheckoutClient({
   customerEmail,
   bands,
   products,
+  goodsCountries,
   customerType,
   methods,
   countries,
@@ -87,6 +95,8 @@ export function CheckoutClient({
   /** Published bands, read on the server so the summary cannot quote a stale rung. */
   bands: CustomerPrice[];
   products: Product[];
+  /** Where each product's goods are held, by product id (spec 0009, AC-3). */
+  goodsCountries: Record<string, CountryCode | null>;
   customerType: CustomerType;
   /**
    * The methods that can actually take a payment right now, decided on the
@@ -191,15 +201,14 @@ export function CheckoutClient({
       : DOORSTEP_DELIVERY_FEE;
   const total = subtotal + deliveryFee;
 
-  const hasImportedItems = cart.some((line) => {
-    const product = products.find((candidate) => candidate.id === line.product_id);
-    // Spec 0009: cross-border on this order's lane, to the locker's country or the buyer's.
-    const deliveryCountry =
-      selectedDeliveryMethod === 'COLLECTION_POINT' && selectedPoint
-        ? selectedPoint.country
-        : selectedCountry;
-    return product ? isCrossBorder(product.country_of_origin, deliveryCountry) : false;
-  });
+  // Spec 0009: cross-border on this order's lane, from where the goods are held
+  // to the locker's country or the buyer's.
+  const hasImportedItems = cart.some((line) =>
+    isCrossBorder(
+      goodsCountries[line.product_id],
+      selectedDeliveryMethod === 'COLLECTION_POINT' && selectedPoint ? selectedPoint.country : selectedCountry,
+    ),
+  );
 
   /*
    * Spec 0009, answer 2: the delivery country's payment methods, in its order.
@@ -228,7 +237,7 @@ export function CheckoutClient({
       : (watch('delivery_city') ?? '');
   const goodsByOrigin = new Map<string, number>();
   for (const entry of priced) {
-    const origin = products.find((candidate) => candidate.id === entry.line.product_id)?.country_of_origin;
+    const origin = goodsCountries[entry.line.product_id];
     if (!origin || !isCrossBorder(origin, laneCountry)) continue;
     goodsByOrigin.set(origin, (goodsByOrigin.get(origin) ?? 0) + entry.unitPrice * entry.line.qty);
   }
@@ -331,8 +340,14 @@ export function CheckoutClient({
     );
   }
 
+  // The order is charged in the buyer currency of the country chosen here, which
+  // can differ from the header's "Deliver to", so every amount on this page
+  // shows in that one. Before hydration the form still holds its default, and
+  // the header's currency (read from the cookie) stands.
+  const chargeCurrency = mounted ? (countryEntry?.buyer_currency ?? null) : null;
+
   return (
-    <>
+    <ChargeCurrency currency={chargeCurrency}>
       <h1 className="font-display text-headline-lg font-semibold text-ink">
         Confirm and pay
       </h1>
@@ -424,7 +439,8 @@ export function CheckoutClient({
                 <span className="min-w-0 flex-1">
                   <span className="block text-[13.5px] font-medium text-ink">Collection Point</span>
                   <span className="mt-0.5 block text-[12px] text-body">
-                    Pickup from smart locker (from <PriceText amount={COLLECTION_POINT_DELIVERY_FEE} />)
+                    Pickup from smart locker (from{' '}
+                    <PriceText amount={Math.min(...pointsHere.map((point) => point.fee))} />)
                   </span>
                 </span>
               </label>
@@ -720,6 +736,6 @@ export function CheckoutClient({
           </div>
         </div>
       </form>
-    </>
+    </ChargeCurrency>
   );
 }

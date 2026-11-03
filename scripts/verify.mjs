@@ -662,12 +662,24 @@ section('9. Checkout — the order split engine');
 section('9b. Payment expiry — a closed window reads as cancelled');
 {
   const ops = sessions['ops@afrideal.co.bw'].jar;
+  const buyer = sessions['thabo@gmail.com'].jar;
 
-  // The seed gives both cases without touching the clock: o011 was placed a day
-  // ago paying by card (a 30 minute window, so long gone) and o012 was placed
-  // today paying by bank transfer (7 days, so still open).
+  // o011 is seeded a day before the seed's date paying by card (a 30 minute
+  // window, so long gone). The open case is an order placed now: the seed's
+  // dates are fixed when it is generated, so a seeded "placed today" order
+  // closes its window a week later and this check used to rot with the seed.
   const expired = (await json(ops, '/api/orders/o011')).body;
-  const open = (await json(ops, '/api/orders/o012')).body;
+  const placedNow = await json(buyer, '/api/orders', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      lines: [{ product_id: 'p006', variant_id: 'p006v1', qty: 1 }],
+      payment_method: 'EFT',
+      delivery_address: 'Plot 1, Gaborone',
+      delivery_city: 'Gaborone',
+    }),
+  });
+  const open = (await json(ops, `/api/orders/${placedNow.body?.order?.id}`)).body;
 
   check(
     'AC-5: an order past its window reads as CANCELLED',
@@ -689,6 +701,35 @@ section('9b. Payment expiry — a closed window reads as cancelled');
     (expired?.legs?.length ?? 0) === 0,
     `${expired?.legs?.length} leg(s)`,
   );
+
+  // AC-10 and AC-12: a declined card leaves the order payable. The Stripe section
+  // checks this only when test keys are set, so the mock path proves it here.
+  const byCard = await json(buyer, '/api/orders', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      lines: [{ product_id: 'p006', variant_id: 'p006v1', qty: 1 }],
+      payment_method: 'CARD',
+      delivery_address: 'Plot 1, Gaborone',
+      delivery_city: 'Gaborone',
+    }),
+  });
+  const cardOrderId = byCard.body?.order?.id;
+  const declined = await payCallback(cardOrderId, byCard.body?.payment, {
+    status: 'FAILED',
+    reason: 'Card declined (verify)',
+    amount: byCard.body?.order?.total,
+  });
+  check('AC-12: a declined card is recorded as failed', declined.status === 200 && declined.body?.status === 'FAILED',
+    `${declined.status} ${JSON.stringify(declined.body)}`);
+  const afterDecline = (await json(ops, `/api/orders/${cardOrderId}`)).body;
+  check('AC-10: a failed payment leaves the order awaiting payment', afterDecline?.order?.status === 'AWAITING_PAYMENT',
+    `got ${afterDecline?.order?.status}`);
+  check('AC-10: and raises no supplier leg', (afterDecline?.legs?.length ?? 0) === 0,
+    `${afterDecline?.legs?.length} leg(s)`);
+  const again = await json(buyer, `/api/orders/${cardOrderId}/payments`, { method: 'POST' });
+  check('AC-10: the buyer can try again with a new attempt', (again.status === 200 || again.status === 201) &&
+    again.body?.reused !== true, `${again.status} reused=${again.body?.reused}`);
 
   // The list must agree with the detail, or operations chases an order the buyer
   // has already been told is dead.

@@ -73,3 +73,45 @@ test('D01 to D05 a runner finds an item, the buyer approves the price, it arrive
     await expect(done.getByRole('button')).toHaveCount(0);
   });
 });
+
+test('D06 a request reaches the runners in its town, or everyone while none of them is online @p1', async ({ as }) => {
+  const inFrancistown = runLabel('Mophane worms, 5 kg');
+  const inMaseru = runLabel('Basotho blanket, Seanamarena');
+  const buyer = await as('kefilwe');
+  const runner = await as('kagiso', 'phone');
+  const say = (text: string) => Promise.all([caption(buyer, text), caption(runner, text)]);
+
+  /** Set "Deliver to", then send a request; the town comes from "Deliver to". */
+  async function request(town: string, item: string, address: string) {
+    await buyer.goto('/');
+    await ready(buyer);
+    const deliverTo = buyer.locator('button[aria-haspopup="listbox"]').first();
+    await deliverTo.click();
+    await buyer.getByRole('option', { name: town, exact: true }).click();
+    await expect(deliverTo).toContainText(town);
+
+    await buyer.goto('/request-a-runner');
+    await ready(buyer);
+    await expect(buyer.getByRole('textbox', { name: 'Town or city' })).toHaveValue(town);
+    await buyer.getByRole('textbox', { name: 'What are you looking for?' }).fill(item);
+    await buyer.getByRole('textbox', { name: 'Delivery address' }).fill(address);
+    await clickAndSave(buyer.getByRole('button', { name: 'Send to our runners' }));
+    await buyer.waitForURL('**/requests');
+    await expect(card(buyer, item, 'li')).toContainText('Waiting for a runner');
+  }
+
+  await test.step('D06 Kefilwe asks for a runner in Francistown, then in Maseru', async () => {
+    await say('D06 Kefilwe asks for a runner in Francistown, then in Maseru');
+    await request('Francistown', inFrancistown, 'Plot 1180, Blue Jacket Street');
+    await request('Maseru', inMaseru, 'Kingsway, Maseru 100');
+  });
+
+  await test.step('D06 Kagiso sees the Maseru request, not the Francistown one', async () => {
+    await say('D06 Lesedi is online in Francistown; nobody serving Maseru is, so it widens');
+    await runner.goto('/runner/sourcing');
+    await ready(runner);
+    await runner.getByRole('button', { name: /^Open pool/ }).click();
+    await expect(runner.getByRole('heading', { name: inMaseru })).toBeVisible();
+    await expect(runner.getByRole('heading', { name: inFrancistown })).toHaveCount(0);
+  });
+});

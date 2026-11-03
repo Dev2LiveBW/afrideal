@@ -34,7 +34,7 @@ _These are recommendations to keep your build orderly, not requirements. Skip an
 | L | Admin portal | delivery | Foundation | existing |
 | 1 | Coding standards & CI | platform | Foundation | done |
 | 2 | Staging & production environments | platform | Foundation | in-progress |
-| 3 | Order payment states | buying | Foundation | in-progress |
+| 3 | Order payment states | buying | Foundation | done |
 | 4 | Card payment gateway | buying | Slice 1 | done |
 | 5 | Phone checkout | buying | Slice 1 | done |
 | 6 | Product detail at phone parity | buying | Slice 2 | planned |
@@ -63,7 +63,7 @@ _These are recommendations to keep your build orderly, not requirements. Skip an
 | 29 | Team console gaps | delivery | Close out | planned |
 | 30 | Team user management | delivery | Close out | in-progress |
 | 31 | What a supplier sees on an order | delivery | Close out | planned |
-| 32 | Any-to-any marketplace: countries, lanes, deliver to | platform | Close out | in-progress |
+| 32 | Any-to-any marketplace: countries, lanes, deliver to | platform | Close out | done |
 
 Deferred features are listed at the end of each epic file.
 

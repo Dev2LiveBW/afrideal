@@ -272,6 +272,11 @@ export interface RunnerRequest {
   /** What they hope to pay per unit, in Pula. Null when they would rather be told. */
   budget_per_unit: number | null;
   delivery_city: string;
+  /**
+   * The town's country code (spec 0009), e.g. `LS`. Missing on requests made
+   * before it was recorded, which were all Botswana.
+   */
+  delivery_country?: string;
   delivery_address: string;
   needed_by: string | null;
   status: RunnerRequestStatus;

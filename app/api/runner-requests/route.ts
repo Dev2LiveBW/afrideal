@@ -3,6 +3,9 @@ import { z } from 'zod';
 import { fail, guard, handled, ok } from '@/lib/api';
 import { insert, nextId, readAll } from '@/lib/db';
 import { EVENTS, audit, notify, notifyMany } from '@/lib/notifications';
+import { isActiveCountry } from '@/lib/countries';
+import { DEFAULT_DELIVERY_COUNTRY } from '@/lib/lanes.mjs';
+import { runnersForJob } from '@/lib/runner-match';
 import type { RunnerRequest } from '@/types';
 
 export const dynamic = 'force-dynamic';
@@ -41,6 +44,7 @@ const CreateSchema = z.object({
   quantity: z.coerce.number().int().min(1, 'At least one.').max(10_000),
   budget_per_unit: z.coerce.number().min(0).nullable().optional(),
   delivery_city: z.string().min(2, 'We need a town or city.').max(80),
+  delivery_country: z.string().trim().toUpperCase().length(2).optional(),
   delivery_address: z.string().min(4, 'We need somewhere to deliver to.').max(240),
   needed_by: z.string().max(40).nullable().optional(),
 });
@@ -60,6 +64,12 @@ export const POST = handled(async (request: Request) => {
   const parsed = CreateSchema.safeParse(await request.json());
   if (!parsed.success) return fail(parsed.error.issues[0]?.message ?? 'Check the form.', 422);
 
+  // Spec 0009: the request's town is in a country AfriDeal trades in.
+  const deliveryCountry = parsed.data.delivery_country ?? DEFAULT_DELIVERY_COUNTRY;
+  if (!(await isActiveCountry(deliveryCountry))) {
+    return fail('We do not have runners in that country yet.', 422);
+  }
+
   const now = new Date().toISOString();
   const id = await nextId('runner-requests', 'rr');
   const existing = await readAll('runner-requests');
@@ -74,6 +84,7 @@ export const POST = handled(async (request: Request) => {
     quantity: parsed.data.quantity,
     budget_per_unit: parsed.data.budget_per_unit ?? null,
     delivery_city: parsed.data.delivery_city,
+    delivery_country: deliveryCountry,
     delivery_address: parsed.data.delivery_address,
     needed_by: parsed.data.needed_by || null,
     status: 'REQUESTED',
@@ -89,14 +100,17 @@ export const POST = handled(async (request: Request) => {
 
   await insert('runner-requests', record);
 
-  // Every runner who is online gets told there is something in the pool.
+  // The online runners who serve the request's town get told (spec 0009, AC-6):
+  // a Maseru request reaches Maseru runners, not Gaborone ones. While none of
+  // them is online it goes to every online runner, as a delivery job does, so a
+  // request in a town nobody lists is never stranded. The sourcing pool shows
+  // it to the same runners.
   const [runners, users] = await Promise.all([readAll('runners'), readAll('users')]);
+  const alerted = new Set(
+    runnersForJob(runners, { country: deliveryCountry, town: record.delivery_city }).map((runner) => runner.id),
+  );
   const onlineRunnerUserIds = users
-    .filter(
-      (user) =>
-        user.role === 'RUNNER' &&
-        runners.some((runner) => runner.id === user.runner_id && runner.online),
-    )
+    .filter((user) => user.role === 'RUNNER' && !!user.runner_id && alerted.has(user.runner_id))
     .map((user) => user.id);
 
   if (onlineRunnerUserIds.length > 0) {

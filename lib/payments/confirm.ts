@@ -1,5 +1,6 @@
 import 'server-only';
 
+import { toPula } from '@/lib/currency.mjs';
 import { findById, mutate, nextIds, readAll } from '@/lib/db';
 import { EVENTS, audit, notify } from '@/lib/notifications';
 import { claimedAfterWindow } from '@/lib/payments/policy';
@@ -541,8 +542,14 @@ async function raiseSupplierLegs(order: Order, now: string): Promise<RaisedLegs>
       for (const [supplierId, supplierItems] of bySupplier) {
         if (alreadyLegged.has(supplierId)) continue;
 
-        const gross = supplierItems.reduce((sum, item) => sum + item.line_total, 0);
-        const cost = supplierItems.reduce((sum, item) => sum + item.supplier_cost * item.qty, 0);
+        // Booked in pula (spec 0009): the buyer's lines come back from their
+        // currency at the rate they were charged at, and the supplier's cost
+        // from theirs at the rate fixed on the line (spec 0007, AC-7).
+        const gross = supplierItems.reduce((sum, item) => sum + toPula(item.line_total, order.buyer_fx_rate), 0);
+        const cost = supplierItems.reduce(
+          (sum, item) => sum + toPula(item.supplier_cost, item.fx_rate) * item.qty,
+          0,
+        );
 
         const route = selectSupplier(
           offers.filter((offer) => offer.product_id === supplierItems[0].product_id),

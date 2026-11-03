@@ -50,6 +50,16 @@ export const COLLECTION_POINTS: readonly CollectionPoint[] = [
     fee: 35,
     blurb: 'Smart Locker pickup 06:00 - 22:00 (BWP 35.00)',
   },
+  // Spec 0009: a Lesotho locker, so a Maseru buyer has a collection point on their lane.
+  {
+    id: 'maseru-pioneer-mall-locker',
+    name: 'Maseru Pioneer Mall Locker',
+    address: 'Pioneer Mall, Pioneer Road',
+    city: 'Maseru',
+    country: 'LS',
+    fee: 35,
+    blurb: 'Smart Locker pickup 07:00 - 21:00',
+  },
 ];
 
 /** The locker a request names, by name or id. Null when it is not on the list. */
