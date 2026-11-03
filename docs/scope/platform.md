@@ -83,7 +83,7 @@ spec [0009](../specs/0009-any-to-any-marketplace.md)
   - [x] Copy sweep
 - [x] Verify it: `/check verify any-to-any marketplace`
 - [x] Test it: `/test`
-- [ ] Review it: `/check review`
+- [x] Review it: `/check review`
 - [ ] Document it: `/document`
 
 ## Deferred

@@ -9,7 +9,7 @@ import { availablePaymentMethods, startPayment } from '@/lib/payments/adapters';
 import { allAsDisplayed } from '@/lib/payments/status';
 import { findCollectionPoint } from '@/lib/collection-points';
 import { activeCountries } from '@/lib/countries';
-import { fromPula } from '@/lib/currency.mjs';
+import { fromPula, pulaPerUnit } from '@/lib/currency.mjs';
 import { DEFAULT_DELIVERY_COUNTRY, isCrossBorder } from '@/lib/lanes.mjs';
 import { checkoutIsPaused } from '@/lib/settings';
 import { paymentExpiresAt } from '@/lib/payments/policy';
@@ -252,6 +252,7 @@ export const POST = handled(async (request: Request) => {
     customer_name: actor.name,
     status: 'AWAITING_PAYMENT',
     currency,
+    buyer_fx_rate: pulaPerUnit(currency),
     subtotal,
     delivery_fee,
     total: subtotal + delivery_fee,

@@ -5,7 +5,7 @@ import { insert, nextId, readAll } from '@/lib/db';
 import { EVENTS, audit, notify, notifyMany } from '@/lib/notifications';
 import { isActiveCountry } from '@/lib/countries';
 import { DEFAULT_DELIVERY_COUNTRY } from '@/lib/lanes.mjs';
-import { servesPlace } from '@/lib/runner-match';
+import { runnersForJob } from '@/lib/runner-match';
 import type { RunnerRequest } from '@/types';
 
 export const dynamic = 'force-dynamic';
@@ -101,20 +101,16 @@ export const POST = handled(async (request: Request) => {
   await insert('runner-requests', record);
 
   // The online runners who serve the request's town get told (spec 0009, AC-6):
-  // a Maseru request reaches Maseru runners, not Gaborone ones. The sourcing
-  // pool shows it to the same runners, so nobody else can take it.
+  // a Maseru request reaches Maseru runners, not Gaborone ones. While none of
+  // them is online it goes to every online runner, as a delivery job does, so a
+  // request in a town nobody lists is never stranded. The sourcing pool shows
+  // it to the same runners.
   const [runners, users] = await Promise.all([readAll('runners'), readAll('users')]);
+  const alerted = new Set(
+    runnersForJob(runners, { country: deliveryCountry, town: record.delivery_city }).map((runner) => runner.id),
+  );
   const onlineRunnerUserIds = users
-    .filter(
-      (user) =>
-        user.role === 'RUNNER' &&
-        runners.some(
-          (runner) =>
-            runner.id === user.runner_id &&
-            runner.online &&
-            servesPlace(runner, deliveryCountry, record.delivery_city),
-        ),
-    )
+    .filter((user) => user.role === 'RUNNER' && !!user.runner_id && alerted.has(user.runner_id))
     .map((user) => user.id);
 
   if (onlineRunnerUserIds.length > 0) {

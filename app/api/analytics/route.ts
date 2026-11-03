@@ -1,7 +1,9 @@
 import { guard, handled, ok } from '@/lib/api';
+import { toPula } from '@/lib/currency.mjs';
 import { readAll } from '@/lib/db';
 import { billableOnly, effectiveOrderStatus } from '@/lib/payments/status';
 import { summarise } from '@/lib/payables';
+import type { Order } from '@/types';
 
 export const dynamic = 'force-dynamic';
 
@@ -21,6 +23,13 @@ export const dynamic = 'force-dynamic';
 
 const REVENUE_SHARE_RATE = 0.05;
 const COMMISSION_RATE = 0.12;
+
+/**
+ * An order's own amount in pula. Orders are charged in the buyer's currency
+ * (spec 0009); every figure here is booked in pula, so each one comes back
+ * at the rate that order was charged at before it is summed.
+ */
+const inPula = (order: Order, amount: number) => toPula(amount, order.buyer_fx_rate);
 
 export const GET = handled(async (request: Request) => {
   const { response } = await guard(['SUPER_ADMIN', 'OPERATIONS_ADMIN', 'FINANCE_ADMIN']);
@@ -47,7 +56,7 @@ export const GET = handled(async (request: Request) => {
   // average order value until somebody cancelled it by hand.
   const billable = billableOnly(inPeriod, payments);
 
-  const periodGmv = billable.reduce((sum, order) => sum + order.total, 0);
+  const periodGmv = billable.reduce((sum, order) => sum + inPula(order, order.total), 0);
 
   // Platform margin, computed from the line items rather than assumed.
   const itemsByOrder = new Map<string, typeof items>();
@@ -59,7 +68,7 @@ export const GET = handled(async (request: Request) => {
     const lines = itemsByOrder.get(order.id) ?? [];
     return (
       sum +
-      lines.reduce((lineSum, item) => lineSum + (item.unit_price - item.supplier_cost) * item.qty, 0)
+      lines.reduce((lineSum, item) => lineSum + (inPula(order, item.unit_price) - toPula(item.supplier_cost, item.fx_rate)) * item.qty, 0)
     );
   }, 0);
 
@@ -74,7 +83,7 @@ export const GET = handled(async (request: Request) => {
 
     trend.push({
       date: day.toLocaleDateString('en-GB', { day: 'numeric', month: 'short' }),
-      gmv: dayOrders.reduce((sum, order) => sum + order.total, 0),
+      gmv: dayOrders.reduce((sum, order) => sum + inPula(order, order.total), 0),
       orders: dayOrders.length,
     });
   }
@@ -97,10 +106,10 @@ export const GET = handled(async (request: Request) => {
     .reduce((sum, record) => sum + record.amount, 0);
   const cancelled = inPeriod
     .filter((order) => effectiveOrderStatus(order, payments) === 'CANCELLED')
-    .reduce((sum, order) => sum + order.total, 0);
+    .reduce((sum, order) => sum + inPula(order, order.total), 0);
   const refundedOrders = inPeriod
     .filter((order) => effectiveOrderStatus(order, payments) === 'REFUNDED')
-    .reduce((sum, order) => sum + (order.refund_amount ?? order.total), 0);
+    .reduce((sum, order) => sum + inPula(order, order.refund_amount ?? order.total), 0);
 
   const exclusions = [
     { label: 'Cancelled supplier invoices', amount: refunded, why: 'Refunded to the customer, so it never became platform revenue.' },

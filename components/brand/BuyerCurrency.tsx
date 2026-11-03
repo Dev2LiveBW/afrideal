@@ -45,6 +45,17 @@ export function BuyerCurrencyProvider({
   );
 }
 
+/**
+ * Shows the money inside it in `currency` instead of the "Deliver to" one.
+ * Checkout wraps its form in this with the currency of the country chosen
+ * there, because that is the currency the order is charged in. Without a
+ * currency it leaves the surrounding one in place.
+ */
+export function ChargeCurrency({ currency, children }: { currency: CurrencyCode | null; children: ReactNode }) {
+  if (!currency) return <>{children}</>;
+  return <BuyerCurrencyContext.Provider value={currency}>{children}</BuyerCurrencyContext.Provider>;
+}
+
 /** The shopper's currency inside the storefront; null outside it (console screens). */
 export function useBuyerCurrency(): CurrencyCode | null {
   return useContext(BuyerCurrencyContext);

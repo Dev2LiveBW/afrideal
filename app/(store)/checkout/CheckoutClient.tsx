@@ -9,7 +9,7 @@ import { AlertCircle, ShieldCheck, ShoppingBag } from 'lucide-react';
 import { z } from 'zod';
 
 import { ActionButton } from '@/components/brand/ActionButton';
-import { PriceText } from '@/components/brand/BuyerCurrency';
+import { ChargeCurrency, PriceText } from '@/components/brand/BuyerCurrency';
 import { MoneyText } from '@/components/brand/MoneyText';
 import { EmptyState, Enclosure } from '@/components/brand/Panel';
 import { CartLineThumb } from '@/components/storefront/CartLineThumb';
@@ -340,8 +340,14 @@ export function CheckoutClient({
     );
   }
 
+  // The order is charged in the buyer currency of the country chosen here, which
+  // can differ from the header's "Deliver to", so every amount on this page
+  // shows in that one. Before hydration the form still holds its default, and
+  // the header's currency (read from the cookie) stands.
+  const chargeCurrency = mounted ? (countryEntry?.buyer_currency ?? null) : null;
+
   return (
-    <>
+    <ChargeCurrency currency={chargeCurrency}>
       <h1 className="font-display text-headline-lg font-semibold text-ink">
         Confirm and pay
       </h1>
@@ -730,6 +736,6 @@ export function CheckoutClient({
           </div>
         </div>
       </form>
-    </>
+    </ChargeCurrency>
   );
 }

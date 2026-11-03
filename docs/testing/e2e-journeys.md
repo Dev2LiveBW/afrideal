@@ -85,7 +85,7 @@ The spec for each journey lives in `e2e/` (storefront, supplier, runner, console
 | D03 | Runner sends back a price | Runner | P1 | yes | yes |
 | D04 | Buyer approves the price | Customer | P1 | yes | yes |
 | D05 | Runner delivers, buyer confirms | Runner, Customer | P1 | yes | yes |
-| D06 | A request in Maseru reaches Maseru's runners, not Gaborone's | Customer, Runner | P1 | yes | no |
+| D06 | A request reaches the runners in its town, or everyone while none of them is online | Customer, Runner | P1 | yes | no |
 | **E** | **Supplier portal** | | | | |
 | E01 | Supplier dashboard shows their own numbers | Supplier | P1 | yes | yes |
 | E02 | Confirm, prepare, and mark an order ready for collection | Supplier | P1 | yes | yes |
@@ -429,14 +429,18 @@ Run D01 to D05 in order; each picks up the request the last one left.
 
 **Expect:** status ends at Confirmed; it cannot be reopened afterwards.
 
-### D06 A request in Maseru reaches Maseru's runners, not Gaborone's
+### D06 A request reaches the runners in its town, or everyone while none of them is online
 
-**Start:** signed in as Kefilwe, delivering to Maseru (Lesotho). Spec 0009, AC-6. Stands on its own; it does not follow D05.
+**Start:** signed in as Kefilwe. Spec 0009, AC-6. Stands on its own; it does not follow D05. In the seed Lesedi (Francistown) is online and Palesa (Maseru) is offline.
 
-1. On `/request-a-runner`, describe an item. The town is filled in as Maseru. Send.
-2. As Kagiso (who serves Gaborone), open the open pool on `/runner/sourcing`.
+1. Set "Deliver to" to Francistown. On `/request-a-runner`, describe an item; the town is filled in as Francistown. Send.
+2. Set "Deliver to" to Maseru and send a second request the same way.
+3. As Kagiso (who serves Gaborone), open the open pool on `/runner/sourcing`.
 
-**Expect:** Kefilwe's request shows on `/requests` as waiting for a runner, and it is not in Kagiso's open pool: a request goes only to runners who serve its town.
+**Expect:**
+- Both requests show on `/requests` as waiting for a runner.
+- The Francistown request is not in Kagiso's pool: Lesedi serves Francistown and is online, so it goes to Lesedi alone.
+- The Maseru request is in Kagiso's pool: nobody serving Maseru is online, so it widens to every online runner rather than reaching no one (review 2026-11-03).
 
 ---
 
