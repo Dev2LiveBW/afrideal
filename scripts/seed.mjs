@@ -157,7 +157,17 @@ const docTemplate = (status, uploadedDaysAgo) => [
  * `method` is taken once that method is live on the platform (a card through
  * Stripe or DPO at launch); one without is shown as "coming soon".
  */
-const CARD = { name: 'Visa / Mastercard', blurb: 'Pay by card through our secure gateway.', method: 'DPO_PAY' };
+const CARD = { name: 'Visa / Mastercard', blurb: 'Pay by card through our secure gateway.', method: 'CARD' };
+
+/*
+ * Spec 0010: the card is a method, the gateway a provider behind it. The
+ * seeded history was "paid" before Stripe existed here, so its card payments
+ * name DPO as the provider; live ones are taken by whichever provider
+ * CARD_PROVIDER selects.
+ */
+function seedProvider(method) {
+  return method === 'CARD' ? 'DPO_PAY' : method;
+}
 const PAYMENT_METHODS = {
   BW: [
     CARD,
@@ -888,20 +898,20 @@ runnerRequestSpecs.forEach((spec, index) => {
  * 2 pending, 2 disputed, 1 cancelled.
  */
 const orderSpecs = [
-  ['DELIVERED', 'u006', 27, 'DPO_PAY', 'Gaborone', 'Plot 5412, Extension 12', [['p001', 1, 2], ['p003', 0, 3]]],
+  ['DELIVERED', 'u006', 27, 'CARD', 'Gaborone', 'Plot 5412, Extension 12', [['p001', 1, 2], ['p003', 0, 3]]],
   ['DELIVERED', 'u007', 24, 'ORANGE_MONEY', 'Gaborone', 'Plot 220, Block 6, Broadhurst', [['p006', 2, 1]]],
   ['DELIVERED', 'u006', 19, 'PAYGATE', 'Gaborone', 'Plot 5412, Extension 12', [['p004', 0, 1], ['p005', 0, 1]]],
-  ['DELIVERED', 'u007', 15, 'DPO_PAY', 'Francistown', 'Plot 1180, Tati Siding', [['p008', 1, 4], ['p010', 0, 2]]],
+  ['DELIVERED', 'u007', 15, 'CARD', 'Francistown', 'Plot 1180, Tati Siding', [['p008', 1, 4], ['p010', 0, 2]]],
   ['IN_TRANSIT', 'u006', 6, 'ORANGE_MONEY', 'Gaborone', 'Plot 5412, Extension 12', [['p001', 0, 5]]],
-  ['IN_TRANSIT', 'u007', 5, 'DPO_PAY', 'Gaborone', 'Plot 220, Block 6, Broadhurst', [['p007', 0, 8], ['p006', 0, 12]]],
+  ['IN_TRANSIT', 'u007', 5, 'CARD', 'Gaborone', 'Plot 220, Block 6, Broadhurst', [['p007', 0, 8], ['p006', 0, 12]]],
   ['IN_TRANSIT', 'u006', 4, 'PAYGATE', 'Lobatse', 'Plot 88, Peleng Ward', [['p012', 1, 3], ['p011', 0, 2]]],
-  ['PROCESSING', 'u007', 3, 'DPO_PAY', 'Gaborone', 'Plot 220, Block 6, Broadhurst', [['p001', 2, 1], ['p003', 1, 1]]],
+  ['PROCESSING', 'u007', 3, 'CARD', 'Gaborone', 'Plot 220, Block 6, Broadhurst', [['p001', 2, 1], ['p003', 1, 1]]],
   ['PROCESSING', 'u006', 2, 'ORANGE_MONEY', 'Gaborone', 'Plot 5412, Extension 12', [['p009', 0, 2]]],
   ['PROCESSING', 'u007', 2, 'PAYGATE', 'Maun', 'Plot 3301, Boseja Ward', [['p008', 0, 6]]],
-  ['AWAITING_PAYMENT', 'u006', 1, 'DPO_PAY', 'Gaborone', 'Plot 5412, Extension 12', [['p005', 1, 1]]],
+  ['AWAITING_PAYMENT', 'u006', 1, 'CARD', 'Gaborone', 'Plot 5412, Extension 12', [['p005', 1, 1]]],
   ['AWAITING_PAYMENT', 'u007', 0, 'EFT', 'Gaborone', 'Plot 220, Block 6, Broadhurst', [['p010', 1, 1], ['p001', 0, 2]]],
   ['DISPUTED', 'u006', 12, 'PAYGATE', 'Gaborone', 'Plot 5412, Extension 12', [['p005', 0, 2]]],
-  ['DISPUTED', 'u007', 9, 'DPO_PAY', 'Francistown', 'Plot 1180, Tati Siding', [['p007', 1, 6]]],
+  ['DISPUTED', 'u007', 9, 'CARD', 'Francistown', 'Plot 1180, Tati Siding', [['p007', 1, 6]]],
   ['CANCELLED', 'u006', 21, 'ORANGE_MONEY', 'Gaborone', 'Plot 5412, Extension 12', [['p004', 2, 1]]],
 ];
 
@@ -996,10 +1006,14 @@ orderSpecs.forEach((spec, index) => {
     // Spec 0003: only a confirmed payment gives an order a reference. An unpaid
     // order has none, which is what stopped every seeded order looking paid.
     payment_reference:
-      status === 'AWAITING_PAYMENT' ? null : `${payment.split('_')[0]}-${String(884210 + index * 37)}`,
-    // Card and wallet windows are 30 minutes, a bank transfer gets 7 days.
+      status === 'AWAITING_PAYMENT'
+        ? null
+        : `${seedProvider(payment).split('_')[0]}-${String(884210 + index * 37)}`,
+    // Card and wallet windows: 35 minutes for a card (spec 0010, outliving a
+    // Stripe session), 30 for a wallet. A bank transfer gets 7 days.
     payment_expires_at: new Date(
-      new Date(placedAt).getTime() + (payment === 'EFT' ? 7 * 24 * 60 : 30) * 60 * 1000,
+      new Date(placedAt).getTime() +
+        (payment === 'EFT' ? 7 * 24 * 60 : payment === 'CARD' ? 35 : 30) * 60 * 1000,
     ).toISOString(),
     cancel_reason: status === 'CANCELLED' ? 'STAFF' : null,
     delivery_address: address,
@@ -1778,7 +1792,7 @@ const payments = orders
     return {
       id: `pmt${String(paymentSeq++).padStart(3, '0')}`,
       order_id: order.id,
-      provider: order.payment_method,
+      provider: seedProvider(order.payment_method),
       provider_reference: order.payment_reference,
       status: 'CONFIRMED',
       amount: order.total,

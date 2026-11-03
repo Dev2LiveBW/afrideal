@@ -92,7 +92,7 @@ export default async function HowItWorksPage() {
                 />
                 <span>
                   AfriDeal is not a payment provider. Payments are processed by licensed partners —
-                  DPO Pay, Orange Money and PayGate — and AfriDeal does not hold funds on behalf of
+                  a licensed card processor for Visa and Mastercard, your own bank for transfers — and AfriDeal does not hold funds on behalf of
                   buyers or suppliers. Your card details never reach us.
                 </span>
               </p>

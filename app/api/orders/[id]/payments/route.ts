@@ -1,6 +1,7 @@
 import { fail, guard, handled, ok } from '@/lib/api';
 import { findById, insert, nextIds, readAll, update } from '@/lib/db';
-import { startPayment } from '@/lib/payments/adapters';
+import { resumePayment, startPayment } from '@/lib/payments/adapters';
+import { failPayment } from '@/lib/payments/confirm';
 import { windowHasClosed } from '@/lib/payments/policy';
 import type { Payment } from '@/types';
 
@@ -66,8 +67,22 @@ export const POST = handled(async (_request: Request, { params }: { params: { id
   // An attempt still open is handed back rather than duplicated, so a buyer who
   // double taps does not litter the order with STARTED rows.
   const open = mine.find((row) => row.status === 'STARTED');
-  if (open) {
-    const existing = await startPayment(order);
+  const existing = open ? await resumePayment(order, open) : null;
+
+  // The gateway closed it unpaid (a Stripe session past its time). Its own
+  // `expired` event fails the row too; failing it here as well lets the buyer
+  // carry on now instead of waiting for that event.
+  if (open && !existing) {
+    await failPayment({
+      orderId: order.id,
+      provider: open.provider,
+      providerReference: open.provider_reference ?? '',
+      reason: 'The payment page closed before payment.',
+      actor: { id: actor.id, name: actor.name },
+    });
+  }
+
+  if (open && existing) {
     if (existing.providerReference && existing.providerReference !== open.provider_reference) {
       await update('payments', open.id, { provider_reference: existing.providerReference });
       open.provider_reference = existing.providerReference;

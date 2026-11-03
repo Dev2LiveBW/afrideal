@@ -17,8 +17,8 @@ afterEach(() => {
 });
 
 describe('paymentExpiresAt', () => {
-  it('gives a card payment thirty minutes, so our deadline outlives the gateway session · covers AC-1', () => {
-    expect(paymentExpiresAt(PLACED, 'DPO_PAY')).toBe('2026-10-06T08:30:00.000Z');
+  it('gives a card payment thirty-five minutes, so our deadline outlives a 31 minute Stripe session · covers AC-1', () => {
+    expect(paymentExpiresAt(PLACED, 'CARD')).toBe('2026-10-06T08:35:00.000Z');
   });
 
   it('gives PayGate the same thirty minutes · covers AC-1', () => {
@@ -34,7 +34,7 @@ describe('paymentExpiresAt', () => {
   });
 
   it('never gives a bank transfer the card window, which would expire real money in flight · covers AC-1', () => {
-    expect(paymentExpiresAt(PLACED, 'EFT')).not.toBe(paymentExpiresAt(PLACED, 'DPO_PAY'));
+    expect(paymentExpiresAt(PLACED, 'EFT')).not.toBe(paymentExpiresAt(PLACED, 'CARD'));
   });
 });
 
@@ -60,7 +60,7 @@ describe('the PAYMENT_WINDOW_SECONDS override', () => {
 
     for (const bad of ['0', '-5', 'soon', '']) {
       vi.stubEnv('PAYMENT_WINDOW_SECONDS', bad);
-      expect(paymentExpiresAt(PLACED, 'DPO_PAY')).toBe('2026-10-06T08:30:00.000Z');
+      expect(paymentExpiresAt(PLACED, 'CARD')).toBe('2026-10-06T08:35:00.000Z');
     }
   });
 });

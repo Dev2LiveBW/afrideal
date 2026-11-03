@@ -29,7 +29,7 @@ const CheckoutSchema = z.object({
       }),
     )
     .min(1, 'Your cart is empty.'),
-  payment_method: z.enum(['DPO_PAY', 'ORANGE_MONEY', 'PAYGATE', 'EFT']),
+  payment_method: z.enum(['CARD', 'ORANGE_MONEY', 'PAYGATE', 'EFT']),
   delivery_method: z.enum(['DOORSTEP', 'COLLECTION_POINT']).optional().default('DOORSTEP'),
   collection_point: z.string().nullish(),
   delivery_address: z.string().min(4, 'Enter a delivery address.'),

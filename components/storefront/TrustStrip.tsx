@@ -22,7 +22,7 @@ const CLAIMS = [
   {
     icon: Landmark,
     title: 'Payments handled by licensed partners',
-    body: 'Processed through DPO Pay, Orange Money or PayGate. AfriDeal never sees your card details.',
+    body: 'Cards go through a licensed card processor, transfers through your own bank. AfriDeal never sees your card details.',
     /* A disclosure, not elaboration - see the note above. Never folds away. */
     legal: true,
   },
