@@ -50,6 +50,13 @@
       "when": 1793761293358,
       "tag": "0006_addresses",
       "breakpoints": true
+    },
+    {
+      "idx": 7,
+      "version": "7",
+      "when": 1793770294961,
+      "tag": "0007_saved_items",
+      "breakpoints": true
     }
   ]
 }

@@ -30,6 +30,7 @@ import type {
   RfqResponse,
   Runner,
   RunnerRequest,
+  SavedItem,
   Setting,
   Settlement,
   Shipment,
@@ -121,6 +122,9 @@ export interface Schema {
 
   // A buyer's saved addresses (spec 0011). Orders keep their own copy.
   addresses: Address;
+
+  // What a buyer saved for later (spec 0011).
+  'saved-items': SavedItem;
 }
 
 export type Collection = keyof Schema;

@@ -280,10 +280,10 @@ Ordered as tracer bullets, one thin thread through every layer at a time, with m
 6. [x] Add `/terms`, and show instructions on the order pages and the runner's job, satisfies **AC-9**, **AC-10**.
 
 **Slice 2: account and repeat buying**
-7. Build the reorder endpoint and button, satisfies **AC-11**, **AC-12**.
-8. Build the map link as a pure function and show it on tracking, satisfies **AC-13**.
-9. Add `saved-items`, its routes, the heart and `/account/saved`, satisfies **AC-14**, **AC-15**, **AC-16**, **AC-19**.
-10. Add `alert_prefs`, its route and `/account/settings`, satisfies **AC-17**, **AC-18**, **AC-19**.
+7. [x] Build the reorder endpoint and button, satisfies **AC-11**, **AC-12**.
+8. [x] Build the map link as a pure function and show it on tracking, satisfies **AC-13**.
+9. [x] Add `saved-items`, its routes, the heart and `/account/saved`, satisfies **AC-14**, **AC-15**, **AC-16**, **AC-19**.
+10. [x] Add `alert_prefs`, its route and `/account/settings`, satisfies **AC-17**, **AC-18**, **AC-19**.
 
 **Slice 3: promo codes**
 11. Extract `buildOrderLines()` from the order route with no change in behaviour, then add `promo-codes`, `lib/promo.mjs` with unit tests at rates other than 1, and the quote endpoint, satisfies **AC-21**, **AC-22**, **AC-23**.

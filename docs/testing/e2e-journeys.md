@@ -75,6 +75,9 @@ The spec for each journey lives in `e2e/` (storefront, supplier, runner, console
 | B12 | A buyer in Lesotho pays in rand, with Lesotho's payment methods | Customer | P1 | yes | yes |
 | B13 | Local goods to a local buyer carry no customs and no courier | Customer | P1 | yes | yes |
 | B14 | A saved address in another country | Customer | P1 | yes | no |
+| B15 | Reorder a delivered order at today's prices | Customer | P1 | yes | no |
+| B16 | A heart saves an item, for a guest too | Customer | P1 | yes | no |
+| B17 | Alert settings and the consent date | Customer | P2 | yes | no |
 | **C** | **Request for quotation (RFQ)** | | | | |
 | C01 | Buyer sends an RFQ | Customer | P1 | yes | yes |
 | C02 | Invited supplier sends a quote | Supplier | P1 | no screen yet | no |
@@ -368,6 +371,54 @@ That is 51 journeys. 48 have a screen to test (C02 to C04 do not yet, see Findin
 - Without the terms, checkout says "Please agree to the terms to place your order." and nothing is placed.
 - The order page shows "For Mma Dithebe" with the recipient's phone, and the instructions.
 - Deleting the address leaves the order exactly as it was.
+
+### B15 Reorder a delivered order at today's prices
+
+**Start:** signed in as Kefilwe, with the seeded delivered order o004 (maize meal and copy paper). Spec 0011, AC-11 to AC-13.
+
+1. Open order o004 from `/orders`.
+2. Press Reorder.
+3. Open the cart.
+4. Open order o012, which is still waiting for payment.
+
+**Expect:**
+
+- The order page has an "Open in Maps" link that ends at the town and country, with no street in it.
+- Reorder says the copy paper could not be added, and why: its minimum order is now 5.
+- The cart holds the maize meal at today's price, not the price on the old order.
+- An order that is not delivered offers no Reorder.
+
+### B16 A heart saves an item, for a guest too
+
+**Start:** signed out, on a product page. Spec 0011, AC-14 to AC-16 and AC-19.
+
+1. Tap the heart.
+2. Sign in as Thabo with a demo card.
+3. Check the heart, then tap it.
+4. Open a second browser as Thabo and go to `/account/saved`.
+5. Remove the item.
+
+**Expect:**
+
+- The guest goes to sign in, and comes back to the same product page.
+- Nothing was saved until the tap after signing in.
+- The second browser lists the item with its price.
+- Removing it empties the list, and the heart on the product page is off again.
+- The account panel links Addresses, Saved items and Account settings. Payments stays dimmed.
+
+### B17 Alert settings and the consent date
+
+**Start:** signed in as Kefilwe, on `/account/settings`. Spec 0011, AC-17 and AC-18.
+
+1. Read the three switches.
+2. Turn on Offers and news, and reload.
+3. Turn it off, and reload.
+
+**Expect:**
+
+- Order updates by email and by SMS are on, and Offers and news is off.
+- Turning it on shows the date you agreed, and it stays on after a reload.
+- Turning it off removes the date.
 
 ## C. Request for quotation (RFQ)
 

@@ -88,6 +88,9 @@ export const EVENTS = {
   SHIPMENT_CREATED: 'SHIPMENT_CREATED',
   SHIPMENT_DELIVERED: 'SHIPMENT_DELIVERED',
   REFUND_ISSUED: 'REFUND_ISSUED',
+  /** Spec 0011, AC-18: the record of a buyer opting in to or out of offers and news. */
+  MARKETING_CONSENT_ON: 'MARKETING_CONSENT_ON',
+  MARKETING_CONSENT_OFF: 'MARKETING_CONSENT_OFF',
 } as const;
 
 export type DomainEvent = (typeof EVENTS)[keyof typeof EVENTS];

@@ -1863,6 +1863,8 @@ const files = {
   payments,
   settings,
   addresses,
+  // Empty on purpose: a buyer's list is theirs to fill.
+  'saved-items': [],
 };
 
 await fs.mkdir(DATA_DIR, { recursive: true });

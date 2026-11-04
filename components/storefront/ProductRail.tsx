@@ -1,13 +1,14 @@
 'use client';
 
 import Link from 'next/link';
-import { useRef, useState } from 'react';
-import { ChevronLeft, ChevronRight, Heart, Plus } from 'lucide-react';
+import { useRef } from 'react';
+import { ChevronLeft, ChevronRight, Plus } from 'lucide-react';
 import toast from 'react-hot-toast';
 
 import { PriceTag } from '@/components/brand/MoneyText';
 import { PriceText } from '@/components/brand/BuyerCurrency';
 import { CategoryIcon } from '@/components/storefront/CategoryIcon';
+import { SaveButton } from '@/components/storefront/SaveButton';
 import { Swatch, photoUrl } from '@/components/storefront/Swatch';
 import { useAfriDealStore } from '@/store/useAfriDealStore';
 import { categoryPalette } from '@/lib/category-palette';
@@ -45,24 +46,9 @@ export function ProductRail({
 }) {
   const scroller = useRef<HTMLDivElement>(null);
   const addToCart = useAfriDealStore((state) => state.addToCart);
-  const [saved, setSaved] = useState<Set<string>>(new Set());
 
   function nudge(direction: -1 | 1) {
     scroller.current?.scrollBy({ left: direction * 480, behavior: 'smooth' });
-  }
-
-  function toggleSave(productId: string, name: string) {
-    setSaved((previous) => {
-      const next = new Set(previous);
-      if (next.has(productId)) {
-        next.delete(productId);
-        toast(`Removed ${name} from your list`);
-      } else {
-        next.add(productId);
-        toast.success(`Saved ${name} for later`);
-      }
-      return next;
-    });
   }
 
   function quickAdd(product: RailProduct) {
@@ -127,7 +113,6 @@ export function ProductRail({
           const primary = images.find(
             (image) => image.product_id === product.id && image.sort_order === 0,
           );
-          const isSaved = saved.has(product.id);
           const palette = categoryPalette(product.category_id);
 
           return (
@@ -170,6 +155,13 @@ export function ProductRail({
                   )}
                 </div>
               </Link>
+
+              {/* Beside the link rather than in it, and clear of the promotion badge. */}
+              <SaveButton
+                productId={product.id}
+                productName={product.name}
+                className="absolute left-1 top-1 flex h-7 w-7 items-center justify-center rounded-full bg-surface-raised/90 shadow-sm backdrop-blur-sm transition-colors hover:bg-surface-raised"
+              />
 
               <div className="mt-2.5 sm:mt-5 flex w-full flex-col items-center px-1 sm:px-2">
                 <Link href={`/products/${product.id}`} className="block">

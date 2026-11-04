@@ -4,6 +4,8 @@ test.describe('B14. A saved address in another country', () => {
   test.use(signedInAs('kefilwe'));
 
   test('B14 a buyer saves an address, sends there, and the order keeps its copy @p1', async ({ page }) => {
+    // The paid order page can take a minute and a half over Neon, and this journey loads it twice.
+    test.slow();
     const label = runLabel('Mum');
 
     await caption(page, 'B14 · 1. Checkout opens on the default address');

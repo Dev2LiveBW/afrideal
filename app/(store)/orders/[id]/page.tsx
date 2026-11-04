@@ -17,11 +17,13 @@ import { findById } from '@/lib/db';
 import { countryNames as readCountryNames } from '@/lib/countries';
 import { DEFAULT_DELIVERY_COUNTRY, isCrossBorder } from '@/lib/lanes.mjs';
 import { COLLECTION_POINTS } from '@/lib/collection-points';
+import { orderMapLink } from '@/lib/map-link';
 import { couriersForLane } from '@/lib/couriers.mjs';
 import { servesPlace } from '@/lib/runner-match';
 
 import { ConfirmingPayment } from './ConfirmingPayment';
 import { OrderActions } from './OrderActions';
+import { ReorderButton } from './ReorderButton';
 import { RetryPaymentButton } from './RetryPaymentButton';
 
 /**
@@ -159,6 +161,8 @@ export default async function OrderTrackingPage({
     order.status === 'DELIVERED';
   const canDispute = outstanding.length > 0 && order.status !== 'CANCELLED';
   const isCollectionPoint = order.delivery_method === 'COLLECTION_POINT';
+  // Spec 0011, AC-12: a reorder prices lines for the buyer, so staff are not offered it.
+  const canReorder = order.status === 'DELIVERED' && order.customer_id === session.user.id;
 
   const lockerPinEntry = [...order.timeline]
     .reverse()
@@ -407,6 +411,15 @@ export default async function OrderTrackingPage({
                       <span className="font-medium text-ink">Instructions:</span> {order.delivery_instructions}
                     </p>
                   )}
+                  {/* Spec 0011, AC-13: a town for a home, the full address for a locker. */}
+                  <a
+                    href={orderMapLink(order, destinationName)}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="press-soft mt-2 inline-block text-[13px] font-medium text-forest hover:underline"
+                  >
+                    Open in Maps
+                  </a>
                   {order.delivery_method === 'COLLECTION_POINT' && (
                     <p className="mt-2 text-[12px] text-muted">
                       Your order will be held in a secure locker. You will receive your locker PIN once runner drop-off is complete.
@@ -573,6 +586,8 @@ export default async function OrderTrackingPage({
                   </div>
                 </div>
               </div>
+
+              {canReorder && <ReorderButton orderId={order.id} />}
 
               <OrderActions
                 orderId={order.id}

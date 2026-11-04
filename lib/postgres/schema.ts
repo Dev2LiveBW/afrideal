@@ -54,6 +54,7 @@ export const rfqResponses = docTable('rfq_responses');
 export const rfqs = docTable('rfqs');
 export const runnerRequests = docTable('runner_requests');
 export const runners = docTable('runners');
+export const savedItems = docTable('saved_items');
 export const settings = docTable('settings');
 export const settlements = docTable('settlements');
 export const shipments = docTable('shipments');
@@ -67,6 +68,7 @@ export const users = docTable('users');
 /** Collection name → table. lib/db.ts checks this covers every `Collection`. */
 export const tables = {
   addresses,
+  'saved-items': savedItems,
   'audit-log': auditLog,
   brands,
   categories,

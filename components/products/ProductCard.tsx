@@ -1,12 +1,12 @@
 'use client';
 
 import Link from 'next/link';
-import { useState } from 'react';
-import { Heart, Plus, ShieldCheck, Star } from 'lucide-react';
+import { Plus, ShieldCheck, Star } from 'lucide-react';
 import toast from 'react-hot-toast';
 
 import { PriceTag } from '@/components/brand/MoneyText';
 import { PriceText } from '@/components/brand/BuyerCurrency';
+import { SaveButton } from '@/components/storefront/SaveButton';
 import { Swatch, photoUrl } from '@/components/storefront/Swatch';
 import { useAfriDealStore } from '@/store/useAfriDealStore';
 import { cn } from '@/lib/utils';
@@ -70,21 +70,10 @@ export function ProductCard({
   className?: string;
 }) {
   const addToCart = useAfriDealStore((state) => state.addToCart);
-  const [saved, setSaved] = useState(false);
 
   const isSupplierOwned = product.owner_type === 'SUPPLIER' || product.commercial_model === 'SUPPLIER_LED';
   const supplierMoq = Math.max(1, product.moq ?? 1);
   const showingTier = !isSupplierOwned && tierPrice !== null && tierPrice !== undefined;
-
-  function toggleSave(event: React.MouseEvent) {
-    event.preventDefault();
-    setSaved((value) => {
-      toast.success(
-        value ? `Removed ${product.name} from your list` : `Saved ${product.name} for later`,
-      );
-      return !value;
-    });
-  }
 
   function quickAdd(event: React.MouseEvent) {
     event.preventDefault();
@@ -161,18 +150,11 @@ export function ProductCard({
             </span>
           )}
 
-          <button
-            onClick={toggleSave}
-            aria-label={saved ? `Remove ${product.name} from your list` : `Save ${product.name} for later`}
-            aria-pressed={saved}
+          <SaveButton
+            productId={product.id}
+            productName={product.name}
             className="absolute right-0.5 top-0.5 flex h-6 w-6 items-center justify-center rounded-full bg-surface-raised/90 sm:right-2 sm:top-2 sm:h-7 sm:w-7 backdrop-blur-sm transition-colors hover:bg-surface-raised"
-          >
-            <Heart
-              size={13}
-              strokeWidth={1.75}
-              className={saved ? 'fill-danger text-danger' : 'text-body'}
-            />
-          </button>
+          />
 
           <button
             onClick={quickAdd}

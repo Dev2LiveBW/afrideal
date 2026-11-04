@@ -1258,6 +1258,95 @@ section('9g. Buyer account — addresses, terms and the recipient');
   check('AC-4: a full book never stops the order', full.status === 201, `got ${full.status}`);
 }
 
+section('9h. Buyer account — reorder, saved items and alert settings');
+{
+  const buyer = sessions['kefilwe@gmail.com'].jar;
+  const other = sessions['thabo@gmail.com'].jar;
+  const ops = sessions['ops@afrideal.co.bw'].jar;
+
+  // AC-11 and AC-12. o004 is Kefilwe's: maize meal, and paper bought below today's minimum.
+  const reorder = await json(buyer, '/api/orders/o004/reorder');
+  check('AC-11: a delivered order can be reordered', reorder.status === 200, `got ${reorder.status}`);
+  const maize = reorder.body?.lines?.find((line) => line.product_id === 'p008');
+  check('AC-11: a line still sold goes back in the cart', maize?.qty === 4 && maize?.variant_id === 'p008v2');
+  check('AC-11: a line that cannot be ordered is left out and named',
+    reorder.body?.skipped?.some((entry) => entry.product_id === 'p010' && /minimum order of 5/.test(entry.note)));
+  check('AC-12: the lines hold no figure from the old order',
+    maize !== undefined && maize.line_total === undefined && maize.order_id === undefined);
+
+  const notYours = await json(other, '/api/orders/o004/reorder');
+  check('AC-12: another buyer cannot reorder it', notYours.status === 403, `got ${notYours.status}`);
+  const staff = await json(ops, '/api/orders/o004/reorder');
+  check('AC-12: nor can staff', staff.status === 403, `got ${staff.status}`);
+  const anonymous = await json(makeJar(), '/api/orders/o004/reorder');
+  check('AC-12: nor can a guest', anonymous.status === 401, `got ${anonymous.status}`);
+  const missing = await json(buyer, '/api/orders/nope/reorder');
+  check('AC-12: an unknown order is 404', missing.status === 404, `got ${missing.status}`);
+
+  const placed = await json(buyer, '/api/orders', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      lines: [{ product_id: 'p001', variant_id: 'p001v1', qty: 1 }],
+      payment_method: 'CARD',
+      delivery_address: 'Plot 2201, Block 6',
+      delivery_city: 'Gaborone',
+      delivery_phone: '+267 71 234 567',
+      terms_accepted: true,
+    }),
+  });
+  const placedId = placed.body?.order?.id ?? placed.body?.id;
+  const early = await json(buyer, `/api/orders/${placedId}/reorder`);
+  check('AC-11: an order not yet delivered cannot be reordered', early.status === 409, `got ${early.status}`);
+
+  // AC-13: the page a buyer reads, as the browser gets it.
+  const tracking = await (await request(buyer, '/orders/o002')).text();
+  check('AC-13: order tracking links to a map of the town',
+    tracking.includes('https://www.google.com/maps/search/?api=1&amp;query=Gaborone%2C%20Botswana'));
+  check('AC-13: the street stays out of the link', !/maps\/search[^"]*Plot/.test(tracking));
+
+  // AC-14 to AC-16.
+  const save = (jar, productId) =>
+    json(jar, '/api/saved-items', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ product_id: productId }),
+    });
+  const list = async (jar) => (await json(jar, '/api/saved-items')).body?.product_ids ?? [];
+
+  check('AC-14: a buyer can save an item', (await save(buyer, 'p001')).status === 201);
+  await save(buyer, 'p001');
+  check('AC-14: saving twice is one save', (await list(buyer)).filter((id) => id === 'p001').length === 1);
+  check('AC-14: a list is not shared with other buyers', !(await list(other)).includes('p001'));
+  check('AC-14: an unknown product is 404', (await save(buyer, 'nope')).status === 404);
+  check('AC-14: staff have no list', (await save(ops, 'p001')).status === 403);
+  check('AC-15: a guest saves nothing', (await save(makeJar(), 'p001')).status === 401);
+
+  const remove = () => json(buyer, '/api/saved-items/p001', { method: 'DELETE' });
+  check('AC-14: an item can be removed', (await remove()).status === 200 && !(await list(buyer)).includes('p001'));
+  check('AC-14: removing it twice is fine', (await remove()).status === 200);
+
+  // AC-17 and AC-18.
+  const alerts = (jar, change) =>
+    json(jar, '/api/account/alerts', {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(change),
+    });
+  const on = await alerts(buyer, { marketing: true });
+  check('AC-18: opting in records the date', on.status === 200 && on.body?.marketing === true && !!on.body?.marketing_consent_at);
+  const again = await alerts(buyer, { marketing: true });
+  check('AC-18: saying yes again keeps the first date', again.body?.marketing_consent_at === on.body?.marketing_consent_at);
+  const off = await alerts(buyer, { marketing: false });
+  check('AC-18: opting out clears it', off.status === 200 && off.body?.marketing === false && off.body?.marketing_consent_at === null);
+  check('AC-17: an order switch saves', (await alerts(buyer, { order_sms: false })).body?.order_sms === false);
+  await alerts(buyer, { order_sms: true });
+  check('AC-17: nothing to change is refused', (await alerts(buyer, {})).status === 422);
+  check('AC-17: an unknown switch is refused', (await alerts(buyer, { in_app: false })).status === 422);
+  check('AC-17: staff have no alert settings', (await alerts(ops, { marketing: true })).status === 403);
+  check('AC-17: a guest cannot change them', (await alerts(makeJar(), { marketing: true })).status === 401);
+}
+
 // ── 10. Runner availability toggle ───────────────────────────────────────────
 
 section('10. Runner availability');

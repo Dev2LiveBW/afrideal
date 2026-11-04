@@ -40,6 +40,18 @@ export interface User {
   runner_id?: string;
   /** §7 - set on buyers. Decides which pricing tiers they can be quoted. */
   customer_type?: CustomerType;
+  /** Spec 0011: how a buyer wants to hear from us. Missing means the defaults. */
+  alert_prefs?: AlertPrefs;
+}
+
+/** A buyer's alert choices (spec 0011, AC-17). In app notices cannot be turned off. */
+export interface AlertPrefs {
+  order_email: boolean;
+  order_sms: boolean;
+  /** Offers and news. Opt in only. */
+  marketing: boolean;
+  /** When they opted in, kept as the record of consent. Null while off. */
+  marketing_consent_at: string | null;
 }
 
 /** Safe shape - never leaves the server with the password attached. */
@@ -674,6 +686,14 @@ export interface AppNotification {
   kind: 'ORDER' | 'PAYMENT' | 'SUPPLIER' | 'DISPUTE' | 'SYSTEM';
   read: boolean;
   at: string;
+}
+
+/** A product a buyer saved for later (spec 0011). One row per buyer and product. */
+export interface SavedItem {
+  id: string;
+  user_id: string;
+  product_id: string;
+  created_at: string;
 }
 
 export interface CartLine {
