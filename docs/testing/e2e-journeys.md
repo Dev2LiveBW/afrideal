@@ -74,6 +74,7 @@ The spec for each journey lives in `e2e/` (storefront, supplier, runner, console
 | B11 | Customs and duty on imported goods are cleared by the courier | Customer | P1 | yes | yes |
 | B12 | A buyer in Lesotho pays in rand, with Lesotho's payment methods | Customer | P1 | yes | yes |
 | B13 | Local goods to a local buyer carry no customs and no courier | Customer | P1 | yes | yes |
+| B14 | A saved address in another country | Customer | P1 | yes | no |
 | **C** | **Request for quotation (RFQ)** | | | | |
 | C01 | Buyer sends an RFQ | Customer | P1 | yes | yes |
 | C02 | Invited supplier sends a quote | Supplier | P1 | no screen yet | no |
@@ -348,6 +349,25 @@ That is 51 journeys. 48 have a screen to test (C02 to C04 do not yet, see Findin
 - Shea butter's page does not say "Customs cleared by courier" either: where goods are held decides the lane, not where they were made. Its delivery reads "a flat P45" (AC-7).
 
 ---
+
+### B14 A saved address in another country
+
+**Start:** signed in as Kefilwe, delivering to Gaborone, with the seeded Home address. Spec 0011, AC-1 to AC-9.
+
+1. Add `p001` to the cart and go to checkout.
+2. On `/account/addresses`, add an address in Maseru, Lesotho, for Mma Dithebe.
+3. At checkout, pick that address.
+4. Add delivery instructions, and press Place order without agreeing to the terms.
+5. Agree to the terms, place the order and pay by card.
+6. Delete the address, then open the order again.
+
+**Expect:**
+
+- Checkout opens on Home, with its street and phone filled in.
+- Picking the Maseru address moves the Country to Lesotho and the total to ZAR 182.00.
+- Without the terms, checkout says "Please agree to the terms to place your order." and nothing is placed.
+- The order page shows "For Mma Dithebe" with the recipient's phone, and the instructions.
+- Deleting the address leaves the order exactly as it was.
 
 ## C. Request for quotation (RFQ)
 

@@ -1804,6 +1804,23 @@ const payments = orders
     };
   });
 
+// A demo address book (spec 0011): Kefilwe's home, so checkout has one to pick.
+const addresses = [
+  {
+    id: 'adr001',
+    user_id: 'u007',
+    label: 'Home',
+    recipient_name: 'Kefilwe Dithebe',
+    phone: '+267 71 234 567',
+    country: 'BW',
+    town: 'Gaborone',
+    street: 'Plot 2201, Block 6',
+    is_default: true,
+    created_at: daysAgo(30),
+    updated_at: daysAgo(30),
+  },
+];
+
 const settings = [
   {
     id: 'checkout_paused',
@@ -1845,6 +1862,7 @@ const files = {
   'supplier-users': supplierUsers,
   payments,
   settings,
+  addresses,
 };
 
 await fs.mkdir(DATA_DIR, { recursive: true });

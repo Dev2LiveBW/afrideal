@@ -56,6 +56,7 @@ const isPublic = createRouteMatcher([
   '/categories(.*)',
   '/rfq(.*)',
   '/how-it-works(.*)',
+  '/terms(.*)',
   '/cart(.*)',
 ]);
 

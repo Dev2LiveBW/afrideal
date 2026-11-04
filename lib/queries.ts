@@ -2,6 +2,7 @@ import 'server-only';
 
 import { readAll } from '@/lib/db';
 import { asDisplayed } from '@/lib/payments/status';
+import { orderForSupplier } from '@/lib/order-privacy';
 import { offeredTo } from '@/lib/runner-match';
 import { rankOffers } from '@/lib/supplier-selection';
 import type {
@@ -207,6 +208,7 @@ export async function getSupplierWorkspace(supplierId: string) {
   const myProductIds = new Set(myOffers.map((offer) => offer.product_id));
   const myLegs = legs.filter((leg) => leg.supplier_id === supplierId);
   const myOrderIds = new Set(myLegs.map((leg) => leg.order_id));
+  const visibleOrders = orders.map(orderForSupplier);
 
   return {
     supplier,
@@ -214,11 +216,11 @@ export async function getSupplierWorkspace(supplierId: string) {
     products: products.filter((product) => myProductIds.has(product.id)),
     legs: myLegs.map((leg) => ({
       ...leg,
-      order: orders.find((order) => order.id === leg.order_id) ?? null,
+      order: visibleOrders.find((order) => order.id === leg.order_id) ?? null,
       items: items.filter((item) => leg.item_ids.includes(item.id)),
       payable: payableRecords.find((record) => record.supplier_order_id === leg.id) ?? null,
     })),
-    orders: orders.filter((order) => myOrderIds.has(order.id)),
+    orders: visibleOrders.filter((order) => myOrderIds.has(order.id)),
     payables: payableRecords.filter((record) => record.supplier_id === supplierId),
     settlements: settlements.filter((settlement) => settlement.supplier_id === supplierId),
   };

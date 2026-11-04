@@ -393,9 +393,20 @@ export default async function OrderTrackingPage({
                 <MapPin size={16} strokeWidth={1.5} className="mt-0.5 shrink-0 text-muted" />
                 <div>
                   <p className="text-[14px] font-medium text-ink">{order.delivery_address}</p>
+                  {order.recipient_name && order.delivery_method !== 'COLLECTION_POINT' && (
+                    <p className="text-[13px] text-body">
+                      For {order.recipient_name}
+                      {order.delivery_phone ? ` · ${order.delivery_phone}` : ''}
+                    </p>
+                  )}
                   <p className="text-[13px] text-body">
                     {order.delivery_city}, {countryNames[order.delivery_country ?? DEFAULT_DELIVERY_COUNTRY] ?? order.delivery_country}
                   </p>
+                  {order.delivery_instructions && (
+                    <p className="mt-2 text-[13px] text-body">
+                      <span className="font-medium text-ink">Instructions:</span> {order.delivery_instructions}
+                    </p>
+                  )}
                   {order.delivery_method === 'COLLECTION_POINT' && (
                     <p className="mt-2 text-[12px] text-muted">
                       Your order will be held in a secure locker. You will receive your locker PIN once runner drop-off is complete.

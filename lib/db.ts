@@ -12,6 +12,7 @@ import type {
   AuditEntry,
   Brand,
   Category,
+  Address,
   Country,
   Courier,
   CustomerPrice,
@@ -117,6 +118,9 @@ export interface Schema {
   countries: Country;
   // Listed courier and clearance partners and the routes they serve (spec 0008, 0009).
   couriers: Courier;
+
+  // A buyer's saved addresses (spec 0011). Orders keep their own copy.
+  addresses: Address;
 }
 
 export type Collection = keyof Schema;

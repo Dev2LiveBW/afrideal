@@ -1,4 +1,4 @@
-import { addToCart, bwp, caption, cartLink, clickAndSave, expect, expectHealthy, ready, signedInAs, test } from '../support/fixtures';
+import { addToCart, bwp, caption, cartLink, clickAndSave, expect, expectHealthy, ready, signedInAs, test, agreeAtCheckout } from '../support/fixtures';
 
 /**
  * B. Buying and tracking (docs/testing/e2e-journeys.md), as Thabo.
@@ -53,6 +53,7 @@ test.describe('B. Buying and tracking', () => {
     await page.getByRole('radio', { name: /Bank transfer/ }).check({ force: true });
     await expect(page.getByRole('radio', { name: /Bank transfer/ })).toBeChecked();
     await expect(page.getByText('Total to pay').first().locator('xpath=following-sibling::*[1]')).toHaveText(bwp(315));
+    await agreeAtCheckout(page);
     await clickAndSave(page.getByRole('button', { name: 'Place order' }).filter({ visible: true }));
 
     // The order waits for the money: a reference to quote, and nothing sourced yet.

@@ -14,12 +14,14 @@ import { MoneyText } from '@/components/brand/MoneyText';
 import { EmptyState, Enclosure } from '@/components/brand/Panel';
 import { CartLineThumb } from '@/components/storefront/CartLineThumb';
 import { DEFAULT_DELIVER_TO, useAfriDealStore } from '@/store/useAfriDealStore';
+import { MAX_ADDRESSES, PHONE_PATTERN } from '@/lib/addresses';
 import { COLLECTION_POINTS } from '@/lib/collection-points';
 import { courierFee, couriersForLane } from '@/lib/couriers.mjs';
 import { isCrossBorder } from '@/lib/lanes.mjs';
 import { priceLine, sellerQuantities } from '@/lib/pricing-tiers';
 import { cn } from '@/lib/utils';
 import type {
+  Address,
   Country,
   CountryCode,
   Courier,
@@ -41,9 +43,39 @@ const CheckoutSchema = z
     delivery_address: z.string().optional(),
     delivery_city: z.string().optional(),
     payment_method: z.enum(['CARD', 'ORANGE_MONEY', 'PAYGATE', 'EFT']),
+    recipient_name: z.string().optional(),
+    delivery_phone: z.string().optional(),
+    delivery_instructions: z.string().max(300, 'Keep this under 300 characters.').optional(),
+    save_address: z.boolean().optional(),
+    address_label: z.string().max(40, 'Keep the label under 40 characters.').optional(),
+    terms_accepted: z.boolean().optional(),
   })
   .superRefine((data, ctx) => {
+    // Spec 0011, AC-8: the server refuses without this too.
+    if (data.terms_accepted !== true) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        path: ['terms_accepted'],
+        message: 'Please agree to the terms to place your order.',
+      });
+    }
+    // Spec 0011, AC-4: a driver needs a number; a locker pickup does not.
+    const phone = data.delivery_phone?.trim() ?? '';
+    if (phone ? !PHONE_PATTERN.test(phone) : data.delivery_method === 'DOORSTEP') {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        path: ['delivery_phone'],
+        message: 'Enter a phone number we can reach.',
+      });
+    }
     if (data.delivery_method === 'DOORSTEP') {
+      if (!data.recipient_name || data.recipient_name.trim().length < 2) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          path: ['recipient_name'],
+          message: 'Enter who receives the delivery.',
+        });
+      }
       if (!data.delivery_address || data.delivery_address.trim().length < 4) {
         ctx.addIssue({
           code: z.ZodIssueCode.custom,
@@ -89,6 +121,7 @@ export function CheckoutClient({
   methods,
   countries,
   couriers,
+  addresses,
 }: {
   customerName: string;
   customerEmail: string;
@@ -108,6 +141,8 @@ export function CheckoutClient({
   countries: Country[];
   /** Listed couriers and their routes (spec 0008), to quote the courier's own fee. */
   couriers: Courier[];
+  /** The buyer's saved addresses, default first (spec 0011). */
+  addresses: Address[];
 }) {
   const router = useRouter();
   const cart = useAfriDealStore((state) => state.cart);
@@ -119,6 +154,8 @@ export function CheckoutClient({
   // Set once the order is placed: the cart empties before the next page
   // arrives, and this keeps "nothing to check out" from flashing meanwhile.
   const [leaving, setLeaving] = useState<'payment' | 'order' | null>(null);
+  // The saved address filling the form, if any. Typing over it unpicks it.
+  const [pickedId, setPickedId] = useState('');
 
   useEffect(() => setMounted(true), []);
 
@@ -137,8 +174,36 @@ export function CheckoutClient({
       delivery_address: '',
       delivery_city: DEFAULT_DELIVER_TO.city,
       payment_method: methods[0] ?? 'EFT',
+      recipient_name: customerName,
+      delivery_phone: '',
+      delivery_instructions: '',
+      save_address: false,
+      address_label: '',
+      terms_accepted: false,
     },
   });
+
+  /** Spec 0011, AC-6: an address in a country we no longer serve cannot be picked. */
+  const pickable = (address: Address) => countries.some((country) => country.code === address.country);
+
+  /** Fills the form from a saved address; the currency follows its country. */
+  const applyAddress = (address: Address) => {
+    setPickedId(address.id);
+    setValue('delivery_country', address.country);
+    setValue('delivery_city', address.town);
+    setValue('delivery_address', address.street);
+    setValue('recipient_name', address.recipient_name);
+    setValue('delivery_phone', address.phone);
+    setValue('collection_point', '');
+    setValue('save_address', false);
+  };
+
+  const clearPicked = () => {
+    setPickedId('');
+    setValue('delivery_address', '');
+    setValue('recipient_name', customerName);
+    setValue('delivery_phone', '');
+  };
 
   /*
    * Start from the header's "Deliver to" once the persisted value is readable
@@ -148,12 +213,18 @@ export function CheckoutClient({
     if (!mounted) return;
     setValue('delivery_country', deliverTo.country);
     setValue('delivery_city', deliverTo.city);
+    // Spec 0011, AC-3: the default, unless it is for somewhere else than the
+    // header says. Sending to another country is then the buyer's own choice.
+    const main = addresses.find((address) => address.is_default && pickable(address));
+    if (main && main.country === deliverTo.country) applyAddress(main);
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- runs when "Deliver to" is known or changes.
   }, [mounted, deliverTo.country, deliverTo.city, setValue]);
 
   const selectedGateway = watch('payment_method');
   const selectedCountry = watch('delivery_country') ?? DEFAULT_DELIVER_TO.country;
   const countryEntry = countries.find((country) => country.code === selectedCountry);
   const selectedDeliveryMethod = watch('delivery_method') ?? 'DOORSTEP';
+  const wantsToSave = watch('save_address') === true;
   // Only the lockers in the delivery country; a country with none offers doorstep alone.
   const pointsHere = COLLECTION_POINTS.filter((point) => point.country === selectedCountry);
   const selectedCollectionPointName = watch('collection_point');
@@ -281,6 +352,12 @@ export function CheckoutClient({
         delivery_address: finalAddress,
         delivery_city: finalCity,
         delivery_country: isCollection ? point.country : values.delivery_country,
+        terms_accepted: values.terms_accepted === true,
+        recipient_name: values.recipient_name?.trim() || null,
+        delivery_phone: values.delivery_phone?.trim() || null,
+        delivery_instructions: values.delivery_instructions?.trim() || null,
+        save_address: !isCollection && !pickedId && values.save_address === true,
+        address_label: values.address_label?.trim() || null,
       }),
     });
 
@@ -366,6 +443,33 @@ export function CheckoutClient({
               {customerEmail && ` (${customerEmail})`}.
             </p>
 
+            {/* Spec 0011, AC-3: pick a saved address, or type a new one below. */}
+            {addresses.length > 0 && selectedDeliveryMethod === 'DOORSTEP' && (
+              <div className="mt-4">
+                <label htmlFor="saved_address" className="mb-1.5 block text-[13px] font-medium text-ink">
+                  Saved address
+                </label>
+                <select
+                  id="saved_address"
+                  value={pickedId}
+                  onChange={(event) => {
+                    const chosen = addresses.find((address) => address.id === event.target.value);
+                    if (chosen) applyAddress(chosen);
+                    else clearPicked();
+                  }}
+                  className="w-full rounded border border-hairline-strong bg-surface px-3.5 py-2.5 text-[14px] text-ink outline-none transition-colors placeholder:text-muted focus:border-gold/60"
+                >
+                  <option value="">Use a different address</option>
+                  {addresses.map((address) => (
+                    <option key={address.id} value={address.id} disabled={!pickable(address)}>
+                      {address.label}, {address.town}
+                      {pickable(address) ? '' : ' (not available now)'}
+                    </option>
+                  ))}
+                </select>
+              </div>
+            )}
+
             {/* Spec 0009: a buyer can be in any country AfriDeal trades in. */}
             <div className="mt-4">
               <label htmlFor="delivery_country" className="mb-1.5 block text-[13px] font-medium text-ink">
@@ -378,6 +482,8 @@ export function CheckoutClient({
                     const next = countries.find((country) => country.code === event.target.value);
                     setValue('delivery_city', next?.towns[0] ?? '');
                     setValue('collection_point', '');
+                    // Spec 0011, AC-3: a saved address belongs to its own country.
+                    if (pickedId) clearPicked();
                   },
                 })}
                 className="w-full rounded border border-hairline-strong bg-surface px-3.5 py-2.5 text-[14px] text-ink outline-none transition-colors focus:border-gold/60"
@@ -474,12 +580,35 @@ export function CheckoutClient({
             ) : (
               <div className="mt-5 space-y-4">
                 <div>
+                  <label htmlFor="recipient" className="mb-1.5 block text-[13px] font-medium text-ink">
+                    Recipient
+                  </label>
+                  <input
+                    id="recipient"
+                    {...register('recipient_name')}
+                    autoComplete="name"
+                    aria-invalid={errors.recipient_name ? 'true' : undefined}
+                    aria-describedby={errors.recipient_name ? 'recipient-error' : undefined}
+                    className={cn(
+                      'w-full rounded border bg-surface px-3.5 py-2.5 text-[14px] text-ink outline-none transition-colors',
+                      'placeholder:text-muted focus:border-gold/60',
+                      errors.recipient_name ? 'border-danger/60' : 'border-hairline-strong',
+                    )}
+                  />
+                  {errors.recipient_name && (
+                    <p id="recipient-error" role="alert" className="mt-1.5 text-[12px] text-danger-ink">
+                      {errors.recipient_name.message}
+                    </p>
+                  )}
+                </div>
+
+                <div>
                   <label htmlFor="address" className="mb-1.5 block text-[13px] font-medium text-ink">
                     Street address or plot number
                   </label>
                   <input
                     id="address"
-                    {...register('delivery_address')}
+                    {...register('delivery_address', { onChange: () => setPickedId('') })}
                     placeholder="Plot 5412, Extension 12"
                     autoComplete="street-address"
                     aria-invalid={errors.delivery_address ? 'true' : undefined}
@@ -503,7 +632,7 @@ export function CheckoutClient({
                   </label>
                   <input
                     id="city"
-                    {...register('delivery_city')}
+                    {...register('delivery_city', { onChange: () => setPickedId('') })}
                     list="delivery-towns"
                     placeholder={countryEntry?.towns[0] ?? 'Town or city'}
                     autoComplete="address-level2"
@@ -526,8 +655,61 @@ export function CheckoutClient({
                     </p>
                   )}
                 </div>
+
+                {/* Spec 0011, AC-4: a typed address can join the book. */}
+                {!pickedId &&
+                  (addresses.length >= MAX_ADDRESSES ? (
+                    <p className="text-[12.5px] text-body">
+                      Your address book is full, so this address will not be saved.
+                    </p>
+                  ) : (
+                    <div className="space-y-3">
+                      <label className="flex items-center gap-2.5 text-[13.5px] text-ink">
+                        <input type="checkbox" {...register('save_address')} className="accent-gold" />
+                        Save this address
+                      </label>
+                      {wantsToSave && (
+                        <div>
+                          <label htmlFor="address_label" className="mb-1.5 block text-[13px] font-medium text-ink">
+                            Label (optional)
+                          </label>
+                          <input
+                            id="address_label"
+                            {...register('address_label')}
+                            placeholder="Home"
+                            className="w-full rounded border border-hairline-strong bg-surface px-3.5 py-2.5 text-[14px] text-ink outline-none transition-colors placeholder:text-muted focus:border-gold/60"
+                          />
+                        </div>
+                      )}
+                    </div>
+                  ))}
               </div>
             )}
+
+            {/* A runner needs this at the door; a locker can text it. */}
+            <div className="mt-4">
+              <label htmlFor="delivery_phone" className="mb-1.5 block text-[13px] font-medium text-ink">
+                {selectedDeliveryMethod === 'DOORSTEP' ? 'Phone' : 'Phone (optional)'}
+              </label>
+              <input
+                id="delivery_phone"
+                type="tel"
+                {...register('delivery_phone')}
+                autoComplete="tel"
+                aria-invalid={errors.delivery_phone ? 'true' : undefined}
+                aria-describedby={errors.delivery_phone ? 'phone-error' : undefined}
+                className={cn(
+                  'w-full rounded border bg-surface px-3.5 py-2.5 text-[14px] text-ink outline-none transition-colors',
+                  'placeholder:text-muted focus:border-gold/60',
+                  errors.delivery_phone ? 'border-danger/60' : 'border-hairline-strong',
+                )}
+              />
+              {errors.delivery_phone && (
+                <p id="phone-error" role="alert" className="mt-1.5 text-[12px] text-danger-ink">
+                  {errors.delivery_phone.message}
+                </p>
+              )}
+            </div>
           </section>
 
           {/* Payment */}
@@ -693,6 +875,45 @@ export function CheckoutClient({
                   </dd>
                 </div>
               </dl>
+
+              {/* Spec 0011, AC-7: the summary is the review, so these sit beside the total. */}
+              <div className="mt-4 space-y-3 border-t border-hairline pt-4">
+                <div>
+                  <label htmlFor="delivery_instructions" className="mb-1.5 block text-[13px] font-medium text-ink">
+                    Delivery instructions (optional)
+                  </label>
+                  <textarea
+                    id="delivery_instructions"
+                    rows={2}
+                    maxLength={300}
+                    {...register('delivery_instructions')}
+                    placeholder="A landmark, a gate code, when to call"
+                    className="w-full rounded border border-hairline-strong bg-surface px-3.5 py-2.5 text-[14px] text-ink outline-none transition-colors placeholder:text-muted focus:border-gold/60"
+                  />
+                </div>
+                <div>
+                  <label className="flex items-start gap-2.5 text-[13px] leading-5 text-ink">
+                    <input
+                      type="checkbox"
+                      {...register('terms_accepted')}
+                      aria-invalid={errors.terms_accepted ? 'true' : undefined}
+                      aria-describedby={errors.terms_accepted ? 'terms-error' : undefined}
+                      className="mt-0.5 accent-gold"
+                    />
+                    <span>
+                      I agree to the{' '}
+                      <Link href="/terms" target="_blank" className="font-medium text-forest underline">
+                        terms of sale
+                      </Link>
+                    </span>
+                  </label>
+                  {errors.terms_accepted && (
+                    <p id="terms-error" role="alert" className="mt-1.5 text-[12px] text-danger-ink">
+                      {errors.terms_accepted.message}
+                    </p>
+                  )}
+                </div>
+              </div>
 
               <ActionButton
                 type="submit"

@@ -1,7 +1,7 @@
 # 0011. Buyer account and checkout extras
 
 **Date**: 2026-11-04
-**Status**: Proposed
+**Status**: In Progress
 
 ## Summary
 
@@ -272,12 +272,12 @@ New pages: `/account/addresses`, `/account/saved`, `/account/settings`, `/terms`
 Ordered as tracer bullets, one thin thread through every layer at a time, with money last.
 
 **Slice 1: addresses and the review step**
-1. Add the `addresses` collection, the new order fields and the migration, satisfies **AC-1**, **AC-5**.
-2. Build the address routes with the limit and default rules, satisfies **AC-1**, **AC-2**, **AC-6**.
-3. Build `/account/addresses` and make the panel link live, satisfies **AC-1**, **AC-6**, **AC-19**.
-4. Add the picker and "Save this address" to checkout, with the recipient and phone fields, satisfies **AC-3**, **AC-4**, **AC-5**.
-5. Add instructions, the terms checkbox and `lib/terms.ts` to checkout and the order route, and update `scripts/verify.mjs` and the e2e helpers that place orders, satisfies **AC-7**, **AC-8**.
-6. Add `/terms`, and show instructions on the order pages and the runner's job, satisfies **AC-9**, **AC-10**.
+1. [x] Add the `addresses` collection, the new order fields and the migration, satisfies **AC-1**, **AC-5**.
+2. [x] Build the address routes with the limit and default rules, satisfies **AC-1**, **AC-2**, **AC-6**.
+3. [x] Build `/account/addresses` and make the panel link live, satisfies **AC-1**, **AC-6**, **AC-19**.
+4. [x] Add the picker and "Save this address" to checkout, with the recipient and phone fields, satisfies **AC-3**, **AC-4**, **AC-5**.
+5. [x] Add instructions, the terms checkbox and `lib/terms.ts` to checkout and the order route, and update `scripts/verify.mjs` and the e2e helpers that place orders, satisfies **AC-7**, **AC-8**.
+6. [x] Add `/terms`, and show instructions on the order pages and the runner's job, satisfies **AC-9**, **AC-10**.
 
 **Slice 2: account and repeat buying**
 7. Build the reorder endpoint and button, satisfies **AC-11**, **AC-12**.

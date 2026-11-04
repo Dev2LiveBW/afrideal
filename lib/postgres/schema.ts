@@ -33,6 +33,7 @@ export type DocTable = ReturnType<typeof docTable>;
 
 // One export per table so drizzle-kit can see them all. Names are the
 // collection names with `-` → `_`.
+export const addresses = docTable('addresses');
 export const auditLog = docTable('audit_log');
 export const brands = docTable('brands');
 export const categories = docTable('categories');
@@ -65,6 +66,7 @@ export const users = docTable('users');
 
 /** Collection name → table. lib/db.ts checks this covers every `Collection`. */
 export const tables = {
+  addresses,
   'audit-log': auditLog,
   brands,
   categories,

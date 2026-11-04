@@ -253,6 +253,22 @@ export type PaymentMethod = 'CARD' | 'ORANGE_MONEY' | 'PAYGATE' | 'EFT';
  */
 export type CancelReason = 'EXPIRED' | 'CUSTOMER' | 'STAFF';
 
+/** One entry in a buyer's address book (spec 0011). */
+export interface Address {
+  id: string;
+  user_id: string;
+  label: string;
+  recipient_name: string;
+  phone: string;
+  country: CountryCode;
+  town: string;
+  street: string;
+  /** Exactly one per buyer who has any address. */
+  is_default: boolean;
+  created_at: string;
+  updated_at: string;
+}
+
 export interface OrderTimelineEntry {
   status: string;
   label: string;
@@ -282,6 +298,15 @@ export interface Order {
   subtotal: number;
   delivery_fee: number;
   total: number;
+  /** Who receives it (spec 0011). Copied at checkout; missing means the buyer. */
+  recipient_name?: string | null;
+  /** How to reach them. Copied at checkout, so a later edit never changes an order. */
+  delivery_phone?: string | null;
+  /** What the buyer told the driver, up to 300 characters. */
+  delivery_instructions?: string | null;
+  /** When the buyer agreed to the terms, and which version (spec 0011, AC-8). */
+  terms_accepted_at?: string;
+  terms_version?: string;
   payment_method: PaymentMethod;
   /**
    * The provider's reference for the payment that settled this order. Null
@@ -513,6 +538,9 @@ export interface Shipment {
   dropoff_address: string;
   dropoff_country?: CountryCode;
   dropoff_town?: string;
+  /** The recipient's phone, and what the buyer told the driver (spec 0011, AC-9). */
+  dropoff_phone?: string | null;
+  delivery_instructions?: string | null;
   distance_km: number;
   payout: number;
   created_at: string;

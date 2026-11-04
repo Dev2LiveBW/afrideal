@@ -1,11 +1,13 @@
 import { z } from 'zod';
 
 import { fail, guard, handled, ok } from '@/lib/api';
-import { insert, insertMany, nextId, nextIds, readAll } from '@/lib/db';
+import { PHONE_PATTERN, addAddress, type AddressFields, type AddressResult } from '@/lib/addresses';
+import { insert, insertMany, mutate, nextId, nextIds, readAll } from '@/lib/db';
 import { EVENTS, audit, notify } from '@/lib/notifications';
 import { offerLandedCost, priceLine, sellerQuantities } from '@/lib/pricing-tiers';
 import { routeLine } from '@/lib/supplier-selection';
 import { availablePaymentMethods, startPayment } from '@/lib/payments/adapters';
+import { orderForSupplier } from '@/lib/order-privacy';
 import { allAsDisplayed } from '@/lib/payments/status';
 import { findCollectionPoint } from '@/lib/collection-points';
 import { activeCountries } from '@/lib/countries';
@@ -13,6 +15,7 @@ import { fromPula, pulaPerUnit } from '@/lib/currency.mjs';
 import { DEFAULT_DELIVERY_COUNTRY, isCrossBorder } from '@/lib/lanes.mjs';
 import { checkoutIsPaused } from '@/lib/settings';
 import { paymentExpiresAt } from '@/lib/payments/policy';
+import { TERMS_VERSION } from '@/lib/terms';
 import type { Order, OrderItem, OrderTimelineEntry, Payment } from '@/types';
 
 export const dynamic = 'force-dynamic';
@@ -36,7 +39,46 @@ const CheckoutSchema = z.object({
   delivery_city: z.string().min(2, 'Enter a city.'),
   /** Spec 0009: where the order is going. Botswana until "Deliver to" sends one. */
   delivery_country: z.string().trim().toUpperCase().length(2).optional(),
+  /** Spec 0011, AC-8: without this there is no order. */
+  terms_accepted: z.boolean().optional(),
+  recipient_name: z.string().trim().max(120).nullish(),
+  delivery_phone: z.string().trim().max(30).nullish(),
+  delivery_instructions: z.string().trim().max(300, 'Keep delivery instructions under 300 characters.').nullish(),
+  /** Spec 0011, AC-4: keep this typed address in the buyer's book. */
+  save_address: z.boolean().optional(),
+  address_label: z.string().trim().max(40).nullish(),
 });
+
+/**
+ * Keep a typed address in the buyer's book. The order is already placed, so a
+ * failure here must never reach the buyer as a failed order: anything that
+ * stops the save becomes a notice instead.
+ */
+async function saveOrderAddress(userId: string, fields: AddressFields, now: string) {
+  let refused: 'FULL' | 'DUPLICATE' | null = null;
+  try {
+    const [id] = await nextIds('addresses', 'adr', 1);
+    const result = await mutate<'addresses', AddressResult>('addresses', (rows) =>
+      addAddress(rows, { id, userId, fields, now, refuseDuplicates: true }),
+    );
+    if (result.ok) return;
+    if (result.reason !== 'NOT_FOUND') refused = result.reason;
+  } catch (error) {
+    console.error('[orders] saving the address failed', error);
+  }
+
+  await notify({
+    userId,
+    title: 'Address not saved',
+    body:
+      refused === 'FULL'
+        ? 'Your address book is full, so this address was not saved. Your order is not affected.'
+        : refused === 'DUPLICATE'
+          ? 'This address is already in your address book. Your order is not affected.'
+          : 'We could not save this address just now. Your order is not affected.',
+    kind: 'ORDER',
+  });
+}
 
 // ── GET /api/orders ──────────────────────────────────────────────────────────
 
@@ -61,7 +103,7 @@ export const GET = handled(async (request: Request) => {
     const mine = new Set(
       legs.filter((leg) => leg.supplier_id === actor.supplierId).map((leg) => leg.order_id),
     );
-    visible = orders.filter((order) => mine.has(order.id));
+    visible = orders.filter((order) => mine.has(order.id)).map(orderForSupplier);
   }
 
   if (status) visible = visible.filter((order) => order.status === status);
@@ -100,12 +142,28 @@ export const POST = handled(async (request: Request) => {
     delivery_address,
     delivery_city,
     delivery_country,
+    terms_accepted,
+    recipient_name,
+    delivery_phone,
+    delivery_instructions,
+    save_address,
+    address_label,
   } = parsed.data;
 
   // Spec 0003, AC-8: checked before any pricing or supplier work, so a pause stops
   // an order at the door rather than part way through building one.
   if (await checkoutIsPaused()) {
     return fail('Checkout is temporarily unavailable. Please try again shortly.', 409);
+  }
+
+  // Spec 0011, AC-8: the buyer agrees before anything is priced or held.
+  if (terms_accepted !== true) {
+    return fail('Please agree to the terms to place your order.', 422);
+  }
+
+  // Spec 0011, AC-4: a driver needs a number; a locker pickup does not.
+  if (delivery_phone ? !PHONE_PATTERN.test(delivery_phone) : delivery_method === 'DOORSTEP') {
+    return fail('Enter a phone number we can reach for this delivery.', 422);
   }
 
   // A collection point order must name a locker on the list; its fee is charged
@@ -257,6 +315,11 @@ export const POST = handled(async (request: Request) => {
     delivery_fee,
     total: subtotal + delivery_fee,
     payment_method,
+    recipient_name: recipient_name || actor.name,
+    delivery_phone: delivery_phone || null,
+    delivery_instructions: delivery_instructions || null,
+    terms_accepted_at: now,
+    terms_version: TERMS_VERSION,
     // Null until a payment confirms. It used to be invented from the clock here,
     // which is what made every order look paid the moment it was placed.
     payment_reference: null,
@@ -313,6 +376,21 @@ export const POST = handled(async (request: Request) => {
     entityId: orderId,
     detail: `${order.reference} placed - ${items.length} line(s), awaiting payment by ${payment.provider}.`,
   });
+
+  if (save_address && delivery_method === 'DOORSTEP' && delivery_phone) {
+    await saveOrderAddress(
+      actor.id,
+      {
+        label: address_label || order.delivery_city,
+        recipient_name: order.recipient_name ?? actor.name,
+        phone: delivery_phone,
+        country: deliveryCountry,
+        town: order.delivery_city,
+        street: delivery_address,
+      },
+      now,
+    );
+  }
 
   // Spec 0003: `supplier_orders` and `payables` are gone from this response
   // because they do not exist yet. They appear once payment confirms, on the

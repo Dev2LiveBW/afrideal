@@ -1,6 +1,6 @@
 import type { Page } from '@playwright/test';
 
-import { addToCart, caption, card, clickAndSave, expect, ready, test } from '../support/fixtures';
+import { addToCart, caption, card, clickAndSave, expect, ready, test, agreeAtCheckout } from '../support/fixtures';
 
 /**
  * Z01. The golden thread: one order from cart to supplier paid, five people
@@ -44,6 +44,7 @@ test('Z01 one order from cart to the supplier paid @p1', async ({ as }) => {
     // Bank transfer, so Finance confirms it in step 2. The e2e run also offers
     // card methods through the mock gateway, which B09 and C04 cover.
     await buyer.getByRole('radio', { name: /Bank transfer/ }).check({ force: true });
+    await agreeAtCheckout(buyer);
     await clickAndSave(buyer.getByRole('button', { name: 'Place order' }).filter({ visible: true }));
     await buyer.waitForURL(/\/orders\/o\d+\?placed=1/);
     orderPath = new URL(buyer.url()).pathname;

@@ -477,6 +477,8 @@ section('9. Checkout — the order split engine');
       payment_method: 'ORANGE_MONEY',
       delivery_address: 'Plot 5412, Extension 12',
       delivery_city: 'Gaborone',
+      terms_accepted: true,
+      delivery_phone: '+267 71 000 000',
     }),
   });
 
@@ -613,6 +615,8 @@ section('9. Checkout — the order split engine');
         payment_method: 'CARD',
         delivery_address: 'Plot 1, Gaborone',
         delivery_city: 'Gaborone',
+        terms_accepted: true,
+        delivery_phone: '+267 71 000 000',
       }),
     });
 
@@ -653,6 +657,8 @@ section('9. Checkout — the order split engine');
       payment_method: 'CARD',
       delivery_address: 'x',
       delivery_city: 'Gaborone',
+      terms_accepted: true,
+      delivery_phone: '+267 71 000 000',
     }),
   });
   check('an empty cart is refused', empty.status === 422, `got ${empty.status}`);
@@ -677,6 +683,8 @@ section('9b. Payment expiry — a closed window reads as cancelled');
       payment_method: 'EFT',
       delivery_address: 'Plot 1, Gaborone',
       delivery_city: 'Gaborone',
+      terms_accepted: true,
+      delivery_phone: '+267 71 000 000',
     }),
   });
   const open = (await json(ops, `/api/orders/${placedNow.body?.order?.id}`)).body;
@@ -712,6 +720,8 @@ section('9b. Payment expiry — a closed window reads as cancelled');
       payment_method: 'CARD',
       delivery_address: 'Plot 1, Gaborone',
       delivery_city: 'Gaborone',
+      terms_accepted: true,
+      delivery_phone: '+267 71 000 000',
     }),
   });
   const cardOrderId = byCard.body?.order?.id;
@@ -788,6 +798,8 @@ section('9c. Finance controls — mark as paid, and pausing checkout');
       payment_method: 'EFT',
       delivery_address: 'Plot 1, Gaborone',
       delivery_city: 'Gaborone',
+      terms_accepted: true,
+      delivery_phone: '+267 71 000 000',
     }),
   });
   check('a bank transfer order can be placed', placed.status === 201, `got ${placed.status}`);
@@ -876,6 +888,8 @@ section('9c. Finance controls — mark as paid, and pausing checkout');
       payment_method: 'EFT',
       delivery_address: 'Plot 1, Gaborone',
       delivery_city: 'Gaborone',
+      terms_accepted: true,
+      delivery_phone: '+267 71 000 000',
     }),
   });
   check('AC-8: a paused checkout refuses new orders', blocked.status === 409, `got ${blocked.status}`);
@@ -904,6 +918,8 @@ section('9d. Refused payments — a cancelled order is not reopened, a paid one 
         payment_method: 'CARD',
         delivery_address: 'Plot 1, Gaborone',
         delivery_city: 'Gaborone',
+        terms_accepted: true,
+        delivery_phone: '+267 71 000 000',
       }),
     });
 
@@ -1005,6 +1021,8 @@ section('9f. Card payments through Stripe — signed webhook, one confirmation')
         payment_method: 'CARD',
         delivery_address: 'Plot 5412, Extension 12',
         delivery_city: 'Gaborone',
+        terms_accepted: true,
+        delivery_phone: '+267 71 000 000',
         ...extra,
       }),
     });
@@ -1129,6 +1147,8 @@ section('9e. Collection points — the fee charged is the fee shown');
         collection_point,
         delivery_address: collection_point ?? 'none',
         delivery_city: 'Gaborone',
+        terms_accepted: true,
+        delivery_phone: '+267 71 000 000',
       }),
     });
 
@@ -1143,6 +1163,99 @@ section('9e. Collection points — the fee charged is the fee shown');
 
   const unknown = await placeAt('A locker nobody listed');
   check('an unlisted locker is refused, so it cannot set its own fee', unknown.status === 422, `got ${unknown.status}`);
+}
+
+// ── Spec 0011, slice 1: the address book, terms and who sees what ────────────
+section('9g. Buyer account — addresses, terms and the recipient');
+{
+  const buyer = sessions['thabo@gmail.com'].jar;
+  const other = sessions['kefilwe@gmail.com'].jar;
+  const ops = sessions['ops@afrideal.co.bw'].jar;
+  const naledi = sessions['supplier@naledi.co.bw'].jar;
+
+  const order = (extra) =>
+    json(buyer, '/api/orders', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        lines: [{ product_id: 'p001', variant_id: 'p001v1', qty: 1 }],
+        payment_method: 'CARD',
+        delivery_address: 'Plot 77, Broadhurst',
+        delivery_city: 'Gaborone',
+        ...extra,
+      }),
+    });
+
+  const noTerms = await order({ delivery_phone: '+267 71 000 000' });
+  check('AC-8: an order without the terms is refused', noTerms.status === 422, `got ${noTerms.status}`);
+
+  const noPhone = await order({ terms_accepted: true });
+  check('AC-4: a doorstep order needs a phone number', noPhone.status === 422, `got ${noPhone.status}`);
+
+  const locker = await order({
+    terms_accepted: true,
+    delivery_method: 'COLLECTION_POINT',
+    collection_point: 'Gaborone Central Locker',
+  });
+  check('AC-4: a collection point order does not', locker.status === 201, `got ${locker.status}`);
+
+  const placed = await order({
+    terms_accepted: true,
+    delivery_phone: '+267 71 000 000',
+    recipient_name: 'Mma Modise',
+    delivery_instructions: 'Blue gate, ring twice',
+  });
+  check('an order with the terms is placed', placed.status === 201, `got ${placed.status}`);
+  check('AC-8: it records when the terms were accepted', typeof placed.body?.order?.terms_accepted_at === 'string');
+  check('AC-8: and which version', typeof placed.body?.order?.terms_version === 'string');
+  check('AC-9: the recipient is on the order', placed.body?.order?.recipient_name === 'Mma Modise');
+
+  // AC-9: a supplier on this order never sees who receives it or what they said.
+  const paid = await payCallback(placed.body?.order?.id, placed.body?.payment, { amount: placed.body?.order?.total });
+  check('that order can be paid', paid.status === 200, `got ${paid.status}`);
+  const seen = await json(naledi, `/api/orders/${placed.body?.order?.id}`);
+  check('AC-9: its supplier can read the order', seen.status === 200, `got ${seen.status}`);
+  check('AC-9: but not the recipient, phone or instructions',
+    seen.body?.order?.recipient_name === undefined &&
+      seen.body?.order?.delivery_phone === undefined &&
+      seen.body?.order?.delivery_instructions === undefined,
+      JSON.stringify(seen.body?.order));
+  const staffSee = (await json(ops, `/api/orders/${placed.body?.order?.id}`)).body?.order;
+  check('AC-9: the team can', staffSee?.delivery_instructions === 'Blue gate, ring twice');
+
+  const book = (jar, path, method, body) =>
+    json(jar, path, { method, headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
+  const entry = (label) => ({
+    label,
+    recipient_name: 'Mma Modise',
+    phone: '+266 2231 2345',
+    country: 'ls',
+    town: 'Maseru',
+    street: `Kingsway ${label}`,
+  });
+
+  const first = await book(buyer, '/api/addresses', 'POST', entry('One'));
+  check('AC-1: a buyer can save an address', first.status === 201, `got ${first.status}`);
+  check('AC-2: the first is the default', first.body?.is_default === true);
+
+  const theirs = await json(other, `/api/addresses/${first.body?.id}`, { method: 'DELETE' });
+  check("AC-1: another buyer cannot delete it", theirs.status === 403, `got ${theirs.status}`);
+  const staffBook = await json(ops, '/api/addresses');
+  check('staff have no view of the address book', staffBook.status === 403, `got ${staffBook.status}`);
+
+  const nowhere = await book(buyer, '/api/addresses', 'POST', { ...entry('Nowhere'), country: 'ZZ' });
+  check('AC-6: an address needs an active country', nowhere.status === 422, `got ${nowhere.status}`);
+
+  for (let index = 2; index <= 10; index += 1) await book(buyer, '/api/addresses', 'POST', entry(`No${index}`));
+  const eleventh = await book(buyer, '/api/addresses', 'POST', entry('Eleven'));
+  check('AC-1: an eleventh address is refused', eleventh.status === 409, `got ${eleventh.status}`);
+
+  const full = await order({
+    terms_accepted: true,
+    delivery_phone: '+267 71 000 000',
+    save_address: true,
+  });
+  check('AC-4: a full book never stops the order', full.status === 201, `got ${full.status}`);
 }
 
 // ── 10. Runner availability toggle ───────────────────────────────────────────
@@ -1253,6 +1366,8 @@ section('13. Tiered pricing — the ladder is real, not hard-coded');
       payment_method: 'CARD',
       delivery_address: 'Plot 220, Block 6',
       delivery_city: 'Gaborone',
+      terms_accepted: true,
+      delivery_phone: '+267 71 000 000',
     }),
   });
   const unit1 = order1.body?.items?.[0]?.unit_price;
@@ -1267,6 +1382,8 @@ section('13. Tiered pricing — the ladder is real, not hard-coded');
       payment_method: 'CARD',
       delivery_address: 'Plot 220, Block 6',
       delivery_city: 'Gaborone',
+      terms_accepted: true,
+      delivery_phone: '+267 71 000 000',
     }),
   });
   const unit5 = order5.body?.items?.[0]?.unit_price;
@@ -1287,6 +1404,8 @@ section('13. Tiered pricing — the ladder is real, not hard-coded');
         payment_method: 'CARD',
         delivery_address: 'Plot 220, Block 6',
         delivery_city: 'Gaborone',
+        terms_accepted: true,
+        delivery_phone: '+267 71 000 000',
       }),
     });
     return order.body?.items?.[0]?.unit_price;
@@ -1321,6 +1440,8 @@ section('13. Tiered pricing — the ladder is real, not hard-coded');
       payment_method: 'CARD',
       delivery_address: 'Plot 5412, Extension 12',
       delivery_city: 'Gaborone',
+      terms_accepted: true,
+      delivery_phone: '+267 71 000 000',
     }),
   });
   const retailUnit20 = retail20.body?.items?.[0]?.unit_price;
@@ -1364,6 +1485,8 @@ section('13. Tiered pricing — the ladder is real, not hard-coded');
       payment_method: 'CARD',
       delivery_address: 'Plot 5412, Extension 12',
       delivery_city: 'Gaborone',
+      terms_accepted: true,
+      delivery_phone: '+267 71 000 000',
     }),
   });
   const [wig8, wig10] = wigs.body?.items ?? [];
@@ -1387,6 +1510,8 @@ section('13. Tiered pricing — the ladder is real, not hard-coded');
       payment_method: 'CARD',
       delivery_address: 'Plot 5412, Extension 12',
       delivery_city: 'Gaborone',
+      terms_accepted: true,
+      delivery_phone: '+267 71 000 000',
     }),
   });
   // Three 8" wigs alone: hair retail 350 less the 3% multi-buy, 339.50 rounded up.
@@ -1414,6 +1539,8 @@ section('13. Tiered pricing — the ladder is real, not hard-coded');
       payment_method: 'CARD',
       delivery_address: 'Somewhere',
       delivery_city: 'Nowhere',
+      terms_accepted: true,
+      delivery_phone: '+267 71 000 000',
       delivery_country: 'XX',
     }),
   });
@@ -1433,6 +1560,8 @@ section('13. Tiered pricing — the ladder is real, not hard-coded');
         payment_method,
         delivery_address: 'Kingsway Road 12',
         delivery_city: 'Maseru',
+        terms_accepted: true,
+        delivery_phone: '+267 71 000 000',
         delivery_country: 'LS',
       }),
     });
@@ -1462,6 +1591,8 @@ section('13. Tiered pricing — the ladder is real, not hard-coded');
       payment_method: 'CARD',
       delivery_address: 'Plot 220, Block 6',
       delivery_city: 'Gaborone',
+      terms_accepted: true,
+      delivery_phone: '+267 71 000 000',
     }),
   });
   check('qty 100 is refused and routed to a quotation', order100.status === 409, `got ${order100.status}`);
@@ -1606,6 +1737,8 @@ section('16. Runner sourcing — request to delivery');
       quantity: 3,
       budget_per_unit: 900,
       delivery_city: 'Gaborone',
+      terms_accepted: true,
+      delivery_phone: '+267 71 000 000',
       delivery_address: 'Plot 5412, Extension 12',
     }),
   });
