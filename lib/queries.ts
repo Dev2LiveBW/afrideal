@@ -2,7 +2,7 @@ import 'server-only';
 
 import { readAll } from '@/lib/db';
 import { asDisplayed } from '@/lib/payments/status';
-import { orderForSupplier } from '@/lib/order-privacy';
+import { legForSupplier, orderForSupplier } from '@/lib/order-privacy';
 import { offeredTo } from '@/lib/runner-match';
 import { rankOffers } from '@/lib/supplier-selection';
 import type {
@@ -215,7 +215,7 @@ export async function getSupplierWorkspace(supplierId: string) {
     offers: myOffers,
     products: products.filter((product) => myProductIds.has(product.id)),
     legs: myLegs.map((leg) => ({
-      ...leg,
+      ...legForSupplier(leg),
       order: visibleOrders.find((order) => order.id === leg.order_id) ?? null,
       items: items.filter((item) => leg.item_ids.includes(item.id)),
       payable: payableRecords.find((record) => record.supplier_order_id === leg.id) ?? null,

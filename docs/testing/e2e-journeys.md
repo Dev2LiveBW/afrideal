@@ -78,6 +78,8 @@ The spec for each journey lives in `e2e/` (storefront, supplier, runner, console
 | B15 | Reorder a delivered order at today's prices | Customer | P1 | yes | no |
 | B16 | A heart saves an item, for a guest too | Customer | P1 | yes | no |
 | B17 | Alert settings and the consent date | Customer | P2 | yes | no |
+| B18 | Finance makes a code and a buyer pays less with it | Finance, Customer | P1 | yes | no |
+| B19 | A code switched off after it was applied stops the order | Finance, Customer | P1 | yes | no |
 | **C** | **Request for quotation (RFQ)** | | | | |
 | C01 | Buyer sends an RFQ | Customer | P1 | yes | yes |
 | C02 | Invited supplier sends a quote | Supplier | P1 | no screen yet | no |
@@ -419,6 +421,38 @@ That is 51 journeys. 48 have a screen to test (C02 to C04 do not yet, see Findin
 - Order updates by email and by SMS are on, and Offers and news is off.
 - Turning it on shows the date you agreed, and it stays on after a reload.
 - Turning it off removes the date.
+
+### B18 Finance makes a code and a buyer pays less with it
+
+**Start:** signed in as Finance on `/admin/promo-codes`, and as Thabo in a second browser. Spec 0011, AC-20 to AC-28.
+
+1. As Finance, add a code: 10% off, up to BWP 50, running for years.
+2. As Thabo, add `p001` to the cart and go to checkout.
+3. Type a code that does not exist, then the new one.
+4. Agree to the terms, place the order and pay by card.
+5. As Finance, reload the list.
+
+**Expect:**
+
+- The list shows the code as Live.
+- The unknown code says "That code is not valid."
+- The new code adds a Promo line and moves the total from BWP 182.00 to BWP 168.30. Delivery is not discounted.
+- The card page asks for BWP 168.30, and the paid order shows the same total and the Promo line.
+- The list shows 1 paid use.
+
+### B19 A code switched off after it was applied stops the order
+
+**Start:** as B18, with a new code. Spec 0011, AC-24.
+
+1. As Thabo, apply the code at checkout.
+2. As Finance, switch the code off.
+3. As Thabo, press Place order.
+4. Press Place order again.
+
+**Expect:**
+
+- The first press places nothing. Checkout says the new total is BWP 182.00, and the Promo line is gone.
+- The second press goes on to pay at BWP 182.00.
 
 ## C. Request for quotation (RFQ)
 

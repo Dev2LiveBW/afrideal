@@ -1804,6 +1804,34 @@ const payments = orders
     };
   });
 
+// Promo codes at the boundaries (spec 0011): the journeys and verify lean on these.
+const promoCode = (id, code, percent, maxDiscount, minOrder, extra = {}) => ({
+  id,
+  code,
+  percent,
+  max_discount: maxDiscount,
+  min_order: minOrder,
+  starts_at: '2026-01-01T00:00:00.000Z',
+  ends_at: '2036-01-01T00:00:00.000Z',
+  usage_limit: null,
+  active: true,
+  created_by: 'u001',
+  created_at: '2026-01-01T00:00:00.000Z',
+  updated_at: '2026-01-01T00:00:00.000Z',
+  ...extra,
+});
+
+const promoCodes = [
+  promoCode('prm001', 'WELCOME10', 10, 50, 100),
+  // So large only the margin floor stops it.
+  promoCode('prm002', 'FLOOR90', 90, 100000, 0),
+  promoCode('prm003', 'BIGSPEND', 5, 20, 100000),
+  promoCode('prm004', 'LASTONE', 10, 50, 0, { usage_limit: 1 }),
+  promoCode('prm005', 'SWITCHOFF', 10, 50, 0, { active: false }),
+  promoCode('prm006', 'LASTYEAR', 10, 50, 0, { ends_at: '2026-02-01T00:00:00.000Z' }),
+  promoCode('prm007', 'NEXTYEAR', 10, 50, 0, { starts_at: '2035-01-01T00:00:00.000Z' }),
+];
+
 // A demo address book (spec 0011): Kefilwe's home, so checkout has one to pick.
 const addresses = [
   {
@@ -1865,6 +1893,7 @@ const files = {
   addresses,
   // Empty on purpose: a buyer's list is theirs to fill.
   'saved-items': [],
+  'promo-codes': promoCodes,
 };
 
 await fs.mkdir(DATA_DIR, { recursive: true });

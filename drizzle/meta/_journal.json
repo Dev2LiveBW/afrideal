@@ -57,6 +57,13 @@
       "when": 1793770294961,
       "tag": "0007_saved_items",
       "breakpoints": true
+    },
+    {
+      "idx": 8,
+      "version": "7",
+      "when": 1793800182570,
+      "tag": "0008_promo_codes",
+      "breakpoints": true
     }
   ]
 }

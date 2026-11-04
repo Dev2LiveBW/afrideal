@@ -7,7 +7,7 @@ import { EVENTS, audit, notify } from '@/lib/notifications';
 import { closeOpenAttempts, providerFor } from '@/lib/payments/adapters';
 import { confirmPayment } from '@/lib/payments/confirm';
 import { executeRefund } from '@/lib/refunds';
-import { orderForSupplier } from '@/lib/order-privacy';
+import { legForSupplier, orderForSupplier } from '@/lib/order-privacy';
 import { getOrderDetail } from '@/lib/queries';
 import type { Dispute, Order } from '@/types';
 
@@ -32,7 +32,7 @@ export const GET = handled(async (_request: Request, { params }: { params: { id:
     return ok({
       ...detail,
       order: orderForSupplier(detail.order),
-      legs: detail.legs.filter((leg) => leg.supplier_id === actor.supplierId),
+      legs: detail.legs.filter((leg) => leg.supplier_id === actor.supplierId).map(legForSupplier),
     });
   }
 

@@ -109,12 +109,12 @@ spec [0004](../specs/0004-quote-chain.md) · code in `app/api/rfqs/[id]/route.ts
 ### 25. Buyer account & checkout extras · in-progress
 The account and checkout pieces on the Phase 1 list: saved addresses chosen at checkout, a review step with delivery instructions and terms, promo codes, reorder, a map link on tracking, a mini cart, saved items, alert settings, and a welcome step after sign up. Builds on 5 (phone checkout).
 **Done when:** a buyer can save addresses and pick one at checkout; checkout has a review step with delivery instructions and a terms checkbox; a promo code changes the total; a delivered order can be reordered; saved items and alert settings are live in the account (no longer dimmed).
-spec [0011](../specs/0011-buyer-account-checkout-extras.md) · code in `lib/addresses.ts`, `lib/reorder.ts`, `lib/saved-items.ts`, `lib/alert-prefs.ts`, `app/(store)/account/`, `app/(store)/checkout/`
+spec [0011](../specs/0011-buyer-account-checkout-extras.md) · code in `lib/addresses.ts`, `lib/reorder.ts`, `lib/saved-items.ts`, `lib/alert-prefs.ts`, `lib/promo.mjs`, `lib/order-lines.ts`, `app/(store)/account/`, `app/(store)/checkout/`
 - [x] Design it (spec): `/architect buyer account & checkout extras`
 - [ ] Build it: `/develop buyer account & checkout extras`
   - [x] Addresses and the review step: address book, picker at checkout, instructions, terms, draft `/terms` (AC-1 to AC-10)
   - [x] Account and repeat buying: reorder, map link, saved items, alert settings (AC-11 to AC-19)
-  - [ ] Promo codes: shared pricing path, codes in checkout, ledger shares, admin page, verify and journeys (AC-20 to AC-29)
+  - [x] Promo codes: shared pricing path, codes in checkout, ledger shares, admin page, verify and journeys (AC-20 to AC-29)
   - [ ] Mini cart and welcome step (waits on a recording of Alibaba's cart and post sign up)
 - [ ] Verify it: `/check verify buyer account & checkout extras`
 - [ ] Test it: `/test buyer account & checkout extras`

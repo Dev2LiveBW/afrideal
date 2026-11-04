@@ -105,6 +105,12 @@ export default async function AdminOrderDetailPage({ params }: { params: { id: s
                 <p className="mt-1 text-[11px] text-muted">
                   Subtotal <span className="font-mono">{order.subtotal.toFixed(2)}</span> + delivery{' '}
                   <span className="font-mono">{order.delivery_fee.toFixed(2)}</span>
+                  {order.promo_code && (
+                    <>
+                      {' '}- promo {order.promo_code}{' '}
+                      <span className="font-mono">{(order.promo_discount ?? 0).toFixed(2)}</span>
+                    </>
+                  )}
                 </p>
               </div>
             </PanelBody>

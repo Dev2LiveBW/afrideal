@@ -50,6 +50,7 @@ export const payments = docTable('payments');
 export const pricingRules = docTable('pricing_rules');
 export const productImages = docTable('product_images');
 export const products = docTable('products');
+export const promoCodes = docTable('promo_codes');
 export const rfqResponses = docTable('rfq_responses');
 export const rfqs = docTable('rfqs');
 export const runnerRequests = docTable('runner_requests');
@@ -69,6 +70,7 @@ export const users = docTable('users');
 export const tables = {
   addresses,
   'saved-items': savedItems,
+  'promo-codes': promoCodes,
   'audit-log': auditLog,
   brands,
   categories,

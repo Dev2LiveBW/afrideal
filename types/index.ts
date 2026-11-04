@@ -319,6 +319,12 @@ export interface Order {
   /** When the buyer agreed to the terms, and which version (spec 0011, AC-8). */
   terms_accepted_at?: string;
   terms_version?: string;
+  /** The promo code as applied (spec 0011). Text, so a later edit cannot rewrite the order. */
+  promo_code?: string | null;
+  /** What it took off, in `currency`. The one true figure. */
+  promo_discount?: number;
+  /** The same discount as booked, always `toPula(promo_discount, buyer_fx_rate)`. */
+  promo_discount_pula?: number;
   payment_method: PaymentMethod;
   /**
    * The provider's reference for the payment that settled this order. Null
@@ -386,8 +392,10 @@ export interface SupplierOrder {
   status: SupplierOrderStatus;
   item_ids: string[];
   supplier_subtotal: number;
-  /** The platform cut on this leg. */
+  /** The platform cut on this leg, after its share of any promo discount. */
   platform_margin: number;
+  /** This leg's share of the order's promo discount, in pula (spec 0011, AC-26). */
+  promo_discount?: number;
   /** Why the engine picked this supplier - surfaced in the admin UI. */
   selection_reason: string;
   auto_selected: boolean;
@@ -686,6 +694,23 @@ export interface AppNotification {
   kind: 'ORDER' | 'PAYMENT' | 'SUPPLIER' | 'DISPUTE' | 'SYSTEM';
   read: boolean;
   at: string;
+}
+
+/** A promo code (spec 0011). `max_discount` and `min_order` are pula; its state is derived. */
+export interface PromoCode {
+  id: string;
+  code: string;
+  percent: number;
+  max_discount: number;
+  min_order: number;
+  starts_at: string;
+  ends_at: string;
+  /** Null means no total limit. */
+  usage_limit: number | null;
+  active: boolean;
+  created_by: string;
+  created_at: string;
+  updated_at: string;
 }
 
 /** A product a buyer saved for later (spec 0011). One row per buyer and product. */

@@ -3,6 +3,7 @@ import 'server-only';
 import { toPula } from '@/lib/currency.mjs';
 import { findById, mutate, nextIds, readAll } from '@/lib/db';
 import { EVENTS, audit, notify } from '@/lib/notifications';
+import { promoShares } from '@/lib/promo.mjs';
 import { claimedAfterWindow } from '@/lib/payments/policy';
 import { selectSupplier } from '@/lib/supplier-selection';
 import type {
@@ -522,6 +523,16 @@ async function raiseSupplierLegs(order: Order, now: string): Promise<RaisedLegs>
 
   if (bySupplier.size === 0) return { supplierOrders: [], payables: [] };
 
+  // Spec 0011, AC-26: over every supplier on the order, not only the legs still to
+  // raise, so a resumed run shares the discount out exactly as the first did.
+  const shares = promoShares(
+    order.promo_discount_pula ?? 0,
+    [...bySupplier].map(([supplierId, supplierItems]) => ({
+      supplierId,
+      gross: supplierItems.reduce((sum, item) => sum + toPula(item.line_total, order.buyer_fx_rate), 0),
+    })),
+  );
+
   // Reserved before the lock, because minting ids is itself a write and taking a
   // second lock inside a held one invites a deadlock. Ids this call ends up not
   // using just leave a gap, which the store already tolerates.
@@ -551,6 +562,8 @@ async function raiseSupplierLegs(order: Order, now: string): Promise<RaisedLegs>
           0,
         );
 
+        const legDiscount = shares.get(supplierId) ?? 0;
+
         const route = selectSupplier(
           offers.filter((offer) => offer.product_id === supplierItems[0].product_id),
           suppliers,
@@ -564,7 +577,9 @@ async function raiseSupplierLegs(order: Order, now: string): Promise<RaisedLegs>
           status: 'AWAITING_CONFIRMATION',
           item_ids: supplierItems.map((item) => item.id),
           supplier_subtotal: cost,
-          platform_margin: gross - cost,
+          // A thin leg may go negative: the floor holds for the order, not each leg.
+          platform_margin: gross - cost - legDiscount,
+          ...(legDiscount > 0 && { promo_discount: legDiscount }),
           selection_reason: route?.reason ?? 'Routed on composite supplier score.',
           auto_selected: true,
           created_at: now,
@@ -602,8 +617,10 @@ async function raiseSupplierLegs(order: Order, now: string): Promise<RaisedLegs>
           supplier_id: leg.supplier_id,
           // Taken from the leg rather than recomputed, so a payable can be raised
           // for a leg this call did not build. Gross is what the customer pays for
-          // those lines: the supplier's cost plus our margin on them.
-          amount: leg.supplier_subtotal + leg.platform_margin,
+          // those lines: the supplier's cost plus our margin on them. A promo
+          // discount comes out of our margin alone, so it goes back in here and
+          // the supplier is owed what they would have been (spec 0011, AC-26).
+          amount: leg.supplier_subtotal + leg.platform_margin + (leg.promo_discount ?? 0),
           status: 'PENDING',
           gateway: order.payment_method,
           raised_at: now,
@@ -770,6 +787,30 @@ async function announce(args: {
       .join('')
       .trim(),
   });
+
+  // Spec 0011, AC-25: the money has been taken, so the discount stands. Finance
+  // should still see that this buyer got a code twice.
+  if (late && order.promo_code) {
+    const orders = await readAll('orders');
+    const usedAgain = orders.some(
+      (row) =>
+        row.id !== order.id &&
+        row.customer_id === order.customer_id &&
+        row.promo_code === order.promo_code &&
+        row.status !== 'CANCELLED' &&
+        row.status !== 'AWAITING_PAYMENT',
+    );
+    if (usedAgain) {
+      await audit({
+        actorId: actor.id,
+        actorName: actor.name,
+        action: EVENTS.PROMO_LATE_REUSE,
+        entity: 'order',
+        entityId: order.id,
+        detail: `${order.reference} reopened by a late payment on ${order.promo_code}, which the buyer had since used again.`,
+      });
+    }
+  }
 
   if (raised.supplierOrders.length > 0) {
     const users = await readAll('users');

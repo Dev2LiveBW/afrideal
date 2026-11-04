@@ -202,7 +202,7 @@ Relationships: a user has many addresses and saved items (1:N). A product has ma
 | `/api/promo-codes` | GET | none | codes with `paid_uses` | FINANCE_ADMIN, SUPER_ADMIN | 403 |
 | `/api/promo-codes` | POST | all promo fields | code | FINANCE_ADMIN, SUPER_ADMIN | 403, 409 duplicate, 422 |
 | `/api/promo-codes/[id]` | PATCH | `active?`, `ends_at?`, `usage_limit?` | code | FINANCE_ADMIN, SUPER_ADMIN | 403, 404, 422 |
-| `/api/orders` (changed) | POST | adds `terms_accepted`, `promo_code?`, `delivery_instructions?`, `recipient_name?`, `delivery_phone?`, `save_address?`, `address_label?` | order | CUSTOMER | 409 stale promo with `{ reason, promo_discount, total }`, 422 no terms, 422 no phone on a doorstep order |
+| `/api/orders` (changed) | POST | adds `terms_accepted`, `promo_code?`, `promo_expected_discount?` (the discount the buyer was shown, compared and never used), `delivery_instructions?`, `recipient_name?`, `delivery_phone?`, `save_address?`, `address_label?` | order | CUSTOMER | 409 stale promo with `{ reason, promo_discount, total }`, 422 no terms, 422 no phone on a doorstep order |
 
 New pages: `/account/addresses`, `/account/saved`, `/account/settings`, `/terms`, `/admin/promo-codes`. Finance is an allow list and operations a deny list, each kept twice: add `/admin/promo-codes` to `FINANCE_ALLOWED_PREFIXES` and `OPS_DENIED_PREFIXES` in `lib/roles.ts`, and to `FINANCE_ALLOWED` and `OPS_DENIED` in `middleware.ts`. Add `/terms` to the public routes in `middleware.ts`.
 
@@ -286,12 +286,12 @@ Ordered as tracer bullets, one thin thread through every layer at a time, with m
 10. [x] Add `alert_prefs`, its route and `/account/settings`, satisfies **AC-17**, **AC-18**, **AC-19**.
 
 **Slice 3: promo codes**
-11. Extract `buildOrderLines()` from the order route with no change in behaviour, then add `promo-codes`, `lib/promo.mjs` with unit tests at rates other than 1, and the quote endpoint, satisfies **AC-21**, **AC-22**, **AC-23**.
-12. Apply the discount in the order route with the stale check, use counting and the once per buyer check inside the order write, satisfies **AC-24**, **AC-25**.
-13. Share the discount across legs in `confirmPayment()` and adjust analytics and the order pages, satisfies **AC-26**, **AC-27**.
-14. Add the code box to checkout's summary, quoting again when the cart, country or locker changes, and the confirm step for a 409, satisfies **AC-21**, **AC-24**.
-15. Build `/admin/promo-codes`, its routes and auditing, allow finance and deny operations in both `lib/roles.ts` and `middleware.ts`, with verify checks that finance gets 200 and operations 403, satisfies **AC-20**, **AC-28**.
-16. Seed codes at the cap and limit boundaries, then add verify checks and the e2e journeys, changing `docs/testing/e2e-journeys.md` first, satisfies **AC-29**.
+11. [x] Extract `buildOrderLines()` from the order route with no change in behaviour, then add `promo-codes`, `lib/promo.mjs` with unit tests at rates other than 1, and the quote endpoint, satisfies **AC-21**, **AC-22**, **AC-23**.
+12. [x] Apply the discount in the order route with the stale check, use counting and the once per buyer check inside the order write, satisfies **AC-24**, **AC-25**.
+13. [x] Share the discount across legs in `confirmPayment()` and adjust analytics and the order pages, satisfies **AC-26**, **AC-27**.
+14. [x] Add the code box to checkout's summary, quoting again when the cart, country or locker changes, and the confirm step for a 409, satisfies **AC-21**, **AC-24**.
+15. [x] Build `/admin/promo-codes`, its routes and auditing, allow finance and deny operations in both `lib/roles.ts` and `middleware.ts`, with verify checks that finance gets 200 and operations 403, satisfies **AC-20**, **AC-28**.
+16. [x] Seed codes at the cap and limit boundaries, then add verify checks and the e2e journeys, changing `docs/testing/e2e-journeys.md` first, satisfies **AC-29**.
 
 ## Consequences
 

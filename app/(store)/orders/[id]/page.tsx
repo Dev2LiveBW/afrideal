@@ -117,7 +117,8 @@ export default async function OrderTrackingPage({
   const outstanding = payables.filter((record) => record.status === 'PENDING');
   const settled = payables.filter((record) => record.status === 'SETTLED');
   const underReview = payables.filter((record) => record.status === 'ON_HOLD');
-  const orderValue = payables.reduce((sum, record) => sum + record.amount, 0);
+  // Spec 0011, AC-27: what the buyer paid for the goods, after any promo code.
+  const goodsPaid = Math.round((order.subtotal - (order.promo_discount ?? 0)) * 100) / 100;
 
   // Spec 0003: what the buyer is told turns on whether their money has arrived.
   const awaitingPayment = order.status === 'AWAITING_PAYMENT';
@@ -485,6 +486,14 @@ export default async function OrderTrackingPage({
                         <MoneyText currency={order.currency ?? 'BWP'} amount={order.delivery_fee} size="sm" />
                       </dd>
                     </div>
+                    {order.promo_code && (
+                      <div className="flex items-center justify-between">
+                        <dt className="text-body">Promo {order.promo_code}</dt>
+                        <dd>
+                          -<MoneyText currency={order.currency ?? 'BWP'} amount={order.promo_discount ?? 0} size="sm" />
+                        </dd>
+                      </div>
+                    )}
                     {/* Spec 0009, AC-3: the lane this order actually took. */}
                     {crossBorderFrom.length > 0 && (
                       <div className="flex items-center justify-between">
@@ -592,7 +601,8 @@ export default async function OrderTrackingPage({
               <OrderActions
                 orderId={order.id}
                 reference={order.reference}
-                orderAmount={orderValue}
+                orderAmount={goodsPaid}
+                orderCurrency={order.currency ?? 'BWP'}
                 canConfirm={canConfirm && outstanding.length > 0}
                 canDispute={canDispute}
                 isCollectionPoint={isCollectionPoint}

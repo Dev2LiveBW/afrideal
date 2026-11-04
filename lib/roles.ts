@@ -37,6 +37,7 @@ export const ADMIN_ROLES: Role[] = ['SUPER_ADMIN', 'OPERATIONS_ADMIN', 'FINANCE_
 export const FINANCE_ALLOWED_PREFIXES = [
   '/admin/analytics',
   '/admin/payables',
+  '/admin/promo-codes',
   '/admin/settlements',
 ];
 
@@ -46,7 +47,7 @@ export const FINANCE_ALLOWED_PREFIXES = [
  * ordinary payables run - so a finance login has no reason to be there.
  */
 
-export const OPS_DENIED_PREFIXES = ['/admin/settings', '/admin/finance', '/admin/settlements'];
+export const OPS_DENIED_PREFIXES = ['/admin/settings', '/admin/finance', '/admin/settlements', '/admin/promo-codes'];
 
 /**
  * Finance is scoped to money surfaces only. Operations sees everything except

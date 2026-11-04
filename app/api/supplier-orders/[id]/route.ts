@@ -3,6 +3,7 @@ import { z } from 'zod';
 import { fail, guard, handled, ok } from '@/lib/api';
 import { findById, readAll, update } from '@/lib/db';
 import { EVENTS, audit, notify } from '@/lib/notifications';
+import { legForSupplier } from '@/lib/order-privacy';
 import { openJobForLeg } from '@/lib/shipments';
 import { selectSupplier } from '@/lib/supplier-selection';
 import type { OrderStatus, SupplierOrderStatus } from '@/types';
@@ -74,7 +75,7 @@ export const PATCH = handled(async (request: Request, { params }: { params: { id
     const updated = await update('supplier-orders', params.id, {
       supplier_id: target.id,
       supplier_subtotal: newCost,
-      platform_margin: gross - newCost,
+      platform_margin: gross - newCost - (leg.promo_discount ?? 0),
       auto_selected: false,
       selection_reason: `Manually routed to ${target.name} by ${actor.name}.`,
     });
@@ -149,5 +150,5 @@ export const PATCH = handled(async (request: Request, { params }: { params: { id
     }
   }
 
-  return ok(updated);
+  return ok(updated && actor.role === 'SUPPLIER_OWNER' ? legForSupplier(updated) : updated);
 });

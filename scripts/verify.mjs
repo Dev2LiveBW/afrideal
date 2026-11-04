@@ -1347,6 +1347,172 @@ section('9h. Buyer account — reorder, saved items and alert settings');
   check('AC-17: a guest cannot change them', (await alerts(makeJar(), { marketing: true })).status === 401);
 }
 
+section('9i. Promo codes — the cap, stale codes, use counting and the ledger');
+{
+  const buyer = sessions['thabo@gmail.com'].jar;
+  const other = sessions['kefilwe@gmail.com'].jar;
+  const finance = sessions['finance@afrideal.co.bw'].jar;
+  const admin = sessions['admin@afrideal.co.bw'].jar;
+  const ops = sessions['ops@afrideal.co.bw'].jar;
+  const naledi = sessions['supplier@naledi.co.bw'].jar;
+  const JSON_HEADERS = { 'Content-Type': 'application/json' };
+
+  const lines = [{ product_id: 'p001', variant_id: 'p001v1', qty: 1 }];
+  const quote = (jar, code, extra) =>
+    json(jar, '/api/promo-codes/quote', {
+      method: 'POST',
+      headers: JSON_HEADERS,
+      body: JSON.stringify({ code, lines, delivery_country: 'BW', ...extra }),
+    });
+  const place = (jar, code, expected, extra) =>
+    json(jar, '/api/orders', {
+      method: 'POST',
+      headers: JSON_HEADERS,
+      body: JSON.stringify({
+        lines,
+        payment_method: 'CARD',
+        delivery_address: 'Plot 77, Broadhurst',
+        delivery_city: 'Gaborone',
+        delivery_country: 'BW',
+        delivery_phone: '+267 71 000 000',
+        terms_accepted: true,
+        promo_code: code,
+        promo_expected_discount: expected,
+        ...extra,
+      }),
+    });
+  const newCode = async (code, extra) =>
+    json(finance, '/api/promo-codes', {
+      method: 'POST',
+      headers: JSON_HEADERS,
+      body: JSON.stringify({
+        code,
+        percent: 10,
+        max_discount: 50,
+        min_order: 0,
+        starts_at: '2026-01-01T00:00:00.000Z',
+        ends_at: '2036-01-01T00:00:00.000Z',
+        ...extra,
+      }),
+    });
+  const change = (jar, id, patch) =>
+    json(jar, `/api/promo-codes/${id}`, { method: 'PATCH', headers: JSON_HEADERS, body: JSON.stringify(patch) });
+  const listed = async (code) => (await json(finance, '/api/promo-codes')).body?.find((row) => row.code === code);
+  // Unique per run, so verify can run twice against one store.
+  const stamp = Date.now().toString(36).toUpperCase().slice(-6);
+
+  // AC-20: who may touch codes, and what cannot change.
+  check('AC-20: finance can list codes', (await json(finance, '/api/promo-codes')).status === 200);
+  check('AC-20: super admin can list codes', (await json(admin, '/api/promo-codes')).status === 200);
+  for (const [who, jar] of [['operations', ops], ['a supplier', naledi], ['a buyer', buyer], ['a runner', sessions['runner@afrideal.co.bw'].jar]]) {
+    const status = (await json(jar, '/api/promo-codes')).status;
+    check(`AC-20: ${who} cannot`, status === 403, `got ${status}`);
+  }
+  check('AC-20: finance opens the page', (await request(finance, '/admin/promo-codes')).status === 200);
+  check('AC-20: operations does not', (await request(ops, '/admin/promo-codes')).status !== 200);
+
+  const made = await newCode(`  ver${stamp} `);
+  check('AC-20: a code is trimmed and upper cased', made.status === 201 && made.body?.code === `VER${stamp}`, JSON.stringify(made.body));
+  check('AC-20: a duplicate is refused', (await newCode(`VER${stamp}`)).status === 409);
+  check('AC-20: a percent over 90 is refused', (await newCode(`BIG${stamp}`, { percent: 91 })).status === 422);
+  check('AC-20: the percent cannot change', (await change(finance, made.body?.id, { percent: 50 })).status === 422);
+  check('AC-20: the code cannot change', (await change(finance, made.body?.id, { code: 'OTHER1' })).status === 422);
+  check('AC-20: operations cannot change one', (await change(ops, made.body?.id, { active: false })).status === 403);
+
+  // AC-21 and AC-22.
+  const welcome = await quote(buyer, 'welcome10');
+  check('AC-21: a code takes its percent off the goods', welcome.status === 200 && welcome.body?.discount === 13.7, JSON.stringify(welcome.body));
+  check('AC-21: delivery is not discounted', welcome.body?.total === 168.3, `${welcome.body?.total}`);
+  const floor = await quote(buyer, 'FLOOR90');
+  check('AC-22: a large percent stops at the margin', floor.body?.discount === 55 && floor.body?.capped === true, JSON.stringify(floor.body));
+
+  // AC-23: each refusal, in its own words.
+  const refusal = async (code) => (await quote(buyer, code)).body?.error;
+  const unknown = await refusal('NOSUCHCODE');
+  check('AC-23: an unknown and a switched off code read alike', unknown && unknown === (await refusal('SWITCHOFF')), unknown);
+  check('AC-23: an ended code says so', /ended/.test(await refusal('LASTYEAR')));
+  check('AC-23: a code not started says so', /not live yet/.test(await refusal('NEXTYEAR')));
+  check('AC-23: a minimum says how much', /at least BWP 100,000\.00/.test(await refusal('BIGSPEND')), await refusal('BIGSPEND'));
+
+  // AC-24: the server decides, and a stale figure stops the order.
+  const ordersBefore = (await json(buyer, '/api/orders')).body?.length;
+  const stale = await place(buyer, 'WELCOME10', 99);
+  check('AC-24: a discount that changed is refused', stale.status === 409, `got ${stale.status}`);
+  check('AC-24: the refusal gives the new figures',
+    typeof stale.body?.reason === 'string' && stale.body?.promo_discount === 13.7 && stale.body?.total === 168.3, JSON.stringify(stale.body));
+  check('AC-24: and no order was placed', (await json(buyer, '/api/orders')).body?.length === ordersBefore);
+
+  const usesBefore = (await listed('WELCOME10'))?.paid_uses;
+  const before = (await json(finance, '/api/analytics')).body;
+  const placed = await place(buyer, 'WELCOME10', 13.7, { promo_discount: 137, total: 1, promo_discount_pula: 137 });
+  const placedOrder = placed.body?.order;
+  check('AC-24: the expected figure places the order', placed.status === 201, JSON.stringify(placed.body));
+  check('AC-24: figures from the browser are ignored',
+    placedOrder?.promo_discount === 13.7 && placedOrder?.promo_discount_pula === 13.7 && placedOrder?.total === 168.3, JSON.stringify(placedOrder));
+
+  // AC-25: an unpaid order holds the code, but is not a use.
+  check('AC-25: a buyer cannot use it again while unpaid', /already used/.test((await quote(buyer, 'WELCOME10')).body?.error ?? ''));
+  check('AC-25: an unpaid order is not a paid use', (await listed('WELCOME10'))?.paid_uses === usesBefore);
+  await payCallback(placedOrder?.id, placed.body?.payment, { amount: placedOrder?.total });
+  const after = (await json(finance, '/api/analytics')).body;
+  check('AC-25: a paid order is', (await listed('WELCOME10'))?.paid_uses === usesBefore + 1);
+  check('AC-25: another buyer can still use it', (await quote(other, 'WELCOME10')).status === 200);
+
+  const off = await newCode(`OFF${stamp}`);
+  const offQuote = await quote(buyer, `OFF${stamp}`);
+  await change(finance, off.body?.id, { active: false });
+  const lateOff = await place(buyer, `OFF${stamp}`, offQuote.body?.discount);
+  check('AC-24: a code switched off after the quote is refused',
+    lateOff.status === 409 && lateOff.body?.promo_discount === 0 && lateOff.body?.total === 182, JSON.stringify(lateOff.body));
+
+  await newCode(`PAR${stamp}`);
+  const [first, second] = await Promise.all([place(buyer, `PAR${stamp}`, 13.7), place(buyer, `PAR${stamp}`, 13.7)]);
+  const statuses = [first.status, second.status].sort();
+  check('AC-25: two parallel submits cannot both use a code', statuses[0] === 201 && statuses[1] === 409, statuses.join(' '));
+
+  const held = first.status === 201 ? first : second;
+  await json(ops, `/api/orders/${held.body?.order?.id}`, {
+    method: 'PATCH',
+    headers: JSON_HEADERS,
+    body: JSON.stringify({ action: 'CANCEL', reason: 'Verify gives the use back' }),
+  });
+  check('AC-25: cancelling an unpaid order gives its use back', (await quote(buyer, `PAR${stamp}`)).status === 200);
+
+  const limit = await newCode(`LIM${stamp}`);
+  for (const jar of [buyer, other]) {
+    const order = await place(jar, `LIM${stamp}`, 13.7);
+    await payCallback(order.body?.order?.id, order.body?.payment, { amount: order.body?.order?.total });
+  }
+  check('AC-20: a limit cannot go below the paid uses', (await change(finance, limit.body?.id, { usage_limit: 1 })).status === 422);
+  check('AC-20: it can match them', (await change(finance, limit.body?.id, { usage_limit: 2 })).status === 200);
+  check('AC-23: a code at its limit says so', /used up/.test((await quote(sessions['thabo@gmail.com'].jar, `LIM${stamp}`)).body?.error ?? ''));
+  check('AC-28: the list shows the state and paid uses',
+    await listed(`LIM${stamp}`).then((row) => row?.paid_uses === 2 && row?.state === 'USED_UP'));
+
+  // AC-26 and AC-27: the supplier is whole, and the discount comes out of margin.
+  const paid = (await json(ops, `/api/orders/${placedOrder?.id}`)).body;
+  const leg = paid?.legs?.[0];
+  check('AC-26: the leg carries the discount', leg?.promo_discount === 13.7, JSON.stringify(leg));
+  check('AC-26: the margin falls by it', Math.abs((leg?.platform_margin ?? 0) - 41.3) < 0.001, `${leg?.platform_margin}`);
+  check('AC-26: the payable is unchanged', leg?.payable?.amount === 137, `${leg?.payable?.amount}`);
+
+  const seen = (await json(naledi, `/api/orders/${placedOrder?.id}`)).body;
+  check('Suppliers see no promo details',
+    seen?.order && seen.order.promo_code === undefined && seen.order.promo_discount === undefined && seen.legs?.[0]?.promo_discount === undefined);
+
+  check('AC-27: analytics GMV counts what the buyer paid', Math.abs(after.period_gmv - before.period_gmv - 168.3) < 0.001, `${before.period_gmv} to ${after.period_gmv}`);
+  check('AC-27: analytics margin falls by the discount', Math.abs(after.gross_margin - before.gross_margin - 41.3) < 0.001, `${before.gross_margin} to ${after.gross_margin}`);
+  check('AC-27: the staff order keeps the discounted total', paid?.order?.total === 168.3);
+
+  const refund = await json(finance, `/api/orders/${placedOrder?.id}`, {
+    method: 'PATCH',
+    headers: JSON_HEADERS,
+    body: JSON.stringify({ action: 'REFUND', reason: 'Verify refund' }),
+  });
+  check('AC-27: a refund defaults to the discounted total', refund.body?.refund_amount === 168.3 || refund.body?.order?.refund_amount === 168.3, JSON.stringify(refund.body).slice(0, 160));
+  check('AC-25: a refunded order keeps its use', (await listed('WELCOME10'))?.paid_uses === usesBefore + 1);
+}
+
 // ── 10. Runner availability toggle ───────────────────────────────────────────
 
 section('10. Runner availability');

@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { AlertCircle, ShieldCheck, ShoppingBag } from 'lucide-react';
@@ -16,6 +16,7 @@ import { CartLineThumb } from '@/components/storefront/CartLineThumb';
 import { DEFAULT_DELIVER_TO, useAfriDealStore } from '@/store/useAfriDealStore';
 import { MAX_ADDRESSES, PHONE_PATTERN } from '@/lib/addresses';
 import { COLLECTION_POINTS } from '@/lib/collection-points';
+import { moneyLong } from '@/lib/currency.mjs';
 import { courierFee, couriersForLane } from '@/lib/couriers.mjs';
 import { isCrossBorder } from '@/lib/lanes.mjs';
 import { priceLine, sellerQuantities } from '@/lib/pricing-tiers';
@@ -95,6 +96,14 @@ const CheckoutSchema = z
 
 type CheckoutValues = z.infer<typeof CheckoutSchema>;
 
+/** What `/api/promo-codes/quote` answers. Amounts are in the order's currency. */
+interface PromoQuote {
+  code: string;
+  discount: number;
+  capped: boolean;
+  total: number;
+}
+
 /** A short label for a method's tile. */
 const MONOGRAM: Partial<Record<PaymentMethod, string>> = {
   CARD: 'CARD',
@@ -156,6 +165,12 @@ export function CheckoutClient({
   const [leaving, setLeaving] = useState<'payment' | 'order' | null>(null);
   // The saved address filling the form, if any. Typing over it unpicks it.
   const [pickedId, setPickedId] = useState('');
+  // Spec 0011, AC-21: the code as typed, and the discount the server gave it.
+  const [promoInput, setPromoInput] = useState('');
+  const [promo, setPromo] = useState<PromoQuote | null>(null);
+  const [promoError, setPromoError] = useState<string | null>(null);
+  const [promoBusy, setPromoBusy] = useState(false);
+  const promoRequest = useRef(0);
 
   useEffect(() => setMounted(true), []);
 
@@ -272,6 +287,45 @@ export function CheckoutClient({
       : DOORSTEP_DELIVERY_FEE;
   const total = subtotal + deliveryFee;
 
+  // The lane the discount is worked out on. Any change to it quotes again.
+  const quoteInput = JSON.stringify({
+    lines: cart.map((line) => ({ product_id: line.product_id, variant_id: line.variant_id, qty: line.qty })),
+    delivery_country: selectedCountry,
+    delivery_method: selectedDeliveryMethod,
+    collection_point: selectedDeliveryMethod === 'COLLECTION_POINT' ? (selectedPoint?.name ?? null) : null,
+  });
+
+  /** Asks the server, the only place a discount is worked out (AC-24). */
+  async function applyCode(code: string) {
+    // Only the latest answer counts, so a slow reply cannot undo a newer one.
+    const request = ++promoRequest.current;
+    setPromoBusy(true);
+    setPromoError(null);
+
+    const response = await fetch('/api/promo-codes/quote', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ ...JSON.parse(quoteInput), code }),
+    }).catch(() => null);
+    const reply = await response?.json().catch(() => null);
+
+    if (request !== promoRequest.current) return;
+    setPromoBusy(false);
+
+    if (!response?.ok) {
+      setPromo(null);
+      setPromoError(reply?.error ?? 'We could not check that code. Please try again.');
+      return;
+    }
+    setPromo(reply as PromoQuote);
+  }
+
+  // Spec 0011, AC-24: a discount follows the cart, the country and the locker.
+  useEffect(() => {
+    if (promo) void applyCode(promo.code);
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- runs when what was quoted changes.
+  }, [quoteInput]);
+
   // Spec 0009: cross-border on this order's lane, from where the goods are held
   // to the locker's country or the buyer's.
   const hasImportedItems = cart.some((line) =>
@@ -358,10 +412,22 @@ export function CheckoutClient({
         delivery_instructions: values.delivery_instructions?.trim() || null,
         save_address: !isCollection && !pickedId && values.save_address === true,
         address_label: values.address_label?.trim() || null,
+        // The figure is only compared. The server works the discount out itself.
+        promo_code: promo?.code ?? null,
+        promo_expected_discount: promo?.discount ?? null,
       }),
     });
 
     const body = await response.json().catch(() => null);
+
+    // Spec 0011, AC-24: the code changed since it was applied. Nothing is placed
+    // until the buyer has seen the new total and pressed Place order again.
+    if (response.status === 409 && body?.reason) {
+      const newTotal = moneyLong(body.total, countryEntry?.buyer_currency ?? 'BWP');
+      setPromo(promo && body.promo_discount > 0 ? { ...promo, discount: body.promo_discount, total: body.total } : null);
+      setApiError(`${body.reason} Your total is now ${newTotal}. Check it, then place your order again.`);
+      return;
+    }
 
     if (!response.ok) {
       setApiError(body?.error ?? 'We could not place that order. Please try again.');
@@ -422,6 +488,8 @@ export function CheckoutClient({
   // shows in that one. Before hydration the form still holds its default, and
   // the header's currency (read from the cookie) stands.
   const chargeCurrency = mounted ? (countryEntry?.buyer_currency ?? null) : null;
+  // A quoted total is already in the order's currency.
+  const quotedCurrency = chargeCurrency ?? undefined;
 
   return (
     <ChargeCurrency currency={chargeCurrency}>
@@ -868,13 +936,86 @@ export function CheckoutClient({
                     </p>
                   </div>
                 ))}
+                {promo && (
+                  <div className="flex items-center justify-between">
+                    <dt className="text-body">Promo {promo.code}</dt>
+                    <dd>
+                      -<MoneyText currency={quotedCurrency} amount={promo.discount} size="sm" tone="forest" />
+                    </dd>
+                  </div>
+                )}
                 <div className="flex items-baseline justify-between border-t border-hairline pt-3">
                   <dt className="font-medium text-ink">Total to pay</dt>
                   <dd>
-                    <MoneyText amount={total} size="lg" tone="ink" />
+                    {promo ? (
+                      <MoneyText currency={quotedCurrency} amount={promo.total} size="lg" tone="ink" />
+                    ) : (
+                      <MoneyText amount={total} size="lg" tone="ink" />
+                    )}
                   </dd>
                 </div>
               </dl>
+
+              {/* Spec 0011, AC-21: one code, applied beside the total it changes. */}
+              <div className="mt-4 border-t border-hairline pt-4">
+                {promo ? (
+                  <p className="flex items-center justify-between gap-3 text-[13px] text-ink">
+                    <span>
+                      {promo.code} applied
+                      {promo.capped ? ', up to the most this order allows' : ''}.
+                    </span>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        promoRequest.current += 1;
+                        setPromoBusy(false);
+                        setPromo(null);
+                      }}
+                      className="press-soft shrink-0 font-medium text-forest hover:underline"
+                    >
+                      Remove code
+                    </button>
+                  </p>
+                ) : (
+                  <>
+                    <label htmlFor="promo_code" className="mb-1.5 block text-[13px] font-medium text-ink">
+                      Promo code
+                    </label>
+                    <div className="flex gap-2">
+                      <input
+                        id="promo_code"
+                        value={promoInput}
+                        onChange={(event) => setPromoInput(event.target.value)}
+                        onKeyDown={(event) => {
+                          // Enter here applies the code; it must not place the order.
+                          if (event.key !== 'Enter') return;
+                          event.preventDefault();
+                          if (promoInput.trim()) void applyCode(promoInput);
+                        }}
+                        autoComplete="off"
+                        aria-invalid={promoError ? 'true' : undefined}
+                        aria-describedby={promoError ? 'promo-error' : undefined}
+                        className="min-w-0 flex-1 rounded border border-hairline-strong bg-surface px-3.5 py-2.5 text-[14px] uppercase text-ink outline-none transition-colors focus:border-gold/60"
+                      />
+                      <ActionButton
+                        type="button"
+                        variant="ghost"
+                        size="md"
+                        loading={promoBusy}
+                        disabled={!promoInput.trim()}
+                        onClick={() => applyCode(promoInput)}
+                      >
+                        Apply
+                      </ActionButton>
+                    </div>
+                  </>
+                )}
+                {promoError && (
+                  <p id="promo-error" role="alert" className="mt-1.5 text-[12px] text-danger-ink">
+                    {promoError}
+                  </p>
+                )}
+              </div>
 
               {/* Spec 0011, AC-7: the summary is the review, so these sit beside the total. */}
               <div className="mt-4 space-y-3 border-t border-hairline pt-4">
@@ -943,7 +1084,11 @@ export function CheckoutClient({
           <div className="mx-auto flex max-w-market items-center justify-between gap-4">
             <div>
               <span className="block text-[11px] text-muted">Total to pay</span>
-              <MoneyText amount={total} size="md" tone="ink" />
+              {promo ? (
+                <MoneyText currency={quotedCurrency} amount={promo.total} size="md" tone="ink" />
+              ) : (
+                <MoneyText amount={total} size="md" tone="ink" />
+              )}
             </div>
             <ActionButton
               type="submit"
