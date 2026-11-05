@@ -523,16 +523,6 @@ async function raiseSupplierLegs(order: Order, now: string): Promise<RaisedLegs>
 
   if (bySupplier.size === 0) return { supplierOrders: [], payables: [] };
 
-  // Spec 0011, AC-26: over every supplier on the order, not only the legs still to
-  // raise, so a resumed run shares the discount out exactly as the first did.
-  const shares = promoShares(
-    order.promo_discount_pula ?? 0,
-    [...bySupplier].map(([supplierId, supplierItems]) => ({
-      supplierId,
-      gross: supplierItems.reduce((sum, item) => sum + toPula(item.line_total, order.buyer_fx_rate), 0),
-    })),
-  );
-
   // Reserved before the lock, because minting ids is itself a write and taking a
   // second lock inside a held one invites a deadlock. Ids this call ends up not
   // using just leave a gap, which the store already tolerates.
@@ -545,6 +535,22 @@ async function raiseSupplierLegs(order: Order, now: string): Promise<RaisedLegs>
       // second caller cannot observe this set before the first one has written.
       const alreadyLegged = new Set(
         rows.filter((leg) => leg.order_id === order.id).map((leg) => leg.supplier_id),
+      );
+
+      // Spec 0011, AC-26: a run only shares out what earlier runs have not. Legs
+      // are written together, so a leg already here means routing moved between
+      // runs, and a fresh split of the whole discount would no longer add up.
+      const alreadyShared = rows
+        .filter((leg) => leg.order_id === order.id)
+        .reduce((sum, leg) => sum + (leg.promo_discount ?? 0), 0);
+      const shares = promoShares(
+        Math.round(((order.promo_discount_pula ?? 0) - alreadyShared) * 100) / 100,
+        [...bySupplier]
+          .filter(([supplierId]) => !alreadyLegged.has(supplierId))
+          .map(([supplierId, supplierItems]) => ({
+            supplierId,
+            gross: supplierItems.reduce((sum, item) => sum + toPula(item.line_total, order.buyer_fx_rate), 0),
+          })),
       );
 
       const created: SupplierOrder[] = [];

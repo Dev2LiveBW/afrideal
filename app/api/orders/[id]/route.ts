@@ -7,7 +7,7 @@ import { EVENTS, audit, notify } from '@/lib/notifications';
 import { closeOpenAttempts, providerFor } from '@/lib/payments/adapters';
 import { confirmPayment } from '@/lib/payments/confirm';
 import { executeRefund } from '@/lib/refunds';
-import { legForSupplier, orderForSupplier } from '@/lib/order-privacy';
+import { orderDetailForSupplier } from '@/lib/order-privacy';
 import { getOrderDetail } from '@/lib/queries';
 import type { Dispute, Order } from '@/types';
 
@@ -28,12 +28,8 @@ export const GET = handled(async (_request: Request, { params }: { params: { id:
     const mine = detail.legs.some((leg) => leg.supplier_id === actor.supplierId);
     if (!mine) return fail('That order does not include your goods.', 403);
 
-    // A supplier sees only their own leg of a split order.
-    return ok({
-      ...detail,
-      order: orderForSupplier(detail.order),
-      legs: detail.legs.filter((leg) => leg.supplier_id === actor.supplierId).map(legForSupplier),
-    });
+    // A supplier sees only their own part of a split order.
+    return ok(orderDetailForSupplier(detail, actor.supplierId));
   }
 
   return ok(detail);

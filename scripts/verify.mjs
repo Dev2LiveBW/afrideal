@@ -1414,6 +1414,8 @@ section('9i. Promo codes — the cap, stale codes, use counting and the ledger')
   const made = await newCode(`  ver${stamp} `);
   check('AC-20: a code is trimmed and upper cased', made.status === 201 && made.body?.code === `VER${stamp}`, JSON.stringify(made.body));
   check('AC-20: a duplicate is refused', (await newCode(`VER${stamp}`)).status === 409);
+  const offset = await newCode(`TZ${stamp}`, { starts_at: '2026-01-01T02:00:00+02:00' });
+  check('AC-20: a date with an offset is stored in UTC', offset.body?.starts_at === '2026-01-01T00:00:00.000Z', offset.body?.starts_at);
   check('AC-20: a percent over 90 is refused', (await newCode(`BIG${stamp}`, { percent: 91 })).status === 422);
   check('AC-20: the percent cannot change', (await change(finance, made.body?.id, { percent: 50 })).status === 422);
   check('AC-20: the code cannot change', (await change(finance, made.body?.id, { code: 'OTHER1' })).status === 422);
@@ -1499,6 +1501,11 @@ section('9i. Promo codes — the cap, stale codes, use counting and the ledger')
   const seen = (await json(naledi, `/api/orders/${placedOrder?.id}`)).body;
   check('Suppliers see no promo details',
     seen?.order && seen.order.promo_code === undefined && seen.order.promo_discount === undefined && seen.legs?.[0]?.promo_discount === undefined);
+  check('A supplier cannot work the discount out from the margin', seen?.legs?.[0] && seen.legs[0].platform_margin === undefined);
+  check('Nor from the total', seen?.order?.total === 182, `${seen?.order?.total}`);
+  check('Nor from a payment', seen?.payments?.length === 0);
+  check('A supplier sees only their own lines and payables',
+    seen?.items?.every((item) => item.supplier_id === 's001') && seen?.payables?.every((row) => row.supplier_id === 's001'));
 
   check('AC-27: analytics GMV counts what the buyer paid', Math.abs(after.period_gmv - before.period_gmv - 168.3) < 0.001, `${before.period_gmv} to ${after.period_gmv}`);
   check('AC-27: analytics margin falls by the discount', Math.abs(after.gross_margin - before.gross_margin - 41.3) < 0.001, `${before.gross_margin} to ${after.gross_margin}`);

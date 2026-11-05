@@ -4,6 +4,7 @@ import { fail, guard, handled, ok } from '@/lib/api';
 import { mutate, readAll } from '@/lib/db';
 import { EVENTS, audit } from '@/lib/notifications';
 import { allAsDisplayed } from '@/lib/payments/status';
+import { PromoDate } from '@/lib/promo-codes';
 import { paidUsesOf } from '@/lib/promo.mjs';
 import type { PromoCode } from '@/types';
 
@@ -13,7 +14,7 @@ export const dynamic = 'force-dynamic';
 const ChangeSchema = z
   .object({
     active: z.boolean().optional(),
-    ends_at: z.string().datetime({ offset: true }).optional(),
+    ends_at: PromoDate.optional(),
     usage_limit: z.number().int().positive().nullable().optional(),
   })
   .strict()

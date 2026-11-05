@@ -13,7 +13,7 @@ import { REFUSED_ALREADY_USED, usedByBuyer } from '@/lib/promo.mjs';
 import { checkoutIsPaused } from '@/lib/settings';
 import { paymentExpiresAt } from '@/lib/payments/policy';
 import { TERMS_VERSION } from '@/lib/terms';
-import type { Order, OrderItem, OrderTimelineEntry, Payment } from '@/types';
+import type { Order, OrderItem, OrderTimelineEntry, Payment, PromoCode } from '@/types';
 
 export const dynamic = 'force-dynamic';
 
@@ -193,15 +193,19 @@ export const POST = handled(async (request: Request) => {
   // Spec 0011, AC-24: what the buyer has seen is compared, never used. The only
   // discount is the one worked out here.
   const totalWith = (discount: number) => Math.round((subtotal - discount + delivery_fee) * 100) / 100;
-  const staleCode = async (code: string, reason: string, discount: number) => {
-    await audit({
-      actorId: actor.id,
-      actorName: actor.name,
-      action: EVENTS.PROMO_STALE_REFUSED,
-      entity: 'promo-code',
-      entityId: code,
-      detail: `${code} refused at order: ${reason}`,
-    });
+  const staleCode = async (promoCode: PromoCode | undefined, reason: string, discount: number) => {
+    // Only a real code is worth a record. Anyone can post any text, and an audit
+    // log must not be something a buyer can fill with it.
+    if (promoCode) {
+      await audit({
+        actorId: actor.id,
+        actorName: actor.name,
+        action: EVENTS.PROMO_STALE_REFUSED,
+        entity: 'promo-code',
+        entityId: promoCode.id,
+        detail: `${promoCode.code} refused at order: ${reason}`,
+      });
+    }
     return ok({ error: reason, reason, promo_discount: discount, total: totalWith(discount) }, { status: 409 });
   };
 
@@ -209,10 +213,10 @@ export const POST = handled(async (request: Request) => {
     ? await evaluateCode({ code: promo_code, buyerId: actor.id, built, lane })
     : null;
   if (applied) {
-    const { code, result } = applied;
-    if (!result.ok) return staleCode(code, result.reason, 0);
+    const { promo: stored, result } = applied;
+    if (!result.ok) return staleCode(stored, result.reason, 0);
     if (result.discount !== promo_expected_discount) {
-      return staleCode(code, 'Your discount has changed.', result.discount);
+      return staleCode(stored, 'Your discount has changed.', result.discount);
     }
   }
   const promo = applied?.result.ok ? { code: applied.code, ...applied.result } : null;
@@ -284,7 +288,7 @@ export const POST = handled(async (request: Request) => {
     const placed = await insertUnless('orders', order, (rows) =>
       usedByBuyer(allAsDisplayed(rows, applied.payments), promo.code, actor.id),
     );
-    if (!placed) return staleCode(promo.code, REFUSED_ALREADY_USED, 0);
+    if (!placed) return staleCode(applied.promo, REFUSED_ALREADY_USED, 0);
   } else {
     await insert('orders', order);
   }

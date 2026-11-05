@@ -338,6 +338,23 @@ describe('confirmPayment', () => {
       expect(legs.find((leg) => leg.supplier_id === 's2')?.promo_discount).toBe(10);
     });
 
+    it('still adds up when routing moved between runs', async () => {
+      store.orders = [discounted({ promo_discount: 40, promo_discount_pula: 40 })];
+      store['order-items'] = [
+        item('i1', 's1', 'p1', { line_total: 300 }),
+        item('i2', 's2', 'p2', { line_total: 100 }),
+      ];
+      // An earlier run left a leg with a supplier who is no longer on the order.
+      store['supplier-orders'] = [
+        { id: 'sup1', order_id: 'o1', supplier_id: 's9', item_ids: [], supplier_subtotal: 100, platform_margin: 170, promo_discount: 25 },
+      ] as unknown as { id: string }[];
+
+      await confirm();
+
+      const shares = rows<{ promo_discount: number }>('supplier-orders').map((leg) => leg.promo_discount);
+      expect(shares.reduce((sum, share) => sum + share, 0)).toBeCloseTo(40, 10);
+    });
+
     it('audits a late payment on a code the buyer has since used again', async () => {
       store.orders = [
         discounted({ payment_expires_at: anHourAgo() }),

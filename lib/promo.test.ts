@@ -79,6 +79,17 @@ describe('promoDiscount', () => {
     expect(discountPula).toBeLessThanOrEqual(23.45);
   });
 
+  it('steps down as far as it takes at a very weak rate', () => {
+    const rate = 0.0517;
+    const { discountPula } = promoDiscount({ percent: 90, maxDiscount: 1000, grossPula: 123.45, landedPula: 100, rate, subtotal: 2400 });
+    expect(discountPula).toBeLessThanOrEqual(23.45);
+  });
+
+  it('says it was capped when the goods were what stopped it', () => {
+    const result = promoDiscount({ ...order, percent: 90, maxDiscount: 1000, landedPula: 0, subtotal: 100 });
+    expect(result).toMatchObject({ discount: 100, capped: true });
+  });
+
   it('converts at the rate: a rand buyer at 0.8 gets more rand for the same pula', () => {
     expect(promoDiscount({ ...order, rate: 0.8, subtotal: 250 })).toMatchObject({ discount: 25, discountPula: 20 });
   });

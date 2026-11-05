@@ -1,9 +1,17 @@
 import 'server-only';
 
+import { z } from 'zod';
+
 import { readAll } from '@/lib/db';
 import type { BuiltLines, OrderLane } from '@/lib/order-lines';
 import { allAsDisplayed } from '@/lib/payments/status';
 import { evaluatePromo, normaliseCode, paidUsesOf, usedByBuyer } from '@/lib/promo.mjs';
+
+/**
+ * A promo date, always stored in UTC. Dates are compared as text against the clock,
+ * which only holds if they share one format, so an offset is resolved on the way in.
+ */
+export const PromoDate = z.string().datetime({ offset: true }).transform((value) => new Date(value).toISOString());
 
 /**
  * A code checked against a priced order, for the quote and the order route.
@@ -20,12 +28,14 @@ export async function evaluateCode(input: { code: string; buyerId: string; built
     readAll('payments'),
   ]);
   const displayed = allAsDisplayed(orders, payments);
+  const promo = promos.find((entry) => entry.code === code);
 
   return {
     code,
+    promo,
     payments,
     result: evaluatePromo({
-      promo: promos.find((entry) => entry.code === code),
+      promo,
       now: new Date().toISOString(),
       paidUses: paidUsesOf(displayed, code),
       usedByBuyer: usedByBuyer(displayed, code, input.buyerId),

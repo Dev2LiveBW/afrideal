@@ -4,6 +4,7 @@ import { fail, guard, handled, ok } from '@/lib/api';
 import { mutate, nextIds, readAll } from '@/lib/db';
 import { EVENTS, audit } from '@/lib/notifications';
 import { allAsDisplayed } from '@/lib/payments/status';
+import { PromoDate } from '@/lib/promo-codes';
 import { CODE_PATTERN, MAX_PERCENT, MIN_PERCENT, normaliseCode, paidUsesOf, promoState } from '@/lib/promo.mjs';
 import type { PromoCode } from '@/types';
 
@@ -15,8 +16,8 @@ const CreateSchema = z
     percent: z.number().int().min(MIN_PERCENT).max(MAX_PERCENT),
     max_discount: z.number().positive('Set a maximum discount above zero.'),
     min_order: z.number().min(0),
-    starts_at: z.string().datetime({ offset: true }),
-    ends_at: z.string().datetime({ offset: true }),
+    starts_at: PromoDate,
+    ends_at: PromoDate,
     usage_limit: z.number().int().positive().nullable().optional(),
   })
   .refine((promo) => promo.ends_at > promo.starts_at, { message: 'The end date must be after the start date.' });
