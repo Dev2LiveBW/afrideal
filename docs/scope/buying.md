@@ -119,7 +119,7 @@ spec [0011](../specs/0011-buyer-account-checkout-extras.md) · code in `lib/addr
 - [ ] Verify it: `/check verify buyer account & checkout extras`
 - [x] Test it: `/test buyer account & checkout extras`
 - [x] Review it (fresh model): `/check review buyer account & checkout extras`
-- [ ] Document it: `/document buyer account & checkout extras`
+- [x] Document it: `/document buyer account & checkout extras`
 
 ### 33. Suppliers are paid their cost · needs a decision · from spec 0011
 A supplier's payable equals the full sale price, margin included, while the earnings page shows 12% commission. The owner confirmed on 2026-11-04 that suppliers are paid their cost, since AfriDeal is the seller.
