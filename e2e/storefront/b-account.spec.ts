@@ -39,7 +39,10 @@ test.describe('B14. A saved address in another country', () => {
     await expect(page.getByText('Total to pay').first().locator('xpath=following-sibling::*[1]')).toHaveText('ZAR 182.00');
 
     await caption(page, 'B14 · 4. Instructions, and terms are required');
+    // Spec 0011, AC-7: the box stops at 300 characters, as the server does.
+    await expect(page.getByRole('textbox', { name: /Delivery instructions/ })).toHaveAttribute('maxlength', '300');
     await page.getByRole('textbox', { name: /Delivery instructions/ }).fill('Blue gate, ring twice');
+    await expect(page.getByRole('link', { name: 'terms of sale' })).toHaveAttribute('href', '/terms');
     await page.getByRole('button', { name: 'Place order' }).filter({ visible: true }).click();
     await expect(page.getByText('Please agree to the terms to place your order.')).toBeVisible();
     await page.getByRole('checkbox', { name: /I agree to the/ }).check();
@@ -63,6 +66,18 @@ test.describe('B14. A saved address in another country', () => {
     await page.goto(orderUrl);
     await ready(page);
     await expect(page.getByText('For Mma Dithebe · +266 2231 2345')).toBeVisible();
+    await expectHealthy(page);
+  });
+});
+
+test.describe('B14. The terms behind the checkbox', () => {
+  test('B14 /terms is open to anyone and says it is a draft @p2', async ({ page }) => {
+    // Spec 0011, AC-10: the wording checkout already used, marked as a draft.
+    await page.goto('/terms');
+    await ready(page);
+    await expect(page.getByRole('heading', { name: 'Terms of sale' })).toBeVisible();
+    await expect(page.getByText(/Draft/).first()).toBeVisible();
+    await expect(page.getByText(/returns and refunds/).first()).toBeVisible();
     await expectHealthy(page);
   });
 });

@@ -117,7 +117,7 @@ spec [0011](../specs/0011-buyer-account-checkout-extras.md) · code in `lib/addr
   - [x] Promo codes: shared pricing path, codes in checkout, ledger shares, admin page, verify and journeys (AC-20 to AC-29)
   - [ ] Mini cart and welcome step (waits on a recording of Alibaba's cart and post sign up)
 - [ ] Verify it: `/check verify buyer account & checkout extras`
-- [ ] Test it: `/test buyer account & checkout extras`
+- [x] Test it: `/test buyer account & checkout extras`
 - [x] Review it (fresh model): `/check review buyer account & checkout extras`
 - [ ] Document it: `/document buyer account & checkout extras`
 

@@ -373,6 +373,7 @@ That is 51 journeys. 48 have a screen to test (C02 to C04 do not yet, see Findin
 - Without the terms, checkout says "Please agree to the terms to place your order." and nothing is placed.
 - The order page shows "For Mma Dithebe" with the recipient's phone, and the instructions.
 - Deleting the address leaves the order exactly as it was.
+- The instructions box takes at most 300 characters, and the terms link opens `/terms`, which says it is a draft.
 
 ### B15 Reorder a delivered order at today's prices
 

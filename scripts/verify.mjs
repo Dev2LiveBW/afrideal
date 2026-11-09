@@ -1186,6 +1186,9 @@ section('9g. Buyer account — addresses, terms and the recipient');
       }),
     });
 
+  const longNote = await order({ terms_accepted: true, delivery_phone: '+267 71 000 000', delivery_instructions: 'x'.repeat(301) });
+  check('AC-7: instructions over 300 characters are refused', longNote.status === 422, `got ${longNote.status}`);
+
   const noTerms = await order({ delivery_phone: '+267 71 000 000' });
   check('AC-8: an order without the terms is refused', noTerms.status === 422, `got ${noTerms.status}`);
 
