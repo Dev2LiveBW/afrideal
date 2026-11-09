@@ -88,6 +88,15 @@ export const EVENTS = {
   SHIPMENT_CREATED: 'SHIPMENT_CREATED',
   SHIPMENT_DELIVERED: 'SHIPMENT_DELIVERED',
   REFUND_ISSUED: 'REFUND_ISSUED',
+  /** Spec 0011, AC-18: the record of a buyer opting in to or out of offers and news. */
+  MARKETING_CONSENT_ON: 'MARKETING_CONSENT_ON',
+  MARKETING_CONSENT_OFF: 'MARKETING_CONSENT_OFF',
+  PROMO_CREATED: 'PROMO_CREATED',
+  PROMO_CHANGED: 'PROMO_CHANGED',
+  /** A code that stopped standing between the quote and the order. */
+  PROMO_STALE_REFUSED: 'PROMO_STALE_REFUSED',
+  /** A late payment reopened an order on a code the buyer had since used again. */
+  PROMO_LATE_REUSE: 'PROMO_LATE_REUSE',
 } as const;
 
 export type DomainEvent = (typeof EVENTS)[keyof typeof EVENTS];

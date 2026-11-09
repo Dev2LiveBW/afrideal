@@ -74,6 +74,12 @@ The spec for each journey lives in `e2e/` (storefront, supplier, runner, console
 | B11 | Customs and duty on imported goods are cleared by the courier | Customer | P1 | yes | yes |
 | B12 | A buyer in Lesotho pays in rand, with Lesotho's payment methods | Customer | P1 | yes | yes |
 | B13 | Local goods to a local buyer carry no customs and no courier | Customer | P1 | yes | yes |
+| B14 | A saved address in another country | Customer | P1 | yes | no |
+| B15 | Reorder a delivered order at today's prices | Customer | P1 | yes | no |
+| B16 | A heart saves an item, for a guest too | Customer | P1 | yes | no |
+| B17 | Alert settings and the consent date | Customer | P2 | yes | no |
+| B18 | Finance makes a code and a buyer pays less with it | Finance, Customer | P1 | yes | no |
+| B19 | A code switched off after it was applied stops the order | Finance, Customer | P1 | yes | no |
 | **C** | **Request for quotation (RFQ)** | | | | |
 | C01 | Buyer sends an RFQ | Customer | P1 | yes | yes |
 | C02 | Invited supplier sends a quote | Supplier | P1 | no screen yet | no |
@@ -348,6 +354,106 @@ That is 51 journeys. 48 have a screen to test (C02 to C04 do not yet, see Findin
 - Shea butter's page does not say "Customs cleared by courier" either: where goods are held decides the lane, not where they were made. Its delivery reads "a flat P45" (AC-7).
 
 ---
+
+### B14 A saved address in another country
+
+**Start:** signed in as Kefilwe, delivering to Gaborone, with the seeded Home address. Spec 0011, AC-1 to AC-9.
+
+1. Add `p001` to the cart and go to checkout.
+2. On `/account/addresses`, add an address in Maseru, Lesotho, for Mma Dithebe.
+3. At checkout, pick that address.
+4. Add delivery instructions, and press Place order without agreeing to the terms.
+5. Agree to the terms, place the order and pay by card.
+6. Delete the address, then open the order again.
+
+**Expect:**
+
+- Checkout opens on Home, with its street and phone filled in.
+- Picking the Maseru address moves the Country to Lesotho and the total to ZAR 182.00.
+- Without the terms, checkout says "Please agree to the terms to place your order." and nothing is placed.
+- The order page shows "For Mma Dithebe" with the recipient's phone, and the instructions.
+- Deleting the address leaves the order exactly as it was.
+- The instructions box takes at most 300 characters, and the terms link opens `/terms`, which says it is a draft.
+
+### B15 Reorder a delivered order at today's prices
+
+**Start:** signed in as Kefilwe, with the seeded delivered order o004 (maize meal and copy paper). Spec 0011, AC-11 to AC-13.
+
+1. Open order o004 from `/orders`.
+2. Press Reorder.
+3. Open the cart.
+4. Open order o012, which is still waiting for payment.
+
+**Expect:**
+
+- The order page has an "Open in Maps" link that ends at the town and country, with no street in it.
+- Reorder says the copy paper could not be added, and why: its minimum order is now 5.
+- The cart holds the maize meal at today's price, not the price on the old order.
+- An order that is not delivered offers no Reorder.
+
+### B16 A heart saves an item, for a guest too
+
+**Start:** signed out, on a product page. Spec 0011, AC-14 to AC-16 and AC-19.
+
+1. Tap the heart.
+2. Sign in as Thabo with a demo card.
+3. Check the heart, then tap it.
+4. Open a second browser as Thabo and go to `/account/saved`.
+5. Remove the item.
+
+**Expect:**
+
+- The guest goes to sign in, and comes back to the same product page.
+- Nothing was saved until the tap after signing in.
+- The second browser lists the item with its price.
+- Removing it empties the list, and the heart on the product page is off again.
+- The account panel links Addresses, Saved items and Account settings. Payments stays dimmed.
+
+### B17 Alert settings and the consent date
+
+**Start:** signed in as Kefilwe, on `/account/settings`. Spec 0011, AC-17 and AC-18.
+
+1. Read the three switches.
+2. Turn on Offers and news, and reload.
+3. Turn it off, and reload.
+
+**Expect:**
+
+- Order updates by email and by SMS are on, and Offers and news is off.
+- Turning it on shows the date you agreed, and it stays on after a reload.
+- Turning it off removes the date.
+
+### B18 Finance makes a code and a buyer pays less with it
+
+**Start:** signed in as Finance on `/admin/promo-codes`, and as Thabo in a second browser. Spec 0011, AC-20 to AC-28.
+
+1. As Finance, add a code: 10% off, up to BWP 50, running for years.
+2. As Thabo, add `p001` to the cart and go to checkout.
+3. Type a code that does not exist, then the new one.
+4. Agree to the terms, place the order and pay by card.
+5. As Finance, reload the list.
+
+**Expect:**
+
+- The list shows the code as Live.
+- The unknown code says "That code is not valid."
+- The new code adds a Promo line and moves the total from BWP 182.00 to BWP 168.30. Delivery is not discounted.
+- The card page asks for BWP 168.30, and the paid order shows the same total and the Promo line.
+- The list shows 1 paid use.
+
+### B19 A code switched off after it was applied stops the order
+
+**Start:** as B18, with a new code. Spec 0011, AC-24.
+
+1. As Thabo, apply the code at checkout.
+2. As Finance, switch the code off.
+3. As Thabo, press Place order.
+4. Press Place order again.
+
+**Expect:**
+
+- The first press places nothing. Checkout says the new total is BWP 182.00, and the Promo line is gone.
+- The second press goes on to pay at BWP 182.00.
 
 ## C. Request for quotation (RFQ)
 

@@ -1,4 +1,4 @@
-import { addToCart, caption, clickAndSave, expect, expectHealthy, ready, signedInAs, test } from '../support/fixtures';
+import { addToCart, caption, clickAndSave, expect, expectHealthy, ready, signedInAs, test, agreeAtCheckout } from '../support/fixtures';
 
 /**
  * B12 and B13: any buyer, any country (spec 0009, docs/testing/e2e-journeys.md).
@@ -56,6 +56,7 @@ test.describe('B12. A buyer in Lesotho', () => {
     await page.getByRole('radio', { name: /Visa \/ Mastercard/ }).check({ force: true });
     await expect(page.getByText('Total to pay').first().locator('xpath=following-sibling::*[1]')).toHaveText('ZAR 182.00');
     await caption(page, 'B12 · 5. Pay ZAR 182.00 by card');
+    await agreeAtCheckout(page);
     await clickAndSave(page.getByRole('button', { name: 'Place order' }).filter({ visible: true }));
 
     // 4. The card page, then back to the paid order, still in rand.

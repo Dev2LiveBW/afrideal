@@ -68,7 +68,9 @@ export const GET = handled(async (request: Request) => {
     const lines = itemsByOrder.get(order.id) ?? [];
     return (
       sum +
-      lines.reduce((lineSum, item) => lineSum + (inPula(order, item.unit_price) - toPula(item.supplier_cost, item.fx_rate)) * item.qty, 0)
+      lines.reduce((lineSum, item) => lineSum + (inPula(order, item.unit_price) - toPula(item.supplier_cost, item.fx_rate)) * item.qty, 0) -
+      // Spec 0011, AC-27: a promo discount comes out of AfriDeal's margin.
+      (order.promo_discount_pula ?? 0)
     );
   }, 0);
 

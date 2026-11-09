@@ -1,4 +1,4 @@
-import { addToCart, bwp, caption, card, cartLink, clickAndSave, expect, expectHealthy, ready, runLabel, signedInAs, test } from '../support/fixtures';
+import { addToCart, bwp, caption, card, cartLink, clickAndSave, expect, expectHealthy, ready, runLabel, signedInAs, test, agreeAtCheckout } from '../support/fixtures';
 
 /**
  * B. Buying and tracking - Phase 1 Close-out extensions.
@@ -27,6 +27,7 @@ test.describe('B. Buying and tracking (Close-out)', () => {
     await page.getByRole('radio', { name: /Visa \/ Mastercard/ }).check({ force: true });
     
     // Place order should trigger the gateway redirect
+    await agreeAtCheckout(page);
     await clickAndSave(page.getByRole('button', { name: 'Place order' }));
 
     // 3. Gateway mock redirect
@@ -60,6 +61,8 @@ test.describe('B. Buying and tracking (Collection Point)', () => {
     await caption(page, 'B10 · 2. Select Collection Point delivery');
     await page.getByRole('radio', { name: /Collection Point/ }).check();
     await page.getByRole('combobox', { name: 'Select location' }).selectOption('Gaborone Central Locker');
+    
+    await agreeAtCheckout(page);
     
     await clickAndSave(page.getByRole('button', { name: 'Place order' }));
 
@@ -201,6 +204,7 @@ test.describe('F. Runner deliveries (Collection Point)', () => {
 
     await page.getByRole('radio', { name: /Collection Point/ }).check();
     await page.getByRole('combobox', { name: 'Select location' }).selectOption(LOCKER);
+    await agreeAtCheckout(page);
     await clickAndSave(page.getByRole('button', { name: 'Place order' }));
 
     // Mock payment gateway step
@@ -373,6 +377,7 @@ test.describe('Z. The golden thread (Mobile Parity)', () => {
     await page.getByRole('radio', { name: /Visa \/ Mastercard/ }).check({ force: true });
 
     // Place order
+    await agreeAtCheckout(page);
     await clickAndSave(page.getByRole('button', { name: 'Place order' }).filter({ visible: true }));
 
     // 5. Card payment gateway

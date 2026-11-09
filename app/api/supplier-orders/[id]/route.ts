@@ -1,8 +1,11 @@
 import { z } from 'zod';
 
 import { fail, guard, handled, ok } from '@/lib/api';
+import { toPula } from '@/lib/currency.mjs';
 import { findById, readAll, update } from '@/lib/db';
 import { EVENTS, audit, notify } from '@/lib/notifications';
+import { legForSupplier } from '@/lib/order-privacy';
+import { offerLandedCost } from '@/lib/pricing-tiers';
 import { openJobForLeg } from '@/lib/shipments';
 import { selectSupplier } from '@/lib/supplier-selection';
 import type { OrderStatus, SupplierOrderStatus } from '@/types';
@@ -62,19 +65,23 @@ export const PATCH = handled(async (request: Request, { params }: { params: { id
     const items = (await readAll('order-items')).filter((item) => leg.item_ids.includes(item.id));
     const offers = await readAll('supplier-offers');
 
+    // Booked in pula, as `raiseSupplierLegs` does: the buyer's lines at the rate they
+    // were charged at, the new supplier's cost at today's rate for their currency.
     const newCost = items.reduce((sum, item) => {
       const offer = offers.find(
         (candidate) => candidate.product_id === item.product_id && candidate.supplier_id === target.id,
       );
-      return sum + (offer?.supplier_cost ?? item.supplier_cost) * item.qty;
+      const unit = offer ? offerLandedCost(offer, item.variant_id, false).cost : toPula(item.supplier_cost, item.fx_rate);
+      return sum + unit * item.qty;
     }, 0);
 
-    const gross = items.reduce((sum, item) => sum + item.line_total, 0);
+    const order = await findById('orders', leg.order_id);
+    const gross = items.reduce((sum, item) => sum + toPula(item.line_total, order?.buyer_fx_rate), 0);
 
     const updated = await update('supplier-orders', params.id, {
       supplier_id: target.id,
       supplier_subtotal: newCost,
-      platform_margin: gross - newCost,
+      platform_margin: gross - newCost - (leg.promo_discount ?? 0),
       auto_selected: false,
       selection_reason: `Manually routed to ${target.name} by ${actor.name}.`,
     });
@@ -149,5 +156,5 @@ export const PATCH = handled(async (request: Request, { params }: { params: { id
     }
   }
 
-  return ok(updated);
+  return ok(updated && actor.role === 'SUPPLIER_OWNER' ? legForSupplier(updated) : updated);
 });

@@ -32,7 +32,7 @@ import type { SupplierPayable, Order, OrderItem, SupplierOrder, SupplierOrderSta
  * settle or cancel their own invoice.
  */
 
-type Leg = SupplierOrder & {
+type Leg = Omit<SupplierOrder, 'platform_margin' | 'promo_discount'> & {
   order: Order | null;
   items: OrderItem[];
   payable: SupplierPayable | null;

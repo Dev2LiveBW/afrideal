@@ -477,6 +477,8 @@ section('9. Checkout — the order split engine');
       payment_method: 'ORANGE_MONEY',
       delivery_address: 'Plot 5412, Extension 12',
       delivery_city: 'Gaborone',
+      terms_accepted: true,
+      delivery_phone: '+267 71 000 000',
     }),
   });
 
@@ -613,6 +615,8 @@ section('9. Checkout — the order split engine');
         payment_method: 'CARD',
         delivery_address: 'Plot 1, Gaborone',
         delivery_city: 'Gaborone',
+        terms_accepted: true,
+        delivery_phone: '+267 71 000 000',
       }),
     });
 
@@ -653,6 +657,8 @@ section('9. Checkout — the order split engine');
       payment_method: 'CARD',
       delivery_address: 'x',
       delivery_city: 'Gaborone',
+      terms_accepted: true,
+      delivery_phone: '+267 71 000 000',
     }),
   });
   check('an empty cart is refused', empty.status === 422, `got ${empty.status}`);
@@ -677,6 +683,8 @@ section('9b. Payment expiry — a closed window reads as cancelled');
       payment_method: 'EFT',
       delivery_address: 'Plot 1, Gaborone',
       delivery_city: 'Gaborone',
+      terms_accepted: true,
+      delivery_phone: '+267 71 000 000',
     }),
   });
   const open = (await json(ops, `/api/orders/${placedNow.body?.order?.id}`)).body;
@@ -712,6 +720,8 @@ section('9b. Payment expiry — a closed window reads as cancelled');
       payment_method: 'CARD',
       delivery_address: 'Plot 1, Gaborone',
       delivery_city: 'Gaborone',
+      terms_accepted: true,
+      delivery_phone: '+267 71 000 000',
     }),
   });
   const cardOrderId = byCard.body?.order?.id;
@@ -788,6 +798,8 @@ section('9c. Finance controls — mark as paid, and pausing checkout');
       payment_method: 'EFT',
       delivery_address: 'Plot 1, Gaborone',
       delivery_city: 'Gaborone',
+      terms_accepted: true,
+      delivery_phone: '+267 71 000 000',
     }),
   });
   check('a bank transfer order can be placed', placed.status === 201, `got ${placed.status}`);
@@ -876,6 +888,8 @@ section('9c. Finance controls — mark as paid, and pausing checkout');
       payment_method: 'EFT',
       delivery_address: 'Plot 1, Gaborone',
       delivery_city: 'Gaborone',
+      terms_accepted: true,
+      delivery_phone: '+267 71 000 000',
     }),
   });
   check('AC-8: a paused checkout refuses new orders', blocked.status === 409, `got ${blocked.status}`);
@@ -904,6 +918,8 @@ section('9d. Refused payments — a cancelled order is not reopened, a paid one 
         payment_method: 'CARD',
         delivery_address: 'Plot 1, Gaborone',
         delivery_city: 'Gaborone',
+        terms_accepted: true,
+        delivery_phone: '+267 71 000 000',
       }),
     });
 
@@ -1005,6 +1021,8 @@ section('9f. Card payments through Stripe — signed webhook, one confirmation')
         payment_method: 'CARD',
         delivery_address: 'Plot 5412, Extension 12',
         delivery_city: 'Gaborone',
+        terms_accepted: true,
+        delivery_phone: '+267 71 000 000',
         ...extra,
       }),
     });
@@ -1129,6 +1147,8 @@ section('9e. Collection points — the fee charged is the fee shown');
         collection_point,
         delivery_address: collection_point ?? 'none',
         delivery_city: 'Gaborone',
+        terms_accepted: true,
+        delivery_phone: '+267 71 000 000',
       }),
     });
 
@@ -1143,6 +1163,364 @@ section('9e. Collection points — the fee charged is the fee shown');
 
   const unknown = await placeAt('A locker nobody listed');
   check('an unlisted locker is refused, so it cannot set its own fee', unknown.status === 422, `got ${unknown.status}`);
+}
+
+// ── Spec 0011, slice 1: the address book, terms and who sees what ────────────
+section('9g. Buyer account — addresses, terms and the recipient');
+{
+  const buyer = sessions['thabo@gmail.com'].jar;
+  const other = sessions['kefilwe@gmail.com'].jar;
+  const ops = sessions['ops@afrideal.co.bw'].jar;
+  const naledi = sessions['supplier@naledi.co.bw'].jar;
+
+  const order = (extra) =>
+    json(buyer, '/api/orders', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        lines: [{ product_id: 'p001', variant_id: 'p001v1', qty: 1 }],
+        payment_method: 'CARD',
+        delivery_address: 'Plot 77, Broadhurst',
+        delivery_city: 'Gaborone',
+        ...extra,
+      }),
+    });
+
+  const longNote = await order({ terms_accepted: true, delivery_phone: '+267 71 000 000', delivery_instructions: 'x'.repeat(301) });
+  check('AC-7: instructions over 300 characters are refused', longNote.status === 422, `got ${longNote.status}`);
+
+  const noTerms = await order({ delivery_phone: '+267 71 000 000' });
+  check('AC-8: an order without the terms is refused', noTerms.status === 422, `got ${noTerms.status}`);
+
+  const noPhone = await order({ terms_accepted: true });
+  check('AC-4: a doorstep order needs a phone number', noPhone.status === 422, `got ${noPhone.status}`);
+
+  const locker = await order({
+    terms_accepted: true,
+    delivery_method: 'COLLECTION_POINT',
+    collection_point: 'Gaborone Central Locker',
+  });
+  check('AC-4: a collection point order does not', locker.status === 201, `got ${locker.status}`);
+
+  const placed = await order({
+    terms_accepted: true,
+    delivery_phone: '+267 71 000 000',
+    recipient_name: 'Mma Modise',
+    delivery_instructions: 'Blue gate, ring twice',
+  });
+  check('an order with the terms is placed', placed.status === 201, `got ${placed.status}`);
+  check('AC-8: it records when the terms were accepted', typeof placed.body?.order?.terms_accepted_at === 'string');
+  check('AC-8: and which version', typeof placed.body?.order?.terms_version === 'string');
+  check('AC-9: the recipient is on the order', placed.body?.order?.recipient_name === 'Mma Modise');
+
+  // AC-9: a supplier on this order never sees who receives it or what they said.
+  const paid = await payCallback(placed.body?.order?.id, placed.body?.payment, { amount: placed.body?.order?.total });
+  check('that order can be paid', paid.status === 200, `got ${paid.status}`);
+  const seen = await json(naledi, `/api/orders/${placed.body?.order?.id}`);
+  check('AC-9: its supplier can read the order', seen.status === 200, `got ${seen.status}`);
+  check('AC-9: but not the recipient, phone or instructions',
+    seen.body?.order?.recipient_name === undefined &&
+      seen.body?.order?.delivery_phone === undefined &&
+      seen.body?.order?.delivery_instructions === undefined,
+      JSON.stringify(seen.body?.order));
+  const staffSee = (await json(ops, `/api/orders/${placed.body?.order?.id}`)).body?.order;
+  check('AC-9: the team can', staffSee?.delivery_instructions === 'Blue gate, ring twice');
+
+  const book = (jar, path, method, body) =>
+    json(jar, path, { method, headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
+  const entry = (label) => ({
+    label,
+    recipient_name: 'Mma Modise',
+    phone: '+266 2231 2345',
+    country: 'ls',
+    town: 'Maseru',
+    street: `Kingsway ${label}`,
+  });
+
+  const first = await book(buyer, '/api/addresses', 'POST', entry('One'));
+  check('AC-1: a buyer can save an address', first.status === 201, `got ${first.status}`);
+  check('AC-2: the first is the default', first.body?.is_default === true);
+
+  const theirs = await json(other, `/api/addresses/${first.body?.id}`, { method: 'DELETE' });
+  check("AC-1: another buyer cannot delete it", theirs.status === 403, `got ${theirs.status}`);
+  const staffBook = await json(ops, '/api/addresses');
+  check('staff have no view of the address book', staffBook.status === 403, `got ${staffBook.status}`);
+
+  const nowhere = await book(buyer, '/api/addresses', 'POST', { ...entry('Nowhere'), country: 'ZZ' });
+  check('AC-6: an address needs an active country', nowhere.status === 422, `got ${nowhere.status}`);
+
+  for (let index = 2; index <= 10; index += 1) await book(buyer, '/api/addresses', 'POST', entry(`No${index}`));
+  const eleventh = await book(buyer, '/api/addresses', 'POST', entry('Eleven'));
+  check('AC-1: an eleventh address is refused', eleventh.status === 409, `got ${eleventh.status}`);
+
+  const full = await order({
+    terms_accepted: true,
+    delivery_phone: '+267 71 000 000',
+    save_address: true,
+  });
+  check('AC-4: a full book never stops the order', full.status === 201, `got ${full.status}`);
+}
+
+section('9h. Buyer account — reorder, saved items and alert settings');
+{
+  const buyer = sessions['kefilwe@gmail.com'].jar;
+  const other = sessions['thabo@gmail.com'].jar;
+  const ops = sessions['ops@afrideal.co.bw'].jar;
+
+  // AC-11 and AC-12. o004 is Kefilwe's: maize meal, and paper bought below today's minimum.
+  const reorder = await json(buyer, '/api/orders/o004/reorder');
+  check('AC-11: a delivered order can be reordered', reorder.status === 200, `got ${reorder.status}`);
+  const maize = reorder.body?.lines?.find((line) => line.product_id === 'p008');
+  check('AC-11: a line still sold goes back in the cart', maize?.qty === 4 && maize?.variant_id === 'p008v2');
+  check('AC-11: a line that cannot be ordered is left out and named',
+    reorder.body?.skipped?.some((entry) => entry.product_id === 'p010' && /minimum order of 5/.test(entry.note)));
+  check('AC-12: the lines hold no figure from the old order',
+    maize !== undefined && maize.line_total === undefined && maize.order_id === undefined);
+
+  const notYours = await json(other, '/api/orders/o004/reorder');
+  check('AC-12: another buyer cannot reorder it', notYours.status === 403, `got ${notYours.status}`);
+  const staff = await json(ops, '/api/orders/o004/reorder');
+  check('AC-12: nor can staff', staff.status === 403, `got ${staff.status}`);
+  const anonymous = await json(makeJar(), '/api/orders/o004/reorder');
+  check('AC-12: nor can a guest', anonymous.status === 401, `got ${anonymous.status}`);
+  const missing = await json(buyer, '/api/orders/nope/reorder');
+  check('AC-12: an unknown order is 404', missing.status === 404, `got ${missing.status}`);
+
+  const placed = await json(buyer, '/api/orders', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      lines: [{ product_id: 'p001', variant_id: 'p001v1', qty: 1 }],
+      payment_method: 'CARD',
+      delivery_address: 'Plot 2201, Block 6',
+      delivery_city: 'Gaborone',
+      delivery_phone: '+267 71 234 567',
+      terms_accepted: true,
+    }),
+  });
+  const placedId = placed.body?.order?.id ?? placed.body?.id;
+  const early = await json(buyer, `/api/orders/${placedId}/reorder`);
+  check('AC-11: an order not yet delivered cannot be reordered', early.status === 409, `got ${early.status}`);
+
+  // AC-13: the page a buyer reads, as the browser gets it.
+  const tracking = await (await request(buyer, '/orders/o002')).text();
+  check('AC-13: order tracking links to a map of the town',
+    tracking.includes('https://www.google.com/maps/search/?api=1&amp;query=Gaborone%2C%20Botswana'));
+  check('AC-13: the street stays out of the link', !/maps\/search[^"]*Plot/.test(tracking));
+
+  // AC-14 to AC-16.
+  const save = (jar, productId) =>
+    json(jar, '/api/saved-items', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ product_id: productId }),
+    });
+  const list = async (jar) => (await json(jar, '/api/saved-items')).body?.product_ids ?? [];
+
+  check('AC-14: a buyer can save an item', (await save(buyer, 'p001')).status === 201);
+  await save(buyer, 'p001');
+  check('AC-14: saving twice is one save', (await list(buyer)).filter((id) => id === 'p001').length === 1);
+  check('AC-14: a list is not shared with other buyers', !(await list(other)).includes('p001'));
+  check('AC-14: an unknown product is 404', (await save(buyer, 'nope')).status === 404);
+  check('AC-14: staff have no list', (await save(ops, 'p001')).status === 403);
+  check('AC-15: a guest saves nothing', (await save(makeJar(), 'p001')).status === 401);
+
+  const remove = () => json(buyer, '/api/saved-items/p001', { method: 'DELETE' });
+  check('AC-14: an item can be removed', (await remove()).status === 200 && !(await list(buyer)).includes('p001'));
+  check('AC-14: removing it twice is fine', (await remove()).status === 200);
+
+  // AC-17 and AC-18.
+  const alerts = (jar, change) =>
+    json(jar, '/api/account/alerts', {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(change),
+    });
+  const on = await alerts(buyer, { marketing: true });
+  check('AC-18: opting in records the date', on.status === 200 && on.body?.marketing === true && !!on.body?.marketing_consent_at);
+  const again = await alerts(buyer, { marketing: true });
+  check('AC-18: saying yes again keeps the first date', again.body?.marketing_consent_at === on.body?.marketing_consent_at);
+  const off = await alerts(buyer, { marketing: false });
+  check('AC-18: opting out clears it', off.status === 200 && off.body?.marketing === false && off.body?.marketing_consent_at === null);
+  check('AC-17: an order switch saves', (await alerts(buyer, { order_sms: false })).body?.order_sms === false);
+  await alerts(buyer, { order_sms: true });
+  check('AC-17: nothing to change is refused', (await alerts(buyer, {})).status === 422);
+  check('AC-17: an unknown switch is refused', (await alerts(buyer, { in_app: false })).status === 422);
+  check('AC-17: staff have no alert settings', (await alerts(ops, { marketing: true })).status === 403);
+  check('AC-17: a guest cannot change them', (await alerts(makeJar(), { marketing: true })).status === 401);
+}
+
+section('9i. Promo codes — the cap, stale codes, use counting and the ledger');
+{
+  const buyer = sessions['thabo@gmail.com'].jar;
+  const other = sessions['kefilwe@gmail.com'].jar;
+  const finance = sessions['finance@afrideal.co.bw'].jar;
+  const admin = sessions['admin@afrideal.co.bw'].jar;
+  const ops = sessions['ops@afrideal.co.bw'].jar;
+  const naledi = sessions['supplier@naledi.co.bw'].jar;
+  const JSON_HEADERS = { 'Content-Type': 'application/json' };
+
+  const lines = [{ product_id: 'p001', variant_id: 'p001v1', qty: 1 }];
+  const quote = (jar, code, extra) =>
+    json(jar, '/api/promo-codes/quote', {
+      method: 'POST',
+      headers: JSON_HEADERS,
+      body: JSON.stringify({ code, lines, delivery_country: 'BW', ...extra }),
+    });
+  const place = (jar, code, expected, extra) =>
+    json(jar, '/api/orders', {
+      method: 'POST',
+      headers: JSON_HEADERS,
+      body: JSON.stringify({
+        lines,
+        payment_method: 'CARD',
+        delivery_address: 'Plot 77, Broadhurst',
+        delivery_city: 'Gaborone',
+        delivery_country: 'BW',
+        delivery_phone: '+267 71 000 000',
+        terms_accepted: true,
+        promo_code: code,
+        promo_expected_discount: expected,
+        ...extra,
+      }),
+    });
+  const newCode = async (code, extra) =>
+    json(finance, '/api/promo-codes', {
+      method: 'POST',
+      headers: JSON_HEADERS,
+      body: JSON.stringify({
+        code,
+        percent: 10,
+        max_discount: 50,
+        min_order: 0,
+        starts_at: '2026-01-01T00:00:00.000Z',
+        ends_at: '2036-01-01T00:00:00.000Z',
+        ...extra,
+      }),
+    });
+  const change = (jar, id, patch) =>
+    json(jar, `/api/promo-codes/${id}`, { method: 'PATCH', headers: JSON_HEADERS, body: JSON.stringify(patch) });
+  const listed = async (code) => (await json(finance, '/api/promo-codes')).body?.find((row) => row.code === code);
+  // Unique per run, so verify can run twice against one store.
+  const stamp = Date.now().toString(36).toUpperCase().slice(-6);
+
+  // AC-20: who may touch codes, and what cannot change.
+  check('AC-20: finance can list codes', (await json(finance, '/api/promo-codes')).status === 200);
+  check('AC-20: super admin can list codes', (await json(admin, '/api/promo-codes')).status === 200);
+  for (const [who, jar] of [['operations', ops], ['a supplier', naledi], ['a buyer', buyer], ['a runner', sessions['runner@afrideal.co.bw'].jar]]) {
+    const status = (await json(jar, '/api/promo-codes')).status;
+    check(`AC-20: ${who} cannot`, status === 403, `got ${status}`);
+  }
+  check('AC-20: finance opens the page', (await request(finance, '/admin/promo-codes')).status === 200);
+  check('AC-20: operations does not', (await request(ops, '/admin/promo-codes')).status !== 200);
+
+  const made = await newCode(`  ver${stamp} `);
+  check('AC-20: a code is trimmed and upper cased', made.status === 201 && made.body?.code === `VER${stamp}`, JSON.stringify(made.body));
+  check('AC-20: a duplicate is refused', (await newCode(`VER${stamp}`)).status === 409);
+  const offset = await newCode(`TZ${stamp}`, { starts_at: '2026-01-01T02:00:00+02:00' });
+  check('AC-20: a date with an offset is stored in UTC', offset.body?.starts_at === '2026-01-01T00:00:00.000Z', offset.body?.starts_at);
+  check('AC-20: a percent over 90 is refused', (await newCode(`BIG${stamp}`, { percent: 91 })).status === 422);
+  check('AC-20: the percent cannot change', (await change(finance, made.body?.id, { percent: 50 })).status === 422);
+  check('AC-20: the code cannot change', (await change(finance, made.body?.id, { code: 'OTHER1' })).status === 422);
+  check('AC-20: operations cannot change one', (await change(ops, made.body?.id, { active: false })).status === 403);
+
+  // AC-21 and AC-22.
+  const welcome = await quote(buyer, 'welcome10');
+  check('AC-21: a code takes its percent off the goods', welcome.status === 200 && welcome.body?.discount === 13.7, JSON.stringify(welcome.body));
+  check('AC-21: delivery is not discounted', welcome.body?.total === 168.3, `${welcome.body?.total}`);
+  const floor = await quote(buyer, 'FLOOR90');
+  check('AC-22: a large percent stops at the margin', floor.body?.discount === 55 && floor.body?.capped === true, JSON.stringify(floor.body));
+
+  // AC-23: each refusal, in its own words.
+  const refusal = async (code) => (await quote(buyer, code)).body?.error;
+  const unknown = await refusal('NOSUCHCODE');
+  check('AC-23: an unknown and a switched off code read alike', unknown && unknown === (await refusal('SWITCHOFF')), unknown);
+  check('AC-23: an ended code says so', /ended/.test(await refusal('LASTYEAR')));
+  check('AC-23: a code not started says so', /not live yet/.test(await refusal('NEXTYEAR')));
+  check('AC-23: a minimum says how much', /at least BWP 100,000\.00/.test(await refusal('BIGSPEND')), await refusal('BIGSPEND'));
+
+  // AC-24: the server decides, and a stale figure stops the order.
+  const ordersBefore = (await json(buyer, '/api/orders')).body?.length;
+  const stale = await place(buyer, 'WELCOME10', 99);
+  check('AC-24: a discount that changed is refused', stale.status === 409, `got ${stale.status}`);
+  check('AC-24: the refusal gives the new figures',
+    typeof stale.body?.reason === 'string' && stale.body?.promo_discount === 13.7 && stale.body?.total === 168.3, JSON.stringify(stale.body));
+  check('AC-24: and no order was placed', (await json(buyer, '/api/orders')).body?.length === ordersBefore);
+
+  const usesBefore = (await listed('WELCOME10'))?.paid_uses;
+  const before = (await json(finance, '/api/analytics')).body;
+  const placed = await place(buyer, 'WELCOME10', 13.7, { promo_discount: 137, total: 1, promo_discount_pula: 137 });
+  const placedOrder = placed.body?.order;
+  check('AC-24: the expected figure places the order', placed.status === 201, JSON.stringify(placed.body));
+  check('AC-24: figures from the browser are ignored',
+    placedOrder?.promo_discount === 13.7 && placedOrder?.promo_discount_pula === 13.7 && placedOrder?.total === 168.3, JSON.stringify(placedOrder));
+
+  // AC-25: an unpaid order holds the code, but is not a use.
+  check('AC-25: a buyer cannot use it again while unpaid', /already used/.test((await quote(buyer, 'WELCOME10')).body?.error ?? ''));
+  check('AC-25: an unpaid order is not a paid use', (await listed('WELCOME10'))?.paid_uses === usesBefore);
+  await payCallback(placedOrder?.id, placed.body?.payment, { amount: placedOrder?.total });
+  const after = (await json(finance, '/api/analytics')).body;
+  check('AC-25: a paid order is', (await listed('WELCOME10'))?.paid_uses === usesBefore + 1);
+  check('AC-25: another buyer can still use it', (await quote(other, 'WELCOME10')).status === 200);
+
+  const off = await newCode(`OFF${stamp}`);
+  const offQuote = await quote(buyer, `OFF${stamp}`);
+  await change(finance, off.body?.id, { active: false });
+  const lateOff = await place(buyer, `OFF${stamp}`, offQuote.body?.discount);
+  check('AC-24: a code switched off after the quote is refused',
+    lateOff.status === 409 && lateOff.body?.promo_discount === 0 && lateOff.body?.total === 182, JSON.stringify(lateOff.body));
+
+  await newCode(`PAR${stamp}`);
+  const [first, second] = await Promise.all([place(buyer, `PAR${stamp}`, 13.7), place(buyer, `PAR${stamp}`, 13.7)]);
+  const statuses = [first.status, second.status].sort();
+  check('AC-25: two parallel submits cannot both use a code', statuses[0] === 201 && statuses[1] === 409, statuses.join(' '));
+
+  const held = first.status === 201 ? first : second;
+  await json(ops, `/api/orders/${held.body?.order?.id}`, {
+    method: 'PATCH',
+    headers: JSON_HEADERS,
+    body: JSON.stringify({ action: 'CANCEL', reason: 'Verify gives the use back' }),
+  });
+  check('AC-25: cancelling an unpaid order gives its use back', (await quote(buyer, `PAR${stamp}`)).status === 200);
+
+  const limit = await newCode(`LIM${stamp}`);
+  for (const jar of [buyer, other]) {
+    const order = await place(jar, `LIM${stamp}`, 13.7);
+    await payCallback(order.body?.order?.id, order.body?.payment, { amount: order.body?.order?.total });
+  }
+  check('AC-20: a limit cannot go below the paid uses', (await change(finance, limit.body?.id, { usage_limit: 1 })).status === 422);
+  check('AC-20: it can match them', (await change(finance, limit.body?.id, { usage_limit: 2 })).status === 200);
+  check('AC-23: a code at its limit says so', /used up/.test((await quote(sessions['thabo@gmail.com'].jar, `LIM${stamp}`)).body?.error ?? ''));
+  check('AC-28: the list shows the state and paid uses',
+    await listed(`LIM${stamp}`).then((row) => row?.paid_uses === 2 && row?.state === 'USED_UP'));
+
+  // AC-26 and AC-27: the supplier is whole, and the discount comes out of margin.
+  const paid = (await json(ops, `/api/orders/${placedOrder?.id}`)).body;
+  const leg = paid?.legs?.[0];
+  check('AC-26: the leg carries the discount', leg?.promo_discount === 13.7, JSON.stringify(leg));
+  check('AC-26: the margin falls by it', Math.abs((leg?.platform_margin ?? 0) - 41.3) < 0.001, `${leg?.platform_margin}`);
+  check('AC-26: the payable is unchanged', leg?.payable?.amount === 137, `${leg?.payable?.amount}`);
+
+  const seen = (await json(naledi, `/api/orders/${placedOrder?.id}`)).body;
+  check('Suppliers see no promo details',
+    seen?.order && seen.order.promo_code === undefined && seen.order.promo_discount === undefined && seen.legs?.[0]?.promo_discount === undefined);
+  check('A supplier cannot work the discount out from the margin', seen?.legs?.[0] && seen.legs[0].platform_margin === undefined);
+  check('Nor from the total', seen?.order?.total === 182, `${seen?.order?.total}`);
+  check('Nor from a payment', seen?.payments?.length === 0);
+  check('A supplier sees only their own lines and payables',
+    seen?.items?.every((item) => item.supplier_id === 's001') && seen?.payables?.every((row) => row.supplier_id === 's001'));
+
+  check('AC-27: analytics GMV counts what the buyer paid', Math.abs(after.period_gmv - before.period_gmv - 168.3) < 0.001, `${before.period_gmv} to ${after.period_gmv}`);
+  check('AC-27: analytics margin falls by the discount', Math.abs(after.gross_margin - before.gross_margin - 41.3) < 0.001, `${before.gross_margin} to ${after.gross_margin}`);
+  check('AC-27: the staff order keeps the discounted total', paid?.order?.total === 168.3);
+
+  const refund = await json(finance, `/api/orders/${placedOrder?.id}`, {
+    method: 'PATCH',
+    headers: JSON_HEADERS,
+    body: JSON.stringify({ action: 'REFUND', reason: 'Verify refund' }),
+  });
+  check('AC-27: a refund defaults to the discounted total', refund.body?.refund_amount === 168.3 || refund.body?.order?.refund_amount === 168.3, JSON.stringify(refund.body).slice(0, 160));
+  check('AC-25: a refunded order keeps its use', (await listed('WELCOME10'))?.paid_uses === usesBefore + 1);
 }
 
 // ── 10. Runner availability toggle ───────────────────────────────────────────
@@ -1253,6 +1631,8 @@ section('13. Tiered pricing — the ladder is real, not hard-coded');
       payment_method: 'CARD',
       delivery_address: 'Plot 220, Block 6',
       delivery_city: 'Gaborone',
+      terms_accepted: true,
+      delivery_phone: '+267 71 000 000',
     }),
   });
   const unit1 = order1.body?.items?.[0]?.unit_price;
@@ -1267,6 +1647,8 @@ section('13. Tiered pricing — the ladder is real, not hard-coded');
       payment_method: 'CARD',
       delivery_address: 'Plot 220, Block 6',
       delivery_city: 'Gaborone',
+      terms_accepted: true,
+      delivery_phone: '+267 71 000 000',
     }),
   });
   const unit5 = order5.body?.items?.[0]?.unit_price;
@@ -1287,6 +1669,8 @@ section('13. Tiered pricing — the ladder is real, not hard-coded');
         payment_method: 'CARD',
         delivery_address: 'Plot 220, Block 6',
         delivery_city: 'Gaborone',
+        terms_accepted: true,
+        delivery_phone: '+267 71 000 000',
       }),
     });
     return order.body?.items?.[0]?.unit_price;
@@ -1321,6 +1705,8 @@ section('13. Tiered pricing — the ladder is real, not hard-coded');
       payment_method: 'CARD',
       delivery_address: 'Plot 5412, Extension 12',
       delivery_city: 'Gaborone',
+      terms_accepted: true,
+      delivery_phone: '+267 71 000 000',
     }),
   });
   const retailUnit20 = retail20.body?.items?.[0]?.unit_price;
@@ -1364,6 +1750,8 @@ section('13. Tiered pricing — the ladder is real, not hard-coded');
       payment_method: 'CARD',
       delivery_address: 'Plot 5412, Extension 12',
       delivery_city: 'Gaborone',
+      terms_accepted: true,
+      delivery_phone: '+267 71 000 000',
     }),
   });
   const [wig8, wig10] = wigs.body?.items ?? [];
@@ -1387,6 +1775,8 @@ section('13. Tiered pricing — the ladder is real, not hard-coded');
       payment_method: 'CARD',
       delivery_address: 'Plot 5412, Extension 12',
       delivery_city: 'Gaborone',
+      terms_accepted: true,
+      delivery_phone: '+267 71 000 000',
     }),
   });
   // Three 8" wigs alone: hair retail 350 less the 3% multi-buy, 339.50 rounded up.
@@ -1414,6 +1804,8 @@ section('13. Tiered pricing — the ladder is real, not hard-coded');
       payment_method: 'CARD',
       delivery_address: 'Somewhere',
       delivery_city: 'Nowhere',
+      terms_accepted: true,
+      delivery_phone: '+267 71 000 000',
       delivery_country: 'XX',
     }),
   });
@@ -1433,6 +1825,8 @@ section('13. Tiered pricing — the ladder is real, not hard-coded');
         payment_method,
         delivery_address: 'Kingsway Road 12',
         delivery_city: 'Maseru',
+        terms_accepted: true,
+        delivery_phone: '+267 71 000 000',
         delivery_country: 'LS',
       }),
     });
@@ -1462,6 +1856,8 @@ section('13. Tiered pricing — the ladder is real, not hard-coded');
       payment_method: 'CARD',
       delivery_address: 'Plot 220, Block 6',
       delivery_city: 'Gaborone',
+      terms_accepted: true,
+      delivery_phone: '+267 71 000 000',
     }),
   });
   check('qty 100 is refused and routed to a quotation', order100.status === 409, `got ${order100.status}`);
@@ -1606,6 +2002,8 @@ section('16. Runner sourcing — request to delivery');
       quantity: 3,
       budget_per_unit: 900,
       delivery_city: 'Gaborone',
+      terms_accepted: true,
+      delivery_phone: '+267 71 000 000',
       delivery_address: 'Plot 5412, Extension 12',
     }),
   });

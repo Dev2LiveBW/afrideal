@@ -292,6 +292,90 @@ describe('confirmPayment', () => {
     expect(rows('supplier-payables')[0]).toMatchObject({ amount: 160 });
   });
 
+  // Spec 0011, AC-26: a discount comes out of our margin, never the supplier's money.
+  describe('with a promo discount', () => {
+    const discounted = (overrides: Partial<Order> = {}) =>
+      order({ promo_code: 'WELCOME10', promo_discount: 30, promo_discount_pula: 30, ...overrides });
+
+    it('shares it across the legs, and leaves each payable as it would have been', async () => {
+      store.orders = [discounted()];
+
+      await confirm();
+
+      const legs = rows<{ supplier_id: string; promo_discount: number; platform_margin: number }>('supplier-orders');
+      expect(legs.find((leg) => leg.supplier_id === 's1')).toMatchObject({ promo_discount: 15, platform_margin: 35 });
+      expect(legs.find((leg) => leg.supplier_id === 's2')).toMatchObject({ promo_discount: 15, platform_margin: 35 });
+      expect(rows<{ amount: number }>('supplier-payables').map((row) => row.amount)).toEqual([150, 150]);
+    });
+
+    it('lets a thin leg go negative, because the floor is on the order', async () => {
+      store.orders = [discounted({ promo_discount: 90, promo_discount_pula: 90 })];
+      store['order-items'] = [
+        item('i1', 's1', 'p1', { line_total: 200 }),
+        item('i2', 's2', 'p2', { line_total: 100 }),
+      ];
+
+      await confirm();
+
+      const legs = rows<{ supplier_id: string; platform_margin: number }>('supplier-orders');
+      expect(legs.find((leg) => leg.supplier_id === 's2')?.platform_margin).toBe(-30);
+      expect(rows<{ supplier_id: string; amount: number }>('supplier-payables').find((row) => row.supplier_id === 's2')?.amount).toBe(100);
+    });
+
+    it('gives a resumed run the same share for the leg still to raise', async () => {
+      store.orders = [discounted({ promo_discount: 40, promo_discount_pula: 40 })];
+      store['order-items'] = [
+        item('i1', 's1', 'p1', { line_total: 300 }),
+        item('i2', 's2', 'p2', { line_total: 100 }),
+      ];
+      store['supplier-orders'] = [
+        { id: 'sup1', order_id: 'o1', supplier_id: 's1', item_ids: ['i1'], supplier_subtotal: 100, platform_margin: 170, promo_discount: 30 },
+      ] as unknown as { id: string }[];
+
+      await confirm();
+
+      const legs = rows<{ supplier_id: string; promo_discount: number }>('supplier-orders');
+      expect(legs.find((leg) => leg.supplier_id === 's2')?.promo_discount).toBe(10);
+    });
+
+    it('still adds up when routing moved between runs', async () => {
+      store.orders = [discounted({ promo_discount: 40, promo_discount_pula: 40 })];
+      store['order-items'] = [
+        item('i1', 's1', 'p1', { line_total: 300 }),
+        item('i2', 's2', 'p2', { line_total: 100 }),
+      ];
+      // An earlier run left a leg with a supplier who is no longer on the order.
+      store['supplier-orders'] = [
+        { id: 'sup1', order_id: 'o1', supplier_id: 's9', item_ids: [], supplier_subtotal: 100, platform_margin: 170, promo_discount: 25 },
+      ] as unknown as { id: string }[];
+
+      await confirm();
+
+      const shares = rows<{ promo_discount: number }>('supplier-orders').map((leg) => leg.promo_discount);
+      expect(shares.reduce((sum, share) => sum + share, 0)).toBeCloseTo(40, 10);
+    });
+
+    it('audits a late payment on a code the buyer has since used again', async () => {
+      store.orders = [
+        discounted({ payment_expires_at: anHourAgo() }),
+        order({ id: 'o2', status: 'PROCESSING', promo_code: 'WELCOME10' }),
+      ];
+
+      const result = await confirm();
+
+      expect(result).toMatchObject({ ok: true, late: true });
+      expect(auditsOf('PROMO_LATE_REUSE')).toHaveLength(1);
+      // The money is in, so the discount stands.
+      expect(rows<Order>('orders')[0].promo_discount).toBe(30);
+    });
+
+    it('says nothing when the late payment is the only use', async () => {
+      store.orders = [discounted({ payment_expires_at: anHourAgo() })];
+      await confirm();
+      expect(auditsOf('PROMO_LATE_REUSE')).toHaveLength(0);
+    });
+  });
+
   it('reports an unknown order without touching anything', async () => {
     expect(await confirm({ orderId: 'nope' })).toEqual({ ok: false, reason: 'NOT_FOUND' });
     expect(rows('supplier-orders')).toHaveLength(0);

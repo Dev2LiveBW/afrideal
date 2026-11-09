@@ -66,7 +66,7 @@ Patch the cart so it reads on a phone: sticky checkout bar, one line titles, tie
 ### 13. Finance controls: mark as paid, pause checkout
 The EFT and invoice fallback: a finance admin marks an order paid with a reference and note through the same confirmation path the gateway uses, and can pause checkout storewide without a deploy.
 **Done when:** an EFT order becomes paid with its supplier order raised and the action audit logged; pausing checkout shows "temporarily unavailable" on the storefront within one request.
-- [ ] Build it: `/develop finance controls`
+- [x] Build it: `/develop finance controls`
 
 ### 14. Refunds · needs a decision
 Full and partial refunds through the gateway from a paid order, with the supplier payable adjusted to match.
@@ -106,10 +106,25 @@ spec [0004](../specs/0004-quote-chain.md) · code in `app/api/rfqs/[id]/route.ts
 - [ ] Review it (fresh model): `/check review chosen quote becomes an order`
 - [ ] Document it: `/document chosen quote becomes an order`
 
-### 25. Buyer account & checkout extras · needs a decision
+### 25. Buyer account & checkout extras · in-progress
 The account and checkout pieces on the Phase 1 list: saved addresses chosen at checkout, a review step with delivery instructions and terms, promo codes, reorder, a map link on tracking, a mini cart, saved items, alert settings, and a welcome step after sign up. Builds on 5 (phone checkout).
 **Done when:** a buyer can save addresses and pick one at checkout; checkout has a review step with delivery instructions and a terms checkbox; a promo code changes the total; a delivered order can be reordered; saved items and alert settings are live in the account (no longer dimmed).
-- [ ] Design it (spec): `/architect buyer account & checkout extras`
+spec [0011](../specs/0011-buyer-account-checkout-extras.md) · code in `lib/addresses.ts`, `lib/reorder.ts`, `lib/saved-items.ts`, `lib/alert-prefs.ts`, `lib/promo.mjs`, `lib/order-lines.ts`, `app/(store)/account/`, `app/(store)/checkout/`
+- [x] Design it (spec): `/architect buyer account & checkout extras`
+- [ ] Build it: `/develop buyer account & checkout extras`
+  - [x] Addresses and the review step: address book, picker at checkout, instructions, terms, draft `/terms` (AC-1 to AC-10)
+  - [x] Account and repeat buying: reorder, map link, saved items, alert settings (AC-11 to AC-19)
+  - [x] Promo codes: shared pricing path, codes in checkout, ledger shares, admin page, verify and journeys (AC-20 to AC-29)
+  - [ ] Mini cart and welcome step (waits on a recording of Alibaba's cart and post sign up)
+- [ ] Verify it: `/check verify buyer account & checkout extras`
+- [x] Test it: `/test buyer account & checkout extras`
+- [x] Review it (fresh model): `/check review buyer account & checkout extras`
+- [x] Document it: `/document buyer account & checkout extras`
+
+### 33. Suppliers are paid their cost · needs a decision · from spec 0011
+A supplier's payable equals the full sale price, margin included, while the earnings page shows 12% commission. The owner confirmed on 2026-11-04 that suppliers are paid their cost, since AfriDeal is the seller.
+**Done when:** a confirmed order's payable equals the supplier's landed cost in pula; the supplier's earnings page and the finance queue agree with it; platform margin is what AfriDeal keeps. Must land before any real payout.
+- [ ] Design it (spec): `/architect suppliers are paid their cost`
 
 ### 26. Browse extras · needs a decision
 The browsing pieces still missing from the Phase 1 list: a price range filter, load more on long result lists, and recently viewed products.

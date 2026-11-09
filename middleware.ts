@@ -19,8 +19,8 @@ import type { Role } from '@/types';
  * helper is the server-component equivalent for the same rules.
  */
 
-const FINANCE_ALLOWED = ['/admin/analytics', '/admin/payables', '/admin/settlements'];
-const OPS_DENIED = ['/admin/settings', '/admin/finance', '/admin/settlements'];
+const FINANCE_ALLOWED = ['/admin/analytics', '/admin/payables', '/admin/promo-codes', '/admin/settlements'];
+const OPS_DENIED = ['/admin/settings', '/admin/finance', '/admin/settlements', '/admin/promo-codes'];
 
 const LANDING: Record<Role, string> = {
   SUPER_ADMIN: '/admin/dashboard',
@@ -56,6 +56,7 @@ const isPublic = createRouteMatcher([
   '/categories(.*)',
   '/rfq(.*)',
   '/how-it-works(.*)',
+  '/terms(.*)',
   '/cart(.*)',
 ]);
 

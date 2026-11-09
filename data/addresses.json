@@ -1,0 +1,15 @@
+[
+  {
+    "id": "adr001",
+    "user_id": "u007",
+    "label": "Home",
+    "recipient_name": "Kefilwe Dithebe",
+    "phone": "+267 71 234 567",
+    "country": "BW",
+    "town": "Gaborone",
+    "street": "Plot 2201, Block 6",
+    "is_default": true,
+    "created_at": "2026-10-05T03:13:21.450Z",
+    "updated_at": "2026-10-05T03:13:21.450Z"
+  }
+]

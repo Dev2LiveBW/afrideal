@@ -9,10 +9,10 @@ import type { Runner } from '@/types';
 const NAV = [
   { href: '/orders', label: 'Orders', icon: Package, live: true },
   { href: '/requests', label: 'Runner requests', icon: PackageSearch, live: true },
-  { href: '/orders', label: 'Addresses', icon: MapPin, live: false },
+  { href: '/account/addresses', label: 'Addresses', icon: MapPin, live: true },
   { href: '/orders', label: 'Payments', icon: CreditCard, live: false },
-  { href: '/orders', label: 'Saved items', icon: Heart, live: false },
-  { href: '/orders', label: 'Account settings', icon: Settings, live: false },
+  { href: '/account/saved', label: 'Saved items', icon: Heart, live: true },
+  { href: '/account/settings', label: 'Account settings', icon: Settings, live: true },
 ];
 
 export function AccountSidebar({
@@ -75,7 +75,7 @@ export function AccountSidebar({
       </nav>
 
       <p className="mt-4 hidden border-t border-hairline pt-4 text-[11.5px] leading-4 text-muted lg:block">
-        Addresses, payments and saved items are dimmed because they are not part of this release.
+        Payments is dimmed because stored cards are not part of this release yet.
       </p>
     </aside>
   );

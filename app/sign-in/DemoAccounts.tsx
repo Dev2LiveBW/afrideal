@@ -55,7 +55,10 @@ export function DemoAccounts() {
       }
 
       await setActive({ session: attempt.createdSessionId });
-      router.push('/after-sign-in');
+      // Back to the page that sent them here, as Clerk's own form does. Only a path
+      // on this site: the query string is anyone's to write.
+      const next = new URLSearchParams(window.location.search).get('redirect_url');
+      router.push(next && /^\/(?![/\\])/.test(next) ? next : '/after-sign-in');
       router.refresh();
     } catch (error) {
       const message =
