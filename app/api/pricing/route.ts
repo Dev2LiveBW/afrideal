@@ -4,11 +4,16 @@ import { fail, guard, handled, ok } from '@/lib/api';
 import { readAll, update } from '@/lib/db';
 import { audit } from '@/lib/notifications';
 import { calculatePrice, getPricingRule } from '@/lib/pricing-engine';
+import { ADMIN_ROLES } from '@/lib/roles';
 
 export const dynamic = 'force-dynamic';
 
-/** GET /api/pricing - every rule. */
-export const GET = handled(async () => ok(await readAll('pricing-rules')));
+/** GET /api/pricing - every rule. Our markups are the team's to read. */
+export const GET = handled(async () => {
+  const { response } = await guard(ADMIN_ROLES);
+  if (response) return response;
+  return ok(await readAll('pricing-rules'));
+});
 
 const CalcSchema = z.object({
   supplier_cost: z.number().positive('Enter a supplier cost above zero.'),
@@ -17,6 +22,9 @@ const CalcSchema = z.object({
 
 /** POST /api/pricing - the live calculator on /admin/pricing. */
 export const POST = handled(async (request: Request) => {
+  const { response } = await guard(ADMIN_ROLES);
+  if (response) return response;
+
   const parsed = CalcSchema.safeParse(await request.json());
   if (!parsed.success) return fail(parsed.error.issues[0]?.message ?? 'Invalid input.', 422);
 

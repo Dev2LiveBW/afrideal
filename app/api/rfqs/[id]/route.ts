@@ -1,8 +1,10 @@
 import { z } from 'zod';
 
 import { fail, guard, handled, ok } from '@/lib/api';
-import { findById, insert, nextId, nextIds, readAll, update } from '@/lib/db';
+import { findById, insert, mutate, nextId, nextIds, readAll, update } from '@/lib/db';
 import { audit, notify } from '@/lib/notifications';
+import { orderForCustomer } from '@/lib/order-privacy';
+import { ADMIN_ROLES } from '@/lib/roles';
 import { startPayment } from '@/lib/payments/adapters';
 import { paymentExpiresAt } from '@/lib/payments/policy';
 import type {
@@ -35,8 +37,19 @@ export const GET = handled(async (_request: Request, { params }: { params: { id:
   if (actor.role === 'CUSTOMER' && rfq.customer_id !== actor.id) {
     return fail('Not your request.', 403);
   }
+  // A request names a buyer and where they are; a runner has no part in one.
+  if (actor.role !== 'CUSTOMER' && actor.role !== 'SUPPLIER_OWNER' && !ADMIN_ROLES.includes(actor.role)) {
+    return fail('Your role cannot read quotation requests.', 403);
+  }
 
   const all = (await readAll('rfq-responses')).filter((entry) => entry.rfq_id === rfq.id);
+
+  if (actor.role === 'SUPPLIER_OWNER') {
+    const answered = all.some((entry) => entry.supplier_id === actor.supplierId);
+    if (!answered && !(await supplierCarries(actor.supplierId, rfq.product_id))) {
+      return fail('You were not asked to quote on this request.', 403);
+    }
+  }
   const suppliers = await readAll('suppliers');
 
   // §5 - scope what comes back to what the caller is entitled to see.
@@ -65,6 +78,25 @@ export const GET = handled(async (_request: Request, { params }: { params: { id:
     })),
   });
 });
+
+/**
+ * Who is asked to quote: a verified supplier with a live offer on the product.
+ * The same rule `POST /api/rfqs` uses to decide whom to notify.
+ */
+async function supplierCarries(supplierId: string | null, productId: string): Promise<boolean> {
+  if (!supplierId) return false;
+  const supplier = await findById('suppliers', supplierId);
+  if (supplier?.status !== 'VERIFIED') return false;
+  return (await readAll('supplier-offers')).some(
+    (offer) => offer.product_id === productId && offer.supplier_id === supplierId && offer.active,
+  );
+}
+
+/** A request that can still take a supplier's answer or become an order. */
+const OPEN_STATUSES: Rfq['status'][] = ['SUBMITTED', 'SOURCING', 'QUOTED'];
+
+/** What AfriDeal adds to a supplier's quoted unit price (spec 0004 replaces this). */
+const QUOTE_MARKUP = 1.22;
 
 const RespondSchema = z.object({
   action: z.literal('RESPOND'),
@@ -99,7 +131,7 @@ async function createOrderFromRfqQuote({
   paymentMethod?: PaymentMethod;
 }): Promise<{ order: Order; rfq: Rfq }> {
   const now = new Date().toISOString();
-  const customerUnitPrice = customerUnitPriceOverride ?? Math.ceil(chosen.unit_price * 1.22);
+  const customerUnitPrice = customerUnitPriceOverride ?? Math.ceil(chosen.unit_price * QUOTE_MARKUP);
   const qty = rfq.requested_quantity;
   const subtotal = customerUnitPrice * qty;
   const delivery_fee = 45;
@@ -223,9 +255,18 @@ export const PATCH = handled(async (request: Request, { params }: { params: { id
     const parsed = RespondSchema.safeParse(body);
     if (!parsed.success) return fail(parsed.error.issues[0]?.message ?? 'Invalid quote.', 422);
 
+    if (!OPEN_STATUSES.includes(rfq.status)) {
+      return fail('This request is no longer taking quotes.', 409);
+    }
+
     const existing = (await readAll('rfq-responses')).find(
       (entry) => entry.rfq_id === rfq.id && entry.supplier_id === actor.supplierId,
     );
+
+    // Knowing a request's id is not an invitation to quote on it.
+    if (!existing && !(await supplierCarries(actor.supplierId, rfq.product_id))) {
+      return fail('You were not asked to quote on this request.', 403);
+    }
 
     const patch = {
       quantity: parsed.data.quantity,
@@ -283,69 +324,81 @@ export const PATCH = handled(async (request: Request, { params }: { params: { id
   const parsed = UpdateSchema.safeParse(body);
   if (!parsed.success) return fail('Invalid quotation update.', 422);
 
-  const now = new Date().toISOString();
-
-  if (parsed.data.action === 'SELECT_RESPONSE') {
-    if (!parsed.data.response_id) return fail('Name the response to select.', 422);
-
-    const responses = (await readAll('rfq-responses')).filter((entry) => entry.rfq_id === rfq.id);
-    const chosen = responses.find((entry) => entry.id === parsed.data.response_id);
-    if (!chosen) return fail('That response is not on this request.', 404);
-
-    for (const entry of responses) {
-      await update('rfq-responses', entry.id, {
-        status: entry.id === chosen.id ? 'SELECTED' : 'REJECTED',
-      });
-    }
-
-    if (rfq.order_id) {
-      const existingOrder = await findById('orders', rfq.order_id);
-      if (existingOrder) {
-        return ok({ ...chosen, order: existingOrder, rfq });
-      }
-    }
-
-    const { order, rfq: updatedRfq } = await createOrderFromRfqQuote({
-      rfq,
-      chosen,
-      actor,
-      customerUnitPriceOverride: parsed.data.customer_unit_price,
-      paymentMethod: parsed.data.payment_method,
-    });
-
-    return ok({ ...chosen, order, rfq: updatedRfq });
+  // The price a buyer pays on a quote is ours to set. A buyer who could send
+  // their own would be naming what they pay.
+  if (parsed.data.customer_unit_price !== undefined && !isStaff) {
+    return fail('Only the team can set the price on a quotation.', 403);
   }
 
-  if (parsed.data.action === 'ACCEPT_QUOTE') {
+  const now = new Date().toISOString();
+
+  // The team sees the supplier answer it picked; a buyer sees only their order
+  // and request. What a supplier quoted us is confidential (§5).
+  const answer = (chosen: RfqResponse | undefined, order: Order, current: Rfq) =>
+    isStaff ? { ...(chosen ?? {}), order, rfq: current } : { order: orderForCustomer(order), rfq: current };
+
+  if (parsed.data.action === 'SELECT_RESPONSE' || parsed.data.action === 'ACCEPT_QUOTE') {
     const responses = (await readAll('rfq-responses')).filter((entry) => entry.rfq_id === rfq.id);
-    const chosen =
-      responses.find((entry) => entry.status === 'SELECTED') ??
-      responses.find((entry) => entry.status === 'SUBMITTED');
+
+    let chosen: RfqResponse | undefined;
+    if (parsed.data.action === 'SELECT_RESPONSE') {
+      if (!parsed.data.response_id) return fail('Name the response to select.', 422);
+      chosen = responses.find((entry) => entry.id === parsed.data.response_id);
+      if (!chosen) return fail('That response is not on this request.', 404);
+    } else {
+      // The team's pick if there is one; otherwise the cheapest answer still
+      // standing, so which quote a buyer accepts never depends on row order.
+      const live = responses
+        .filter((entry) => entry.status === 'SUBMITTED' && entry.valid_until >= now)
+        .sort((a, b) => a.unit_price - b.unit_price);
+      chosen = responses.find((entry) => entry.status === 'SELECTED') ?? live[0];
+    }
 
     if (rfq.order_id) {
       const existingOrder = await findById('orders', rfq.order_id);
-      if (existingOrder) {
-        return ok({ ...(chosen ?? {}), order: existingOrder, rfq });
-      }
+      if (existingOrder) return ok(answer(chosen, existingOrder, rfq));
     }
 
     if (!chosen) return fail('No quotation response is available to accept.', 400);
 
-    for (const entry of responses) {
-      await update('rfq-responses', entry.id, {
-        status: entry.id === chosen.id ? 'SELECTED' : 'REJECTED',
-      });
+    // One request becomes one order. The claim is taken under the collection's
+    // write lock, so two accepts arriving together cannot both get past it.
+    const claimed = await mutate('rfqs', (rows) => {
+      const row = rows.find((entry) => entry.id === rfq.id);
+      if (!row || row.order_id || !OPEN_STATUSES.includes(row.status)) return { rows, result: false };
+      return {
+        rows: rows.map((entry) => (entry.id === rfq.id ? { ...entry, status: 'ORDERED' as const, updated_at: now } : entry)),
+        result: true,
+      };
+    });
+    if (!claimed) {
+      const current = await findById('rfqs', rfq.id);
+      const existingOrder = current?.order_id ? await findById('orders', current.order_id) : null;
+      if (existingOrder) return ok(answer(chosen, existingOrder, current ?? rfq));
+      return fail('This request can no longer be turned into an order.', 409);
     }
 
-    const { order, rfq: updatedRfq } = await createOrderFromRfqQuote({
-      rfq,
-      chosen,
-      actor,
-      customerUnitPriceOverride: parsed.data.customer_unit_price,
-      paymentMethod: parsed.data.payment_method,
-    });
+    try {
+      for (const entry of responses) {
+        await update('rfq-responses', entry.id, {
+          status: entry.id === chosen.id ? 'SELECTED' : 'REJECTED',
+        });
+      }
 
-    return ok({ ...chosen, order, rfq: updatedRfq });
+      const { order, rfq: updatedRfq } = await createOrderFromRfqQuote({
+        rfq,
+        chosen,
+        actor,
+        customerUnitPriceOverride: isStaff ? parsed.data.customer_unit_price : undefined,
+        paymentMethod: parsed.data.payment_method,
+      });
+
+      return ok(answer(chosen, order, updatedRfq));
+    } catch (error) {
+      // Give the claim back, or a failed attempt would lock the request for good.
+      await update('rfqs', rfq.id, (row) => (row.order_id ? {} : { status: rfq.status, updated_at: now }));
+      throw error;
+    }
   }
 
   if (!parsed.data.status) return fail('Nothing to update.', 422);

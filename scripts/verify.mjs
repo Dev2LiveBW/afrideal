@@ -124,7 +124,9 @@ async function payCallback(orderId, attempt, options = {}) {
     reference: attempt?.provider_reference ?? attempt?.reference ?? null,
     status: options.status ?? 'CONFIRMED',
     amount: options.amount,
-    currency: 'BWP',
+    // The route compares this with the order's currency (AC-11). Every mock
+    // callback below pays a Botswana order; pass `currency` for any other.
+    currency: options.currency ?? 'BWP',
     occurred_at: new Date().toISOString(),
     ...(options.reason ? { reason: options.reason } : {}),
   });
@@ -1505,7 +1507,12 @@ section('9i. Promo codes — the cap, stale codes, use counting and the ledger')
   check('Suppliers see no promo details',
     seen?.order && seen.order.promo_code === undefined && seen.order.promo_discount === undefined && seen.legs?.[0]?.promo_discount === undefined);
   check('A supplier cannot work the discount out from the margin', seen?.legs?.[0] && seen.legs[0].platform_margin === undefined);
-  check('Nor from the total', seen?.order?.total === 182, `${seen?.order?.total}`);
+  // Scope feature 31: a supplier sees no customer price at all, so there is no
+  // total to work a discount out from either.
+  check('Nor from the total: a supplier sees no customer price',
+    seen?.order && seen.order.total === undefined && seen.order.subtotal === undefined &&
+      seen.items?.every((item) => item.unit_price === undefined && item.line_total === undefined),
+    JSON.stringify({ total: seen?.order?.total, unit: seen?.items?.[0]?.unit_price }));
   check('Nor from a payment', seen?.payments?.length === 0);
   check('A supplier sees only their own lines and payables',
     seen?.items?.every((item) => item.supplier_id === 's001') && seen?.payables?.every((row) => row.supplier_id === 's001'));
@@ -1757,10 +1764,15 @@ section('13. Tiered pricing — the ladder is real, not hard-coded');
   const [wig8, wig10] = wigs.body?.items ?? [];
   check('mixed wig lengths count together: 8" at the bulk price', wig8?.unit_price === 314, `got ${wig8?.unit_price}`);
   check('mixed wig lengths count together: 10" at the bulk price', wig10?.unit_price === 504, `got ${wig10?.unit_price}`);
+  // The cost a line was priced on is ours: the team reads it, the buyer never does.
+  check('the buyer is not told what the supplier charges',
+    wig8 && wig8.supplier_cost === undefined && wig8.supplier_id === undefined, JSON.stringify(wig8));
+  const wigLines = (await json(sessions['ops@afrideal.co.bw'].jar, `/api/orders/${wigs.body?.order?.id}`)).body?.items ?? [];
+  const staffWig8 = wigLines.find((line) => line.id === wig8?.id);
   check(
     'the order fixes the rand cost and the customs it was priced on (none)',
-    wig8?.supplier_cost === 280 && wig8?.supplier_cost_currency === 'ZAR' && wig8?.customs_amount === 0,
-    JSON.stringify({ cost: wig8?.supplier_cost, currency: wig8?.supplier_cost_currency, customs: wig8?.customs_amount }),
+    staffWig8?.supplier_cost === 280 && staffWig8?.supplier_cost_currency === 'ZAR' && staffWig8?.customs_amount === 0,
+    JSON.stringify({ cost: staffWig8?.supplier_cost, currency: staffWig8?.supplier_cost_currency, customs: staffWig8?.customs_amount }),
   );
 
   // A product from another category does not count towards the wigs' rung.
@@ -1942,6 +1954,17 @@ section('15. RFQ — quotation requests');
     });
     check('an invited supplier can quote', quoted.status === 200, `got ${quoted.status}`);
 
+    // Phase 0: the price on a quote is ours to set. A buyer naming their own is refused.
+    const ownPrice = await json(business, `/api/rfqs/${rfqId}`, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ action: 'ACCEPT_QUOTE', customer_unit_price: 0.01, payment_method: 'EFT' }),
+    });
+    check('a buyer cannot set their own price on a quote', ownPrice.status === 403, `got ${ownPrice.status}`);
+
+    const runnerReads = await json(sessions['runner@afrideal.co.bw'].jar, `/api/rfqs/${rfqId}`);
+    check('a runner cannot read a quotation request', runnerReads.status === 403, `got ${runnerReads.status}`);
+
     // §12 — and cannot see a competitor's quote.
     const asRival = (await json(glowup, `/api/rfqs/${rfqId}`)).body;
     const rivalSees = (asRival?.responses ?? []).filter((r) => r.supplier_id !== 's002');
@@ -2110,6 +2133,115 @@ section('16. Runner sourcing — request to delivery');
 
   const runnerView = await json(runner, '/api/runner-requests');
   check('a runner reads the pool and their own', Array.isArray(runnerView.body));
+}
+
+// ── 17. Phase 0: who may read and change what ────────────────────────────────
+//
+// docs/completion-plan.md, phase 0. Each check is a refusal or a missing field
+// that used to be a leak, so a regression shows up here by name.
+
+section('17. Access — routes answer only the roles that need them');
+{
+  const anon = makeJar();
+  const buyer = sessions['thabo@gmail.com'].jar;
+  const naledi = sessions['supplier@naledi.co.bw'].jar;
+  const runner = sessions['runner@afrideal.co.bw'].jar;
+  const ops = sessions['ops@afrideal.co.bw'].jar;
+  const finance = sessions['finance@afrideal.co.bw'].jar;
+  const patch = (jar, path, body) =>
+    json(jar, path, { method: 'PATCH', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
+
+  // Nothing about people, suppliers or our prices to anyone not signed in.
+  check('the open user list is gone', (await json(anon, '/api/users')).status === 404);
+  for (const path of ['/api/supplier-offers', '/api/suppliers', '/api/suppliers/s001', '/api/pricing']) {
+    const answer = await json(anon, path);
+    check(`anonymous ${path} is refused`, answer.status === 401, `got ${answer.status}`);
+  }
+  const calculator = await json(anon, '/api/pricing', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ supplier_cost: 100, category_id: 'c1' }),
+  });
+  check('anonymous cannot use the margin calculator', calculator.status === 401, `got ${calculator.status}`);
+
+  const publicCatalogue = (await json(anon, '/api/products')).body ?? [];
+  check('the public catalogue lists only active products',
+    publicCatalogue.length > 0 && publicCatalogue.every((product) => product.status === 'ACTIVE'));
+  const publicProduct = await request(anon, '/api/products/p001');
+  check('a public product carries no supplier cost', !(await publicProduct.text()).includes('supplier_cost'));
+
+  // Signed in, but the wrong role.
+  check('a buyer cannot read supplier offers', (await json(buyer, '/api/supplier-offers')).status === 403);
+  const nalediOffers = (await json(naledi, '/api/supplier-offers')).body ?? [];
+  check('a supplier reads only their own offers',
+    nalediOffers.length > 0 && nalediOffers.every((offer) => offer.supplier_id === 's001'));
+  check('a supplier cannot read another supplier record', (await json(naledi, '/api/suppliers/s002')).status === 403);
+  check('a runner cannot list orders', (await json(runner, '/api/orders')).status === 403);
+  check('a runner cannot list quotation requests', (await json(runner, '/api/rfqs')).status === 403);
+  check('a supplier cannot list runner requests', (await json(naledi, '/api/runner-requests')).status === 403);
+
+  // A buyer's own order, without what is ours.
+  const mine = (await json(buyer, '/api/orders')).body ?? [];
+  check('a buyer list carries no staff notes', mine.every((order) => order.internal_notes === undefined));
+  const ownId = mine[0]?.id;
+  if (ownId) {
+    const own = (await json(buyer, `/api/orders/${ownId}`)).body;
+    const body = JSON.stringify(own ?? {});
+    check('a buyer order shows no margin, supplier cost or supplier record',
+      !body.includes('platform_margin') && !body.includes('supplier_cost') && !body.includes('contact_email'));
+    check('a buyer order shows no supplier invoice', Array.isArray(own?.payables) && own.payables.length === 0);
+    check('a buyer order shows no staff notes', own?.order && own.order.internal_notes === undefined);
+  }
+
+  // A fresh unpaid order to try the state gates on.
+  const unpaid = await json(buyer, '/api/orders', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      lines: [{ product_id: 'p001', variant_id: 'p001v1', qty: 1 }],
+      payment_method: 'EFT',
+      delivery_address: 'Plot 5412, Extension 12',
+      delivery_city: 'Gaborone',
+      terms_accepted: true,
+      recipient_name: 'Thabo Modise',
+      delivery_phone: '+267 71 000 000',
+    }),
+  });
+  check('a buyer can still place an order', unpaid.status === 201, `got ${unpaid.status}`);
+  const unpaidId = unpaid.body?.order?.id;
+  if (unpaidId) {
+    const confirmed = await patch(buyer, `/api/orders/${unpaidId}`, { action: 'CONFIRM_DELIVERY' });
+    check('an unpaid order cannot be confirmed as delivered', confirmed.status === 409, `got ${confirmed.status}`);
+
+    const refund = await patch(finance, `/api/orders/${unpaidId}`, { action: 'REFUND', reason: 'probe' });
+    check('an order nobody paid for cannot be refunded', refund.status === 409, `got ${refund.status}`);
+
+    await patch(buyer, `/api/orders/${unpaidId}`, { action: 'CANCEL' });
+  }
+
+  // Supplier invoices are the team's to hold, not a buyer's.
+  const anyPayable = (await json(ops, '/api/payables')).body?.records?.[0];
+  check('there is a supplier invoice to try', Boolean(anyPayable));
+  if (anyPayable) {
+    const held = await patch(buyer, `/api/payables/${anyPayable.id}`, { status: 'ON_HOLD' });
+    check('a buyer cannot freeze a supplier invoice', held.status === 403, `got ${held.status}`);
+  }
+
+  // A supplier's part ends at ready for collection.
+  const nalediLeg = (await json(naledi, '/api/orders')).body?.[0];
+  if (nalediLeg) {
+    const legId = (await json(naledi, `/api/orders/${nalediLeg.id}`)).body?.legs?.[0]?.id;
+    if (legId) {
+      const delivered = await patch(naledi, `/api/supplier-orders/${legId}`, { status: 'DELIVERED' });
+      check('a supplier cannot mark their own goods delivered', delivered.status === 403, `got ${delivered.status}`);
+    }
+  }
+
+  // The headers every page now carries.
+  const home = await request(anon, '/');
+  check('pages refuse to be framed', home.headers.get('x-frame-options') === 'DENY');
+  check('pages forbid content sniffing', home.headers.get('x-content-type-options') === 'nosniff');
+  check('a content security policy is reported', Boolean(home.headers.get('content-security-policy-report-only')));
 }
 
 // ── Report ───────────────────────────────────────────────────────────────────

@@ -1,8 +1,10 @@
 import { z } from 'zod';
 
 import { fail, guard, handled, ok } from '@/lib/api';
+import { throttle } from '@/lib/rate-limit';
 import { findById, insert, nextId, readAll } from '@/lib/db';
 import { audit, notify } from '@/lib/notifications';
+import { ADMIN_ROLES } from '@/lib/roles';
 import type { Rfq } from '@/types';
 
 export const dynamic = 'force-dynamic';
@@ -28,7 +30,9 @@ const CreateSchema = z.object({
 // ── GET /api/rfqs ────────────────────────────────────────────────────────────
 
 export const GET = handled(async (request: Request) => {
-  const { actor, response } = await guard();
+  // Buyers, suppliers and the team. A request names a buyer and where they are,
+  // and carries every supplier's price: a runner has no part in one.
+  const { actor, response } = await guard(['CUSTOMER', 'SUPPLIER_OWNER', ...ADMIN_ROLES]);
   if (response) return response;
 
   const [rfqs, responses] = await Promise.all([readAll('rfqs'), readAll('rfq-responses')]);
@@ -88,6 +92,9 @@ export const GET = handled(async (request: Request) => {
 export const POST = handled(async (request: Request) => {
   const { actor, response } = await guard();
   if (response) return response;
+
+  const throttled = throttle('requestQuote', actor.id);
+  if (throttled) return throttled;
 
   const parsed = CreateSchema.safeParse(await request.json());
   if (!parsed.success) {

@@ -13,7 +13,7 @@ import { TabButton } from '@/app/(admin)/admin/_components/TabButton';
 import { dateTime } from '@/lib/format';
 import { SOURCING_FEE_RATE, quoteTotal } from '@/lib/runner-requests';
 import { cn } from '@/lib/utils';
-import type { RunnerRequest } from '@/types';
+import type { RunnerRequestView } from '@/lib/runner-requests';
 
 /**
  * The runner's side of a sourcing request.
@@ -31,8 +31,9 @@ export function SourcingClient({
   pool,
   mine,
 }: {
-  pool: RunnerRequest[];
-  mine: RunnerRequest[];
+  /** Offered to this runner; carries no street address until they take one. */
+  pool: RunnerRequestView[];
+  mine: RunnerRequestView[];
 }) {
   const [tab, setTab] = useState<'MINE' | 'POOL'>(mine.length > 0 ? 'MINE' : 'POOL');
   const rows = tab === 'POOL' ? pool : mine;
@@ -75,7 +76,7 @@ export function SourcingClient({
   );
 }
 
-function RequestCard({ request, inPool }: { request: RunnerRequest; inPool: boolean }) {
+function RequestCard({ request, inPool }: { request: RunnerRequestView; inPool: boolean }) {
   const router = useRouter();
   const [saving, setSaving] = useState(false);
   const [quoting, setQuoting] = useState(false);
@@ -156,7 +157,9 @@ function RequestCard({ request, inPool }: { request: RunnerRequest; inPool: bool
       )}
 
       <p className="mt-3 text-[12px] text-muted">
-        Deliver to {request.delivery_address}, {request.delivery_city}
+        Deliver to {request.delivery_address ? `${request.delivery_address}, ` : ''}
+        {request.delivery_city}
+        {!request.delivery_address && ' · full address once you take it'}
         {request.needed_by && ` · needed by ${dateTime(request.needed_by)}`}
       </p>
 

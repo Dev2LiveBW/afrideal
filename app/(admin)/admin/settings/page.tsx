@@ -8,10 +8,13 @@ import { checkoutIsPaused } from '@/lib/settings';
 
 import { CheckoutPauseCard } from './CheckoutPauseCard';
 import { SettingsForm } from './SettingsForm';
+import { requireAdminPage } from '@/lib/admin-access';
 
 export const dynamic = 'force-dynamic';
 
 export default async function AdminSettingsPage() {
+  await requireAdminPage('/admin/settings');
+
   const session = await auth();
   const notifications = session?.user ? await getNotifications(session.user.id) : [];
   const isSuperAdmin = session?.user?.role === 'SUPER_ADMIN';

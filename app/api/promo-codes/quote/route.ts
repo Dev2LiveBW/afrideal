@@ -1,6 +1,7 @@
 import { z } from 'zod';
 
 import { fail, guard, handled, ok } from '@/lib/api';
+import { throttle } from '@/lib/rate-limit';
 import { priceOrder, resolveLane } from '@/lib/order-lines';
 import { evaluateCode } from '@/lib/promo-codes';
 
@@ -24,6 +25,9 @@ const QuoteSchema = z.object({
 export const POST = handled(async (request: Request) => {
   const { actor, response } = await guard(['CUSTOMER']);
   if (response) return response;
+
+  const throttled = throttle('promoQuote', actor.id);
+  if (throttled) return throttled;
 
   const parsed = QuoteSchema.safeParse(await request.json().catch(() => null));
   if (!parsed.success) return fail(parsed.error.issues[0]?.message ?? 'Check the code.', 422);

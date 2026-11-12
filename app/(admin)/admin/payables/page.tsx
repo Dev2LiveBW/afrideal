@@ -10,7 +10,8 @@ import { effectiveOrderStatus } from '@/lib/payments/status';
 import { getNotifications } from '@/lib/queries';
 
 import { AwaitingPaymentQueue, type AwaitingRow } from './AwaitingPaymentQueue';
-import { PayablesQueue, type PayableRow } from './PayablesQueue';
+import { PayablesQueue, type PayableRow } from './PayablesQueue';
+import { requireAdminPage } from '@/lib/admin-access';
 
 export const dynamic = 'force-dynamic';
 
@@ -27,6 +28,8 @@ function sinceLabel(placedAt: string): string {
 const LATE_TRANSFER_DAYS = 30;
 
 export default async function AdminPayablesPage() {
+  await requireAdminPage('/admin/payables');
+
   const [session, records, suppliers, orders, payments, disputes] = await Promise.all([
     auth(),
     readAll('supplier-payables'),

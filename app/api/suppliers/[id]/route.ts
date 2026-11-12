@@ -3,10 +3,18 @@ import { z } from 'zod';
 import { fail, guard, handled, ok } from '@/lib/api';
 import { findById, readAll, update } from '@/lib/db';
 import { EVENTS, audit, notify } from '@/lib/notifications';
+import { ADMIN_ROLES } from '@/lib/roles';
 
 export const dynamic = 'force-dynamic';
 
+/** GET /api/suppliers/:id - the team reads any supplier record, a supplier their own. */
 export const GET = handled(async (_request: Request, { params }: { params: { id: string } }) => {
+  const { actor, response } = await guard([...ADMIN_ROLES, 'SUPPLIER_OWNER']);
+  if (response) return response;
+  if (actor.role === 'SUPPLIER_OWNER' && actor.supplierId !== params.id) {
+    return fail('That is not your supplier record.', 403);
+  }
+
   const supplier = await findById('suppliers', params.id);
   if (!supplier) return fail('Supplier not found.', 404);
   return ok(supplier);

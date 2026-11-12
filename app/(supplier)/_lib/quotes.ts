@@ -64,7 +64,8 @@ export function getQuoteInbox(workspace: Workspace): QuoteRow[] {
         expiresAt: expiryFor(leg.created_at),
         supplierOrderId: leg.id,
         referenceCost: first?.supplier_cost ?? 0,
-        suggestedPrice: first?.unit_price ?? 0,
+        // Their own agreed cost, never what the buyer was charged for the line.
+        suggestedPrice: first?.supplier_cost ?? 0,
         stockHint: offer?.stock ?? null,
         leadTimeHint: offer?.fulfilment_days ?? null,
       };

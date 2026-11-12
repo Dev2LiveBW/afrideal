@@ -5,12 +5,21 @@ import { clerkClient } from '@clerk/nextjs/server';
 import { ALL_DEMO_ACCOUNTS } from './demo-accounts';
 
 /**
- * Demo cards only work against Clerk's development instance. A production
- * instance's secret key starts `sk_live_`, so this is off there no matter what
- * else is configured.
+ * Whether the one-click demo cards are on. Each card signs a visitor in as that
+ * account, super admin included, so two things must both hold:
+ *
+ * - Clerk's development instance (a `sk_test_` key). A production instance's
+ *   key starts `sk_live_`, and that alone switches the cards off.
+ * - On any production build (`next start`, Vercel), an explicit
+ *   `DEMO_SIGNIN=1`. Launching on a development instance by mistake must not
+ *   hand out admin sign-ins; the demo site turns them on deliberately.
+ *
+ * `next dev` keeps them on without the flag.
  */
 export async function isDemoSignInEnabled(): Promise<boolean> {
-  return (process.env.CLERK_SECRET_KEY ?? '').startsWith('sk_test_');
+  if (!(process.env.CLERK_SECRET_KEY ?? '').startsWith('sk_test_')) return false;
+  if (process.env.NODE_ENV !== 'production') return true;
+  return process.env.DEMO_SIGNIN === '1';
 }
 
 /**

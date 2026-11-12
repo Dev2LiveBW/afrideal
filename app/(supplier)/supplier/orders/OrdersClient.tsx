@@ -20,7 +20,8 @@ import { StatusBadge } from '@/components/brand/StatusBadge';
 import { SettlementPanel } from '@/components/orders/SettlementPanel';
 import { Swatch } from '@/components/storefront/Swatch';
 import { dateTime, humanise } from '@/lib/format';
-import type { SupplierPayable, Order, OrderItem, SupplierOrder, SupplierOrderStatus } from '@/types';
+import type { SupplierOrderView } from '@/lib/order-privacy';
+import type { SupplierPayable, OrderItem, SupplierOrder, SupplierOrderStatus } from '@/types';
 
 /**
  * Order fulfilment list.
@@ -32,9 +33,10 @@ import type { SupplierPayable, Order, OrderItem, SupplierOrder, SupplierOrderSta
  * settle or cancel their own invoice.
  */
 
+/** What reaches a supplier's browser: their view of the order and their lines at their cost. */
 type Leg = Omit<SupplierOrder, 'platform_margin' | 'promo_discount'> & {
-  order: Order | null;
-  items: OrderItem[];
+  order: SupplierOrderView | null;
+  items: Omit<OrderItem, 'unit_price' | 'line_total'>[];
   payable: SupplierPayable | null;
 };
 

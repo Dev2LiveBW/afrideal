@@ -3,6 +3,7 @@ import { z } from 'zod';
 import { fail, guard, handled, ok } from '@/lib/api';
 import { findById, readAll, update } from '@/lib/db';
 import { EVENTS, audit, notify } from '@/lib/notifications';
+import { offeredTo } from '@/lib/runner-match';
 import { markCollected } from '@/lib/shipments';
 import type { ShipmentStatus } from '@/types';
 
@@ -34,8 +35,23 @@ export const PATCH = handled(async (request: Request, { params }: { params: { id
   const shipment = await findById('shipments', params.id);
   if (!shipment) return fail('Shipment not found.', 404);
 
-  if (actor.role === 'RUNNER' && shipment.runner_id && shipment.runner_id !== actor.runnerId) {
-    return fail('That job is assigned to another runner.', 403);
+  if (actor.role === 'RUNNER') {
+    if (!actor.runnerId) return fail('This account is not linked to a runner record.', 403);
+    if (shipment.runner_id && shipment.runner_id !== actor.runnerId) {
+      return fail('That job is assigned to another runner.', 403);
+    }
+    // A runner records jobs as themselves; only the team assigns one to someone else.
+    if (parsed.data.runner_id && parsed.data.runner_id !== actor.runnerId) {
+      return fail('You can only take a job yourself.', 403);
+    }
+    // An open job goes to a runner it was offered to (spec 0009, AC-6).
+    if (!shipment.runner_id) {
+      const offered = offeredTo(await readAll('runners'), actor.runnerId, {
+        country: shipment.pickup_country,
+        town: shipment.pickup_town,
+      });
+      if (!offered) return fail('This job was not offered to you.', 403);
+    }
   }
 
   if (!NEXT[shipment.status].includes(parsed.data.status)) {
@@ -55,7 +71,10 @@ export const PATCH = handled(async (request: Request, { params }: { params: { id
   const now = new Date().toISOString();
   const updated = await update('shipments', params.id, {
     status: parsed.data.status,
-    runner_id: parsed.data.runner_id ?? shipment.runner_id ?? actor.runnerId,
+    runner_id:
+      actor.role === 'RUNNER'
+        ? (shipment.runner_id ?? actor.runnerId)
+        : (parsed.data.runner_id ?? shipment.runner_id ?? actor.runnerId),
     delivered_at: parsed.data.status === 'DELIVERED' ? now : shipment.delivered_at,
   });
 

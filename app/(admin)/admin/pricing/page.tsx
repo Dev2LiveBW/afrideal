@@ -8,13 +8,16 @@ import { getNotifications } from '@/lib/queries';
 
 import { MarginAlertConsole } from '@/components/procurement/MarginAlertConsole';
 import { PricingCalculator } from './PricingCalculator';
-import { PricingRulesTable } from './PricingRulesTable';
+import { PricingRulesTable } from './PricingRulesTable';
+import { requireAdminPage } from '@/lib/admin-access';
 
 export const dynamic = 'force-dynamic';
 
 const SAMPLE_COST = 100;
 
 export default async function AdminPricingPage() {
+  await requireAdminPage('/admin/pricing');
+
   const [session, rules, bands, offers, products, marginRules, suppliers] = await Promise.all([
     auth(),
     readAll('pricing-rules'),

@@ -31,6 +31,9 @@ const NEXT: Record<SupplierOrderStatus, SupplierOrderStatus[]> = {
   CANCELLED: [],
 };
 
+/** Steps a supplier may not record on their own leg. */
+const SUPPLIER_STOPS_AT: SupplierOrderStatus[] = ['COLLECTED', 'DELIVERED'];
+
 const ORDER_STATUS_FOR: Partial<Record<SupplierOrderStatus, OrderStatus>> = {
   CONFIRMED: 'PROCESSING',
   PREPARING: 'PROCESSING',
@@ -52,6 +55,13 @@ export const PATCH = handled(async (request: Request, { params }: { params: { id
   // A supplier can only touch their own legs.
   if (actor.role === 'SUPPLIER_OWNER' && leg.supplier_id !== actor.supplierId) {
     return fail('That order belongs to another supplier.', 403);
+  }
+
+  // A supplier's part ends at ready for collection. Collected and delivered are
+  // the runner's to report (PATCH /api/shipments/:id) or the team's: a supplier
+  // marking their own goods delivered would close the buyer's order unseen.
+  if (actor.role === 'SUPPLIER_OWNER' && parsed.data.status && SUPPLIER_STOPS_AT.includes(parsed.data.status)) {
+    return fail('Collection and delivery are recorded by the runner.', 403);
   }
 
   // ── Reassign (admin only) ─────────────────────────────────────────────

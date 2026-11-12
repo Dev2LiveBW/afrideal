@@ -34,9 +34,14 @@ export function sanityRead(): SanityClient {
 export function sanityWrite(): SanityClient {
   const token = process.env.SANITY_API_WRITE_TOKEN;
   if (!token) {
-    throw new Error(
-      'SANITY_API_WRITE_TOKEN is not set. Catalogue edits are made in the Studio; ' +
-        'to let the app write to Sanity, create an Editor token at sanity.io/manage and add it to .env.local.',
+    // Only staff routes write the catalogue, and this is the "clear error"
+    // AGENTS.md promises them, so it is shown rather than hidden behind a reference.
+    throw Object.assign(
+      new Error(
+        'SANITY_API_WRITE_TOKEN is not set. Catalogue edits are made in the Studio; ' +
+          'to let the app write to Sanity, create an Editor token at sanity.io/manage and add it to .env.local.',
+      ),
+      { expose: true },
     );
   }
   writeClient ??= createClient({

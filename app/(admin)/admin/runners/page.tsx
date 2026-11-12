@@ -8,11 +8,14 @@ import { ConsoleTopbar } from '@/components/layout/ConsoleTopbar';
 import { auth } from '@/lib/auth';
 import { readAll } from '@/lib/db';
 import { getNotifications } from '@/lib/queries';
-import { cn } from '@/lib/utils';
+import { cn } from '@/lib/utils';
+import { requireAdminPage } from '@/lib/admin-access';
 
 export const dynamic = 'force-dynamic';
 
 export default async function AdminRunnersPage() {
+  await requireAdminPage('/admin/runners');
+
   const [session, runners, shipments, orders] = await Promise.all([
     auth(),
     readAll('runners'),

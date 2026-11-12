@@ -1,11 +1,14 @@
 import { z } from 'zod';
 
 import { fail, guard, handled, ok } from '@/lib/api';
+import { throttle } from '@/lib/rate-limit';
 import { insert, nextId, readAll } from '@/lib/db';
 import { EVENTS, audit, notify, notifyMany } from '@/lib/notifications';
 import { isActiveCountry } from '@/lib/countries';
 import { DEFAULT_DELIVERY_COUNTRY } from '@/lib/lanes.mjs';
-import { runnersForJob } from '@/lib/runner-match';
+import { offeredTo, runnersForJob } from '@/lib/runner-match';
+import { requestForPool } from '@/lib/runner-requests';
+import { ADMIN_ROLES } from '@/lib/roles';
 import type { RunnerRequest } from '@/types';
 
 export const dynamic = 'force-dynamic';
@@ -18,7 +21,9 @@ export const dynamic = 'force-dynamic';
  * page, so a runner cannot read another runner's job by calling the API directly.
  */
 export const GET = handled(async () => {
-  const { actor, response } = await guard();
+  // Buyers, runners and the team. A supplier has no part in a sourcing request,
+  // which names a buyer and where they live.
+  const { actor, response } = await guard(['CUSTOMER', 'RUNNER', ...ADMIN_ROLES]);
   if (response) return response;
 
   const requests = await readAll('runner-requests');
@@ -28,11 +33,26 @@ export const GET = handled(async () => {
   }
 
   if (actor.role === 'RUNNER') {
-    return ok(
-      requests.filter(
-        (request) => request.status === 'REQUESTED' || request.runner_id === actor.runnerId,
-      ),
-    );
+    if (!actor.runnerId) return ok([]);
+    const runnerId = actor.runnerId;
+    const runners = await readAll('runners');
+
+    // Their own work in full; the open pool only where it is offered to them
+    // (the same rule as the sourcing page), and without the buyer's address.
+    const mine = requests.filter((request) => request.runner_id === runnerId);
+    const pool = requests
+      .filter(
+        (request) =>
+          request.status === 'REQUESTED' &&
+          !request.runner_id &&
+          offeredTo(runners, runnerId, {
+            country: request.delivery_country ?? DEFAULT_DELIVERY_COUNTRY,
+            town: request.delivery_city,
+          }),
+      )
+      .map(requestForPool);
+
+    return ok([...mine, ...pool]);
   }
 
   return ok(requests);
@@ -60,6 +80,9 @@ const CreateSchema = z.object({
 export const POST = handled(async (request: Request) => {
   const { actor, response } = await guard(['CUSTOMER', 'SUPER_ADMIN']);
   if (response) return response;
+
+  const throttled = throttle('requestRunner', actor.id);
+  if (throttled) return throttled;
 
   const parsed = CreateSchema.safeParse(await request.json());
   if (!parsed.success) return fail(parsed.error.issues[0]?.message ?? 'Check the form.', 422);

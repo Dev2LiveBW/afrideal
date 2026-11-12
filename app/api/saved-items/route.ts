@@ -1,6 +1,7 @@
 import { z } from 'zod';
 
 import { fail, guard, handled, ok } from '@/lib/api';
+import { throttle } from '@/lib/rate-limit';
 import { findById, mutate, nextIds, readAll } from '@/lib/db';
 import { MAX_SAVED_ITEMS, saveItem, savedNewestFirst, type SaveResult } from '@/lib/saved-items';
 
@@ -26,6 +27,9 @@ export const GET = handled(async () => {
 export const POST = handled(async (request: Request) => {
   const { actor, response } = await guard(['CUSTOMER']);
   if (response) return response;
+
+  const throttled = throttle('accountWrite', actor.id);
+  if (throttled) return throttled;
 
   const parsed = SaveSchema.safeParse(await request.json().catch(() => null));
   if (!parsed.success) return fail('Choose a product to save.', 422);

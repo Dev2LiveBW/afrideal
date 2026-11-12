@@ -2,7 +2,7 @@ import 'server-only';
 
 import { readAll } from '@/lib/db';
 import { asDisplayed } from '@/lib/payments/status';
-import { legForSupplier, orderForSupplier } from '@/lib/order-privacy';
+import { itemForSupplier, legForSupplier, orderForSupplier } from '@/lib/order-privacy';
 import { offeredTo } from '@/lib/runner-match';
 import { rankOffers } from '@/lib/supplier-selection';
 import type {
@@ -217,7 +217,8 @@ export async function getSupplierWorkspace(supplierId: string) {
     legs: myLegs.map((leg) => ({
       ...legForSupplier(leg),
       order: visibleOrders.find((order) => order.id === leg.order_id) ?? null,
-      items: items.filter((item) => leg.item_ids.includes(item.id)),
+      // Their lines at their cost: these reach the browser, so the buyer's price comes off here.
+      items: items.filter((item) => leg.item_ids.includes(item.id)).map(itemForSupplier),
       payable: payableRecords.find((record) => record.supplier_order_id === leg.id) ?? null,
     })),
     orders: visibleOrders.filter((order) => myOrderIds.has(order.id)),

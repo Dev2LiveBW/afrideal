@@ -8,6 +8,7 @@ import { getNotifications } from '@/lib/queries';
 
 import { AnalyticsClient } from './AnalyticsClient';
 import type { AnalyticsData, AnalyticsPeriod } from './types';
+import { requireAdminPage } from '@/lib/admin-access';
 
 export const dynamic = 'force-dynamic';
 
@@ -167,6 +168,8 @@ async function computeAnalytics(period: AnalyticsPeriod): Promise<AnalyticsData>
 }
 
 export default async function AdminAnalyticsPage() {
+  await requireAdminPage('/admin/analytics');
+
   const [session, data] = await Promise.all([auth(), computeAnalytics('MTD')]);
   const notifications = session?.user ? await getNotifications(session.user.id) : [];
 

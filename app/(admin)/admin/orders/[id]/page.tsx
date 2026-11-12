@@ -14,11 +14,14 @@ import { readAll } from '@/lib/db';
 import { PAYMENT_LABELS, dateTime, shortDate } from '@/lib/format';
 import { getNotifications, getOrderDetail } from '@/lib/queries';
 
-import { OrderNotes } from './OrderNotes';
+import { OrderNotes } from './OrderNotes';
+import { requireAdminPage } from '@/lib/admin-access';
 
 export const dynamic = 'force-dynamic';
 
 export default async function AdminOrderDetailPage({ params }: { params: { id: string } }) {
+  await requireAdminPage('/admin/orders');
+
   const [session, detail, shipments, runners, allImages] = await Promise.all([
     auth(),
     getOrderDetail(params.id),

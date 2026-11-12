@@ -7,11 +7,14 @@ import { paidUsesOf, promoState } from '@/lib/promo.mjs';
 import { getNotifications } from '@/lib/queries';
 
 import { PromoCodesClient, type PromoRow } from './PromoCodesClient';
+import { requireAdminPage } from '@/lib/admin-access';
 
 export const dynamic = 'force-dynamic';
 
 /** Spec 0011, AC-20 and AC-28. Finance and super admin, by the layout and the middleware. */
 export default async function AdminPromoCodesPage() {
+  await requireAdminPage('/admin/promo-codes');
+
   const [session, promos, orders, payments] = await Promise.all([
     auth(),
     readAll('promo-codes'),

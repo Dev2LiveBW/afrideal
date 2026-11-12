@@ -4,11 +4,14 @@ import { auth } from '@/lib/auth';
 import { readAll } from '@/lib/db';
 import { getCatalogue, getNotifications } from '@/lib/queries';
 
-import { ProductsBoard } from './ProductsBoard';
+import { ProductsBoard } from './ProductsBoard';
+import { requireAdminPage } from '@/lib/admin-access';
 
 export const dynamic = 'force-dynamic';
 
 export default async function AdminProductsPage() {
+  await requireAdminPage('/admin/products');
+
   const [session, catalogue, images] = await Promise.all([
     auth(),
     getCatalogue(),

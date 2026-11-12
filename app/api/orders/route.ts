@@ -1,11 +1,13 @@
 import { z } from 'zod';
 
 import { fail, guard, handled, ok } from '@/lib/api';
+import { throttle } from '@/lib/rate-limit';
 import { PHONE_PATTERN, addAddress, type AddressFields, type AddressResult } from '@/lib/addresses';
 import { insert, insertMany, insertUnless, mutate, nextId, nextIds, readAll } from '@/lib/db';
 import { EVENTS, audit, notify } from '@/lib/notifications';
 import { availablePaymentMethods, startPayment } from '@/lib/payments/adapters';
-import { orderForSupplier } from '@/lib/order-privacy';
+import { itemForCustomer, orderForCustomer, orderForSupplier } from '@/lib/order-privacy';
+import { ADMIN_ROLES } from '@/lib/roles';
 import { allAsDisplayed } from '@/lib/payments/status';
 import { priceOrder, resolveLane } from '@/lib/order-lines';
 import { evaluateCode } from '@/lib/promo-codes';
@@ -16,6 +18,13 @@ import { TERMS_VERSION } from '@/lib/terms';
 import type { Order, OrderItem, OrderTimelineEntry, Payment, PromoCode } from '@/types';
 
 export const dynamic = 'force-dynamic';
+
+/**
+ * How many unpaid orders one buyer may hold open at once. Far above what a
+ * person leaves waiting (verify's scripted buyers peak around a dozen), and a
+ * ceiling on how many rows one account can pile up before paying for anything.
+ */
+const MAX_OPEN_UNPAID_ORDERS = 25;
 
 const CheckoutSchema = z.object({
   lines: z
@@ -81,7 +90,9 @@ async function saveOrderAddress(userId: string, fields: AddressFields, now: stri
 // ── GET /api/orders ──────────────────────────────────────────────────────────
 
 export const GET = handled(async (request: Request) => {
-  const { actor, response } = await guard();
+  // Buyers, suppliers and the team. A runner reaches an order through its own
+  // jobs (the runner workspace), never through the list of everyone's orders.
+  const { actor, response } = await guard(['CUSTOMER', 'SUPPLIER_OWNER', ...ADMIN_ROLES]);
   if (response) return response;
 
   // Spec 0003, AC-5: the list agrees with the detail screens about what is still
@@ -90,23 +101,26 @@ export const GET = handled(async (request: Request) => {
   const orders = allAsDisplayed(storedOrders, payments);
   const status = new URL(request.url).searchParams.get('status');
 
-  // Customers only ever see their own orders; suppliers see the orders they
-  // have a leg on. This is enforced here, not in the page.
-  let visible = orders;
+  const newestFirst = <T extends Pick<Order, 'status' | 'placed_at'>>(rows: T[]) =>
+    (status ? rows.filter((row) => row.status === status) : rows).sort((a, b) =>
+      b.placed_at.localeCompare(a.placed_at),
+    );
 
+  // Customers only ever see their own orders; suppliers see the orders they
+  // have a leg on, each through its own allow list. Enforced here, not in the page.
   if (actor.role === 'CUSTOMER') {
-    visible = orders.filter((order) => order.customer_id === actor.id);
-  } else if (actor.role === 'SUPPLIER_OWNER') {
+    return ok(newestFirst(orders.filter((order) => order.customer_id === actor.id).map(orderForCustomer)));
+  }
+
+  if (actor.role === 'SUPPLIER_OWNER') {
     const legs = await readAll('supplier-orders');
     const mine = new Set(
       legs.filter((leg) => leg.supplier_id === actor.supplierId).map((leg) => leg.order_id),
     );
-    visible = orders.filter((order) => mine.has(order.id)).map(orderForSupplier);
+    return ok(newestFirst(orders.filter((order) => mine.has(order.id)).map(orderForSupplier)));
   }
 
-  if (status) visible = visible.filter((order) => order.status === status);
-
-  return ok(visible.sort((a, b) => b.placed_at.localeCompare(a.placed_at)));
+  return ok(newestFirst(orders));
 });
 
 // ── POST /api/orders - checkout, with the split engine ───────────────────────
@@ -126,6 +140,27 @@ export const GET = handled(async (request: Request) => {
 export const POST = handled(async (request: Request) => {
   const { actor, response } = await guard();
   if (response) return response;
+
+  const throttled = throttle('placeOrder', actor.id);
+  if (throttled) return throttled;
+
+  // A buyer with this many orders still waiting for payment pays or cancels
+  // some first. Read from the store, so it holds whichever server instance
+  // takes the request, unlike the throttle above. Lapsed ones read as
+  // cancelled (spec 0003, AC-5) and do not count.
+  {
+    const [stored, payments] = await Promise.all([readAll('orders'), readAll('payments')]);
+    const unpaid = allAsDisplayed(
+      stored.filter((order) => order.customer_id === actor.id),
+      payments,
+    ).filter((order) => order.status === 'AWAITING_PAYMENT').length;
+    if (unpaid >= MAX_OPEN_UNPAID_ORDERS) {
+      return fail(
+        `You have ${unpaid} orders waiting for payment. Pay for or cancel one of them before placing another.`,
+        429,
+      );
+    }
+  }
 
   const parsed = CheckoutSchema.safeParse(await request.json());
   if (!parsed.success) {
@@ -352,8 +387,10 @@ export const POST = handled(async (request: Request) => {
   // order detail. One `payment` object is what checkout branches on.
   return ok(
     {
-      order,
-      items,
+      // What the buyer may read: not the team's notes, nor who supplies each
+      // line at what cost (lib/order-privacy.ts).
+      order: orderForCustomer(order),
+      items: items.map(itemForCustomer),
       payment: {
         id: payment.id,
         provider: payment.provider,

@@ -8,6 +8,7 @@ import {
   type AddressResult,
 } from '@/lib/addresses';
 import { fail, guard, handled, ok } from '@/lib/api';
+import { throttle } from '@/lib/rate-limit';
 import { activeCountries } from '@/lib/countries';
 import { mutate, nextIds, readAll } from '@/lib/db';
 
@@ -28,6 +29,9 @@ export const GET = handled(async () => {
 export const POST = handled(async (request: Request) => {
   const { actor, response } = await guard(['CUSTOMER']);
   if (response) return response;
+
+  const throttled = throttle('accountWrite', actor.id);
+  if (throttled) return throttled;
 
   const parsed = CreateSchema.safeParse(await request.json().catch(() => null));
   if (!parsed.success) return fail(parsed.error.issues[0]?.message ?? 'Check the address.', 422);

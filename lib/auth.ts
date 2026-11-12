@@ -93,13 +93,19 @@ function initials(name: string): string {
  * Lookup order matters: `clerk_user_id` is exact; e-mail is how the eight
  * seeded profiles get claimed the first time their owner signs in through
  * Clerk (and is stamped so the next lookup is exact).
+ *
+ * A claim takes over that profile's orders, addresses and history, so it is
+ * made only on an e-mail Clerk has verified, and never on a profile another
+ * Clerk account already holds. Otherwise the result is null, not a second row:
+ * once the address is verified, the next sign-in claims it.
  */
 async function resolveProfile(
   clerkUserId: string,
   email: string,
+  emailVerified: boolean,
   displayName: string,
   metadata: AfriDealMetadata,
-): Promise<User> {
+): Promise<User | null> {
   const { readAll, update, insert, nextId } = await import('@/lib/db');
   const users = await readAll('users');
 
@@ -108,6 +114,7 @@ async function resolveProfile(
 
   const byEmail = email ? users.find((row) => row.email.toLowerCase() === email) : undefined;
   if (byEmail) {
+    if (!emailVerified || byEmail.clerk_user_id) return null;
     return (await update('users', byEmail.id, { clerk_user_id: clerkUserId })) ?? byEmail;
   }
 
@@ -176,15 +183,27 @@ export const auth = cache(async (): Promise<Session | null> => {
 
   const metadata = (account.publicMetadata ?? {}) as AfriDealMetadata;
   const email = (account.primaryEmailAddress?.emailAddress ?? '').trim().toLowerCase();
+  const emailVerified = account.primaryEmailAddress?.verification?.status === 'verified';
   const displayName = [account.firstName, account.lastName].filter(Boolean).join(' ').trim();
 
-  const profile = await resolveProfile(userId, email, displayName, metadata);
+  const profile = await resolveProfile(userId, email, emailVerified, displayName, metadata);
+  if (!profile) return null;
   return toSession(userId, profile, metadata, email);
 });
 
-/** The session for a profile, with authorisation fields from Clerk's metadata where present. */
+/**
+ * The session for a profile.
+ *
+ * The role comes from Clerk's public metadata alone, which only
+ * `scripts/sync-users-to-clerk.mjs` writes. An account without one is a
+ * customer: a profile row is not where anyone is made staff, so a row loaded
+ * from a seed (or claimed by e-mail) cannot raise its holder's role. The
+ * supplier and runner links follow the same role.
+ */
 function toSession(userId: string, profile: User, metadata: AfriDealMetadata, email: string): Session | null {
   if (profile.status !== 'ACTIVE') return null;
+
+  const role: Role = isRole(metadata.role) ? metadata.role : 'CUSTOMER';
 
   return {
     clerkUserId: userId,
@@ -192,10 +211,10 @@ function toSession(userId: string, profile: User, metadata: AfriDealMetadata, em
       id: profile.id,
       name: profile.name,
       email: profile.email || email,
-      role: isRole(metadata.role) ? metadata.role : profile.role,
+      role,
       avatar: profile.avatar || initials(profile.name),
-      supplier_id: metadata.supplier_id ?? profile.supplier_id ?? null,
-      runner_id: metadata.runner_id ?? profile.runner_id ?? null,
+      supplier_id: role === 'SUPPLIER_OWNER' ? (metadata.supplier_id ?? profile.supplier_id ?? null) : null,
+      runner_id: role === 'RUNNER' ? (metadata.runner_id ?? profile.runner_id ?? null) : null,
       customer_type: isCustomerType(metadata.customer_type)
         ? metadata.customer_type
         : (profile.customer_type ?? 'RETAIL'),
