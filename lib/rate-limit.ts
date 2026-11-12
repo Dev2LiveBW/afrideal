@@ -64,8 +64,12 @@ export function clientIp(request: Request): string {
 
 /** The limits each route uses, in one place so they can be read and tuned together. */
 export const LIMITS = {
-  /** Checkout. Generous for a person, low enough to stop a script filling the orders table. */
-  placeOrder: { limit: 30, windowMs: 10 * 60_000 },
+  /**
+   * Checkout. Far beyond what a person does, low enough to stop a script filling
+   * the orders table. `npm run verify` places 30 to 40 orders as one buyer
+   * within two minutes in CI, so the ceiling sits above that.
+   */
+  placeOrder: { limit: 60, windowMs: 10 * 60_000 },
   /** Quotation and runner requests notify every invited supplier, runner and staff member. */
   requestQuote: { limit: 10, windowMs: 60 * 60_000 },
   requestRunner: { limit: 10, windowMs: 60 * 60_000 },
