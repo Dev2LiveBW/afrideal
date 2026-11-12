@@ -23,7 +23,7 @@ _These are recommendations to keep your build orderly, not requirements. Skip an
 | A | Stack & scaffold | platform | Foundation | existing |
 | B | Transactional store on Postgres | platform | Foundation | existing |
 | C | Sign in & roles | platform | Foundation | existing |
-| D | Catalogue admin (Sanity Studio) | platform | Foundation | in-progress |
+| D | Catalogue admin (Sanity Studio) | platform | Foundation | done |
 | E | Design system & Alibaba benchmark | buying | Foundation | existing |
 | F | Pricing engine & tier ladder | buying | Foundation | existing |
 | G | Storefront: home, categories, suppliers, RFQ, browse | buying | Foundation | existing |
@@ -67,6 +67,12 @@ _These are recommendations to keep your build orderly, not requirements. Skip an
 | 33 | Suppliers are paid their cost | buying | Close out | planned |
 
 Deferred features are listed at the end of each epic file.
+
+**Built in part, not yet enrolled as features (audit 2026-11-10):**
+- Courier choice at checkout, [spec 0008](../specs/0008-courier-choice-at-checkout.md): `lib/couriers.mjs` and the courier quotes at checkout exist although the spec still says "Proposed. Not built"; whether an order records the chosen courier is unchecked.
+- The rest of [spec 0007](../specs/0007-landed-pricing-in-rand.md): every exchange rate is still 1:1 (`lib/pricing-formula.mjs`), and the daily rate, buffer, admin editing and sales VAT setting are unbuilt.
+
+Both are in [completion-plan.md](../completion-plan.md) phase 6; enrol them with `/scope` when they are picked up.
 
 ## Phase 1 close out
 

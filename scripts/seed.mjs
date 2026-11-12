@@ -2074,6 +2074,7 @@ if (process.env.SEED_FILES_ONLY === '1') {
   console.log('• SEED_FILES_ONLY=1: data/ regenerated, Postgres left untouched');
 } else if (process.env.DB_DRIVER === 'postgres') {
   const { loadAll } = await import('./db-load.mjs');
-  const loaded = await loadAll();
+  // The load guard applies here too: `npm run seed -- --production` to mean it.
+  const loaded = await loadAll({ production: process.argv.includes('--production') });
   console.log(`✓ ${loaded.length} collections loaded into Postgres`);
 }

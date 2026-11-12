@@ -43,6 +43,8 @@ jobs:
       - run: npm ci
       - run: npm run typecheck
       - run: npm run lint
+      # The vitest suite (lib/**/*.test.ts): pricing, payments, privacy, lanes.
+      - run: npm test
       - run: npm run build
 
   verify:
@@ -64,6 +66,9 @@ jobs:
         env:
           PAYMENTS_PROVIDER: mock
           ALLOW_MOCK_PAYMENTS: '1'
+          # The page audit checks /sign-in shows the demo cards, which a
+          # production build shows only when asked (app/sign-in/actions.ts).
+          DEMO_SIGNIN: '1'
         run: |
           npm start > server.log 2>&1 &
           for i in $(seq 1 60); do
@@ -72,6 +77,10 @@ jobs:
           done
           cat server.log
           exit 1
+      # Every page renders as a role entitled to it, before verify writes to the data.
+      - run: npm run audit
+        env:
+          AUDIT_BASE: http://localhost:3000
       - run: npm run verify
         env:
           VERIFY_BASE: http://localhost:3000

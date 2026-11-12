@@ -13,7 +13,7 @@ Every collection Sanity does not own lives in Neon Postgres as document tables b
 ### C. Sign in & roles · existing
 Clerk sign in with eight demo accounts; roles from Clerk public metadata, synced from the Sanity people directory; middleware and `guard()` gate portals and APIs. code in `lib/auth.ts`, `middleware.ts`, `app/sign-in/`, `scripts/sync-users-to-clerk.mjs`
 
-### D. Catalogue admin (Sanity Studio) · in-progress
+### D. Catalogue admin (Sanity Studio) · done
 The product owner's admin for products, images, categories, brands, suppliers and offers; the app reads it with `CATALOGUE_SOURCE=sanity`. The Studio is moving into this repo as `studio/`, and that copy still lacks the product, category, brand and runner schemas. code in `lib/sanity/`, `studio/` (working copy still `Tshego/studio/`)
 - [x] Finish moving the Studio into this repo: `/develop catalogue admin`
 
@@ -34,7 +34,7 @@ Two hosted environments with separate secrets and databases, staging deploying f
 spec [0002](../specs/0002-staging-production-environments/index.md)
 - [x] Design it (spec): `/architect staging & production environments`
 - [ ] Build it: `/develop staging & production environments`
-  - [ ] Data isolation: load guard, Neon `staging` + `dev` branches, staging Sanity project, local moved off production (AC-3, AC-4)
+  - [ ] Data isolation: load guard, Neon `staging` + `dev` branches, staging Sanity project, local moved off production (AC-3, AC-4). Load guard built 2026-11-12 (`lib/postgres/production.mjs`; `db:load` and `seed` refuse the production endpoint without `--production`); the branches, Sanity project and the move are dashboard steps still to do.
   - [ ] Staging live: renamed Vercel project, `main` only builds, `npm run verify` green against it (AC-1, AC-4, AC-5, AC-6)
   - [ ] Production dark: Clerk production instance, protected `afrideal-production` project, tag deploy workflow, first `v0.1.0` release (AC-2, AC-3, AC-4, AC-7)
 - [ ] Verify it: `/check verify staging & production environments`
@@ -47,6 +47,7 @@ spec [0002](../specs/0002-staging-production-environments/index.md)
 ### 8. Sign in safety & phone screens · needs a decision
 Buyers sign in on a phone without friction, and attackers cannot hammer it: rate limited sign in, password reset, security headers, and the sign in and create account screens at the benchmark's phone layout.
 **Done when:** repeated failed sign ins are throttled; a buyer can reset a password by email; HSTS, frame and referrer headers and a starting CSP are live with no console errors on any route; the sign in form sits above the fold at 390px.
+**Partly built already (phase 0, 2026-11-12):** HSTS, frame, referrer, nosniff and permissions headers are live; the CSP ships report-only (`next.config.mjs`); write routes are rate limited (`lib/rate-limit.ts`). Still owed: failed sign-in throttling and password reset (Clerk dashboard settings), the CSP enforced, and the 390px layout.
 - [ ] Design it (spec): `/architect sign in safety & phone screens`
 
 ## Slice 6: Run it safely

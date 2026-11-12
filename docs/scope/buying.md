@@ -54,11 +54,13 @@ Checkout rebuilt once, phone first, around the gateway handoff: page header, sin
 ### 6. Product detail at phone parity · needs a decision
 The page where the buy decision happens, at the benchmark: gallery, compact tier rows, and a sticky action bar so buying is one thumb away at any scroll. Needs the product owner's recording of Alibaba's product page (benchmark §5).
 **Done when:** the buy action is reachable at any scroll position; the page scores 7 or more on the design scorecard; the page is under 2,500px tall at 390px.
+**Partly built already (audit 2026-11-10):** a fixed bottom buy bar (`ProductBuyPanel.tsx`), the slide-up cart sheet and the tier rows exist, and e2e `a-browse.spec.ts` checks add-to-cart is in view on a phone. Not measured: the scorecard and the 2,500px height. The spec still waits on the product owner's recording of Alibaba's product page (benchmark §5).
 - [ ] Design it (spec): `/architect product detail at phone parity`
 
 ### 7. Cart at phone parity
 Patch the cart so it reads on a phone: sticky checkout bar, one line titles, tier pills that do not wrap. The full rebuild is deferred.
 **Done when:** the checkout button stays in the viewport at 390px; no tier pill wraps.
+**Mostly built (audit 2026-11-10):** the sticky checkout bar on phones and single-line titles are in `CartClient.tsx`. Left: an e2e check at 390px, and the cart and cart sheet still add a fixed 45 pula delivery fee that disagrees with checkout (`CartClient.tsx`, `CartSheet.tsx`; completion plan phase 6).
 - [ ] Build it: `/develop cart at phone parity`
 
 ## Slice 5: Money operations
@@ -71,6 +73,7 @@ The EFT and invoice fallback: a finance admin marks an order paid with a referen
 ### 14. Refunds · needs a decision
 Full and partial refunds through the gateway from a paid order, with the supplier payable adjusted to match.
 **Done when:** a sandbox refund lands; order, payable and ledger balance to the thebe; the refund is audit logged.
+**Mostly built without a spec (audit 2026-11-10):** `lib/refunds.ts` refunds through Stripe first, cancels or credits the payables, resolves the dispute, audits and notifies; finance runs it from `/admin/payables`. Since phase 0 it refuses an unpaid order and caps at what was paid. Left: real partial refunds (today any amount marks the whole order refunded), amounts in the order's currency, a Stripe test-mode refund check, and a dispute "resolved for the customer" that actually refunds.
 - [ ] Design it (spec): `/architect refunds`
 
 ### 15. Payment reconciliation · needs a decision
@@ -94,6 +97,7 @@ Today a quotation request reaches no supplier, and a chosen quote goes nowhere. 
 spec [0004](../specs/0004-quote-chain.md) · code in `app/api/rfqs/[id]/route.ts`
 **Done when:** selecting a quote creates one order linked to the request for quote, at the quoted price, in the same payment state as a checkout order; the request shows "ordered"; `npm run verify` covers it.
 **Two versions, decision pending (2026-10-13):** a first version was built on 11 Oct before spec 0004 reached the branch: staff selecting a quote (`SELECT_RESPONSE`) or the buyer accepting (`ACCEPT_QUOTE`) creates the order at once, covered by verify section 15 and e2e journey C04. Spec 0004 goes further (supplier answer screens, a 22% markup, buyer decline and new price). The product owner decides whether spec 0004 replaces the first version; the milestones below are spec 0004's.
+**Since phase 0 (2026-11-12):** only staff can set the price on a quote; `ACCEPT_QUOTE` takes the team's pick or the cheapest answer still valid; one request becomes at most one order; a buyer never receives the supplier's quoted price. No screen calls either action yet, and the supplier quote inbox still shows two invented requests per supplier.
 - [x] Design it (spec): `/architect chosen quote becomes an order`
 - [ ] Build it: `/develop chosen quote becomes an order`
   - [ ] Thread: invitations, server priced quote, accept into a paid order with the supplier leg confirmed, plain screens for all three roles (AC-1 to AC-7, AC-12)

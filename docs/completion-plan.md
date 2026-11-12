@@ -35,12 +35,12 @@ Confirmed in code. The first two are reachable without signing in.
 
 ## Phase 1: housekeeping (1 to 2 days)
 
-- [ ] Merge PR 17, then PR 18 (stacked on it), then PR 12. Fast forward local `main` (49 behind).
-- [ ] Decide PR 8 (runner fee per job, a money rule) and PR 7 (demo videos): rebase or close. Both conflict.
-- [ ] Delete superseded branches and worktrees: `scratch/categories-rail`, `claude/distracted-driscoll-63d0b8`, `claude/epic-shtern-967bc1`, `origin/feat/storefront-iteration-2`, `origin/claude/mobile-first-pricing-tiers-4t40pp`.
-- [ ] CI: add `npm test`; add `npm run audit`; add the pages the audit misses (account, promo codes, categories, suppliers, rfq, terms).
-- [ ] `scripts/db-load.mjs` refuses the production endpoint without `--production` (spec 0002 AC 3).
-- [ ] Reconcile the scope: tick what is built (D, 6, 7, 14, 31 in part), mark 28 and 30 as designed only, enrol spec 0008 and the rest of spec 0007, rewrite feature 9 and the delivery intro for the courier model and any to any. Fix AGENTS.md's stale Studio note.
+- [ ] Merge PR 17, then PR 18 (stacked on it), then PR 19 (phase 0) and the phase 1 PR, then PR 12. blocked: owner to merge. Local `main` is fast-forwarded to `origin/main`.
+- [ ] Decide PR 8 (runner fee per job, a money rule) and PR 7 (demo videos): rebase or close. Both conflict. blocked: decision 4 (PR 8); owner (PR 7).
+- [ ] Delete superseded branches and worktrees: `scratch/categories-rail`, `claude/distracted-driscoll-63d0b8`, `claude/epic-shtern-967bc1`, `origin/feat/storefront-iteration-2`, `origin/claude/mobile-first-pricing-tiers-4t40pp`. blocked: owner to confirm.
+- [x] CI runs `npm test` and `npm run audit` (before verify, while the seed data is untouched; the test server gets `DEMO_SIGNIN=1`). The audit now also covers the account pages, promo codes, categories, suppliers, the quote pages, how it works and terms, and checks operations is refused promo codes.
+- [x] `scripts/db-load.mjs` (and so `npm run seed`) refuses the production endpoint without `--production` (spec 0002 AC-3; `lib/postgres/production.mjs`).
+- [x] Scope reconciled: D done; notes on what is built of 6, 7, 14, 24 and 31; 28 and 30 marked designed only; feature 9 and the delivery intro rewritten for the courier model and any to any; specs 0008 and 0007 listed in the index as built in part, not yet enrolled. AGENTS.md: the Studio move, the load guard, the demo-card switch and where roles come from.
 
 ## Phase 2: honest money (about 2 weeks)
 

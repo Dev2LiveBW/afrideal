@@ -142,6 +142,12 @@ section('Public (signed out)');
   await auditPage(jar, '/products/p006', ['Portland Cement', 'Specification'], '/products/p006');
   await auditPage(jar, '/sign-in', ['Sign in', 'Thabo Modise', 'Kagiso Sithole'], '/sign-in');
   await auditPage(jar, '/cart', ['cart'], '/cart');
+  await auditPage(jar, '/categories', ['Categories'], '/categories');
+  await auditPage(jar, '/suppliers', ['Naledi'], '/suppliers');
+  await auditPage(jar, '/suppliers/s001', ['Naledi'], '/suppliers/s001');
+  await auditPage(jar, '/rfq', ['We price it'], '/rfq');
+  await auditPage(jar, '/how-it-works', ['How AfriDeal works'], '/how-it-works');
+  await auditPage(jar, '/terms', ['Terms of sale'], '/terms');
 }
 
 // ── Customer ─────────────────────────────────────────────────────────────────
@@ -156,6 +162,10 @@ section('Customer (thabo@gmail.com)');
   await auditPage(jar, '/products/p012', ['School Uniform'], '/products/p012');
   await auditPage(jar, '/request-a-runner', ['runner', 'looking'], '/request-a-runner');
   await auditPage(jar, '/requests', ['Runner requests'], '/requests');
+  await auditPage(jar, '/rfq/details', ['Request details'], '/rfq/details');
+  await auditPage(jar, '/account/addresses', ['Your addresses'], '/account/addresses');
+  await auditPage(jar, '/account/saved', ['Saved items'], '/account/saved');
+  await auditPage(jar, '/account/settings', ['Account settings'], '/account/settings');
 }
 
 // ── Admin ────────────────────────────────────────────────────────────────────
@@ -179,6 +189,26 @@ section('Admin console (admin@afrideal.co.bw)');
   await auditPage(jar, '/admin/runners', ['Kagiso'], '/admin/runners');
   await auditPage(jar, '/admin/sourcing', ['RUN-', 'ourcing'], '/admin/sourcing');
   await auditPage(jar, '/admin/settings', ['etting'], '/admin/settings');
+  await auditPage(jar, '/admin/promo-codes', ['Promo codes'], '/admin/promo-codes');
+}
+
+// ── Operations scoping ───────────────────────────────────────────────────────
+
+section('Operations scoping (ops@afrideal.co.bw)');
+{
+  const jar = await signIn('ops@afrideal.co.bw');
+  await auditPage(jar, '/admin/dashboard', ['GMV'], '/admin/dashboard');
+
+  // Each admin page checks the sub role itself (lib/admin-access.ts), so this
+  // holds even where the session token carries no `metadata` claim.
+  const denied = await request(jar, '/admin/promo-codes');
+  if (denied.status === 307 || denied.status === 302) {
+    passed += 1;
+    console.log('  ✓ /admin/promo-codes is refused for operations');
+  } else {
+    failures.push(`operations reached /admin/promo-codes (HTTP ${denied.status})`);
+    console.log(`  ✗ operations reached /admin/promo-codes (HTTP ${denied.status})`);
+  }
 }
 
 // ── Finance scoping ──────────────────────────────────────────────────────────
