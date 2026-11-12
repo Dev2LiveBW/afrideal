@@ -1,6 +1,6 @@
 # Epic: Sourcing & delivery
 
-How goods get from a South African supplier to a buyer in Botswana, and how everyone hears about it: suppliers, runners, the admin portal, customs, the collection point, emails and SMS. Back to [index.md](index.md).
+How goods get from wherever a supplier holds them to wherever the buyer is (any country to any country, [spec 0009](../specs/0009-any-to-any-marketplace.md)), and how everyone hears about it: suppliers, runners, the admin portal, customs, the collection point, emails and SMS. Back to [index.md](index.md).
 
 ## Already built
 
@@ -16,7 +16,7 @@ Orders, payables, disputes, pricing, sourcing, suppliers, products, runners, ana
 ## Slice 3: Landed price and delivery
 
 ### 9. Customs & duty in the landed price · done
-AfriDeal, as merchant of record, clears goods at the border and pays duty and VAT, so the buyer sees one landed price. The estimate is built into pricing, and checkout shows one landed total with the Customs & Duty line item explicitly declared as covered by AfriDeal.
+Superseded by spec 0009 (answer 3) and spec 0008: on a cross-border lane, customs, VAT and duty are the buyer's, paid at the border through their courier, never inside AfriDeal's price. Checkout shows a Customs & Duty row reading "Cleared by your courier" and the courier's own fee outside the total; a lane inside one country shows no customs row. (This line used to say AfriDeal clears and pays; the code and e2e B11 follow the courier model.)
 code in `app/(store)/checkout/CheckoutClient.tsx`, `app/(store)/cart/CartClient.tsx`, `app/(store)/products/[id]/ProductBuyPanel.tsx`, `app/(store)/orders/[id]/page.tsx`. E2E verified in `e2e/storefront/b-buy-closeout.spec.ts` (B11).
 - [x] Design it (spec): `/architect customs & duty in the landed price`
 - [x] Build it: Landed price and customs & duty line item
@@ -54,6 +54,7 @@ A supplier can join without staff doing it for them, and run more of their own a
 A runner can join on their phone (sign up, documents, service area, approval, welcome), has a profile page with ratings and performance, and confirms delivery with a real photo instead of the placeholder.
 spec [0005](../specs/0005-runner-signup-service-area.md) covers sign up, documents, approval and service area (milestone M5); the profile, ratings and delivery photos stay open here. Builds after spec 0006 task 2.
 **Done when:** a new runner signs up with documents and a service area and waits for approval; an approved runner sees their profile figures and reviews; confirming delivery stores a photo against the job.
+**Designed, not built (audit 2026-11-10):** no `/drive` route, applications collection, storage or profile page exists; the delivery photo is still a placeholder (`ActiveJobCard.tsx`). Spec 0009 built the town matching it assumes (`lib/runner-match.ts`), not the 30-minute widening. Depends on 30's single write path for people.
 - [x] Design it (spec): `/architect runner onboarding & profile`
 - [ ] Build it: `/develop runner onboarding & profile`
   - [ ] Thread: apply at /drive with documents, approve, jobs and alerts by town with the 30 minute widening (AC-1, AC-3, AC-4, AC-5)
@@ -76,6 +77,7 @@ The admin pieces on the Phase 1 list that are missing: customer accounts (list, 
 Adding staff and assigning their admin role from the console. Conflicts with the current rule that roles come only from `scripts/sync-users-to-clerk.mjs` and the Sanity people directory, so where roles live must be decided first.
 spec [0006](../specs/0006-people-and-roles.md): every person lives in the app database; the Studio keeps records and shows people read only.
 **Done when:** a super admin can add a staff member with a role and deactivate one, and the role source of truth is still single and documented.
+**Designed, not built (audit 2026-11-10):** no `/admin/users` page, `applyPersonChange()`, suspension or invitations exist; roles still come only from `scripts/sync-users-to-clerk.mjs`. 28 and 29 build on it, so it goes first.
 - [x] Design it (spec): `/architect team user management`
 - [ ] Build it: `/develop team user management`
   - [ ] Thread: one write path, suspension enforced from the database, the Users page (AC-1, AC-5, AC-8, AC-10)
@@ -90,6 +92,7 @@ spec [0006](../specs/0006-people-and-roles.md): every person lives in the app da
 ### 31. What a supplier sees on an order · needs a decision
 Suppliers currently see the customer's price and payment method next to AfriDeal's buying price. As merchant of record, AfriDeal probably shows suppliers only its own purchase order. Confirm with the product owner, then hide the rest.
 **Done when:** a supplier's order view shows only AfriDeal's purchase order (items, quantities, AfriDeal's price, dates), with no customer price or payment method.
+**Mostly built (phase 0, 2026-11-12):** `orderForSupplier` is an allow list (`lib/order-privacy.ts`): no customer price, payment, promo, staff notes or timeline notes, and their lines show their own cost only, in the API and the supplier pages. Left: whether a supplier sees the buyer's name and street address (completion plan, decision 2), then the spec.
 - [ ] Design it (spec): `/architect what a supplier sees on an order`
 
 ## Deferred

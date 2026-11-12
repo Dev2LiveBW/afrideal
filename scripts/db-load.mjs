@@ -20,6 +20,7 @@ import nextEnv from '@next/env';
 import { Pool } from '@neondatabase/serverless';
 
 import { allowSlowHandshakes } from '../lib/postgres/network.mjs';
+import { isProductionDatabase } from '../lib/postgres/production.mjs';
 
 const ROOT_DIR = path.join(path.dirname(fileURLToPath(import.meta.url)), '..');
 const DATA_DIR = path.join(ROOT_DIR, 'data');
@@ -31,9 +32,18 @@ allowSlowHandshakes();
 
 const tableFor = (collection) => collection.replaceAll('-', '_');
 
-export async function loadAll({ only } = {}) {
+export async function loadAll({ only, production = false } = {}) {
   const url = process.env.DATABASE_URL;
   if (!url) throw new Error('DATABASE_URL is not set in .env.local');
+
+  // Spec 0002, AC-3: this truncates every table it loads. On production that
+  // is the live orders and payments, so it takes saying so.
+  if (isProductionDatabase(url) && !production) {
+    throw new Error(
+      'DATABASE_URL points at the production database. Loading wipes it, so this is refused. ' +
+        'Point .env.local at a dev branch (neon link), or pass --production if you really mean it.',
+    );
+  }
 
   const names = (await fs.readdir(DATA_DIR))
     .filter((f) => f.endsWith('.json'))
@@ -94,7 +104,13 @@ if (isMain) {
     : undefined;
 
   const t0 = Date.now();
-  const summary = await loadAll({ only });
+  let summary;
+  try {
+    summary = await loadAll({ only, production: process.argv.includes('--production') });
+  } catch (error) {
+    console.error(error instanceof Error ? error.message : error);
+    process.exit(1);
+  }
   console.log(`Loaded ${summary.length} collection(s) into Postgres in ${((Date.now() - t0) / 1000).toFixed(1)}s\n`);
   for (const [name, count] of summary) console.log(`  ${name.padEnd(18)} ${String(count).padStart(4)} rows`);
 }

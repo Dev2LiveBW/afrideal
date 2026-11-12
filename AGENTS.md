@@ -124,10 +124,11 @@ handlers do not know which store they hit.
   supplier-approval checks when no write token is set.
 - Studio schema lives in `Tshego/studio/schemaTypes/`; the seed import is
   `node scripts/seed-from-app.mjs` there (see the file header).
-- The Studio is moving into this repo as `studio/` (untracked as of
-  2026-09-23). That copy is still partial: it lacks the `product`,
-  `category`, `brand` and `runner` schemas, so `Tshego/studio/` stays the
-  working Studio until the move is finished.
+- The Studio has moved into this repo as `studio/` (tracked; checked
+  2026-11-12): `studio/schemaTypes/` holds all of `product`, `category`,
+  `brand`, `supplier`, `supplierOffer`, `user` and `runner`. The old sibling
+  `Tshego/studio/` can retire once the product owner deploys the Studio from
+  here; until then, change the schema in both.
 
 ## Where everything else lives
 
@@ -165,6 +166,11 @@ know which store answered. `DB_DRIVER=json` puts everything back on
   seed still has them. When the seed's countries or couriers change, add one.
 - `npm run seed` regenerates `data/` **and** reloads Postgres from it when
   `DB_DRIVER=postgres`. `npm run db:load` does only the second half.
+- Both refuse the production endpoint (spec 0002 load guard; the endpoint id
+  is in `lib/postgres/production.mjs`) unless given `--production`
+  (`npm run seed -- --production`). `.env.local` still points at production
+  until the Neon `dev` branch exists, so a local seed is refused; use
+  `SEED_FILES_ONLY=1` to regenerate `data/` alone.
 - The Neon project is **afrideal** (`noisy-sky-21749196`, org
   `org-round-wind-61711243`, region `aws-us-east-2`), linked from this
   directory with the Neon CLI (`.neon`, gitignored). `neon link` and
@@ -201,6 +207,13 @@ from the Sanity people directory - never by hand in the Clerk dashboard.
 - Sign-in page is `/sign-in` (Clerk's form plus the eight demo cards);
   `/login` redirects there and `/signup` to `/sign-up`. `/after-sign-in`
   lands each role.
+- The demo cards sign a visitor in as any seeded account, super admin
+  included. They show on a `sk_test_` key in `npm run dev`; a production
+  build (`next start`, Vercel, CI, e2e) shows them only with
+  `DEMO_SIGNIN=1`. Set it on the demo site, never on the launch site.
+- A role comes only from the Clerk user's `publicMetadata`; an account
+  without one is a customer. A seeded profile is claimed by email only when
+  Clerk reports that email verified (`lib/auth.ts`).
 - `npm run verify` mints Clerk sessions with `CLERK_SECRET_KEY` from
   `.env.local` and sends bearer tokens; it needs the demo accounts to exist
   (run the sync script once).
