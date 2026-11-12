@@ -117,6 +117,9 @@ export default defineConfig({
           // pay on /mock-gateway; Stripe test mode is verify's job (section 9f).
           CARD_PROVIDER: process.env.CARD_PROVIDER || 'mock',
           ALLOW_MOCK_PAYMENTS: '1',
+          // The journeys sign in through the demo cards, which a production
+          // build shows only when asked (app/sign-in/actions.ts).
+          DEMO_SIGNIN: '1',
           // Its own build folder, so it can run beside your `npm run dev`.
           NEXT_DIST_DIR: '.next-e2e',
         },

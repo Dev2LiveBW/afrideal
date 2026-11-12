@@ -20,6 +20,9 @@ goods' country and town → delivery country and town. See
 - Never write new code that assumes a Botswana buyer, pula, or "imported
   means not from Botswana". Cross-border means goods' country ≠ delivery
   country. Countries are data, not a `'BW' | 'ZA'` union.
+- The goods' country is where the supplier an order line routes to holds
+  them (`goodsCountryOf` in `lib/supplier-selection.ts`), never the
+  product's `country_of_origin`.
 - The existing Botswana assumptions are listed in spec 0009's inventory and
   are being removed in its build order; do not add to them.
 
@@ -156,6 +159,10 @@ know which store answered. `DB_DRIVER=json` puts everything back on
   retry once or twice on a dropped connection.
 - Schema changes: edit `lib/postgres/schema.ts`, `npm run db:generate`,
   commit the file it writes under `drizzle/`, `npm run db:migrate`.
+- Rows the app cannot run without (countries, couriers) also ship as a
+  data migration (`drizzle/0005_lane_reference_data.sql`, made with
+  `npx drizzle-kit generate --custom`), so a database not reloaded from the
+  seed still has them. When the seed's countries or couriers change, add one.
 - `npm run seed` regenerates `data/` **and** reloads Postgres from it when
   `DB_DRIVER=postgres`. `npm run db:load` does only the second half.
 - The Neon project is **afrideal** (`noisy-sky-21749196`, org

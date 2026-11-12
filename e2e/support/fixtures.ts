@@ -221,3 +221,13 @@ export function bwp(amount: number): string {
 export function runLabel(prefix: string): string {
   return `${prefix} ${Date.now().toString(36)}`;
 }
+
+/**
+ * The review step at checkout (spec 0011): a phone for the driver if the form
+ * has none yet, and the terms. Every journey that places an order needs both.
+ */
+export async function agreeAtCheckout(page: Page) {
+  const phone = page.getByRole('textbox', { name: /^Phone/ });
+  if ((await phone.inputValue()) === '') await phone.fill('+267 71 234 567');
+  await page.getByRole('checkbox', { name: /I agree to the/ }).check();
+}

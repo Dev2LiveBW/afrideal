@@ -6,11 +6,14 @@ import { readAll } from '@/lib/db';
 import { getNotifications } from '@/lib/queries';
 
 import { OnboardSupplierButton } from './OnboardSupplierButton';
-import { SuppliersTable } from './SuppliersTable';
+import { SuppliersTable } from './SuppliersTable';
+import { requireAdminPage } from '@/lib/admin-access';
 
 export const dynamic = 'force-dynamic';
 
 export default async function AdminSuppliersPage() {
+  await requireAdminPage('/admin/suppliers');
+
   const [session, suppliers, categories, countries] = await Promise.all([
     auth(),
     readAll('suppliers'),

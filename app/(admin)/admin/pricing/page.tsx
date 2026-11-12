@@ -8,20 +8,24 @@ import { getNotifications } from '@/lib/queries';
 
 import { MarginAlertConsole } from '@/components/procurement/MarginAlertConsole';
 import { PricingCalculator } from './PricingCalculator';
-import { PricingRulesTable } from './PricingRulesTable';
+import { PricingRulesTable } from './PricingRulesTable';
+import { requireAdminPage } from '@/lib/admin-access';
 
 export const dynamic = 'force-dynamic';
 
 const SAMPLE_COST = 100;
 
 export default async function AdminPricingPage() {
-  const [session, rules, bands, offers, products, marginRules] = await Promise.all([
+  await requireAdminPage('/admin/pricing');
+
+  const [session, rules, bands, offers, products, marginRules, suppliers] = await Promise.all([
     auth(),
     readAll('pricing-rules'),
     readAll('customer-prices'),
     readAll('supplier-offers'),
     readAll('products'),
     readAll('margin-rules'),
+    readAll('suppliers'),
   ]);
 
   const notifications = session?.user ? await getNotifications(session.user.id) : [];
@@ -32,7 +36,7 @@ export default async function AdminPricingPage() {
 
   // §19 - computed live from the current bands and supplier costs, so the queue
   // reflects the data an operator is actually looking at.
-  const alerts = findMarginAlerts(bands, offers, products, marginRules);
+  const alerts = findMarginAlerts(bands, offers, products, marginRules, suppliers);
 
   return (
     <>

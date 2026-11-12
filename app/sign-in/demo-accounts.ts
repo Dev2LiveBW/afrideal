@@ -3,17 +3,13 @@ import type { Role } from '@/types';
 /**
  * The eight seeded accounts, for the one-click demo cards.
  *
- * These are the demo passwords `scripts/sync-users-to-clerk.mjs` sets on the
- * development Clerk instance, and they are documented in the README. Nothing is
- * being leaked by putting them here: the whole point of this build is that
- * anyone watching a demo can jump between roles without typing. Real
- * credentials would never live in a client bundle, and the production instance
- * will not have these accounts.
+ * No passwords: this file reaches the browser, and the cards sign in with a
+ * one-time ticket the server issues (`demoSignInTicket`). The passwords
+ * `scripts/sync-users-to-clerk.mjs` sets stay in that script.
  */
 
 export interface DemoAccount {
   email: string;
-  password: string;
   name: string;
   role: Role;
   avatar: string;
@@ -28,7 +24,6 @@ export const DEMO_GROUPS: { heading: string; caption: string; accounts: DemoAcco
     accounts: [
       {
         email: 'admin@afrideal.co.bw',
-        password: 'Admin-AfriDeal-2026!',
         name: 'AfriDeal Admin',
         role: 'SUPER_ADMIN',
         avatar: 'AA',
@@ -36,7 +31,6 @@ export const DEMO_GROUPS: { heading: string; caption: string; accounts: DemoAcco
       },
       {
         email: 'ops@afrideal.co.bw',
-        password: 'Ops-AfriDeal-2026!',
         name: 'Keabetswe Molapo',
         role: 'OPERATIONS_ADMIN',
         avatar: 'KM',
@@ -44,7 +38,6 @@ export const DEMO_GROUPS: { heading: string; caption: string; accounts: DemoAcco
       },
       {
         email: 'finance@afrideal.co.bw',
-        password: 'Finance-AfriDeal-2026!',
         name: 'Finance Admin',
         role: 'FINANCE_ADMIN',
         avatar: 'FA',
@@ -58,7 +51,6 @@ export const DEMO_GROUPS: { heading: string; caption: string; accounts: DemoAcco
     accounts: [
       {
         email: 'supplier@naledi.co.bw',
-        password: 'Naledi-AfriDeal-2026!',
         name: 'Naledi Beauty Supplies',
         role: 'SUPPLIER_OWNER',
         avatar: 'NB',
@@ -66,7 +58,6 @@ export const DEMO_GROUPS: { heading: string; caption: string; accounts: DemoAcco
       },
       {
         email: 'supplier@glowup.co.za',
-        password: 'GlowUp-AfriDeal-2026!',
         name: 'GlowUp Distributors',
         role: 'SUPPLIER_OWNER',
         avatar: 'GU',
@@ -80,7 +71,6 @@ export const DEMO_GROUPS: { heading: string; caption: string; accounts: DemoAcco
     accounts: [
       {
         email: 'runner@afrideal.co.bw',
-        password: 'Runner-AfriDeal-2026!',
         name: 'Kagiso Sithole',
         role: 'RUNNER',
         avatar: 'KS',
@@ -94,7 +84,6 @@ export const DEMO_GROUPS: { heading: string; caption: string; accounts: DemoAcco
     accounts: [
       {
         email: 'thabo@gmail.com',
-        password: 'Thabo-AfriDeal-2026!',
         name: 'Thabo Modise',
         role: 'CUSTOMER',
         avatar: 'TM',
@@ -102,7 +91,6 @@ export const DEMO_GROUPS: { heading: string; caption: string; accounts: DemoAcco
       },
       {
         email: 'kefilwe@gmail.com',
-        password: 'Kefilwe-AfriDeal-2026!',
         name: 'Kefilwe Dithebe',
         role: 'CUSTOMER',
         avatar: 'KD',

@@ -8,6 +8,7 @@ import { getNotifications } from '@/lib/queries';
 
 import { AnalyticsClient } from './AnalyticsClient';
 import type { AnalyticsData, AnalyticsPeriod } from './types';
+import { requireAdminPage } from '@/lib/admin-access';
 
 export const dynamic = 'force-dynamic';
 
@@ -50,7 +51,9 @@ async function computeAnalytics(period: AnalyticsPeriod): Promise<AnalyticsData>
 
   const grossMargin = billable.reduce((sum, order) => {
     const lines = itemsByOrder.get(order.id) ?? [];
-    return sum + lines.reduce((lineSum, item) => lineSum + (item.unit_price - item.supplier_cost) * item.qty, 0);
+    // Spec 0011, AC-27: a promo discount comes out of AfriDeal's margin.
+    const margin = lines.reduce((lineSum, item) => lineSum + (item.unit_price - item.supplier_cost) * item.qty, 0);
+    return sum + margin - (order.promo_discount_pula ?? 0);
   }, 0);
 
   const trend: { date: string; gmv: number; orders: number }[] = [];
@@ -165,6 +168,8 @@ async function computeAnalytics(period: AnalyticsPeriod): Promise<AnalyticsData>
 }
 
 export default async function AdminAnalyticsPage() {
+  await requireAdminPage('/admin/analytics');
+
   const [session, data] = await Promise.all([auth(), computeAnalytics('MTD')]);
   const notifications = session?.user ? await getNotifications(session.user.id) : [];
 

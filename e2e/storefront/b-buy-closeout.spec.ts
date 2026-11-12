@@ -1,4 +1,4 @@
-import { addToCart, bwp, caption, card, cartLink, clickAndSave, expect, expectHealthy, ready, runLabel, signedInAs, test } from '../support/fixtures';
+import { addToCart, bwp, caption, card, cartLink, clickAndSave, expect, expectHealthy, ready, runLabel, signedInAs, test, agreeAtCheckout } from '../support/fixtures';
 
 /**
  * B. Buying and tracking - Phase 1 Close-out extensions.
@@ -27,6 +27,7 @@ test.describe('B. Buying and tracking (Close-out)', () => {
     await page.getByRole('radio', { name: /Visa \/ Mastercard/ }).check({ force: true });
     
     // Place order should trigger the gateway redirect
+    await agreeAtCheckout(page);
     await clickAndSave(page.getByRole('button', { name: 'Place order' }));
 
     // 3. Gateway mock redirect
@@ -60,6 +61,8 @@ test.describe('B. Buying and tracking (Collection Point)', () => {
     await caption(page, 'B10 · 2. Select Collection Point delivery');
     await page.getByRole('radio', { name: /Collection Point/ }).check();
     await page.getByRole('combobox', { name: 'Select location' }).selectOption('Gaborone Central Locker');
+    
+    await agreeAtCheckout(page);
     
     await clickAndSave(page.getByRole('button', { name: 'Place order' }));
 
@@ -143,7 +146,8 @@ test.describe('C. Request for quotation (Chosen quote to order)', () => {
     // 3. Buyer accepts the quote (or staff selects), converting it into an order
     const acceptRes = await page.request.patch(`/api/rfqs/${rfq.id}`, {
       timeout: SAVE,
-      data: { action: 'ACCEPT_QUOTE', customer_unit_price: 85, payment_method: 'CARD' },
+      // No price from the buyer: what a quote costs is set on the server.
+      data: { action: 'ACCEPT_QUOTE', payment_method: 'CARD' },
     });
     expect(acceptRes.ok(), `accept quote failed: ${await acceptRes.text()}`).toBeTruthy();
     const { order, rfq: updatedRfq } = await acceptRes.json();
@@ -201,6 +205,7 @@ test.describe('F. Runner deliveries (Collection Point)', () => {
 
     await page.getByRole('radio', { name: /Collection Point/ }).check();
     await page.getByRole('combobox', { name: 'Select location' }).selectOption(LOCKER);
+    await agreeAtCheckout(page);
     await clickAndSave(page.getByRole('button', { name: 'Place order' }));
 
     // Mock payment gateway step
@@ -373,6 +378,7 @@ test.describe('Z. The golden thread (Mobile Parity)', () => {
     await page.getByRole('radio', { name: /Visa \/ Mastercard/ }).check({ force: true });
 
     // Place order
+    await agreeAtCheckout(page);
     await clickAndSave(page.getByRole('button', { name: 'Place order' }).filter({ visible: true }));
 
     // 5. Card payment gateway

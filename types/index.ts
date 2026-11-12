@@ -40,6 +40,18 @@ export interface User {
   runner_id?: string;
   /** §7 - set on buyers. Decides which pricing tiers they can be quoted. */
   customer_type?: CustomerType;
+  /** Spec 0011: how a buyer wants to hear from us. Missing means the defaults. */
+  alert_prefs?: AlertPrefs;
+}
+
+/** A buyer's alert choices (spec 0011, AC-17). In app notices cannot be turned off. */
+export interface AlertPrefs {
+  order_email: boolean;
+  order_sms: boolean;
+  /** Offers and news. Opt in only. */
+  marketing: boolean;
+  /** When they opted in, kept as the record of consent. Null while off. */
+  marketing_consent_at: string | null;
 }
 
 /** Safe shape - never leaves the server with the password attached. */
@@ -253,6 +265,22 @@ export type PaymentMethod = 'CARD' | 'ORANGE_MONEY' | 'PAYGATE' | 'EFT';
  */
 export type CancelReason = 'EXPIRED' | 'CUSTOMER' | 'STAFF';
 
+/** One entry in a buyer's address book (spec 0011). */
+export interface Address {
+  id: string;
+  user_id: string;
+  label: string;
+  recipient_name: string;
+  phone: string;
+  country: CountryCode;
+  town: string;
+  street: string;
+  /** Exactly one per buyer who has any address. */
+  is_default: boolean;
+  created_at: string;
+  updated_at: string;
+}
+
 export interface OrderTimelineEntry {
   status: string;
   label: string;
@@ -273,9 +301,30 @@ export interface Order {
    * which were all pula.
    */
   currency?: CurrencyCode;
+  /**
+   * Pula per unit of `currency` when the order was priced, so the ledgers
+   * (payables, margin, GMV) book it in pula at the rate the buyer was charged
+   * at. Missing means 1: every earlier order was charged at 1:1.
+   */
+  buyer_fx_rate?: number;
   subtotal: number;
   delivery_fee: number;
   total: number;
+  /** Who receives it (spec 0011). Copied at checkout; missing means the buyer. */
+  recipient_name?: string | null;
+  /** How to reach them. Copied at checkout, so a later edit never changes an order. */
+  delivery_phone?: string | null;
+  /** What the buyer told the driver, up to 300 characters. */
+  delivery_instructions?: string | null;
+  /** When the buyer agreed to the terms, and which version (spec 0011, AC-8). */
+  terms_accepted_at?: string;
+  terms_version?: string;
+  /** The promo code as applied (spec 0011). Text, so a later edit cannot rewrite the order. */
+  promo_code?: string | null;
+  /** What it took off, in `currency`. The one true figure. */
+  promo_discount?: number;
+  /** The same discount as booked, always `toPula(promo_discount, buyer_fx_rate)`. */
+  promo_discount_pula?: number;
   payment_method: PaymentMethod;
   /**
    * The provider's reference for the payment that settled this order. Null
@@ -343,8 +392,10 @@ export interface SupplierOrder {
   status: SupplierOrderStatus;
   item_ids: string[];
   supplier_subtotal: number;
-  /** The platform cut on this leg. */
+  /** The platform cut on this leg, after its share of any promo discount. */
   platform_margin: number;
+  /** This leg's share of the order's promo discount, in pula (spec 0011, AC-26). */
+  promo_discount?: number;
   /** Why the engine picked this supplier - surfaced in the admin UI. */
   selection_reason: string;
   auto_selected: boolean;
@@ -507,6 +558,9 @@ export interface Shipment {
   dropoff_address: string;
   dropoff_country?: CountryCode;
   dropoff_town?: string;
+  /** The recipient's phone, and what the buyer told the driver (spec 0011, AC-9). */
+  dropoff_phone?: string | null;
+  delivery_instructions?: string | null;
   distance_km: number;
   payout: number;
   created_at: string;
@@ -640,6 +694,31 @@ export interface AppNotification {
   kind: 'ORDER' | 'PAYMENT' | 'SUPPLIER' | 'DISPUTE' | 'SYSTEM';
   read: boolean;
   at: string;
+}
+
+/** A promo code (spec 0011). `max_discount` and `min_order` are pula; its state is derived. */
+export interface PromoCode {
+  id: string;
+  code: string;
+  percent: number;
+  max_discount: number;
+  min_order: number;
+  starts_at: string;
+  ends_at: string;
+  /** Null means no total limit. */
+  usage_limit: number | null;
+  active: boolean;
+  created_by: string;
+  created_at: string;
+  updated_at: string;
+}
+
+/** A product a buyer saved for later (spec 0011). One row per buyer and product. */
+export interface SavedItem {
+  id: string;
+  user_id: string;
+  product_id: string;
+  created_at: string;
 }
 
 export interface CartLine {

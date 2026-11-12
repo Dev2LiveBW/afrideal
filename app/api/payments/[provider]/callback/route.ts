@@ -1,6 +1,7 @@
 import { z } from 'zod';
 
 import { fail, handled, ok } from '@/lib/api';
+import { clientIp, throttle } from '@/lib/rate-limit';
 import { findById, readAll } from '@/lib/db';
 import {
   CALLBACK_ACTOR,
@@ -53,6 +54,10 @@ export const POST = handled(
   async (request: Request, { params }: { params: { provider: string } }) => {
     const provider = params.provider.toUpperCase();
     if (!isProvider(provider)) return fail('Unknown payment provider.', 404);
+
+    // Unsigned junk costs us an HMAC each; one address cannot send it without limit.
+    const throttled = throttle('paymentCallback', clientIp(request));
+    if (throttled) return throttled;
 
     // The raw text, before any parse. Hashing a re-serialised object would change
     // key order and spacing, so a genuine signature would never match.
@@ -128,6 +133,9 @@ export const POST = handled(
       provider,
       providerReference: parsed.data.reference,
       amount: parsed.data.amount,
+      // Signed with the rest of the body: a payment in another currency is a
+      // mismatch for finance however the numbers compare (AC-11).
+      currency: parsed.data.currency,
       actor: CALLBACK_ACTOR,
     });
 

@@ -54,17 +54,25 @@ export async function executeRefund(input: ExecuteRefundInput): Promise<RefundRe
   const refundAmount = input.amount != null && input.amount > 0 ? input.amount : order.total;
   const refundReason = input.reason?.trim() || 'Dispute resolved in customer favour';
 
-  // Spec 0010: a card paid through Stripe is refunded through Stripe, before any
-  // record here changes, so the buyer is never told "refund processed" while
-  // their money is still with us. If Stripe refuses, nothing below runs.
+  // Only money that arrived can go back, and never more of it than arrived. This
+  // holds for every way of paying, not only cards: a bank transfer or wallet
+  // refund is paid out by hand from what this records.
   const paidBy = (await readAll('payments')).find(
     (row) => row.order_id === order.id && row.status === 'CONFIRMED',
   );
+  if (!paidBy) {
+    return { ok: false, reason: 'This order has no confirmed payment, so there is nothing to refund.' };
+  }
+  const refundable = Math.min(order.total, paidBy.amount);
+  if (refundAmount > refundable) {
+    return { ok: false, reason: `A refund cannot be more than was paid (${refundable.toFixed(2)}).` };
+  }
+
+  // Spec 0010: a card paid through Stripe is refunded through Stripe, before any
+  // record here changes, so the buyer is never told "refund processed" while
+  // their money is still with us. If Stripe refuses, nothing below runs.
   let stripeRefundId: string | null = null;
-  if (paidBy?.provider === 'STRIPE' && paidBy.provider_reference) {
-    if (refundAmount > order.total) {
-      return { ok: false, reason: 'A refund cannot be more than the order total.' };
-    }
+  if (paidBy.provider === 'STRIPE' && paidBy.provider_reference) {
     try {
       ({ refundId: stripeRefundId } = await refundCheckoutPayment({
         reference: paidBy.provider_reference,

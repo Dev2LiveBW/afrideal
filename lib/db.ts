@@ -12,6 +12,7 @@ import type {
   AuditEntry,
   Brand,
   Category,
+  Address,
   Country,
   Courier,
   CustomerPrice,
@@ -25,10 +26,12 @@ import type {
   PricingRule,
   Product,
   ProductImage,
+  PromoCode,
   Rfq,
   RfqResponse,
   Runner,
   RunnerRequest,
+  SavedItem,
   Setting,
   Settlement,
   Shipment,
@@ -117,6 +120,15 @@ export interface Schema {
   countries: Country;
   // Listed courier and clearance partners and the routes they serve (spec 0008, 0009).
   couriers: Courier;
+
+  // A buyer's saved addresses (spec 0011). Orders keep their own copy.
+  addresses: Address;
+
+  // What a buyer saved for later (spec 0011).
+  'saved-items': SavedItem;
+
+  // Discounts finance runs (spec 0011). Uses are counted from orders.
+  'promo-codes': PromoCode;
 }
 
 export type Collection = keyof Schema;
@@ -279,6 +291,22 @@ export async function insert<C extends Collection>(
   return mutate(collection, (rows) => {
     assertNewIds(collection, rows, [row]);
     return { rows: [...rows, row], result: row };
+  });
+}
+
+/**
+ * Append a row unless `refuse` says otherwise, under the one lock. For a rule that
+ * only holds if it is checked and written together. Returns whether it was added.
+ */
+export async function insertUnless<C extends Collection>(
+  collection: C,
+  row: Schema[C],
+  refuse: (rows: Schema[C][]) => boolean,
+): Promise<boolean> {
+  return mutate<C, boolean>(collection, (rows) => {
+    if (refuse(rows)) return { rows, result: false };
+    assertNewIds(collection, rows, [row]);
+    return { rows: [...rows, row], result: true };
   });
 }
 

@@ -6,10 +6,13 @@ import { allAsDisplayed } from '@/lib/payments/status';
 import { getNotifications } from '@/lib/queries';
 
 import { OrdersTable, type OrderRow } from './OrdersTable';
+import { requireAdminPage } from '@/lib/admin-access';
 
 export const dynamic = 'force-dynamic';
 
 export default async function AdminOrdersPage() {
+  await requireAdminPage('/admin/orders');
+
   const [session, storedOrders, items, legs, payableRecords, suppliers, payments] = await Promise.all([
     auth(),
     readAll('orders'),

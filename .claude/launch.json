@@ -16,6 +16,21 @@
       "env": { "DB_DRIVER": "json", "CATALOGUE_SOURCE": "json", "PAYMENTS_PROVIDER": "mock" }
     },
     {
+      "name": "afrideal-verify",
+      "runtimeExecutable": "npm",
+      "runtimeArgs": ["run", "dev", "--", "-p", "3400"],
+      "port": 3400,
+      "env": {
+        "DB_DRIVER": "json",
+        "CATALOGUE_SOURCE": "json",
+        "PAYMENTS_PROVIDER": "mock",
+        "CARD_PROVIDER": "mock",
+        "STRIPE_SECRET_KEY": "",
+        "STRIPE_WEBHOOK_SECRET": "",
+        "NEXT_DIST_DIR": ".next-verify"
+      }
+    },
+    {
       "name": "afrideal-demo-prod",
       "runtimeExecutable": "npm",
       "runtimeArgs": ["run", "start", "--", "-p", "3200"],

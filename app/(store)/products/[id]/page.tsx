@@ -6,11 +6,12 @@ import { SupplierComparisonMatrix } from '@/components/procurement/SupplierCompa
 import { ProductGallery } from '@/components/storefront/ProductGallery';
 import { Breadcrumb, DeliveryEstimate, SellerCard } from '@/components/storefront/ProductPanels';
 import { ProductRail } from '@/components/storefront/ProductRail';
+import { SaveButton } from '@/components/storefront/SaveButton';
 import { ProductTabs } from '@/components/storefront/ProductTabs';
 import { auth } from '@/lib/auth';
 import { readAll } from '@/lib/db';
 import { getCatalogue, getProductDetail, toPublicOffers } from '@/lib/queries';
-import { rankOffers } from '@/lib/supplier-selection';
+import { goodsCountryOf, rankOffers } from '@/lib/supplier-selection';
 import { tierDoors } from '@/lib/tier-doors';
 
 import { ProductBuyPanel } from './ProductBuyPanel';
@@ -110,6 +111,7 @@ export default async function ProductPage({ params }: { params: { id: string } }
           customerType={customerType}
           inStock={inStock}
           primarySupplierId={primaryOffer?.supplier_id ?? selection.primary?.supplier.id ?? ''}
+          goodsCountry={goodsCountryOf(product, offers, suppliers)}
           primaryImage={images.find((image) => image.sort_order === 0)}
           doors={productDoors}
           intro={
@@ -141,9 +143,17 @@ export default async function ProductPage({ params }: { params: { id: string } }
                 </span>
               </div>
 
-              <h1 className="mt-3 font-display text-[28px] font-bold leading-[1.15] tracking-[-0.025em] text-ink">
-                {product.name}
-              </h1>
+              <div className="mt-3 flex items-start justify-between gap-3">
+                <h1 className="font-display text-[28px] font-bold leading-[1.15] tracking-[-0.025em] text-ink">
+                  {product.name}
+                </h1>
+                <SaveButton
+                  productId={product.id}
+                  productName={product.name}
+                  size={18}
+                  className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full ring-1 ring-inset ring-hairline-strong transition-colors hover:bg-ink/[0.04]"
+                />
+              </div>
               <p className="measure mt-3 text-[14px] leading-6 text-body">{product.short_description}</p>
 
               <div className="mt-4 flex flex-wrap items-center gap-4 text-[12.5px]">

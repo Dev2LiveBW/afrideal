@@ -2,6 +2,8 @@ import 'server-only';
 
 import { readAll } from '@/lib/db';
 import { asDisplayed } from '@/lib/payments/status';
+import { itemForSupplier, legForSupplier, orderForSupplier } from '@/lib/order-privacy';
+import { offeredTo } from '@/lib/runner-match';
 import { rankOffers } from '@/lib/supplier-selection';
 import type {
   SupplierPayable,
@@ -206,18 +208,20 @@ export async function getSupplierWorkspace(supplierId: string) {
   const myProductIds = new Set(myOffers.map((offer) => offer.product_id));
   const myLegs = legs.filter((leg) => leg.supplier_id === supplierId);
   const myOrderIds = new Set(myLegs.map((leg) => leg.order_id));
+  const visibleOrders = orders.map(orderForSupplier);
 
   return {
     supplier,
     offers: myOffers,
     products: products.filter((product) => myProductIds.has(product.id)),
     legs: myLegs.map((leg) => ({
-      ...leg,
-      order: orders.find((order) => order.id === leg.order_id) ?? null,
-      items: items.filter((item) => leg.item_ids.includes(item.id)),
+      ...legForSupplier(leg),
+      order: visibleOrders.find((order) => order.id === leg.order_id) ?? null,
+      // Their lines at their cost: these reach the browser, so the buyer's price comes off here.
+      items: items.filter((item) => leg.item_ids.includes(item.id)).map(itemForSupplier),
       payable: payableRecords.find((record) => record.supplier_order_id === leg.id) ?? null,
     })),
-    orders: orders.filter((order) => myOrderIds.has(order.id)),
+    orders: visibleOrders.filter((order) => myOrderIds.has(order.id)),
     payables: payableRecords.filter((record) => record.supplier_id === supplierId),
     settlements: settlements.filter((settlement) => settlement.supplier_id === supplierId),
   };
@@ -244,8 +248,11 @@ export async function getRunnerWorkspace(runnerId: string) {
       .filter((s) => s.runner_id === runnerId && s.status !== 'DELIVERED' && s.status !== 'FAILED')
       .map(decorate),
     completed: shipments.filter((s) => s.runner_id === runnerId && s.status === 'DELIVERED').map(decorate),
+    // Spec 0009, AC-6: a job is offered to the runners it alerts, those serving
+    // its pickup town, or every online runner while none there is online.
     available: shipments
       .filter((s) => s.runner_id === null || s.status === 'UNASSIGNED')
+      .filter((s) => offeredTo(runners, runnerId, { country: s.pickup_country, town: s.pickup_town }))
       .map(decorate),
   };
 }

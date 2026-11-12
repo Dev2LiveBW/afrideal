@@ -4,11 +4,25 @@ import { fail, guard, handled, ok } from '@/lib/api';
 import { isActiveCountry } from '@/lib/countries';
 import { insert, nextId, readAll } from '@/lib/db';
 import { EVENTS, audit } from '@/lib/notifications';
+import { ADMIN_ROLES } from '@/lib/roles';
 import type { Supplier, VerificationDoc } from '@/types';
 
 export const dynamic = 'force-dynamic';
 
-export const GET = handled(async () => ok(await readAll('suppliers')));
+/**
+ * GET /api/suppliers - supplier records, with contacts, registration and documents.
+ * The team reads all of them; a supplier reads their own.
+ */
+export const GET = handled(async () => {
+  const { actor, response } = await guard([...ADMIN_ROLES, 'SUPPLIER_OWNER']);
+  if (response) return response;
+
+  const suppliers = await readAll('suppliers');
+  if (actor.role === 'SUPPLIER_OWNER') {
+    return ok(suppliers.filter((supplier) => supplier.id === actor.supplierId));
+  }
+  return ok(suppliers);
+});
 
 const CreateSupplierSchema = z.object({
   name: z.string().trim().min(1, 'Trading name is required.'),

@@ -4,11 +4,14 @@ import { auth } from '@/lib/auth';
 import { readAll } from '@/lib/db';
 import { getNotifications } from '@/lib/queries';
 
-import { DisputeQueue, type DisputeRow } from './DisputeQueue';
+import { DisputeQueue, type DisputeRow } from './DisputeQueue';
+import { requireAdminPage } from '@/lib/admin-access';
 
 export const dynamic = 'force-dynamic';
 
 export default async function AdminDisputesPage() {
+  await requireAdminPage('/admin/disputes');
+
   const [session, disputes, orders, suppliers, payableRecords] = await Promise.all([
     auth(),
     readAll('disputes'),

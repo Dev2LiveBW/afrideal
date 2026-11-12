@@ -14,12 +14,10 @@ const PatchSchema = z.object({
 
 /** PATCH /api/payables/:id - move one supplier invoice through the state machine. */
 export const PATCH = handled(async (request: Request, { params }: { params: { id: string } }) => {
-  const { actor, response } = await guard([
-    'SUPER_ADMIN',
-    'OPERATIONS_ADMIN',
-    'FINANCE_ADMIN',
-    'CUSTOMER',
-  ]);
+  // The team only. A buyer with a problem raises a dispute on the order
+  // (PATCH /api/orders/:id RAISE_DISPUTE), which records a reason and starts
+  // the review clock; freezing a supplier's invoice directly did neither.
+  const { actor, response } = await guard(['SUPER_ADMIN', 'OPERATIONS_ADMIN', 'FINANCE_ADMIN']);
   if (response) return response;
 
   const parsed = PatchSchema.safeParse(await request.json());
@@ -27,13 +25,6 @@ export const PATCH = handled(async (request: Request, { params }: { params: { id
 
   const record = await findById('supplier-payables', params.id);
   if (!record) return fail('Supplier invoice not found.', 404);
-
-  // A customer may raise a claim on their own order and nothing else.
-  if (actor.role === 'CUSTOMER') {
-    const order = await findById('orders', record.order_id);
-    if (!order || order.customer_id !== actor.id) return fail('Not your order.', 403);
-    if (parsed.data.status !== 'ON_HOLD') return fail('You can only raise a claim here.', 403);
-  }
 
   let updated;
   try {

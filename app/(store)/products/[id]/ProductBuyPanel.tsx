@@ -6,7 +6,7 @@ import { FileText, Minus, PackageX, Plus, ShoppingBag } from 'lucide-react';
 import toast from 'react-hot-toast';
 
 import { ActionButton } from '@/components/brand/ActionButton';
-import { useDeliverTo } from '@/components/brand/BuyerCurrency';
+import { PriceText, useDeliverTo } from '@/components/brand/BuyerCurrency';
 import { MoneyText } from '@/components/brand/MoneyText';
 import { VariantSelector } from '@/components/products/VariantSelector';
 import { RfqModal } from '@/components/procurement/RfqModal';
@@ -19,7 +19,7 @@ import { photoUrl } from '@/components/storefront/Swatch';
 import { CartSheet } from '@/components/storefront/CartSheet';
 import { isCrossBorder } from '@/lib/lanes.mjs';
 import type { TierDoor } from '@/lib/tier-doors';
-import type { CustomerPrice, CustomerType, Product, ProductImage } from '@/types';
+import type { CountryCode, CustomerPrice, CustomerType, Product, ProductImage } from '@/types';
 
 export function ProductBuyPanel({
   product,
@@ -27,6 +27,7 @@ export function ProductBuyPanel({
   customerType,
   inStock,
   primarySupplierId,
+  goodsCountry,
   primaryImage,
   doors,
   intro,
@@ -38,6 +39,8 @@ export function ProductBuyPanel({
   customerType: CustomerType;
   inStock: boolean;
   primarySupplierId: string;
+  /** Where an order for this product is held, so customs follows the lane (spec 0009, AC-3). */
+  goodsCountry: CountryCode | null;
   /** Carried into the cart line so the basket shows the photo, not the glyph. */
   primaryImage?: ProductImage;
   /** This product's five packages, resolved server-side against the account. */
@@ -119,7 +122,7 @@ export function ProductBuyPanel({
                     </span>
                   )}
                 </p>
-                {isCrossBorder(product.country_of_origin, deliveryCountry) && (
+                {isCrossBorder(goodsCountry, deliveryCountry) && (
                   <span className="rounded bg-forest-wash px-1.5 py-0.5 font-mono text-[9.5px] font-semibold uppercase tracking-wider text-forest-ink">
                     Customs cleared by courier
                   </span>
@@ -283,8 +286,8 @@ export function ProductBuyPanel({
           </div>
   
           <p className="mt-4 text-[11.5px] leading-5 text-muted">
-            Delivery is a flat BWP 45.00 per order, not per supplier. An order that splits across two
-            suppliers is still charged once.
+            Delivery is a flat <PriceText amount={45} /> per order, not per supplier. An order that
+            splits across two suppliers is still charged once.
           </p>
         </div>
       </div>

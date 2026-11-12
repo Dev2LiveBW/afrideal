@@ -7,32 +7,39 @@ import { EVENTS, audit, notify } from '@/lib/notifications';
 import { closeOpenAttempts, providerFor } from '@/lib/payments/adapters';
 import { confirmPayment } from '@/lib/payments/confirm';
 import { executeRefund } from '@/lib/refunds';
+import { orderDetailForCustomer, orderDetailForSupplier, orderForCustomer } from '@/lib/order-privacy';
 import { getOrderDetail } from '@/lib/queries';
+import { ADMIN_ROLES } from '@/lib/roles';
 import type { Dispute, Order } from '@/types';
 
 export const dynamic = 'force-dynamic';
 
 export const GET = handled(async (_request: Request, { params }: { params: { id: string } }) => {
-  const { actor, response } = await guard();
+  // Buyers, suppliers and the team; a runner reads an order through its own jobs.
+  const { actor, response } = await guard(['CUSTOMER', 'SUPPLIER_OWNER', ...ADMIN_ROLES]);
   if (response) return response;
 
   const detail = await getOrderDetail(params.id);
   if (!detail) return fail('Order not found.', 404);
 
-  if (actor.role === 'CUSTOMER' && detail.order.customer_id !== actor.id) {
-    return fail('Not your order.', 403);
+  if (actor.role === 'CUSTOMER') {
+    if (detail.order.customer_id !== actor.id) return fail('Not your order.', 403);
+    return ok(orderDetailForCustomer(detail));
   }
 
   if (actor.role === 'SUPPLIER_OWNER') {
     const mine = detail.legs.some((leg) => leg.supplier_id === actor.supplierId);
     if (!mine) return fail('That order does not include your goods.', 403);
 
-    // A supplier sees only their own leg of a split order.
-    return ok({ ...detail, legs: detail.legs.filter((leg) => leg.supplier_id === actor.supplierId) });
+    // A supplier sees only their own part of a split order.
+    return ok(orderDetailForSupplier(detail, actor.supplierId));
   }
 
   return ok(detail);
 });
+
+/** Where a buyer may confirm delivery: the same states the order page offers it in. */
+const CONFIRMABLE: Order['status'][] = ['IN_TRANSIT', 'READY_FOR_COLLECTION', 'DELIVERED'];
 
 const PatchSchema = z.object({
   action: z.enum(['CONFIRM_DELIVERY', 'RAISE_DISPUTE', 'CANCEL', 'ADD_NOTE', 'MARK_PAID', 'REFUND']),
@@ -68,12 +75,20 @@ export const PATCH = handled(async (request: Request, { params }: { params: { id
   const isStaff = ['SUPER_ADMIN', 'OPERATIONS_ADMIN', 'FINANCE_ADMIN'].includes(actor.role);
   if (!isOwner && !isStaff) return fail('Not your order.', 403);
 
+  // What goes back to the caller: the buyer never gets the team's notes.
+  const forCaller = (row: Order | null) => (row && !isStaff ? orderForCustomer(row) : row);
+
   const now = new Date().toISOString();
   const legs = (await readAll('supplier-payables')).filter((record) => record.order_id === params.id);
 
   switch (parsed.data.action) {
     // ── Customer confirms receipt → every held leg releases ──────────────
     case 'CONFIRM_DELIVERY': {
+      // Only once the goods are on their way or there. Confirming an unpaid,
+      // cancelled or still-preparing order would settle suppliers for nothing.
+      if (!CONFIRMABLE.includes(order.status)) {
+        return fail('This order cannot be confirmed as delivered yet.', 409);
+      }
       for (const leg of legs) {
         if (leg.status !== 'PENDING') continue;
         await update(
@@ -102,7 +117,7 @@ export const PATCH = handled(async (request: Request, { params }: { params: { id
         detail: `${order.reference} confirmed delivered; ${legs.length} supplier invoice(s) settled.`,
       });
 
-      return ok(updated);
+      return ok(forCaller(updated));
     }
 
     // ── Customer raises a dispute → legs freeze ──────────────────────────
@@ -218,7 +233,7 @@ export const PATCH = handled(async (request: Request, { params }: { params: { id
         await update('supplier-payables', leg.id, applyTransition(leg, 'CANCELLED', actor.name, 'Order cancelled.'));
       }
 
-      return ok(updated);
+      return ok(forCaller(updated));
     }
 
     // ── Finance confirms a bank transfer by hand (spec 0003, AC-6) ────────

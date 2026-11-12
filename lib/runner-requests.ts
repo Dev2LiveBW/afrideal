@@ -34,6 +34,9 @@ export function canAdvance(from: RunnerRequestStatus, to: RunnerRequestStatus): 
 }
 
 export class RequestTransitionError extends Error {
+  /** Written for the person who asked for the move; `handled()` may show it. */
+  readonly expose = true;
+
   constructor(
     readonly from: RunnerRequestStatus,
     readonly to: RunnerRequestStatus,
@@ -119,4 +122,23 @@ export function quoteTotal(unitPrice: number, quantity: number) {
   const goods = unitPrice * quantity;
   const serviceFee = Math.ceil(goods * SOURCING_FEE_RATE);
   return { goods, serviceFee, total: goods + serviceFee };
+}
+
+/** A sourcing request as a runner reads it, which may be without the buyer's street address. */
+export type RunnerRequestView = Omit<RunnerRequest, 'delivery_address'> & { delivery_address: string | null };
+
+/**
+ * A request in the open pool, as every runner it is offered to reads it.
+ *
+ * The town is enough to decide whether to take the job. Who the buyer is and
+ * where exactly they live are for the runner who takes it, so until then the
+ * pool carries a first name and no street address (Data Protection Act:
+ * only what the task needs).
+ */
+export function requestForPool(request: RunnerRequest): RunnerRequestView {
+  return {
+    ...request,
+    customer_name: request.customer_name.trim().split(/\s+/)[0] ?? '',
+    delivery_address: null,
+  };
 }

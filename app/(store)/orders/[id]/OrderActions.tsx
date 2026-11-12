@@ -7,7 +7,7 @@ import toast from 'react-hot-toast';
 
 import { ConfirmDialog } from '@/components/brand/ConfirmDialog';
 import { ActionButton } from '@/components/brand/ActionButton';
-import { bwp } from '@/lib/format';
+import { moneyLong } from '@/lib/currency.mjs';
 import { cn } from '@/lib/utils';
 
 const REASONS = [
@@ -22,6 +22,7 @@ export function OrderActions({
   orderId,
   reference,
   orderAmount,
+  orderCurrency,
   canConfirm,
   canDispute,
   isCollectionPoint = false,
@@ -29,6 +30,7 @@ export function OrderActions({
   orderId: string;
   reference: string;
   orderAmount: number;
+  orderCurrency: string;
   canConfirm: boolean;
   canDispute: boolean;
   isCollectionPoint?: boolean;
@@ -107,8 +109,8 @@ export function OrderActions({
         title={isCollectionPoint ? 'Confirm you collected your order?' : 'Confirm this order arrived?'}
         description={
           isCollectionPoint
-            ? `Confirming closes ${reference} and settles ${bwp(orderAmount)} with the supplier who filled it. Only confirm once you have retrieved your package from the collection point and verified its contents.`
-            : `Confirming closes ${reference} and settles ${bwp(orderAmount)} with the supplier who filled it. Only confirm once you have the goods and they are what you ordered. Returns stay open for seven days afterwards, but this step cannot be undone from here.`
+            ? `Confirming closes ${reference} and settles ${moneyLong(orderAmount, orderCurrency)} with the supplier who filled it. Only confirm once you have retrieved your package from the collection point and verified its contents.`
+            : `Confirming closes ${reference} and settles ${moneyLong(orderAmount, orderCurrency)} with the supplier who filled it. Only confirm once you have the goods and they are what you ordered. Returns stay open for seven days afterwards, but this step cannot be undone from here.`
         }
         confirmLabel={isCollectionPoint ? 'Yes, I collected it' : 'Yes, it arrived'}
       />

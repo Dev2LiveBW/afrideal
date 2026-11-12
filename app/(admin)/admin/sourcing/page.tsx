@@ -10,11 +10,14 @@ import { auth } from '@/lib/auth';
 import { readAll } from '@/lib/db';
 import { dateTime } from '@/lib/format';
 import { getNotifications } from '@/lib/queries';
-import { REQUEST_LABELS } from '@/lib/runner-requests';
+import { REQUEST_LABELS } from '@/lib/runner-requests';
+import { requireAdminPage } from '@/lib/admin-access';
 
 export const dynamic = 'force-dynamic';
 
 export default async function AdminSourcingPage() {
+  await requireAdminPage('/admin/sourcing');
+
   const [session, requests] = await Promise.all([auth(), readAll('runner-requests')]);
   const notifications = session?.user ? await getNotifications(session.user.id) : [];
 

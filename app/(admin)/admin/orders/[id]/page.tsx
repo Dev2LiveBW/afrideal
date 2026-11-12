@@ -14,11 +14,14 @@ import { readAll } from '@/lib/db';
 import { PAYMENT_LABELS, dateTime, shortDate } from '@/lib/format';
 import { getNotifications, getOrderDetail } from '@/lib/queries';
 
-import { OrderNotes } from './OrderNotes';
+import { OrderNotes } from './OrderNotes';
+import { requireAdminPage } from '@/lib/admin-access';
 
 export const dynamic = 'force-dynamic';
 
 export default async function AdminOrderDetailPage({ params }: { params: { id: string } }) {
+  await requireAdminPage('/admin/orders');
+
   const [session, detail, shipments, runners, allImages] = await Promise.all([
     auth(),
     getOrderDetail(params.id),
@@ -81,6 +84,17 @@ export default async function AdminOrderDetailPage({ params }: { params: { id: s
                   {order.delivery_address}, {order.delivery_city}
                 </span>
               </div>
+              {order.recipient_name && (
+                <p className="text-[12.5px] text-body">
+                  For {order.recipient_name}
+                  {order.delivery_phone ? ` · ${order.delivery_phone}` : ''}
+                </p>
+              )}
+              {order.delivery_instructions && (
+                <p className="text-[12.5px] text-body">
+                  <span className="font-medium text-ink">Instructions:</span> {order.delivery_instructions}
+                </p>
+              )}
               <div className="flex items-center gap-2 text-[12.5px] text-body">
                 <CreditCard size={13} strokeWidth={1.5} className="shrink-0 text-muted" />
                 <span>
@@ -94,6 +108,12 @@ export default async function AdminOrderDetailPage({ params }: { params: { id: s
                 <p className="mt-1 text-[11px] text-muted">
                   Subtotal <span className="font-mono">{order.subtotal.toFixed(2)}</span> + delivery{' '}
                   <span className="font-mono">{order.delivery_fee.toFixed(2)}</span>
+                  {order.promo_code && (
+                    <>
+                      {' '}- promo {order.promo_code}{' '}
+                      <span className="font-mono">{(order.promo_discount ?? 0).toFixed(2)}</span>
+                    </>
+                  )}
                 </p>
               </div>
             </PanelBody>

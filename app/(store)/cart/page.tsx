@@ -2,6 +2,7 @@ import type { Metadata } from 'next';
 
 import { auth } from '@/lib/auth';
 import { readAll } from '@/lib/db';
+import { goodsCountries } from '@/lib/supplier-selection';
 
 import { CartClient } from './CartClient';
 
@@ -21,9 +22,11 @@ export const dynamic = 'force-dynamic';
  * set their own type in localStorage could quote themselves wholesale.
  */
 export default async function CartPage() {
-  const [bands, products, session] = await Promise.all([
+  const [bands, products, offers, suppliers, session] = await Promise.all([
     readAll('customer-prices'),
     readAll('products'),
+    readAll('supplier-offers'),
+    readAll('suppliers'),
     auth(),
   ]);
 
@@ -31,6 +34,7 @@ export default async function CartPage() {
     <CartClient
       bands={bands}
       products={products}
+      goodsCountries={goodsCountries(products, offers, suppliers)}
       customerType={session?.user?.customer_type ?? 'GUEST'}
     />
   );

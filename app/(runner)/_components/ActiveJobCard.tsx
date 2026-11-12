@@ -120,6 +120,16 @@ export function ActiveJobCard({
               <p className="text-[10.5px] uppercase tracking-[0.06em] text-muted">Drop-off</p>
               <p className="truncate text-[13.5px] font-medium text-ink">{job.dropoff_name}</p>
               <p className="truncate text-[12px] text-body">{job.dropoff_address}</p>
+              {job.dropoff_phone && (
+                <a href={`tel:${job.dropoff_phone.replace(/[^+0-9]/g, '')}`} className="text-[12px] font-medium text-forest underline">
+                  {job.dropoff_phone}
+                </a>
+              )}
+              {job.delivery_instructions && (
+                <p className="mt-1 text-[12px] text-body">
+                  <span className="font-medium text-ink">Instructions:</span> {job.delivery_instructions}
+                </p>
+              )}
             </div>
           </div>
         </div>

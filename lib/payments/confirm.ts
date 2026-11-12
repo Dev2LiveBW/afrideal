@@ -1,7 +1,9 @@
 import 'server-only';
 
+import { toPula } from '@/lib/currency.mjs';
 import { findById, mutate, nextIds, readAll } from '@/lib/db';
 import { EVENTS, audit, notify } from '@/lib/notifications';
+import { promoShares } from '@/lib/promo.mjs';
 import { claimedAfterWindow } from '@/lib/payments/policy';
 import { selectSupplier } from '@/lib/supplier-selection';
 import type {
@@ -535,14 +537,38 @@ async function raiseSupplierLegs(order: Order, now: string): Promise<RaisedLegs>
         rows.filter((leg) => leg.order_id === order.id).map((leg) => leg.supplier_id),
       );
 
+      // Spec 0011, AC-26: a run only shares out what earlier runs have not. Legs
+      // are written together, so a leg already here means routing moved between
+      // runs, and a fresh split of the whole discount would no longer add up.
+      const alreadyShared = rows
+        .filter((leg) => leg.order_id === order.id)
+        .reduce((sum, leg) => sum + (leg.promo_discount ?? 0), 0);
+      const shares = promoShares(
+        Math.round(((order.promo_discount_pula ?? 0) - alreadyShared) * 100) / 100,
+        [...bySupplier]
+          .filter(([supplierId]) => !alreadyLegged.has(supplierId))
+          .map(([supplierId, supplierItems]) => ({
+            supplierId,
+            gross: supplierItems.reduce((sum, item) => sum + toPula(item.line_total, order.buyer_fx_rate), 0),
+          })),
+      );
+
       const created: SupplierOrder[] = [];
       let next = 0;
 
       for (const [supplierId, supplierItems] of bySupplier) {
         if (alreadyLegged.has(supplierId)) continue;
 
-        const gross = supplierItems.reduce((sum, item) => sum + item.line_total, 0);
-        const cost = supplierItems.reduce((sum, item) => sum + item.supplier_cost * item.qty, 0);
+        // Booked in pula (spec 0009): the buyer's lines come back from their
+        // currency at the rate they were charged at, and the supplier's cost
+        // from theirs at the rate fixed on the line (spec 0007, AC-7).
+        const gross = supplierItems.reduce((sum, item) => sum + toPula(item.line_total, order.buyer_fx_rate), 0);
+        const cost = supplierItems.reduce(
+          (sum, item) => sum + toPula(item.supplier_cost, item.fx_rate) * item.qty,
+          0,
+        );
+
+        const legDiscount = shares.get(supplierId) ?? 0;
 
         const route = selectSupplier(
           offers.filter((offer) => offer.product_id === supplierItems[0].product_id),
@@ -557,7 +583,9 @@ async function raiseSupplierLegs(order: Order, now: string): Promise<RaisedLegs>
           status: 'AWAITING_CONFIRMATION',
           item_ids: supplierItems.map((item) => item.id),
           supplier_subtotal: cost,
-          platform_margin: gross - cost,
+          // A thin leg may go negative: the floor holds for the order, not each leg.
+          platform_margin: gross - cost - legDiscount,
+          ...(legDiscount > 0 && { promo_discount: legDiscount }),
           selection_reason: route?.reason ?? 'Routed on composite supplier score.',
           auto_selected: true,
           created_at: now,
@@ -595,8 +623,10 @@ async function raiseSupplierLegs(order: Order, now: string): Promise<RaisedLegs>
           supplier_id: leg.supplier_id,
           // Taken from the leg rather than recomputed, so a payable can be raised
           // for a leg this call did not build. Gross is what the customer pays for
-          // those lines: the supplier's cost plus our margin on them.
-          amount: leg.supplier_subtotal + leg.platform_margin,
+          // those lines: the supplier's cost plus our margin on them. A promo
+          // discount comes out of our margin alone, so it goes back in here and
+          // the supplier is owed what they would have been (spec 0011, AC-26).
+          amount: leg.supplier_subtotal + leg.platform_margin + (leg.promo_discount ?? 0),
           status: 'PENDING',
           gateway: order.payment_method,
           raised_at: now,
@@ -763,6 +793,30 @@ async function announce(args: {
       .join('')
       .trim(),
   });
+
+  // Spec 0011, AC-25: the money has been taken, so the discount stands. Finance
+  // should still see that this buyer got a code twice.
+  if (late && order.promo_code) {
+    const orders = await readAll('orders');
+    const usedAgain = orders.some(
+      (row) =>
+        row.id !== order.id &&
+        row.customer_id === order.customer_id &&
+        row.promo_code === order.promo_code &&
+        row.status !== 'CANCELLED' &&
+        row.status !== 'AWAITING_PAYMENT',
+    );
+    if (usedAgain) {
+      await audit({
+        actorId: actor.id,
+        actorName: actor.name,
+        action: EVENTS.PROMO_LATE_REUSE,
+        entity: 'order',
+        entityId: order.id,
+        detail: `${order.reference} reopened by a late payment on ${order.promo_code}, which the buyer had since used again.`,
+      });
+    }
+  }
 
   if (raised.supplierOrders.length > 0) {
     const users = await readAll('users');

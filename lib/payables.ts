@@ -32,6 +32,9 @@ export function canTransition(from: PayableStatus, to: PayableStatus): boolean {
 }
 
 export class PayableTransitionError extends Error {
+  /** Written for the person who asked for the move; `handled()` may show it. */
+  readonly expose = true;
+
   constructor(
     readonly from: PayableStatus,
     readonly to: PayableStatus,

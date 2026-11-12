@@ -15,6 +15,7 @@ import {
   PackageSearch,
   Package,
   Settings as SettingsIcon,
+  Percent,
   ShoppingCart,
   Tags,
 } from 'lucide-react';
@@ -101,6 +102,7 @@ export default async function AdminLayout({ children }: { children: React.ReactN
           badge: badges.openDisputes,
         },
         { href: '/admin/pricing', label: 'Pricing', icon: <Tags size={16} strokeWidth={1.5} /> },
+        { href: '/admin/promo-codes', label: 'Promo codes', icon: <Percent size={16} strokeWidth={1.5} /> },
       ],
     },
     {

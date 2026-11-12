@@ -3,6 +3,9 @@ import { ShieldAlert } from 'lucide-react';
 import { EmptyState, PageHeader } from '@/components/brand/Panel';
 import { auth } from '@/lib/auth';
 import { readAll } from '@/lib/db';
+import { DEFAULT_DELIVERY_COUNTRY } from '@/lib/lanes.mjs';
+import { offeredTo } from '@/lib/runner-match';
+import { requestForPool } from '@/lib/runner-requests';
 
 import { SourcingClient } from './SourcingClient';
 
@@ -22,11 +25,24 @@ export default async function RunnerSourcingPage() {
     );
   }
 
-  const requests = await readAll('runner-requests');
+  const [requests, runners] = await Promise.all([readAll('runner-requests'), readAll('runners')]);
 
+  // Spec 0009, AC-6: the pool holds the requests this runner was alerted to,
+  // those in a town they serve, or every open one while no runner serving its
+  // town is online, so a request in a town nobody lists still reaches someone.
   const pool = requests
-    .filter((request) => request.status === 'REQUESTED')
-    .sort((a, b) => a.created_at.localeCompare(b.created_at));
+    .filter(
+      (request) =>
+        request.status === 'REQUESTED' &&
+        offeredTo(runners, runnerId, {
+          country: request.delivery_country ?? DEFAULT_DELIVERY_COUNTRY,
+          town: request.delivery_city,
+        }),
+    )
+    .sort((a, b) => a.created_at.localeCompare(b.created_at))
+    // Every runner it is offered to receives this in their browser: no street
+    // address and only a first name until one of them takes it.
+    .map(requestForPool);
 
   const mine = requests
     .filter((request) => request.runner_id === runnerId && request.status !== 'CANCELLED')

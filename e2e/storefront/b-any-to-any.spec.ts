@@ -1,4 +1,4 @@
-import { addToCart, caption, clickAndSave, expect, expectHealthy, ready, signedInAs, test } from '../support/fixtures';
+import { addToCart, caption, clickAndSave, expect, expectHealthy, ready, signedInAs, test, agreeAtCheckout } from '../support/fixtures';
 
 /**
  * B12 and B13: any buyer, any country (spec 0009, docs/testing/e2e-journeys.md).
@@ -23,10 +23,12 @@ test.describe('B12. A buyer in Lesotho', () => {
     await page.getByRole('option', { name: 'Maseru' }).click();
     await expect(deliverTo).toContainText('Maseru');
 
-    // 2. Shea butter is held in South Africa. Rand is 1:1 to the pula for now,
-    // so the figures match B02's and only the currency changes.
-    await caption(page, 'B12 · 2. South African shea butter, priced in rand');
+    // 2. Shea butter is made in South Africa and held in Gaborone. Rand is 1:1
+    // to the pula for now, so the figures match B02's and only the currency changes.
+    await caption(page, 'B12 · 2. Shea butter from Gaborone, priced in rand');
     await addToCart(page, 'p001', 1);
+    // Spec 0009, AC-7: the delivery line is in the buyer's currency too.
+    await expect(page.getByText(/Delivery is a flat R45 per order/)).toBeVisible();
     await page.goto('/cart');
     const cart = page.locator('main');
     await expect(cart).toContainText('ZAR 137.00');
@@ -42,16 +44,19 @@ test.describe('B12. A buyer in Lesotho', () => {
     await expect(page.getByRole('radio', { name: /EcoCash/ })).toBeDisabled();
     await expect(page.getByText('Coming soon')).toHaveCount(2);
 
-    // South Africa to Lesotho crosses a border; no listed courier serves it yet.
+    // Botswana to Lesotho crosses a border; no listed courier serves it yet.
     await caption(page, 'B12 · 4. Customs cleared by the courier, who is arranged after the order');
     await expect(orderSummary(page)).toContainText('Cleared by your courier');
     await expect(orderSummary(page)).toContainText('Arranged after you order');
+    // Spec 0009, AC-5: Lesotho's own collection point, priced from its own fee.
+    await expect(page.getByText('Pickup from smart locker (from R35)')).toBeVisible();
 
     await page.getByRole('textbox', { name: 'Street address or plot number' }).fill('Kingsway, Maseru 100');
     await expect(page.getByRole('combobox', { name: 'City or town' })).toHaveValue('Maseru');
     await page.getByRole('radio', { name: /Visa \/ Mastercard/ }).check({ force: true });
     await expect(page.getByText('Total to pay').first().locator('xpath=following-sibling::*[1]')).toHaveText('ZAR 182.00');
     await caption(page, 'B12 · 5. Pay ZAR 182.00 by card');
+    await agreeAtCheckout(page);
     await clickAndSave(page.getByRole('button', { name: 'Place order' }).filter({ visible: true }));
 
     // 4. The card page, then back to the paid order, still in rand.
@@ -66,6 +71,16 @@ test.describe('B12. A buyer in Lesotho', () => {
     await expectHealthy(page);
     await expect(page.getByText('Payment confirmed')).toBeVisible();
     await expect(page.getByText('Total', { exact: true }).locator('xpath=following-sibling::*[1]')).toHaveText('ZAR 182.00');
+
+    // Spec 0009, AC-5: after purchase the order shows who serves the lane.
+    await caption(page, 'B12 · 7. Who can bring it: a Maseru runner, no listed courier yet, a Maseru locker');
+    await expect(page.getByText('Runners in Maseru')).toBeVisible();
+    await expect(page.getByText(/1 runner serves this\s+town/)).toBeVisible();
+    // The footer links "Request a runner" too; this is the one in the panel.
+    await expect(page.getByRole('main').getByRole('link', { name: 'Request a runner' })).toBeVisible();
+    await expect(page.getByText(/No courier lists this route yet/)).toBeVisible();
+    await expect(page.getByText('Collection points in Lesotho')).toBeVisible();
+    await expect(page.getByText('Maseru Pioneer Mall Locker')).toBeVisible();
   });
 });
 
@@ -87,5 +102,13 @@ test.describe('B13. Local goods to a local buyer', () => {
     await expect(page.getByRole('combobox', { name: 'Country' })).toHaveValue('BW');
     await expect(orderSummary(page)).not.toContainText('Customs & Duty');
     await expect(orderSummary(page)).not.toContainText('Courier');
+
+    // Spec 0009, AC-3: where goods are held decides the lane, not where they
+    // were made. Shea butter is South African, but Naledi holds it in Gaborone.
+    await page.goto('/products/p001');
+    await ready(page);
+    await caption(page, 'B13 · 3. South African shea butter held in Gaborone: still no customs');
+    await expect(page.getByText(/Delivery is a flat P45 per order/)).toBeVisible();
+    await expect(page.getByText('Customs cleared by courier')).toHaveCount(0);
   });
 });

@@ -24,3 +24,8 @@ server.log
 # Personal Claude Code settings, including any permission grants.
 # Machine local by nature, never the team's.
 .claude/settings.local.json
+
+# Ruflo's local state. Its hooks log every command Claude runs here, which can
+# include connection strings. Machine local, never the team's.
+.claude-flow/
+.swarm/

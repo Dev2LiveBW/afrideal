@@ -34,7 +34,7 @@ _These are recommendations to keep your build orderly, not requirements. Skip an
 | L | Admin portal | delivery | Foundation | existing |
 | 1 | Coding standards & CI | platform | Foundation | done |
 | 2 | Staging & production environments | platform | Foundation | in-progress |
-| 3 | Order payment states | buying | Foundation | in-progress |
+| 3 | Order payment states | buying | Foundation | done |
 | 4 | Card payment gateway | buying | Slice 1 | done |
 | 5 | Phone checkout | buying | Slice 1 | done |
 | 6 | Product detail at phone parity | buying | Slice 2 | planned |
@@ -44,7 +44,7 @@ _These are recommendations to keep your build orderly, not requirements. Skip an
 | 10 | Collection point delivery | delivery | Slice 3 | done |
 | 11 | Order & payment emails | delivery | Slice 4 | planned |
 | 12 | SMS alerts | delivery | Slice 4 | planned |
-| 13 | Finance controls: mark as paid, pause checkout | buying | Slice 5 | planned |
+| 13 | Finance controls: mark as paid, pause checkout | buying | Slice 5 | done |
 | 14 | Refunds | buying | Slice 5 | planned |
 | 15 | Payment reconciliation | buying | Slice 5 | planned |
 | 16 | Error monitoring & backups | platform | Slice 6 | planned |
@@ -56,14 +56,15 @@ _These are recommendations to keep your build orderly, not requirements. Skip an
 | 22 | Launch checks | platform | Slice 8 | planned |
 | 23 | Production go live | platform | Slice 8 | planned |
 | 24 | Chosen quote becomes an order | buying | Close out | in-progress |
-| 25 | Buyer account & checkout extras | buying | Close out | planned |
+| 25 | Buyer account & checkout extras | buying | Close out | in-progress |
 | 26 | Browse extras | buying | Close out | planned |
 | 27 | Supplier onboarding & self service | delivery | Close out | planned |
 | 28 | Runner onboarding & profile | delivery | Close out | in-progress |
 | 29 | Team console gaps | delivery | Close out | planned |
 | 30 | Team user management | delivery | Close out | in-progress |
 | 31 | What a supplier sees on an order | delivery | Close out | planned |
-| 32 | Any-to-any marketplace: countries, lanes, deliver to | platform | Close out | in-progress |
+| 32 | Any-to-any marketplace: countries, lanes, deliver to | platform | Close out | done |
+| 33 | Suppliers are paid their cost | buying | Close out | planned |
 
 Deferred features are listed at the end of each epic file.
 

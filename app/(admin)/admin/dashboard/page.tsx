@@ -21,6 +21,7 @@ import { billableOnly, effectiveOrderStatus } from '@/lib/payments/status';
 import { PAYMENT_LABELS, shortDate } from '@/lib/format';
 import { getNotifications } from '@/lib/queries';
 import type { OrderStatus } from '@/types';
+import { requireAdminPage } from '@/lib/admin-access';
 
 export const dynamic = 'force-dynamic';
 
@@ -45,6 +46,8 @@ const SYSTEM_HEALTH = [
 ] as const;
 
 export default async function AdminDashboardPage() {
+  await requireAdminPage('/admin/dashboard');
+
   const [session, orders, items, suppliers, payableRecords, disputes, payments] = await Promise.all([
     auth(),
     readAll('orders'),

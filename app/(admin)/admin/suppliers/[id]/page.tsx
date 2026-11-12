@@ -12,11 +12,14 @@ import { readAll } from '@/lib/db';
 import { shortDate } from '@/lib/format';
 import { getNotifications, getSupplierWorkspace } from '@/lib/queries';
 
-import { SupplierDetailTabs } from './SupplierDetailTabs';
+import { SupplierDetailTabs } from './SupplierDetailTabs';
+import { requireAdminPage } from '@/lib/admin-access';
 
 export const dynamic = 'force-dynamic';
 
 export default async function AdminSupplierDetailPage({ params }: { params: { id: string } }) {
+  await requireAdminPage('/admin/suppliers');
+
   const [session, workspace, allSuppliers, names] = await Promise.all([
     auth(),
     getSupplierWorkspace(params.id),

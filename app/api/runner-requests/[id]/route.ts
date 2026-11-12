@@ -3,6 +3,8 @@ import { z } from 'zod';
 import { fail, guard, handled, ok } from '@/lib/api';
 import { findById, readAll, update } from '@/lib/db';
 import { EVENTS, audit, notify } from '@/lib/notifications';
+import { DEFAULT_DELIVERY_COUNTRY } from '@/lib/lanes.mjs';
+import { offeredTo } from '@/lib/runner-match';
 import { RequestTransitionError, advance, quoteTotal } from '@/lib/runner-requests';
 import type { RunnerRequestStatus } from '@/types';
 
@@ -50,9 +52,20 @@ export const PATCH = handled(async (request: Request, { params }: { params: { id
   const isStaff = ['SUPER_ADMIN', 'OPERATIONS_ADMIN'].includes(actor.role);
 
   if (actor.role === 'RUNNER') {
+    if (!actor.runnerId) return fail('This account is not linked to a runner record.', 403);
     if (!RUNNER_MOVES.includes(target)) return fail('A runner cannot make that move.', 403);
     if (record.runner_id != null && record.runner_id !== actor.runnerId) {
       return fail('Another runner is already on this request.', 403);
+    }
+    if (record.runner_id == null) {
+      // Take it first, and only one that was offered to you: the same rule
+      // that decides which runners are alerted and whose pool it sits in.
+      if (target !== 'ACCEPTED') return fail('Take the request before working on it.', 409);
+      const offered = offeredTo(await readAll('runners'), actor.runnerId, {
+        country: record.delivery_country ?? DEFAULT_DELIVERY_COUNTRY,
+        town: record.delivery_city,
+      });
+      if (!offered) return fail('This request was not offered to you.', 403);
     }
   } else if (actor.role === 'CUSTOMER') {
     if (record.customer_id !== actor.id) return fail('Not your request.', 403);

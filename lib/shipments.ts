@@ -55,7 +55,9 @@ export async function openJobForLeg(leg: SupplierOrder, actor: Actor): Promise<S
     // Spec 0009: the job's places, so it reaches the runners who work them.
     pickup_country: supplier.country,
     pickup_town: supplier.city,
-    dropoff_name: order.delivery_method === 'COLLECTION_POINT' ? (order.collection_point ?? 'Collection Locker') : order.customer_name,
+    dropoff_name: order.delivery_method === 'COLLECTION_POINT' ? (order.collection_point ?? 'Collection Locker') : (order.recipient_name ?? order.customer_name),
+    dropoff_phone: order.delivery_phone ?? null,
+    delivery_instructions: order.delivery_instructions ?? null,
     dropoff_address: order.delivery_method === 'COLLECTION_POINT' ? order.delivery_address : `${order.delivery_address}, ${order.delivery_city}`,
     dropoff_country: order.delivery_country ?? DEFAULT_DELIVERY_COUNTRY,
     dropoff_town: order.delivery_city,

@@ -13,18 +13,21 @@ import { useAfriDealStore } from '@/store/useAfriDealStore';
 import { DEFAULT_DELIVERY_COUNTRY, isCrossBorder } from '@/lib/lanes.mjs';
 import { priceLine, sellerQuantities } from '@/lib/pricing-tiers';
 import { nextRung } from '@/lib/tier-doors';
-import type { CustomerPrice, CustomerType, Product } from '@/types';
+import type { CountryCode, CustomerPrice, CustomerType, Product } from '@/types';
 
 const DELIVERY_FEE = 45;
 
 export function CartClient({
   bands,
   products,
+  goodsCountries,
   customerType,
 }: {
   /** Published bands for everything in the catalogue, read on the server. */
   bands: CustomerPrice[];
   products: Product[];
+  /** Where each product's goods are held, by product id (spec 0009, AC-3). */
+  goodsCountries: Record<string, CountryCode | null>;
   customerType: CustomerType;
 }) {
   const cart = useAfriDealStore((state) => state.cart);
@@ -79,11 +82,10 @@ export function CartClient({
     : 0;
   const total = subtotal + (cart.length > 0 ? DELIVERY_FEE : 0);
 
-  const hasImported = cart.some((line) => {
-    const p = products.find((candidate) => candidate.id === line.product_id);
-    // Spec 0009: the lane runs to the header's "Deliver to" country.
-    return p ? isCrossBorder(p.country_of_origin, mounted ? deliverTo.country : DEFAULT_DELIVERY_COUNTRY) : false;
-  });
+  // Spec 0009: the lane runs from where the goods are held to the header's "Deliver to" country.
+  const hasImported = cart.some((line) =>
+    isCrossBorder(goodsCountries[line.product_id], mounted ? deliverTo.country : DEFAULT_DELIVERY_COUNTRY),
+  );
 
   if (!mounted) {
     return (

@@ -13,11 +13,14 @@ import { auth } from '@/lib/auth';
 import { readAll } from '@/lib/db';
 import { shortDate } from '@/lib/format';
 import { calculatePrice, getPricingRule } from '@/lib/pricing-engine';
-import { getNotifications, getProductDetail } from '@/lib/queries';
+import { getNotifications, getProductDetail } from '@/lib/queries';
+import { requireAdminPage } from '@/lib/admin-access';
 
 export const dynamic = 'force-dynamic';
 
 export default async function AdminProductDetailPage({ params }: { params: { id: string } }) {
+  await requireAdminPage('/admin/products');
+
   const [session, detail, pricingRules, allImages] = await Promise.all([
     auth(),
     getProductDetail(params.id),

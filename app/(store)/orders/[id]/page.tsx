@@ -16,9 +16,14 @@ import { getOrderDetail } from '@/lib/queries';
 import { findById } from '@/lib/db';
 import { countryNames as readCountryNames } from '@/lib/countries';
 import { DEFAULT_DELIVERY_COUNTRY, isCrossBorder } from '@/lib/lanes.mjs';
+import { COLLECTION_POINTS } from '@/lib/collection-points';
+import { orderMapLink } from '@/lib/map-link';
+import { couriersForLane } from '@/lib/couriers.mjs';
+import { servesPlace } from '@/lib/runner-match';
 
 import { ConfirmingPayment } from './ConfirmingPayment';
 import { OrderActions } from './OrderActions';
+import { ReorderButton } from './ReorderButton';
 import { RetryPaymentButton } from './RetryPaymentButton';
 
 /**
@@ -54,14 +59,17 @@ export default async function OrderTrackingPage({
   const isStaff = ['SUPER_ADMIN', 'OPERATIONS_ADMIN', 'FINANCE_ADMIN'].includes(session.user.role);
   if (order.customer_id !== session.user.id && !isStaff) notFound();
 
-  const [shipments, runners, allOrders, images, products, countryNames] = await Promise.all([
-    readAll('shipments'),
-    readAll('runners'),
-    readAll('orders'),
-    readAll('product-images'),
-    readAll('products'),
-    readCountryNames(),
-  ]);
+  const [shipments, runners, allOrders, images, products, countryNames, suppliers, couriers] =
+    await Promise.all([
+      readAll('shipments'),
+      readAll('runners'),
+      readAll('orders'),
+      readAll('product-images'),
+      readAll('products'),
+      readCountryNames(),
+      readAll('suppliers'),
+      readAll('couriers'),
+    ]);
 
   // The runner card appears only once someone is actually carrying the order.
   const shipment = shipments.find(
@@ -71,6 +79,36 @@ export default async function OrderTrackingPage({
     ? (runners.find((entry) => entry.id === shipment.runner_id) ?? null)
     : null;
 
+  /*
+   * Spec 0009: the lane this order took, from where each supplier holds the
+   * goods to where the buyer wants them, and who can carry it (AC-5).
+   */
+  const destination = order.delivery_country ?? DEFAULT_DELIVERY_COUNTRY;
+  const supplierCountry = new Map(suppliers.map((supplier) => [supplier.id, supplier.country]));
+  const crossBorderFrom = [
+    ...new Set(
+      items
+        .map((item) => supplierCountry.get(item.supplier_id))
+        .filter((country): country is string => isCrossBorder(country, destination)),
+    ),
+  ];
+  const laneCouriers = [
+    ...new Set(
+      crossBorderFrom.flatMap((from) =>
+        couriersForLane(couriers, {
+          fromCountry: from,
+          toCountry: destination,
+          toCity: order.delivery_city,
+        }).map((entry) => entry.courier.name),
+      ),
+    ),
+  ];
+  const laneRunners = runners.filter((entry) => servesPlace(entry, destination, order.delivery_city));
+  const laneLockers = COLLECTION_POINTS.filter((point) => point.country === destination);
+  const destinationName = countryNames[destination] ?? destination;
+  const deliveryStillOpen =
+    !runner && !['DELIVERED', 'CANCELLED', 'REFUNDED'].includes(order.status);
+
   const recent = allOrders
     .filter((entry) => entry.customer_id === order.customer_id && entry.id !== order.id)
     .sort((a, b) => b.placed_at.localeCompare(a.placed_at))
@@ -79,7 +117,8 @@ export default async function OrderTrackingPage({
   const outstanding = payables.filter((record) => record.status === 'PENDING');
   const settled = payables.filter((record) => record.status === 'SETTLED');
   const underReview = payables.filter((record) => record.status === 'ON_HOLD');
-  const orderValue = payables.reduce((sum, record) => sum + record.amount, 0);
+  // Spec 0011, AC-27: what the buyer paid for the goods, after any promo code.
+  const goodsPaid = Math.round((order.subtotal - (order.promo_discount ?? 0)) * 100) / 100;
 
   // Spec 0003: what the buyer is told turns on whether their money has arrived.
   const awaitingPayment = order.status === 'AWAITING_PAYMENT';
@@ -123,6 +162,8 @@ export default async function OrderTrackingPage({
     order.status === 'DELIVERED';
   const canDispute = outstanding.length > 0 && order.status !== 'CANCELLED';
   const isCollectionPoint = order.delivery_method === 'COLLECTION_POINT';
+  // Spec 0011, AC-12: a reorder prices lines for the buyer, so staff are not offered it.
+  const canReorder = order.status === 'DELIVERED' && order.customer_id === session.user.id;
 
   const lockerPinEntry = [...order.timeline]
     .reverse()
@@ -357,9 +398,29 @@ export default async function OrderTrackingPage({
                 <MapPin size={16} strokeWidth={1.5} className="mt-0.5 shrink-0 text-muted" />
                 <div>
                   <p className="text-[14px] font-medium text-ink">{order.delivery_address}</p>
+                  {order.recipient_name && order.delivery_method !== 'COLLECTION_POINT' && (
+                    <p className="text-[13px] text-body">
+                      For {order.recipient_name}
+                      {order.delivery_phone ? ` · ${order.delivery_phone}` : ''}
+                    </p>
+                  )}
                   <p className="text-[13px] text-body">
                     {order.delivery_city}, {countryNames[order.delivery_country ?? DEFAULT_DELIVERY_COUNTRY] ?? order.delivery_country}
                   </p>
+                  {order.delivery_instructions && (
+                    <p className="mt-2 text-[13px] text-body">
+                      <span className="font-medium text-ink">Instructions:</span> {order.delivery_instructions}
+                    </p>
+                  )}
+                  {/* Spec 0011, AC-13: a town for a home, the full address for a locker. */}
+                  <a
+                    href={orderMapLink(order, destinationName)}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="press-soft mt-2 inline-block text-[13px] font-medium text-forest hover:underline"
+                  >
+                    Open in Maps
+                  </a>
                   {order.delivery_method === 'COLLECTION_POINT' && (
                     <p className="mt-2 text-[12px] text-muted">
                       Your order will be held in a secure locker. You will receive your locker PIN once runner drop-off is complete.
@@ -367,6 +428,44 @@ export default async function OrderTrackingPage({
                   )}
                 </div>
               </div>
+
+              {/* Spec 0009, AC-5: who serves this lane, after purchase as at checkout. */}
+              {deliveryStillOpen && (
+                <dl className="mt-5 space-y-3 border-t border-hairline pt-4 text-[13px]">
+                  <div>
+                    <dt className="font-medium text-ink">Runners in {order.delivery_city}</dt>
+                    <dd className="mt-0.5 text-body">
+                      {laneRunners.length > 0 ? (
+                        <>
+                          {laneRunners.length} {laneRunners.length === 1 ? 'runner serves' : 'runners serve'} this
+                          town.{' '}
+                          <Link href="/request-a-runner" className="press-soft font-medium text-forest hover:underline">
+                            Request a runner
+                          </Link>
+                        </>
+                      ) : (
+                        `No runner lists ${order.delivery_city} yet. We arrange the last stretch with you.`
+                      )}
+                    </dd>
+                  </div>
+                  {crossBorderFrom.length > 0 && (
+                    <div>
+                      <dt className="font-medium text-ink">Couriers to {order.delivery_city}</dt>
+                      <dd className="mt-0.5 text-body">
+                        {laneCouriers.length > 0
+                          ? `${laneCouriers.join(', ')}. VAT and duty are paid to the courier at the border.`
+                          : 'No courier lists this route yet. We arrange the crossing with you and tell you the courier before it leaves.'}
+                      </dd>
+                    </div>
+                  )}
+                  {order.delivery_method !== 'COLLECTION_POINT' && laneLockers.length > 0 && (
+                    <div>
+                      <dt className="font-medium text-ink">Collection points in {destinationName}</dt>
+                      <dd className="mt-0.5 text-body">{laneLockers.map((point) => point.name).join(', ')}</dd>
+                    </div>
+                  )}
+                </dl>
+              )}
             </section>
 
             <div className="space-y-4">
@@ -387,11 +486,16 @@ export default async function OrderTrackingPage({
                         <MoneyText currency={order.currency ?? 'BWP'} amount={order.delivery_fee} size="sm" />
                       </dd>
                     </div>
-                    {items.some((item) => {
-                      const p = products.find((prod) => prod.id === item.product_id);
-                      // Spec 0009: the lane this order actually took.
-                      return p ? isCrossBorder(p.country_of_origin, order.delivery_country) : false;
-                    }) && (
+                    {order.promo_code && (
+                      <div className="flex items-center justify-between">
+                        <dt className="text-body">Promo {order.promo_code}</dt>
+                        <dd>
+                          -<MoneyText currency={order.currency ?? 'BWP'} amount={order.promo_discount ?? 0} size="sm" />
+                        </dd>
+                      </div>
+                    )}
+                    {/* Spec 0009, AC-3: the lane this order actually took. */}
+                    {crossBorderFrom.length > 0 && (
                       <div className="flex items-center justify-between">
                         <dt className="flex items-center gap-1.5 text-body">
                           <span>Customs & Duty</span>
@@ -492,10 +596,13 @@ export default async function OrderTrackingPage({
                 </div>
               </div>
 
+              {canReorder && <ReorderButton orderId={order.id} />}
+
               <OrderActions
                 orderId={order.id}
                 reference={order.reference}
-                orderAmount={orderValue}
+                orderAmount={goodsPaid}
+                orderCurrency={order.currency ?? 'BWP'}
                 canConfirm={canConfirm && outstanding.length > 0}
                 canDispute={canDispute}
                 isCollectionPoint={isCollectionPoint}
